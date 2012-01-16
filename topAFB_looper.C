@@ -1,0 +1,2345 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <iostream>
+#include <exception>
+#include <set>
+#include <algorithm>
+// ROOT includes
+#include "TSystem.h"
+#include "TChain.h"
+#include "TDirectory.h"
+#include "TChainElement.h"
+#include "TH1F.h"
+#include "TH2F.h"
+#include "TProfile.h"
+#include "TTreeCache.h"
+#include "Math/VectorUtil.h"
+#include "TLorentzVector.h"
+// TAS includes
+#include "../CORE/CMS2.h"
+#include "../CORE/SimpleFakeRate.h"
+#include "../CORE/trackSelections.h"
+#include "../CORE/eventSelections.h"
+
+#include "../CORE/muonSelections.h"
+#include "../CORE/electronSelections.h"
+#include "../CORE/electronSelectionsParameters.h"
+#include "../CORE/metSelections.h"
+#include "../CORE/mcSelections.h"
+#include "../CORE/jetSelections.h"
+#include "../CORE/ttbarSelections.h"
+#include "../CORE/susySelections.h"
+#include "../CORE/mcSUSYkfactor.h"
+#include "../CORE/triggerSuperModel.h"
+#include "../CORE/triggerUtils.h"
+#include "../Tools/goodrun.cc"
+#include "../CORE/utilities.cc"
+#include "./topAFB_looper.h"
+#include "Histograms.cc"
+#include "../Tools/vtxreweight.cc"
+#include "../Tools/bTagEff_BTV.cc"
+
+// // top mass
+// #include "../CORE/topmass/ttdilepsolve.cpp"
+// #include "../CORE/topmass/getTopMassEstimate.icc"
+
+using namespace std;
+using namespace tas;
+
+typedef vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > VofP4;
+
+
+
+bool topAFB_looper::passbTagging(const unsigned int jet_idx, const string jetAlgo, const string bTagDiscriminator){
+  if(jetAlgo == "jptJets") {
+    if(bTagDiscriminator == "trackCountingHighEffBJetTag" && jpts_trackCountingHighEffBJetTag()[jet_idx] > 3.3)
+      return true;
+    else if(bTagDiscriminator == "simpleSecondaryVertexHighEffBJetTag" && jpts_simpleSecondaryVertexHighEffBJetTag()[jet_idx] > 1.74)
+      return true;
+    else if(bTagDiscriminator == "simpleSecondaryVertexHighPurBJetTag" && jpts_simpleSecondaryVertexHighPurBJetTags()[jet_idx] > 2)
+      return true;
+  }
+  
+
+  if(jetAlgo == "caloJets") {
+    if(bTagDiscriminator == "trackCountingHighEffBJetTag" && jets_trackCountingHighEffBJetTag()[jet_idx] > 3.3)
+      return true;
+    else if(bTagDiscriminator == "simpleSecondaryVertexHighEffBJetTag" && jets_simpleSecondaryVertexHighEffBJetTag()[jet_idx] > 1.74)
+      return true;
+    else if(bTagDiscriminator == "simpleSecondaryVertexHighPurBJetTag" && jets_simpleSecondaryVertexHighPurBJetTags()[jet_idx] > 2)
+      return true;
+  }
+
+  
+  if(jetAlgo == "pfJets") {
+    if(bTagDiscriminator == "trackCountingHighEffBJetTag" && pfjets_trackCountingHighEffBJetTag()[jet_idx] > 3.3)
+      return true;
+    else if(bTagDiscriminator == "simpleSecondaryVertexHighEffBJetTag" && pfjets_simpleSecondaryVertexHighEffBJetTag()[jet_idx] > 1.74)
+      return true;
+    else if(bTagDiscriminator == "simpleSecondaryVertexHighPurBJetTag" && pfjets_simpleSecondaryVertexHighPurBJetTags()[jet_idx] > 2)
+      return true;
+  }
+
+  return false;
+  
+}
+void topAFB_looper::FillHistograms(const unsigned int hypIdx, const vector<unsigned int> v_jets, const vector<unsigned int> v_jetsNoEtaCut,
+		    const pair<float, float> p_met, const float weight, const string prefix) {
+  
+}
+
+/* THIS NEEDS TO BE IN CORE */
+
+struct DorkyEventIdentifier {
+  // this is a workaround for not having unique event id's in MC
+  unsigned long int run, event,lumi;
+  bool operator < (const DorkyEventIdentifier &) const;
+  bool operator == (const DorkyEventIdentifier &) const;
+};
+
+bool DorkyEventIdentifier::operator < (const DorkyEventIdentifier &other) const
+{
+  if (run != other.run)
+    return run < other.run;
+  if (event != other.event)
+    return event < other.event;
+  if(lumi != other.lumi)
+    return lumi < other.lumi;
+  return false;
+}
+
+bool DorkyEventIdentifier::operator == (const DorkyEventIdentifier &other) const
+{
+  if (run != other.run)
+    return false;
+  if (event != other.event)
+    return false;
+  return true;
+}
+
+std::set<DorkyEventIdentifier> already_seen;
+bool is_duplicate (const DorkyEventIdentifier &id) {
+  std::pair<std::set<DorkyEventIdentifier>::const_iterator, bool> ret =
+    already_seen.insert(id);
+  return !ret.second;
+}
+
+// transverse mass
+float Mt( LorentzVector p4, float met, float met_phi ){
+  return sqrt( 2*met*( p4.pt() - ( p4.Px()*cos(met_phi) + p4.Py()*sin(met_phi) ) ) );
+}
+/*
+void setupJetCorrectors() {
+
+  vector<string> v_jptjetcorrs;
+  vector<string> v_pfjetcorrs;
+  
+  v_jptjetcorrs.push_back("../CORE/jetcorr/START38_V13_AK5JPT_L2Relative.txt");
+  v_jptjetcorrs.push_back("../CORE/jetcorr/START38_V13_AK5JPT_L3Absolute.txt");
+
+  v_pfjetcorrs.push_back("../CORE/jetcorr/START38_V13_AK5PF_L2Relative.txt");
+  v_pfjetcorrs.push_back("../CORE/jetcorr/START38_V13_AK5PF_L3Absolute.txt");
+
+  vector<string> v_jptjetcorrs_wResidual = v_jptjetcorrs;
+  vector<string> v_pfjetcorrs_wResidual = v_pfjetcorrs;
+
+  v_jptjetcorrs_wResidual.push_back("../CORE/jetcorr/START38_V13_AK5JPT_L2L3Residual.txt");
+  v_pfjetcorrs_wResidual.push_back("../CORE/jetcorr/START38_V13_AK5PF_L2L3Residual.txt");
+  
+
+  jptL2L3Corr = makeJetCorrector(v_jptjetcorrs);
+  pfL2L3Corr = makeJetCorrector(v_pfjetcorrs);
+  
+  jptL2L3ResidualCorr = makeJetCorrector(v_jptjetcorrs_wResidual);
+  pfL2L3ResidualCorr = makeJetCorrector(v_pfjetcorrs_wResidual);
+
+
+}
+*/
+
+double topAFB_looper::triggerEff(const int hypIdx){
+  LorentzVector lt_p4  = hyp_lt_p4()[hypIdx];
+  LorentzVector ll_p4  = hyp_ll_p4()[hypIdx];
+  float lt_pt = lt_p4.Pt();
+  float ll_pt = ll_p4.Pt();
+  float lt_eta = fabs(lt_p4.Eta());
+  float ll_eta = fabs(ll_p4.Eta());
+  double weight_lt;
+  double weight_ll;
+  double weight;
+  weight_lt=1.0;
+  weight_ll=1.0;
+  weight=1.0;
+  int id_lt = fabs(hyp_lt_id()[hypIdx]);
+  int id_ll = fabs(hyp_ll_id()[hypIdx]);
+  //reference AN2011/456 v2
+  if (id_lt == 11){
+    if(lt_eta >= 0 && lt_eta < 1.5){
+      if (lt_pt > 20.0 && lt_pt <= 30.0) weight_lt = 0.9849;
+      else if (lt_pt > 30.0) weight_lt = 0.9928;
+    }
+    else if(lt_eta >= 1.5) {
+      if (lt_pt > 20.0 && lt_pt <= 30.0) weight_lt = 0.9774;
+      else if (lt_pt > 30.0) weight_lt = 0.9938;
+    }
+  }
+  
+  if (id_ll == 11){
+    if(ll_eta >= 0 && ll_eta < 1.5){
+      if (ll_pt > 20.0 && ll_pt <= 30.0) weight_ll = 0.9923;
+      else if (ll_pt > 30.0) weight_ll = 0.9948;
+    }
+    else if(ll_eta >= 1.5) {
+      if (ll_pt > 20.0 && ll_pt <= 30.0) weight_ll = 0.9953;
+      else if (ll_pt > 30.0) weight_ll = 0.9956;
+    }
+  }
+  
+  if (id_lt == 13){
+    if(lt_eta > 0 && lt_eta < 0.8){
+      if (lt_pt > 20.0 && lt_pt <= 30.0) weight_lt = 0.9648;
+      else if (lt_pt > 30.0) weight_lt = 0.9666;
+    }
+    else if(lt_eta >= 0.8 && lt_eta < 1.2){
+      if (lt_pt > 20.0 && lt_pt <= 30.0) weight_lt = 0.9516;
+      else if (lt_pt > 30.0) weight_lt = 0.9521;
+    }
+    else if(lt_eta >= 1.2 && lt_eta < 2.1){
+      if (lt_pt > 20.0 && lt_pt <= 30.0) weight_lt = 0.9480;
+      else if (lt_pt > 30.0) weight_lt = 0.9485;
+    }
+    else if(lt_eta >= 2.1) {
+      if (lt_pt > 20.0 && lt_pt <= 30.0) weight_lt = 0.8757;
+      else if (lt_pt > 30.0) weight_lt = 0.8772;
+    }
+  }
+  
+  if (id_ll == 13){
+    if(ll_eta > 0 && ll_eta < 0.8){
+      if (ll_pt > 20.0 && ll_pt <= 30.0) weight_ll = 0.9655;
+      else if (ll_pt > 30.0) weight_ll = 0.9670;
+    }
+    else if(ll_eta >= 0.8 && ll_eta < 1.2){
+      if (ll_pt > 20.0 && ll_pt <= 30.0) weight_ll = 0.9535;
+      else if (ll_pt > 30.0) weight_ll = 0.9537;
+    }
+    else if(ll_eta >= 1.2 && ll_eta < 2.1){
+      if (ll_pt > 20.0 && ll_pt <= 30.0) weight_ll = 0.9558;
+      else if (ll_pt > 30.0) weight_ll = 0.9530;
+    }
+    else if(ll_eta >= 2.1) {
+      if (ll_pt > 20.0 && ll_pt <= 30.0) weight_ll = 0.9031;
+      else if (ll_pt > 30.0) weight_ll = 0.8992;
+    }
+  }
+  
+  weight = weight_lt*weight_ll;
+  return weight;
+}
+
+double topAFB_looper::getBFRWeight(const int hypIdx, vector<LorentzVector> & v_goodNonBtagJets_p4,vector<LorentzVector> & v_goodBtagJets_p4,  bool isData) {
+
+  LorentzVector lt_p4  = hyp_lt_p4()[hypIdx];
+  LorentzVector ll_p4  = hyp_ll_p4()[hypIdx];
+  int nbtag_jet = v_goodBtagJets_p4.size();
+  if(nbtag_jet>2) return -9999; 
+
+  double mass_ltb, mass_llb,nonb_pt,nonb_eta;
+  
+  if (nbtag_jet == 2 ){
+  //fill only events where >=1 of the btagged jets does not match a gen-level b for MC closure test
+    for(unsigned int i = 0; i < 2; i++) {
+      mass_ltb = (lt_p4+v_goodBtagJets_p4.at(i)).M();
+      mass_llb = (ll_p4+v_goodBtagJets_p4.at(i)).M();
+      if (! (mass_ltb > 170 && mass_llb > 170) ) return -9999.;
+    }
+  }
+  
+  if (nbtag_jet == 1 ){
+    for(unsigned int i = 0; i < nbtag_jet; i++) {
+      mass_ltb = (lt_p4+v_goodBtagJets_p4.at(i)).M();
+      mass_llb = (ll_p4+v_goodBtagJets_p4.at(i)).M();
+      if (! (mass_ltb > 170 && mass_llb > 170) ) return -9999.;
+    }    
+  }
+
+  double bjetfr =1.0;
+ 
+  double weight = 1.0;
+  int nFO=0;    //FOs are non-b jets that give mass_ltb > 170 && mass_llb > 170
+  bool isFO = false;
+  vector<double> weight_tmp ;
+  for(unsigned int i = 0; i < v_goodNonBtagJets_p4.size(); i++) {
+    isFO = false;
+    mass_ltb = (lt_p4+v_goodNonBtagJets_p4.at(i)).M();
+    mass_llb = (ll_p4+v_goodNonBtagJets_p4.at(i)).M();
+    nonb_pt =  v_goodNonBtagJets_p4.at(i).Pt();
+    nonb_eta =  fabs(v_goodNonBtagJets_p4.at(i).Eta());
+    //to keep within the range of the function 
+    if(nonb_pt>499.0) {nonb_pt =  499.0; }
+    if(nonb_eta>2.3) {nonb_eta =  2.3; }
+    
+    bjetfr =  getMisTagRate( nonb_pt, nonb_eta  , "TCHEM");
+    //not needed when the mistag events in MC are being weighted by the MisTagSF
+    //if(!isData) bjetfr/=getMisTagSF( nonb_pt, nonb_eta  , "TCHEM");
+    
+    if (mass_ltb > 170 && mass_llb > 170 )     { nFO++; isFO=true;}
+      if(isFO) {
+      weight_tmp.push_back(bjetfr/(1-bjetfr));
+      }
+  }
+  
+  
+  if (nbtag_jet == 0 ){
+  if (nFO>=2) weight = weight_tmp.at(0)*weight_tmp.at(1);
+  if (nFO>=3) weight += weight_tmp.at(0)*weight_tmp.at(2)+weight_tmp.at(1)*weight_tmp.at(2);
+  if (nFO>=4 ) weight += weight_tmp.at(0)*weight_tmp.at(3)+weight_tmp.at(1)*weight_tmp.at(3)+weight_tmp.at(2)*weight_tmp.at(3);
+  if (nFO>=5 ) weight += weight_tmp.at(0)*weight_tmp.at(4)+weight_tmp.at(1)*weight_tmp.at(4)+weight_tmp.at(2)*weight_tmp.at(4)+weight_tmp.at(3)*weight_tmp.at(4);
+  if (nFO>=6 ) weight += weight_tmp.at(0)*weight_tmp.at(5)+weight_tmp.at(1)*weight_tmp.at(5)+weight_tmp.at(2)*weight_tmp.at(5)+weight_tmp.at(3)*weight_tmp.at(5)+weight_tmp.at(4)*weight_tmp.at(5);
+  if (nFO>=7 ) weight += weight_tmp.at(0)*weight_tmp.at(6)+weight_tmp.at(1)*weight_tmp.at(6)+weight_tmp.at(2)*weight_tmp.at(6)+weight_tmp.at(3)*weight_tmp.at(6)+weight_tmp.at(4)*weight_tmp.at(6)+weight_tmp.at(5)*weight_tmp.at(6);
+  }
+  
+
+  if (nbtag_jet == 1 ){  	  
+  if(nFO>=1) weight = weight_tmp.at(0);
+  if (nFO>=2) weight += weight_tmp.at(1);
+  if (nFO>=3) weight += weight_tmp.at(2); 
+  if (nFO>=4 ) weight += weight_tmp.at(3);
+  if (nFO>=5 ) weight += weight_tmp.at(4);
+  if (nFO>=6 ) weight += weight_tmp.at(5);
+  if (nFO>=7 ) weight += weight_tmp.at(6);
+  }
+  
+  //there are no events with >6 FOs (3.23/fb)
+
+  //if (weight !=1 )  cout <<"nbtag_jet, nFO, weight =  " <<nbtag_jet<<" ,  "<<nFO<<" ,  "<<weight <<endl;  
+  
+  if (nFO >1 && nbtag_jet == 0 ) return weight;
+  
+  if (nFO >0 && nbtag_jet == 1 ) return weight;
+  
+  if (nbtag_jet >= 2 ) return 1.0;
+   
+ if (nFO >1-nbtag_jet) cout <<"something went wrong " <<nbtag_jet<<" ,  "<<nFO<<" ,  "<<weight <<endl;   
+ return -9999.;
+}
+
+// *****************************************************************
+//get the FR weight
+// *****************************************************************
+
+
+double topAFB_looper::getFRWeight(const int hypIdx, SimpleFakeRate* mufr, SimpleFakeRate * elfr, FREnum frmode, bool isData) {
+  
+  //std::cout<<"Called topAFB_looper::getFRWeight"<<std::endl;
+
+  bool  estimateQCD   = false;
+  bool  estimateWJets = false;
+
+  if ( frmode == e_qcd ) {
+    estimateQCD   = true;
+    estimateWJets = false;
+  } 
+  else if( frmode == e_wjets ) {
+    estimateQCD   = false;
+    estimateWJets = true;
+  }
+  else {
+    std::cout<<"topAFB_looper::getFRWeight: bad FR mode given, fix this!"<<std::endl;
+    return -9999.;
+  }
+  if(hyp_type()[hypIdx] == 0) {
+  	
+    bool isGoodMut = false;
+    bool isGoodMul = false;
+    bool isFOMut   = false;
+    bool isFOMul   = false;
+    
+    unsigned int iMut = hyp_lt_index()[hypIdx];
+    unsigned int iMul = hyp_ll_index()[hypIdx];
+    
+    if( muonId( iMut , OSGeneric_v3 ) ) {
+      isGoodMut = true;
+    }
+    if( muonId( iMul , OSGeneric_v3 ) ) {
+      isGoodMul = true;
+    }
+    if( muonId( iMut , OSGeneric_v3_FO ) ) {
+      isFOMut = true;
+    }
+    if( muonId( iMul , OSGeneric_v3_FO ) ) {
+      isFOMul = true;
+    }
+    
+    //for both WJets and QCD, we need both to be FOs at least
+    if(!isFOMut || !isFOMul)
+      return -9999.;
+
+    //if we want to estimate the fakes for QCD, then we ask that 
+    //both are not num objects, and that both are FO
+    if(estimateQCD) {
+      
+      //if at least one is a Numerator lepton, we return
+      if( isGoodMut || isGoodMul) 
+        return -9999.;
+      
+      double FRMut = mufr->getFR(mus_p4()[iMut].pt(), mus_p4()[iMut].eta());
+      double FRMul = mufr->getFR(mus_p4()[iMul].pt(), mus_p4()[iMul].eta());
+      return (FRMut/(1-FRMut))*(FRMul/(1-FRMul));
+    } else if(estimateWJets) {
+      
+      //need one to be a Numerator lepton, and the other to be FO but not num
+      if( isGoodMut && !isGoodMul && isFOMul) {
+        double FR = mufr->getFR(mus_p4()[iMul].pt(), mus_p4()[iMul].eta());
+        //cout << "mm, FR and FR/(1-FR) " << FR << ", " << FR/(1-FR) << endl;
+        return FR/(1-FR);
+      }
+      
+      //check the other muon
+      if( isGoodMul && !isGoodMut && isFOMut) {
+        double FR = mufr->getFR(mus_p4()[iMut].pt(), mus_p4()[iMut].eta());
+        //cout << "mm, FR and FR/(1-FR) " << FR << ", " << FR/(1-FR) << endl;
+        return FR/(1-FR);
+      }
+    }//estimate WJets
+    return -9999.;
+  }//mumu case
+  
+
+  //now we do the ee case
+  if(hyp_type()[hypIdx] == 3) {
+	  
+    unsigned int iElt = hyp_lt_index()[hypIdx];
+    unsigned int iEll = hyp_ll_index()[hypIdx];
+	  
+    bool isGoodElt = false;
+    bool isGoodEll = false;
+    bool isFOElt   = false;
+    bool isFOEll   = false;
+
+    if( pass_electronSelection( iElt , electronSelection_el_OSV3 ) ) {
+      isGoodElt = true;
+    }
+    if( pass_electronSelection( iEll , electronSelection_el_OSV3 ) ) {
+      isGoodEll = true;
+    }
+    if( pass_electronSelection( iElt , electronSelection_el_OSV3_FO ) ) {
+      isFOElt   = true;
+    }
+    if( pass_electronSelection( iEll , electronSelection_el_OSV3_FO ) ) {
+      isFOEll   = true;
+    }
+    
+    //for both WJets and QCD, we need both to be FOs at least
+    //if both are good, we continue
+    if( !isFOElt || !isFOEll)
+      return -9999.;
+
+    if(estimateQCD) {
+      
+      //if at least one is a Numerator object, then we return -9999.
+      if( isGoodElt || isGoodEll) 
+        return -9999.;
+      
+      double FRElt = elfr->getFR(els_p4()[iElt].pt(), els_p4()[iElt].eta());
+      double FREll = elfr->getFR(els_p4()[iEll].pt(), els_p4()[iEll].eta());
+      //      sumfr = sumfr +  (FRElt/(1-FRElt))*(FREll/(1-FREll));
+      return (FRElt/(1-FRElt))*(FREll/(1-FREll));
+    } else if(estimateWJets) {
+      
+      if(isGoodElt && !isGoodEll && isFOEll) {
+        double FR = elfr->getFR(els_p4()[iEll].pt(), els_p4()[iEll].eta());
+        //cout << "ee, FR and FR/(1-FR) " << FR << ", " << FR/(1-FR) << endl;
+        return FR/(1-FR);
+      }
+      //check the other electron 
+      if(isGoodEll && !isGoodElt && isFOElt) {
+        double FR = elfr->getFR(els_p4()[iElt].pt(), els_p4()[iElt].eta());
+        //cout << "ee, FR and FR/(1-FR) " << FR << ", " << FR/(1-FR) << endl;
+        return FR/(1-FR);
+      }
+      return -9999.;
+    }//estimateWJets
+    
+  }//ee case
+
+  if(hyp_type()[hypIdx] == 1 || hyp_type()[hypIdx] == 2) {
+    int iEl = 0;
+    int iMu = 0;
+    /*
+    if(hyp_type()[hypIdx] == 2) {
+      iEl = hyp_lt_index()[hypIdx];
+      iMu = hyp_ll_index()[hypIdx];
+    } 
+    if (hyp_type()[hypIdx] == 1) {
+      iEl = hyp_ll_index()[hypIdx];
+      iMu = hyp_lt_index()[hypIdx];
+    } 
+    */
+    
+    if     ( abs(hyp_ll_id()[hypIdx])==11 && abs(hyp_lt_id()[hypIdx])==13 ){
+      iEl = hyp_ll_index()[hypIdx];
+      iMu = hyp_lt_index()[hypIdx];
+    }
+    else if( abs(hyp_ll_id()[hypIdx])==13 && abs(hyp_lt_id()[hypIdx])==11 ){
+      iEl = hyp_lt_index()[hypIdx];
+      iMu = hyp_ll_index()[hypIdx];
+    }
+    else{
+      cout << "ID ll " << hyp_ll_id()[hypIdx] << endl;
+      cout << "ID lt " << hyp_lt_id()[hypIdx] << endl;
+      cout << "Error in getFRWeight, quitting!" << endl;
+      exit(0); 
+    }
+    
+    bool isGoodEl = false;
+    bool isFOEl   = false;
+    bool isGoodMu = false;
+    bool isFOMu   = false;    
+
+    if( pass_electronSelection( iEl , electronSelection_el_OSV3 ) ){
+      isGoodEl = true;
+    }
+    if( muonId( iMu , OSGeneric_v3 ) ) { 
+      isGoodMu = true;
+    }
+    if( pass_electronSelection( iEl , electronSelection_el_OSV3_FO ) ){
+      isFOEl = true;
+    }
+    if( muonId( iMu , OSGeneric_v3_FO ) ) { 
+      isFOMu = true;
+    }
+          
+    //if either fail FO, return!!!
+    if(!isFOMu || !isFOEl)
+      return -9999.;
+    
+    if(estimateQCD ) {
+      
+      //if at least one is a numerator, then we fail
+      if(isGoodMu || isGoodEl)
+        return -9999.;
+      
+      double FRMu = mufr->getFR(mus_p4()[iMu].pt(), mus_p4()[iMu].eta());
+      double FREl = elfr->getFR(els_p4()[iEl].pt(), els_p4()[iEl].eta());
+      return FRMu*FREl/(1-FRMu)/(1-FREl);
+      //if we get here somehow, we're in trouble
+      cout << "We have gotten to line: " << __LINE__  << " in the FR code.";
+      cout << "We should never get here, so something is wrong with our logic!!" << endl;
+    } else if(estimateWJets) {
+      
+      //need one to be a numerator lepton and the other to be a FO
+      if(isGoodMu && !isGoodEl && isFOEl) {
+        double FR = elfr->getFR(els_p4()[iEl].pt(), els_p4()[iEl].eta());
+        //cout << "emu, el FR, FR/(1-FR): " << FR << ", " << FR/(1-FR) << endl;
+        return FR/(1-FR);
+      }
+      
+      if(isGoodEl && !isGoodMu && isFOMu) {
+        double FR = mufr->getFR(mus_p4()[iMu].pt(), mus_p4()[iMu].eta());
+        //cout << "emu, mu FR, FR/(1-FR): " << FR << ", " << FR/(1-FR) << endl;
+        return FR/(1-FR);
+      }
+      return -9999.;
+    }
+  } //emu case
+  
+  return -9999.;
+}
+
+
+topAFB_looper::topAFB_looper(){
+  applyNoCuts= false;
+  getVtxDistOnly= false;
+  usePtGt2020= false;
+  usePtGt2010= false;
+  excludePtGt2020= false;
+  applylepIDCuts= false;
+  applyFOv1Cuts= false;
+  applyFOv2Cuts= false;
+  applyFOv3Cuts= false;
+  applylepIsoCuts= false;
+  applylepLooseIsoCuts= false;
+  applyTriggers= false;
+  vetoZmass= false;
+  requireZmass= false;
+  hypDisamb= false;
+  useCorMET= false;
+  usetcMET= false;
+  usetcMET35X                = false;
+  usepfMET= false;
+  vetoMET= false;
+  vetoMET50= false;
+  vetoProjectedMET= false;
+  usejptJets= false;
+  usecaloJets= false;
+  usepfJets= false;
+  veto1Jet= false;
+  veto2Jets= false;
+  requireEcalEls= false;
+  useOS= false;
+  useSS= false;
+  applyAlignmentCorrection   = false;
+  vetoHypMassLt10            = false;
+  vetoHypMassLt12            = false;
+  scaleJESMETUp              = false; 
+  scaleJESMETDown            = false; 
+  estimateQCD= false;
+  estimateWJets= false;
+  requireBTag                = false;
+  require2BTag               = false;
+  sortJetCandidatesbyPt      = false;
+  sortJetCandidatesbyDR      = false; 
+  applyLeptonJetInvMassCut450 = false;
+  requireExact2BTag           = false;
+  applyTopSystEta              = false;
+  globalJESRescale = 1.;
+
+  jptL2L3Corr = NULL;
+  pfL2L3Corr = NULL;
+  jptL2L3ResidualCorr = NULL;
+  pfL2L3ResidualCorr = NULL;
+  d_llsol = new ttdilepsolve;
+}
+
+
+topAFB_looper::~topAFB_looper(){
+  delete babyFile_;
+  delete babyTree_;
+  delete d_llsol;
+}
+void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string prefix, 
+			    bool doFRestimation, float lumi , float kFactor , bool verbose , FREnum frmode ){
+
+
+
+
+
+  //deal with the cuts
+  applyNoCuts= find(v_Cuts.begin(), v_Cuts.end(), "applyNoCuts") != v_Cuts.end();
+  getVtxDistOnly= find(v_Cuts.begin(), v_Cuts.end(), "getVtxDistOnly") != v_Cuts.end();
+  usePtGt2020= find(v_Cuts.begin(), v_Cuts.end(), "usePtGt2020") != v_Cuts.end();
+  usePtGt2010= find(v_Cuts.begin(), v_Cuts.end(), "usePtGt2010") != v_Cuts.end();
+  excludePtGt2020= find(v_Cuts.begin(), v_Cuts.end(), "excludePtGt2020") != v_Cuts.end();
+  applylepIDCuts= find(v_Cuts.begin(), v_Cuts.end(), "applylepIDCuts") != v_Cuts.end(); 
+  applyFOv1Cuts= find(v_Cuts.begin(), v_Cuts.end(), "applyFOv1Cuts") != v_Cuts.end(); 
+  applyFOv2Cuts= find(v_Cuts.begin(), v_Cuts.end(), "applyFOv2Cuts") != v_Cuts.end(); 
+  applyFOv3Cuts= find(v_Cuts.begin(), v_Cuts.end(), "applyFOv3Cuts") != v_Cuts.end(); 
+  applylepIsoCuts= find(v_Cuts.begin(), v_Cuts.end(), "applylepIsoCuts") != v_Cuts.end(); 
+  applylepLooseIsoCuts= find(v_Cuts.begin(), v_Cuts.end(), "applylepLooseIsoCuts") != v_Cuts.end();
+  applyTriggers= find(v_Cuts.begin(), v_Cuts.end(), "applyTriggers") != v_Cuts.end();
+  vetoZmass= find(v_Cuts.begin(), v_Cuts.end(), "vetoZmass") != v_Cuts.end();
+  requireZmass= find(v_Cuts.begin(), v_Cuts.end(), "requireZmass") != v_Cuts.end();
+  hypDisamb= find(v_Cuts.begin(), v_Cuts.end(), "hypDisamb") != v_Cuts.end();
+  useCorMET= find(v_Cuts.begin(), v_Cuts.end(), "useCorMET") != v_Cuts.end();
+  usetcMET= find(v_Cuts.begin(), v_Cuts.end(), "usetcMET") != v_Cuts.end();   
+  usetcMET35X= find(v_Cuts.begin(), v_Cuts.end(), "usetcMET35X") != v_Cuts.end();   
+  usepfMET= find(v_Cuts.begin(), v_Cuts.end(), "usepfMET") != v_Cuts.end();
+  vetoMET= find(v_Cuts.begin(), v_Cuts.end(), "vetoMET") != v_Cuts.end();
+  vetoMET50= find(v_Cuts.begin(), v_Cuts.end(), "vetoMET50") != v_Cuts.end();
+  vetoProjectedMET= find(v_Cuts.begin(), v_Cuts.end(), "vetoProjectedMET") != v_Cuts.end();
+  usecaloJets= find(v_Cuts.begin(), v_Cuts.end(), "usecaloJets") != v_Cuts.end();
+  usejptJets= find(v_Cuts.begin(), v_Cuts.end(), "usejptJets") != v_Cuts.end();
+  usepfJets= find(v_Cuts.begin(), v_Cuts.end(), "usepfJets") != v_Cuts.end();
+  veto1Jet= find(v_Cuts.begin(), v_Cuts.end(), "veto1Jet") != v_Cuts.end();
+  veto2Jets= find(v_Cuts.begin(), v_Cuts.end(), "veto2Jets") != v_Cuts.end();
+  requireEcalEls= find(v_Cuts.begin(), v_Cuts.end(), "requireEcalEls") != v_Cuts.end();
+  useOS= find(v_Cuts.begin(), v_Cuts.end(), "useOS") != v_Cuts.end();
+  useSS= find(v_Cuts.begin(), v_Cuts.end(), "useSS") != v_Cuts.end();
+  applyAlignmentCorrection= find(v_Cuts.begin(), v_Cuts.end(), "applyAlignmentCorrection" ) != v_Cuts.end();
+  vetoHypMassLt10               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt10"                  ) != v_Cuts.end();
+  vetoHypMassLt12               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt12"                  ) != v_Cuts.end();
+  scaleJESMETUp= find(v_Cuts.begin(), v_Cuts.end(), "scaleJESMETUp"                    ) != v_Cuts.end();
+  scaleJESMETDown= find(v_Cuts.begin(), v_Cuts.end(), "scaleJESMETDown"                  ) != v_Cuts.end();
+  estimateQCD    = find(v_Cuts.begin(), v_Cuts.end(), "estimateQCD") != v_Cuts.end();
+  estimateWJets= find(v_Cuts.begin(), v_Cuts.end(), "estimateWJets") != v_Cuts.end();
+  requireBTag                   = find(v_Cuts.begin(), v_Cuts.end(), "requireBTag"                      ) != v_Cuts.end();
+  require2BTag                   = find(v_Cuts.begin(), v_Cuts.end(), "require2BTag"                      ) != v_Cuts.end();
+  sortJetCandidatesbyPt         = find(v_Cuts.begin(), v_Cuts.end(), "sortJetCandidatesbyPt"                      ) != v_Cuts.end();
+  sortJetCandidatesbyDR         = find(v_Cuts.begin(), v_Cuts.end(), "sortJetCandidatesbyDR"                      ) != v_Cuts.end();
+  applyLeptonJetInvMassCut450   = find(v_Cuts.begin(), v_Cuts.end(), "applyLeptonJetInvMassCut450"                ) != v_Cuts.end();
+  generalLeptonVeto   = find(v_Cuts.begin(), v_Cuts.end(), "generalLeptonVeto"                ) != v_Cuts.end();
+  applyHTCut   = find(v_Cuts.begin(), v_Cuts.end(), "applyHTCut"                ) != v_Cuts.end();
+  matchLeptonJetbyMaxDR   = find(v_Cuts.begin(), v_Cuts.end(), "matchLeptonJetbyMaxDR"                ) != v_Cuts.end();	
+  BTagAlgTCHE = find(v_Cuts.begin(), v_Cuts.end(), "BTagAlgTCHE"                ) != v_Cuts.end();
+  createBabyNtuples =  find(v_Cuts.begin(), v_Cuts.end(), "createBabyNtuples"                ) != v_Cuts.end();
+  requireExact2BTag    = find(v_Cuts.begin(), v_Cuts.end(), "requireExact2BTag"                      ) != v_Cuts.end();
+  applyTopSystEta       = find(v_Cuts.begin(), v_Cuts.end(), "applyTopSystEta"                      ) != v_Cuts.end();
+  // top mass
+  if ( scaleJESMETUp) globalJESRescale = 1.05 ;
+  else if (scaleJESMETDown)globalJESRescale = 0.95;
+
+  already_seen.clear();
+ 
+  // Make a baby ntuple
+ if (createBabyNtuples){
+   TString babyFilename = prefix +".root";
+   MakeBabyNtuple(babyFilename.Data());
+ }
+  bool isData = false;
+  // Set the JSON file
+  if(prefix=="data"){
+    //set_goodrun_file("Cert_160404-163869_7TeV_PromptReco_Collisions11_JSON_goodruns.txt");
+    //set_goodrun_file("Cert_160404-163869_7TeV_May10ReReco_Collisions11_JSON_goodruns.txt");
+    // set_goodrun_file_json("Cert_160404_165970_7TeV_May10ReRecoPlusPromptReco_349pb-1.json");
+    // set_goodrun_file("Cert_EPSFINAL_May10ReReco_v2_PromptReco_160404_167913_JSON_goodruns.txt");
+    //set_goodrun_file_json("Cert_160404-173692_7TeV_PromptReco_Collisions11_JSON.txt");
+    //set_goodrun_file_json("Cert_160404-177515_7TeV_PromptReco-May10ReRecov3-ReReco5Augv2.txt");
+    set_goodrun_file_json("Cert_160404-180252_7TeV_May10ReRecoV3_ReReco5AugV3_PromptReco_Collisions11_JSON.txt");
+    cout << "DATA!!!" << endl;
+     isData = true;    
+  }
+
+  /*
+  if(prefix == "ttdil" || prefix == "ttotr") {
+       cout<<"using Fall11 vertex weighting"<<endl;
+       set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root",false);
+  }
+  else {
+      cout<<"using Summer11 vertex weighting"<<endl;
+      set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
+  }
+  */
+
+  set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
+  //set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_3p5fb_Zselection.root",false);
+  //set_vtxreweight_rootfile("vtxreweight_Spring11MC_336pb_Zselection.root",false);
+  //set_vtxreweight_rootfile("vtxreweight_Summer11MC_1160pb_Zselection.root",false);
+  //set_vtxreweight_rootfile_tprime("vtxreweight_Summer11MC_1160pb_Zselection.root",false);
+  
+  int nchs = NCHANNELS; 
+  int nhists = NHISTS;
+  bookHistos(prefix.c_str(),nchs, nhists);
+
+    
+  //instantiate SimpleFakeRate class for electrons and muons
+  SimpleFakeRate* mufr = 0;
+  //this is the default, can change it below if needed
+  SimpleFakeRate* elfr = 0;
+  
+  if(doFRestimation) {
+    std::cout<<"**************************"<<std::endl;
+    std::cout<<"Running FR application job"<<std::endl;
+    std::cout<<"**************************"<<std::endl;
+
+    if(prefix == "data") {
+      std::cout<<"Using data derived FR files"<<std::endl;
+      mufr = new SimpleFakeRate("fr_os7June2011.root", "fr_mu_OSGV3" );
+      elfr = new SimpleFakeRate("fr_os7June2011.root", "fr_el_OSGV3" );
+    }
+    else {
+      std::cout<<"Using data derived FR files"<<std::endl;
+      std::cout<<"CURRENTLY USING DATA FR FOR MC FIXME!!!!!" <<std::endl;
+      mufr = new SimpleFakeRate("fr_os7June2011.root", "fr_mu_OSGV3" );
+      elfr = new SimpleFakeRate("fr_os7June2011.root", "fr_el_OSGV3" );
+    }
+  }
+
+
+  
+  //--------------------------
+  // File and Event Loop
+  //---------------------------
+  TObjArray *listOfFiles = chain->GetListOfFiles();
+  unsigned int nEventsChain=0;
+  unsigned int nEvents = chain->GetEntries();
+  nEventsChain = nEvents;
+  unsigned int nEventsTotal = 0;   
+  float nEvents_noCuts = 0;
+  float nEvents_noCuts_novtxweight = 0;
+  float nSelectedEvents = 0;
+  unsigned int npreSelectedEvents = 0;
+  unsigned int npreSelectedEvents_genmatch1 = 0;
+  unsigned int npreSelectedEvents_genmatch2 = 0;
+  TIter fileIter(listOfFiles);
+  map<int,int> m_events;
+  while(TChainElement *currentFile = (TChainElement*)fileIter.Next() ) {
+    TString filename = currentFile->GetTitle();
+
+    TFile f(filename.Data());
+    TTree *tree = (TTree*)f.Get("Events");
+    TTreeCache::SetLearnEntries(10);
+    tree->SetCacheSize(128*1024*1024);
+    cms2.Init(tree);
+    unsigned int nEvents = tree->GetEntries();
+    bool print_evt_weight = true;
+    for(unsigned int event = 0; event < nEvents; ++event) 
+    { // Event Loop
+      tree->LoadTree(event);
+      cms2.GetEntry(event);
+      
+   
+      if(print_evt_weight && !isData){
+	cout << "Event Weight = " << evt_scale1fb() * lumi << endl;
+	print_evt_weight = false;
+      }
+      // skip duplicates
+      if( isData ) {
+        DorkyEventIdentifier id = { evt_run(),evt_event(), evt_lumiBlock() };
+        if (is_duplicate(id) ){
+	  //  cout << "Found duplicate! " << evt_dataset()<< " " << evt_run() << " " << evt_lumiBlock() << " " << evt_event() << endl;
+          continue;
+	}
+      }
+      
+      float ndavtxweight = vtxweight(isData,true);
+      //get the channels correct
+      int nels= 0;
+      int nmus= 0;
+      int ntaus= 0;
+      int nleps = 0;
+      if(!isData)
+	nleps = leptonGenpCount_lepTauDecays(nels, nmus, ntaus);
+      if (prefix == "ttdil"    &&  nleps != 2) continue;
+      if (prefix == "ttotr"    &&  nleps == 2) continue;
+      if (prefix == "DYee"     &&  nels != 2) continue;
+      if (prefix == "DYmm"     &&  nmus != 2) continue;
+      if (prefix == "DYtautau" &&  ntaus != 2) continue;
+      
+      if (prefix == "ttdil"    &&  nleps == 2) ++nEventsTotal;
+      // Progress feedback to the user
+      if(nEventsTotal%2000 == 0) {
+	// xterm magic from L. Vacavant and A. Cerri
+	if (isatty(1)) {
+	  printf("\015\033[32m ---> \033[1m\033[31m%4.1f%%"
+		 "\033[0m\033[32m <---\033[0m\015", (float)nEventsTotal/(nEventsChain*0.01));
+	  fflush(stdout);
+	}
+      }//if(nEventsTotal%20000 == 0) {
+
+      
+     
+       if( isData && !goodrun(cms2.evt_run(), cms2.evt_lumiBlock()) ) continue;
+      //if( isData && !goodrun_json(cms2.evt_run(), cms2.evt_lumiBlock()) ) continue;
+      //did it pass all the good event cuts?
+      if( !cleaning_standardApril2011() )                            continue;
+      
+      //skip events with bad els_conv_dist 
+      bool skipEvent = false;
+      for( unsigned int iEl = 0 ; iEl < els_conv_dist().size() ; ++iEl ){
+        if( els_conv_dist().at(iEl) != els_conv_dist().at(iEl) ){
+          skipEvent = true;
+        }
+        if( els_sigmaIEtaIEta().at(iEl) != els_sigmaIEtaIEta().at(iEl) ){
+          skipEvent = true;
+        }
+        if( els_sigmaIEtaIEtaSC().at(iEl) != els_sigmaIEtaIEtaSC().at(iEl) ){
+          skipEvent = true;
+        }
+      }
+      if( skipEvent ){
+	continue;
+      }
+      
+
+      if(verbose)
+	cout << "Event passed all standard event cleaning cuts" << endl;
+
+      float pthat_cutoff = 30.;
+      if (prefix == "qcdpt15" && genps_pthat() > pthat_cutoff)
+	continue;
+      
+      //splice together the DY samples - if its madgraph, then we do nothing
+      if(TString(prefix).Contains("DY") && TString(evt_dataset()).Contains("madgraph") == false) {
+	bool doNotContinue = false;
+	for(unsigned int i = 0; i < genps_p4().size(); i++){
+	  if(abs(genps_id()[i]) == 23 && genps_p4()[i].M() > 50.)
+	    doNotContinue = true;
+	}
+	if(doNotContinue)
+	  continue;
+      }
+      
+      float weight = 1.0;
+      if( isData ){
+	weight = 1;
+      }else{
+	 weight = kFactor * evt_scale1fb() * lumi*ndavtxweight; 
+	  //if(require2BTag)weight = kFactor * evt_scale1fb() * lumi * 0.95 * 0.95 * ndavtxweight; //the MC-data scale factor for bjet tagging is now applied later (after the number of btags is counted)
+      }
+
+      if(applyNoCuts){
+	int ndavtx = 0;	
+	for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
+	  if(isGoodDAVertex(v)) ++ndavtx;
+	}
+	//hnVtx[myType]->Fill(ndavtx,1);
+	hnVtx[3]->Fill(ndavtx,1);
+	//if(isData) hnVtx[3]->Fill(ndavtx,1);
+	//else  hnVtx[3]->Fill(ndavtx,ndavtxweight);
+	if (cms2.davtxs_position().size() >0 ) {
+	  nEvents_noCuts_novtxweight += 1.; 	
+	  if(isData) nEvents_noCuts += 1.;
+	  else  nEvents_noCuts += ndavtxweight;
+	}
+	continue;
+      }
+      
+       vector<unsigned int> v_goodHyps;
+       v_goodHyps.clear();
+       vector<float> v_weights;
+       v_weights.clear();
+
+       VofP4 goodLeptons;
+
+       ngoodlep_ = 0;
+       ngoodel_  = 0;
+       ngoodmu_  = 0;
+       
+       if( generalLeptonVeto ){
+          
+	 for( unsigned int iel = 0 ; iel < els_p4().size(); ++iel ){
+	   if( els_p4().at(iel).pt() < 20 )                                                 continue;
+	   if( !pass_electronSelection( iel , electronSelection_el_OSV3 , false , false ) ) continue;
+	   goodLeptons.push_back( els_p4().at(iel) );
+	   ngoodel_++;
+	   ngoodlep_++;
+	 }
+	 
+	 for( unsigned int imu = 0 ; imu < mus_p4().size(); ++imu ){
+	   if( mus_p4().at(imu).pt() < 20 )           continue;
+	   if( !muonId( imu , OSGeneric_v3 ))         continue;
+	   goodLeptons.push_back( mus_p4().at(imu) );
+          ngoodmu_++;
+          ngoodlep_++;
+	 }
+	 
+       }
+
+
+      for(unsigned int ihyp = 0; ihyp < hyp_p4().size(); ++ihyp) 
+      {
+	//InitBabyNtuple();
+	//int mc_match;
+	//if(prefix == "ttdil" ){
+	//  mc_match=ttbarconstituents(ihyp);
+	//}
+	//if( !isData && (mc_match != 1) ) continue;
+	if( !passSUSYTrigger2011_v1( isData , hyp_type()[ihyp] , true ) ) continue;
+	//if( !hypsFromFirstGoodDAvertx(ihyp, 1.0) ) continue;
+	int type=hyp_type()[ihyp];
+	VofP4 vjpts_p4;
+        LorentzVector lt_p4  = hyp_lt_p4()[ihyp];
+	LorentzVector ll_p4  = hyp_ll_p4()[ihyp];
+	int id_lt = hyp_lt_id()[ihyp]; 
+	int id_ll = hyp_ll_id()[ihyp];
+	int idx_lt = hyp_lt_index()[ihyp];
+	int idx_ll = hyp_ll_index()[ihyp];
+	// opposite charge
+	if (useOS)
+	  if(id_lt * id_ll > 0)
+	    continue;
+
+	if(verbose && useOS)
+	  cout << "Hyp passes OS cuts" << endl;
+	
+	// same sign
+	if (useSS)
+	  if(id_lt * id_ll < 0)
+	    continue;
+
+	if(verbose && useOS)
+	  cout << "Hyp passes OS cuts" << endl;
+	/*	
+
+	//if a muon, always require global and tracker
+	if(abs(id_lt)==13) {
+	  if (((mus_type()[idx_lt]) & (1<<1)) == 0)    continue; // global muon
+	  if (((mus_type()[idx_lt]) & (1<<2)) == 0)    continue; // tracker muon
+	    
+	}
+	if(abs(id_ll)==13) {
+	  if (((mus_type()[idx_ll]) & (1<<1)) == 0)    continue; // global muon
+	  if (((mus_type()[idx_ll]) & (1<<2)) == 0)    continue; // tracker muon
+	}
+	*/
+
+	if(requireEcalEls) {
+	  //ask that the electron is ecal driven
+	  if(abs(id_lt) == 11) {
+	    if (!(els_type()[idx_lt] & (1<<2)))
+	      continue;
+	  }
+	  if(abs(id_ll) == 11) {
+	    if (!(els_type()[idx_ll] & (1<<2)))
+	      continue;
+	  }
+	}
+
+	//regardless of jet bin
+	//cut at Pt > 20, 20
+	if(usePtGt2020) {
+	  if(lt_p4.Pt() < 20. || ll_p4.Pt() < 20.)
+	    continue;
+	  if(verbose)
+	    cout << "Hyp Passes Pt > 20, 20 cuts" << endl;
+	}
+	
+	//cut at tight Pt > 20, loose Pt > 10
+	if(usePtGt2010) {
+	  if(TMath::Max(lt_p4.Pt(),ll_p4.Pt()) < 20)
+	    continue;
+	  if(TMath::Min(lt_p4.Pt(),ll_p4.Pt()) < 10)
+	    continue;
+	}
+	
+
+	//only look at events where loose lepton Pt < 20, tight > 20
+	if(excludePtGt2020) {
+	  if(lt_p4.Pt() > 20. && ll_p4.Pt() > 20.)
+	    continue; 
+	  if(lt_p4.Pt() < 10 || ll_p4.Pt() < 10.)
+	    continue; 
+	}
+
+	
+	if(vetoHypMassLt10) {
+	  if(hyp_p4()[ihyp].mass() < 10.) 
+	    continue;
+	  if(verbose)
+	    cout << "Passed Hyp Mass > 10 cut" << endl;
+	}
+
+	if(vetoHypMassLt12) {
+	  if(hyp_p4()[ihyp].mass() < 12.) 
+	    continue;
+	  if(verbose)
+	    cout << "Passed Hyp Mass > 12 cut" << endl;
+	}
+	float FRweight = 1 ;
+	if(doFRestimation) {
+	 
+	  //          float FRweight = getFRWeight(hypIdx, elFRversion, mufr, elfr); 
+          FRweight = getFRWeight(ihyp, mufr, elfr, frmode, isData); 
+       
+          // if getFRWeight returns less then 1 it means the current hyp
+          // does not fulfill the FO selections.
+          if(FRweight < -1.) 
+            continue;
+        
+	}//
+	if(applylepIDCuts) {
+	   //muon ID
+          if (abs(hyp_ll_id()[ihyp]) == 13  && !( muonId(hyp_ll_index()[ihyp] , OSGeneric_v3 ) ) )   continue;
+          if (abs(hyp_lt_id()[ihyp]) == 13  && !( muonId(hyp_lt_index()[ihyp] , OSGeneric_v3 ) ) )   continue;
+          
+          //OSV1
+          if (abs(hyp_ll_id()[ihyp]) == 11  && !( pass_electronSelection( hyp_ll_index()[ihyp] , electronSelection_el_OSV3  ))) continue;
+          if (abs(hyp_lt_id()[ihyp]) == 11  && !( pass_electronSelection( hyp_lt_index()[ihyp] , electronSelection_el_OSV3  ))) continue;
+          
+	}
+
+	v_goodHyps.push_back(ihyp);
+	v_weights.push_back(FRweight);
+      }
+      //
+      // perform hypothesis disambiguation
+      //
+      if(v_goodHyps.size() == 0) 
+	continue;
+      
+      if(hypDisamb) {
+	//returns the index of the best hypothesis in the vector of hypotheses
+	unsigned int goodHyp = selectHypByHighestSumPt(v_goodHyps);
+	vector<unsigned int>::const_iterator goodHyp_it = find(v_goodHyps.begin(), v_goodHyps.end(), goodHyp);
+	if(goodHyp_it == v_goodHyps.end()) {
+	  cout << "The weight index does not correspond to the index of the best hypothesis!!!! Something is wrong" 
+	       << "We will quit" << endl;
+	  return;
+	}
+
+	//clear this vector and put in the goodHyp vector in here so we can then save some space
+	//and loop over this vector below. Useful when we're not using the hypDisambiguation
+	//get the index of the goodHyp in the vector of goodHyps
+	unsigned int goodHyp_idx = goodHyp_it - v_goodHyps.begin();
+	//get the weight of the corresponding goodHyp
+	float goodHyp_weight = v_weights[goodHyp_idx];
+	v_goodHyps.clear();
+	v_weights.clear();
+	v_goodHyps.push_back(goodHyp);
+	v_weights.push_back(goodHyp_weight);
+      }//if(hypDisamb)
+
+      //now loop over the good hypotheses. If we require hypothesis disambiguation,
+      //we will only have one entry in the vector of good hypothesis
+      bool hasGoodHyp = false;
+      for(unsigned int i = 0; i < v_goodHyps.size(); i++) {
+	
+	unsigned int hypIdx = v_goodHyps[i];
+      	weight = weight*v_weights[i];
+	int type = hyp_type()[hypIdx];
+	if( !isData ){
+	  /*
+	  if(type == 0) {       //mm 
+	    weight = weight*0.90;
+	  }
+	  else if (type == 1 || type == 2){ //em or me
+	    weight = weight*0.95;
+	  }
+	  */
+	  double trigger_weight=triggerEff(hypIdx);
+	  weight = weight*trigger_weight;
+	  
+	}
+		
+ 	LorentzVector lt_p4  = hyp_lt_p4()[hypIdx];
+ 	LorentzVector ll_p4  = hyp_ll_p4()[hypIdx];
+ 	int id_lt = hyp_lt_id()[hypIdx]; 
+ 	int id_ll = hyp_ll_id()[hypIdx];
+ 	int idx_lt = hyp_lt_index()[hypIdx];
+ 	int idx_ll = hyp_ll_index()[hypIdx];
+	// z mass window
+	if(vetoZmass) {
+	  if(type == 0 || type == 3) {
+	    if (inZmassWindow(hyp_p4()[hypIdx].mass())) 
+	      continue;
+	  }
+	  if(verbose)
+	    cout << "Hyp is not in Zmass window" << endl;
+	}//vetoZmass
+	
+	if(requireZmass) {
+	  if(type == 0 || type == 3) {
+	    if (!inZmassWindow(hyp_p4()[hypIdx].mass())) 
+	      continue;
+	  }
+	}//requireZmass
+
+// 	if(requireZmass && getVtxDistOnly) {
+//           if(type == 1 || type == 2) continue;
+// 	  int ndavtx = 0;
+
+// 	  for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
+// 	    if(isGoodDAVertex(v)) ++ndavtx;
+// 	  }
+// 	  //hnVtx[myType]                     ->Fill(ndavtx,               1);                                                                                                  
+// 	  //hnVtx[3]                          ->Fill(ndavtx,               1);
+// 	  //      if (cms2.davtxs_position().size() >0 ) nEvents++ ;                                                                                                            
+// 	  // continue;
+//         }//fill vtx using Z events
+
+	//get the jets passing cuts 
+	vector<unsigned int> v_goodJets;
+	vector<unsigned int> v_goodJetsNoEtaCut;
+	vector<LorentzVector> v_jetP4s;
+	if(usecaloJets) {
+	  for(unsigned int i = 0; i < jets_p4().size(); i++) 
+	    v_jetP4s.push_back(jets_p4()[i]*jets_cor()[i]*globalJESRescale); //jets are uncorrected in our ntuples
+	}
+	if(usejptJets) {
+	  for (unsigned int i = 0; i < jpts_p4().size(); i++)
+	    v_jetP4s.push_back(jpts_p4()[i] * jpts_corL1FastL2L3()[i]*globalJESRescale);
+	}
+	if(usepfJets) {
+	  // for (unsigned int i = 0; i < jpts_p4().size(); i++) //this is a bug
+	  for (unsigned int i = 0; i < pfjets_p4().size(); i++)
+	    v_jetP4s.push_back(pfjets_p4()[i] * pfjets_corL1FastL2L3()[i]*globalJESRescale);
+	}
+	
+	for (unsigned int j = 0; j < v_jetP4s.size(); ++j) {
+	  if (usejptJets && !passesCaloJetID(v_jetP4s.at(j)))
+	    continue;
+	  if (usepfJets && !passesPFJetID(j))
+	    continue;
+	  LorentzVector vlt  = hyp_lt_p4()[hypIdx];
+	  LorentzVector vll  = hyp_ll_p4()[hypIdx];
+	  
+	  if( generalLeptonVeto ){
+	    bool rejectJet = false;
+	    for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
+	      if( ROOT::Math::VectorUtil::DeltaR(v_jetP4s.at(j)  , goodLeptons.at(ilep) ) < 0.4 ) rejectJet = true;  
+	    }
+	    if( rejectJet ) continue;
+	  }
+          
+	  if( ROOT::Math::VectorUtil::DeltaR(v_jetP4s.at(j), vll) < 0.4 )  continue;
+	  if( ROOT::Math::VectorUtil::DeltaR(v_jetP4s.at(j), vlt) < 0.4 )  continue;
+	  if( v_jetP4s.at(j).pt() < JETPTCUT)              continue;
+	  v_goodJetsNoEtaCut.push_back(j);
+	  if( fabs(v_jetP4s.at(j).eta() ) > 2.5 )            continue;
+	  v_goodJets.push_back(j);
+	  
+	}
+
+
+
+	//if we want to veto on nJets, do it here
+	if(veto1Jet) {
+	  if(v_goodJets.size() < 1)
+	    continue;
+	  if(verbose)
+	    cout << "Event passes 1 Jet cut" << endl;
+	}
+
+	if(veto2Jets) {
+	  if(v_goodJets.size() < 2)
+	    continue;
+	  if(verbose)
+	    cout << "Event passes 2 Jet cut" << endl;
+	}
+
+
+	///b-tagging 
+
+	int nBtagJets = 0; 
+	vector<unsigned int> v_goodBtagJets;
+	vector<unsigned int> v_goodNonBtagJets;
+	TString btag_algo;
+	if(BTagAlgTCHE) btag_algo = "trackCountingHighEffBJetTag";
+	else btag_algo = "simpleSecondaryVertexHighEffBJetTag";
+	
+	for(unsigned int i = 0; i < v_goodJets.size(); i++) {
+	  
+	  if(usecaloJets){
+	    if(passbTagging(v_goodJets[i],  "caloJets", btag_algo.Data()) ){
+	      nBtagJets++;
+	      v_goodBtagJets.push_back(v_goodJets[i]);
+	    }
+	    else v_goodNonBtagJets.push_back(v_goodJets[i]);
+	  }
+	  else if(usejptJets){
+	    if(passbTagging(v_goodJets[i],  "jptJets", btag_algo.Data()) ){
+	      nBtagJets++;
+	      v_goodBtagJets.push_back(v_goodJets[i]);
+	    }
+	    else v_goodNonBtagJets.push_back(v_goodJets[i]);
+	  }
+	  else if(usepfJets){
+	    if(passbTagging(v_goodJets[i],  "pfJets", btag_algo.Data()) ) {
+	      nBtagJets++;
+	      v_goodBtagJets.push_back(v_goodJets[i]);
+	    }
+	    else v_goodNonBtagJets.push_back(v_goodJets[i]);
+	  }
+	}
+
+
+//b tagging weights now taken care of later
+/*
+	if( !isData ){
+	  if(nBtagJets <2) {       //leave these unweighted for now (needs to be fixed) 
+	    weight = weight*1.0;
+	  }
+	  else if (nBtagJets>=2){ 
+	    weight = weight*0.95*0.95; //0.95 is the MC-data scale factor for bjet tagging
+	  }
+	}
+*/	
+	
+	 if(requireBTag && nBtagJets < 1 )
+	    continue;
+
+	 if(requireExact2BTag && nBtagJets != 2)  
+	   continue;
+
+	 if(require2BTag && nBtagJets < 2)         
+	   continue;
+	
+
+	// MET cut
+	string metAlgo;
+	if(useCorMET   ) metAlgo  = "CorMET";
+	if(usetcMET    ) metAlgo  = "tcMET";
+	if(usetcMET35X ) metAlgo  = "tcMET35X";
+	if(usepfMET    ) metAlgo  = "pfMET"; 
+	pair<float, float> p_met; //met and met phi
+	if(usetcMET || usepfMET || usetcMET35X) {
+	  p_met = getMet(metAlgo, hypIdx);
+
+	  if(p_met.first < 0) {
+	    cout << "Something is wrong with the MET. Exiting" << endl;
+	    return;
+	  }
+	    
+	  //if we are scaling the MET
+	  if(scaleJESMETDown || scaleJESMETUp) {
+	    float met = p_met.first;
+	    float metPhi = p_met.second;
+	    float metx = p_met.first*cos(metPhi);
+	    float mety = p_met.first*sin(metPhi);
+
+	    float lepx = hyp_p4()[hypIdx].Px();
+	    float lepy = hyp_p4()[hypIdx].Py();
+	        
+	    //hadronic component of MET (well, mostly), scaled
+	    float metHx = (metx + lepx)*globalJESRescale;
+	    float metHy = (mety + lepy)*globalJESRescale;
+	    float metNewx = metHx - lepx;
+	    float metNewy = metHy - lepy;
+	    float metNewPhi = atan2(metNewy, metNewx);
+	    p_met = make_pair(sqrt(metNewx*metNewx + metNewy*metNewy), metNewPhi);
+	  }
+	  //the cut is 30 for ee/mm hyps to reject DY
+	  //20 for emu
+	  if(vetoMET) {
+	    if(hyp_type()[hypIdx] == 0 || hyp_type()[hypIdx] == 3) {
+	      if(p_met.first < 30.) continue;
+	    }
+	    if(hyp_type()[hypIdx] == 1 || hyp_type()[hypIdx] == 2) {
+	      if(p_met.first < 30.)   continue;
+	      
+	    }
+	    if(verbose)
+	      cout << "Event passes MET cut" << endl;
+	  }
+
+	  //the cut is 50 for all hypotheses
+		if(vetoMET50) {
+			if(p_met.first < 50.) continue;
+			if(verbose)
+				cout << "Event passes MET50 cut" << endl;
+		}
+
+	  if(vetoProjectedMET) {
+	    if(hyp_type()[hypIdx] == 0 || hyp_type()[hypIdx] == 3) {
+	      if(p_met.first < 30.) continue;
+	      // if(p_met.first < 50.) continue;
+	    }
+	    if(hyp_type()[hypIdx] == 1 || hyp_type()[hypIdx] == 2) {
+	      if(p_met.first < 20.)   continue;
+	      // if(p_met.first < 50.) continue;
+	    }
+	    if(v_goodJets.size() < 2 && hyp_p4()[hypIdx].M() < 80.) {
+	      if(projectedMET(p_met.first, p_met.second, hypIdx) < 10)
+		continue;
+	    }
+	  }
+	    
+	} else if(useCorMET) {
+
+	  cout << "THIS HAS BEEN COMMENTED OUT FOR NOW. DOES NOTHING" << endl;
+	}//if vetoing on corrected caloMet
+
+	
+
+	//make a vector of corrected jets
+	vector<LorentzVector> v_goodJets_p4;
+	vector<LorentzVector> v_goodBtagJets_p4;
+	vector<LorentzVector> v_goodNonBtagJets_p4;
+	
+	for(unsigned int i = 0; i < v_goodJets.size(); i++) {
+	  
+	  if(usecaloJets) 
+	    v_goodJets_p4.push_back(jets_p4()[v_goodJets[i]]*jets_cor()[v_goodJets[i]]*globalJESRescale);
+	  	 
+	  else if(usejptJets)  
+	    v_goodJets_p4.push_back(jpts_p4()[v_goodJets[i]]*jpts_corL1FastL2L3()[v_goodJets[i]]*globalJESRescale);
+	  
+	  else if(usepfJets)    
+	    v_goodJets_p4.push_back(pfjets_p4()[v_goodJets[i]]*pfjets_corL1FastL2L3()[v_goodJets[i]]*globalJESRescale);
+	  
+	}
+	
+ 	float theSumJetPt = 0.;
+ 	for(unsigned int ijet = 0; ijet < v_goodJets_p4.size(); ijet++) {
+	  theSumJetPt += v_goodJets_p4.at(ijet).Pt();
+ 	}
+	
+	//make a vector of corrected Btag jets
+
+	
+	for(unsigned int i = 0; i < v_goodBtagJets.size(); i++) {
+	  
+	  if(usecaloJets) 
+	    v_goodBtagJets_p4.push_back(jets_p4()[v_goodBtagJets[i]]*jets_cor()[v_goodBtagJets[i]]*globalJESRescale);
+	  	 
+	  else if(usejptJets)  
+	    v_goodBtagJets_p4.push_back(jpts_p4()[v_goodBtagJets[i]]*jpts_corL1FastL2L3()[v_goodBtagJets[i]]*globalJESRescale);
+	  
+	  else if(usepfJets)    
+	    v_goodBtagJets_p4.push_back(pfjets_p4()[v_goodBtagJets[i]]*pfjets_corL1FastL2L3()[v_goodBtagJets[i]]*globalJESRescale);
+	  
+	}
+	
+
+	//make a vector of corrected Non-Btag jets
+	
+	
+	for(unsigned int i = 0; i < v_goodNonBtagJets.size(); i++) {
+	  
+	  if(usecaloJets) 
+	    v_goodNonBtagJets_p4.push_back(jets_p4()[v_goodNonBtagJets[i]]*jets_cor()[v_goodNonBtagJets[i]]*globalJESRescale);
+	  	 
+	  else if(usejptJets)  
+	    v_goodNonBtagJets_p4.push_back(jpts_p4()[v_goodNonBtagJets[i]]*jpts_corL1FastL2L3()[v_goodNonBtagJets[i]]*globalJESRescale);
+	  
+	  else if(usepfJets)    
+	    v_goodNonBtagJets_p4.push_back(pfjets_p4()[v_goodNonBtagJets[i]]*pfjets_corL1FastL2L3()[v_goodNonBtagJets[i]]*globalJESRescale);
+	  
+	}
+	
+
+
+	float theSumBtagJetPt = 0.;
+	for(unsigned int ijet = 0; ijet < v_goodBtagJets_p4.size(); ijet++) {
+          theSumBtagJetPt += v_goodBtagJets_p4.at(ijet).Pt();
+	}
+	
+	//for MT2
+	vector<LorentzVector> v_goodJetsNoEtaCut_p4;
+	for(unsigned int i = 0; i < v_goodJetsNoEtaCut.size(); i++) {
+	  if(usecaloJets)
+	    v_goodJetsNoEtaCut_p4.push_back(jets_p4()[v_goodJetsNoEtaCut[i]]*jets_cor()[v_goodJetsNoEtaCut[i]]*globalJESRescale);
+	  else if(usejptJets) {
+	    v_goodJetsNoEtaCut_p4.push_back(jpts_p4()[v_goodJetsNoEtaCut[i]]*jpts_corL1FastL2L3()[v_goodJetsNoEtaCut[i]]*globalJESRescale);
+	  } else if(usepfJets) {
+	    v_goodJetsNoEtaCut_p4.push_back(pfjets_p4()[v_goodJetsNoEtaCut[i]]*pfjets_corL1FastL2L3()[v_goodJetsNoEtaCut[i]]*globalJESRescale);
+	  }
+	}
+
+	//apply HT CUT
+	if(applyHTCut){
+	  if (theSumJetPt < 100) continue;
+	}
+
+	
+	//sort the jets
+	std::sort(v_goodJets_p4.begin(), v_goodJets_p4.end(), sortByPt);
+	std::sort(v_goodBtagJets_p4.begin(), v_goodBtagJets_p4.end(), sortByPt);
+	std::sort(v_goodNonBtagJets_p4.begin(), v_goodNonBtagJets_p4.end(), sortByPt);
+
+	
+	//apply b tagging weights 
+	double weightb=1.;	
+	double weightbnottagged=1.;
+	double weightmistag=1.;
+	double weightnotmistagged=1.; 
+	double weightcmistag=1.;
+	double weightcnotmistagged=1.; 
+  	if(!isData){
+  		vector<LorentzVector>  v_b_p4;
+  		vector<LorentzVector>  v_c_p4;
+  		for(unsigned int i = 0; i < genps_p4().size(); i++) {
+  			if( fabs(genps_id()[i]) == 5) v_b_p4.push_back(genps_p4()[i]);
+  			if( fabs(genps_id()[i]) == 4) v_c_p4.push_back(genps_p4()[i]);
+  		}
+  		int nGenb = v_b_p4.size();
+  		int nGenc = v_c_p4.size();
+  		
+  		int i_matching_b[nBtagJets];
+  		double dR_matching_b[nBtagJets];
+  		for(unsigned int j = 0; j < nBtagJets; j++) {
+  			i_matching_b[j] = -1;
+  			dR_matching_b[j] = 9999.;
+  			i_matching_b[j] = match4vector(v_goodBtagJets_p4.at(j) ,v_b_p4 , 0.4 );
+  			if(i_matching_b[j]>-1) dR_matching_b[j] = ROOT::Math::VectorUtil::DeltaR( v_goodBtagJets_p4.at(j), v_b_p4.at(i_matching_b[j] ) );
+  		}
+  		
+  		vector<LorentzVector>  v_b_p4_unmatched;
+  		int n_closest_match[nGenb];
+  		for(unsigned int i = 0; i < nGenb; i++) {
+  			n_closest_match[i]=0;
+  			for(unsigned int j = 0; j < nBtagJets; j++) {
+  				if(i==i_matching_b[j]) n_closest_match[i]++;
+  			}
+  			if(n_closest_match[i]==0) v_b_p4_unmatched.push_back(v_b_p4.at(i));
+  		}
+  		/*
+  		//cout check
+  		for(unsigned int i = 0; i < nGenb; i++) if(n_closest_match[i]>1) {
+  			for(unsigned int j = 0; j< nGenb; j++) cout<<"n_closest_match "<<i<<" "<<j<<" "<<n_closest_match[j]<<endl;
+  			for(unsigned int j = 0; j < nBtagJets; j++) cout<<"i_matching_b >1 closest "<<j<<" "<<i_matching_b[j]<<endl;
+  		}
+  		*/			
+  		//if more than 1 b-tag jets have the same closest b, associate the closest matching pair
+  		for(unsigned int j = 0; j < nBtagJets; j++) {
+  			for(unsigned int i = 0; i < nBtagJets; i++) {
+  				if(i!=j && i_matching_b[i]!=-1 && i_matching_b[i]==i_matching_b[j]){
+  					//cout<<"more than 1 b-tag jets have the same closest b. nBtagJets = "<< nBtagJets<<" i_matching_b = "<<i_matching_b[i]<<endl;
+  					if (dR_matching_b[i]<dR_matching_b[j]) {
+  						i_matching_b[j] =  match4vector(v_goodBtagJets_p4.at(j) , v_b_p4_unmatched , 0.4 );
+  						if(i_matching_b[j]>-1) {
+  							dR_matching_b[j] = ROOT::Math::VectorUtil::DeltaR( v_goodBtagJets_p4.at(j), v_b_p4_unmatched.at(i_matching_b[j] ) );
+  							i_matching_b[j]+=100; //so it can't have the same index as a b from v_b_p4
+  						}
+  					}
+  					else  {
+  						i_matching_b[i] = match4vector(v_goodBtagJets_p4.at(i) , v_b_p4_unmatched , 0.4 );
+  						if(i_matching_b[i]>-1) {
+  							dR_matching_b[i] = ROOT::Math::VectorUtil::DeltaR( v_goodBtagJets_p4.at(i), v_b_p4_unmatched.at(i_matching_b[i] ) );
+  							i_matching_b[i]+=100; //so it can't have the same index as a b from v_b_p4
+  						}
+  					}
+  					
+  				}
+  			}
+  		}
+  		
+  		/*
+  		//cout check again
+  		for(unsigned int i = 0; i < nGenb; i++) if(n_closest_match[i]>1) {
+  			for(unsigned int j = 0; j < nBtagJets; j++) cout<<"new i_matching_b >1 closest "<<j<<" "<<i_matching_b[j]<<endl;
+  		}
+  		*/
+  		//if more than 1 b-tag jets still have the same closest b, associate the closest matching pair
+  		for(unsigned int j = 0; j < nBtagJets; j++) {
+  			for(unsigned int i = 0; i < nBtagJets; i++) {
+  				if(i!=j && i_matching_b[i]!=-1 && i_matching_b[i]==i_matching_b[j]){
+  					cout<<"more than 1 b-tag jets still have the same closest b. Only possible if nBtagJets>2. nBtagJets = "<< nBtagJets<<" i_matching_b = "<<i_matching_b[i]<<endl;
+  					if (dR_matching_b[i]<dR_matching_b[j]) i_matching_b[j] =-1;
+  					else i_matching_b[i] =-1;
+  				}
+  			}
+  		}
+  		
+  		//fill vector of b-tagged jets that aren't matched to a b. These are mistagged cs or light jets.
+  		int nUnmatchedBtagJets=0;
+  		int j_unmatched[nBtagJets];
+  		vector<LorentzVector>  v_goodBtagJets_unmatched_p4;
+  		for(unsigned int j = 0; j < nBtagJets; j++) {
+  			j_unmatched[j]=-1;
+  			if(i_matching_b[j] ==-1)  {
+  				v_goodBtagJets_unmatched_p4.push_back(v_goodBtagJets_p4.at(j));
+  				j_unmatched[j] = nUnmatchedBtagJets;
+  				nUnmatchedBtagJets++;
+  			}
+  		}
+
+
+
+
+
+		//now repeat all the matching, but with v_c_p4 instead of v_b_p4
+		int i_matching_c[nUnmatchedBtagJets];
+  		if(nUnmatchedBtagJets>0) {
+                        //if(nGenc>0) cout<<"trying to match to cs"<<endl;
+	  		double dR_matching_c[nUnmatchedBtagJets];
+	  		for(unsigned int j = 0; j < nUnmatchedBtagJets; j++) {
+	  			i_matching_c[j] = -1;
+	  			dR_matching_c[j] = 9999.;
+	  			i_matching_c[j] = match4vector(v_goodBtagJets_unmatched_p4.at(j) ,v_c_p4 , 0.4 );
+	  			if(i_matching_c[j]>-1) dR_matching_c[j] = ROOT::Math::VectorUtil::DeltaR( v_goodBtagJets_unmatched_p4.at(j), v_c_p4.at(i_matching_c[j] ) );
+	  		}
+	  		
+	  		vector<LorentzVector>  v_c_p4_unmatched;
+	  		int n_closest_match_c[nGenc];
+	  		for(unsigned int i = 0; i < nGenc; i++) {
+	  			n_closest_match_c[i]=0;
+	  			for(unsigned int j = 0; j < nUnmatchedBtagJets; j++) {
+	  				if(i==i_matching_c[j]) n_closest_match_c[i]++;
+	  			}
+	  			if(n_closest_match_c[i]==0) v_c_p4_unmatched.push_back(v_c_p4.at(i));
+	  		}
+	  		/*
+	  		//cout check
+	  		for(unsigned int i = 0; i < nGenc; i++) if(n_closest_match_c[i]>1) {
+	  			for(unsigned int j = 0; j< nGenc; j++) cout<<"n_closest_match_c "<<i<<" "<<j<<" "<<n_closest_match_c[j]<<endl;
+	  			for(unsigned int j = 0; j < nUnmatchedBtagJets; j++) cout<<"i_matching_c >1 closest "<<j<<" "<<i_matching_c[j]<<endl;
+	  		}
+	  		*/			
+	  		//if more than 1 b-tag jets have the same closest c, associate the closest matching pair
+	  		for(unsigned int j = 0; j < nUnmatchedBtagJets; j++) {
+	  			for(unsigned int i = 0; i < nUnmatchedBtagJets; i++) {
+	  				if(i!=j && i_matching_c[i]!=-1 && i_matching_c[i]==i_matching_c[j]){
+					        //cout<<"more than 1 b-tag jets have the same closest c. nUnmatchedBtagJets = "<< nUnmatchedBtagJets<<" i_matching_c = "<<i_matching_c[i]<<endl;
+	  					if (dR_matching_c[i]<dR_matching_c[j]) {
+	  						i_matching_c[j] =  match4vector(v_goodBtagJets_unmatched_p4.at(j) , v_c_p4_unmatched , 0.4 );
+	  						if(i_matching_c[j]>-1) {
+	  							dR_matching_c[j] = ROOT::Math::VectorUtil::DeltaR( v_goodBtagJets_unmatched_p4.at(j), v_c_p4_unmatched.at(i_matching_c[j] ) );
+	  							i_matching_c[j]+=100; //so it can't have the same index as a c from v_c_p4
+	  						}
+	  					}
+	  					else  {
+	  						i_matching_c[i] = match4vector(v_goodBtagJets_unmatched_p4.at(i) , v_c_p4_unmatched , 0.4 );
+	  						if(i_matching_c[i]>-1) {
+	  							dR_matching_c[i] = ROOT::Math::VectorUtil::DeltaR( v_goodBtagJets_unmatched_p4.at(i), v_c_p4_unmatched.at(i_matching_c[i] ) );
+	  							i_matching_c[i]+=100; //so it can't have the same index as a c from v_c_p4
+	  						}
+	  					}
+	  					
+	  				}
+	  			}
+	  		}
+	  		
+	  		/*
+	  		//cout check again
+	  		for(unsigned int i = 0; i < nGenc; i++) if(n_closest_match_c[i]>1) {
+	  			for(unsigned int j = 0; j < nUnmatchedBtagJets; j++) cout<<"new i_matching_c >1 closest "<<j<<" "<<i_matching_c[j]<<endl;
+	  		}
+	  		*/
+	  		//if more than 1 b-tag jets still have the same closest c, associate the closest matching pair
+	  		for(unsigned int j = 0; j < nUnmatchedBtagJets; j++) {
+	  			for(unsigned int i = 0; i < nUnmatchedBtagJets; i++) {
+	  				if(i!=j && i_matching_c[i]!=-1 && i_matching_c[i]==i_matching_c[j]){
+	  					cout<<"more than 1 b-tag jets still have the same closest c. Only possible if nUnmatchedBtagJets>2. nUnmatchedBtagJets = "<< nUnmatchedBtagJets<<" i_matching_c = "<<i_matching_c[i]<<endl;
+	  					if (dR_matching_c[i]<dR_matching_c[j]) i_matching_c[j] =-1;
+	  					else i_matching_c[i] =-1;
+	  				}
+	  			}
+	  		}
+  		}
+
+
+
+
+
+  		
+  		
+  		
+  		
+
+  		
+  		double btageffdata = 0.63;
+  		double ctageffdata = 0.13;
+  		double  nonb_pt, nonb_eta,bjet_pt,bjet_eta;
+  		
+  		//b tagged jet weighting, using number of matching real bs, cs and mistags
+  		int nBtagJets_real = 0;
+  		int nMistags = 0;
+  		int ncMistags = 0;
+  		for(unsigned int j = 0; j < nBtagJets; j++) {
+  			bjet_pt =  v_goodBtagJets_p4.at(j).Pt();
+  			bjet_eta =  fabs(v_goodBtagJets_p4.at(j).Eta());
+  			//to keep within the range of the function
+  			if(bjet_pt>499.0) {bjet_pt =  499.0; }
+  			if(bjet_eta>2.3) {bjet_eta =  2.3; }
+  			if(i_matching_b[j]>-1) {
+  				nBtagJets_real++;
+  				weightb *= getBTagSF( bjet_pt, bjet_eta  , "TCHEM");
+  				if( j_unmatched[j] !=-1) cout<<"something went wrong filling v_goodBtagJets_unmatched_p4"<<endl;
+  			}
+  			else if(i_matching_c[j_unmatched[j]]>-1) {
+			        //cout<<"nUnmatched, j, j_unmatched[j], i_matching_c "<<nUnmatchedBtagJets<<" "<<j<<" "<<j_unmatched[j]<<" "<<i_matching_c[j_unmatched[j]]<<endl;
+  				ncMistags++;
+  				weightcmistag *= getBTagSF( bjet_pt, bjet_eta  , "TCHEM");
+  				if( j_unmatched[j] ==-1) cout<<"something went wrong filling v_goodBtagJets_unmatched_p4"<<endl;
+  			}
+  			else{
+  				nMistags++;
+  				weightmistag *= getMisTagSF( bjet_pt, bjet_eta  , "TCHEM");
+  				if( j_unmatched[j] ==-1) cout<<"something went wrong filling v_goodBtagJets_unmatched_p4"<<endl;
+  			}
+  		}
+  		  		
+  		//if(nGenc>0) cout<<"nGenb, nBtagJets, nBtagJets_real, nGenc, ncMistags, nMistags "<<nGenb<<" "<<nBtagJets<<" "<<nBtagJets_real<<" "<<nGenc<<" "<<ncMistags<<" "<<nMistags<<endl;
+  		if(nBtagJets_real> nGenb) cout<<"***problem with b matching in btag weighting***"<<endl;
+  		if(ncMistags> nGenc) cout<<"***problem with c matching in btag weighting***"<<endl;
+  		
+		//weighting for the non b-jets
+		int nNonBtagJets = v_goodNonBtagJets_p4.size();
+		int i_nonb_matching_b[nNonBtagJets];
+  		double dR_nonb_matching_b[nNonBtagJets];
+		int i_nonb_matching_c[nNonBtagJets];
+  		double dR_nonb_matching_c[nNonBtagJets];
+		
+		for(unsigned int j = 0; j < nNonBtagJets; j++) {
+			//match non b-jets to bs and cs.
+  			i_nonb_matching_b[j] = -1;
+  			dR_nonb_matching_b[j] = 9999.;
+  			i_nonb_matching_c[j] = -1;
+  			dR_nonb_matching_c[j] = 9999.;
+			i_nonb_matching_b[j] = match4vector( v_goodNonBtagJets_p4.at(j) ,v_b_p4 , 0.4 );
+			i_nonb_matching_c[j] = match4vector( v_goodNonBtagJets_p4.at(j) ,v_c_p4 , 0.4 );
+			if(i_nonb_matching_b[j]>-1) dR_nonb_matching_b[j] = ROOT::Math::VectorUtil::DeltaR( v_goodNonBtagJets_p4.at(j), v_b_p4.at(i_nonb_matching_b[j] ) );
+			if(i_nonb_matching_c[j]>-1) dR_nonb_matching_c[j] = ROOT::Math::VectorUtil::DeltaR( v_goodNonBtagJets_p4.at(j), v_c_p4.at(i_nonb_matching_c[j] ) );
+		}
+		
+  		//if more than 1 non b-tag jets have the same closest b or c, associate the closest matching pair
+  		for(unsigned int j = 0; j < nNonBtagJets; j++) {
+  			for(unsigned int i = 0; i < nNonBtagJets; i++) {
+  				if(i!=j && i_nonb_matching_b[i]!=-1 && i_nonb_matching_b[i]==i_nonb_matching_b[j]){
+				        //cout<<"more than 1 non b-tag jets have the same closest b.  nNonBtagJets = "<< nNonBtagJets<<" i_nonb_matching_b = "<<i_nonb_matching_b[i]<<endl;
+  					if (dR_nonb_matching_b[i]<dR_nonb_matching_b[j]) i_nonb_matching_b[j] =-1;
+  					else i_nonb_matching_b[i] =-1;
+  				}
+  				if(i!=j && i_nonb_matching_c[i]!=-1 && i_nonb_matching_c[i]==i_nonb_matching_c[j]){
+				        //cout<<"more than 1 non b-tag jets have the same closest c.  nNonBtagJets = "<< nNonBtagJets<<" i_nonb_matching_c = "<<i_nonb_matching_c[i]<<endl;
+  					if (dR_nonb_matching_c[i]<dR_nonb_matching_c[j]) i_nonb_matching_c[j] =-1;
+  					else i_nonb_matching_c[i] =-1;
+  				}
+  			}
+  		}
+
+		for(unsigned int i = 0; i < v_goodNonBtagJets_p4.size(); i++) {
+                        //weight the untagged jets based on whether they match a b, a c, or neither.
+			nonb_pt =  v_goodNonBtagJets_p4.at(i).Pt();
+			nonb_eta =  fabs(v_goodNonBtagJets_p4.at(i).Eta());
+			//to keep within the range of the function 
+			if(nonb_pt>499.0) {nonb_pt =  499.0; }
+			if(nonb_eta>2.3) {nonb_eta =  2.3; }
+			double bjetfrdata =  getMisTagRate( nonb_pt, nonb_eta  , "TCHEM");
+			
+			//if the matched real b or c is already matched to a btag jet, the matching to the nonb is overridden
+			bool alreadymatched=false;
+			bool alreadymatchedc=false;
+			for(unsigned int j = 0; j < nBtagJets; j++) {
+				if(i_nonb_matching_b[i] != -1 && i_nonb_matching_b[i] == i_matching_b[j]) alreadymatched=true;
+				if(j_unmatched[j] >-1) if(i_nonb_matching_c[i] != -1 && i_nonb_matching_c[i] == i_matching_c[j_unmatched[j]]) alreadymatchedc=true;
+			}
+			//if(alreadymatchedc) cout<<"alreadymatchedc"<<endl;
+			if( !(i_nonb_matching_b[i] ==-1 || alreadymatched) ) weightbnottagged *= (1.-btageffdata)/(1.-btageffdata/getBTagSF( nonb_pt, nonb_eta  , "TCHEM") );
+			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && !(i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightcnotmistagged *= (1.-ctageffdata)/(1.-ctageffdata/getBTagSF( nonb_pt, nonb_eta  , "TCHEM") );
+  			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && (i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightnotmistagged *= (1.-bjetfrdata)/(1.-bjetfrdata/getMisTagSF( nonb_pt, nonb_eta  , "TCHEM") );
+		}
+		//if(nGenc>0) cout<<"weightb, weightbnottagged, weightcmistag, weightcnotmistagged, weightmistag, weightnotmistagged: "<<weightb<<" , "<<weightbnottagged <<" , "<<weightcmistag<<" , "<<weightcnotmistagged <<" , "<<weightmistag<<" , "<<weightnotmistagged <<endl;
+		weight = weight*weightb*weightbnottagged*weightcmistag*weightcnotmistagged*weightmistag*weightnotmistagged;
+		if(doBFR && nBtagJets==2 && nMistags==0) continue;
+  	}
+	
+	
+	
+	
+	float BFRweight = 1 ;
+	if(doBFR) {
+	  BFRweight = getBFRWeight(hypIdx, v_goodNonBtagJets_p4, v_goodBtagJets_p4, isData); 
+       
+          // if getFRWeight returns less then 1 it means the current hyp
+          // does not fulfill the FO selections.
+	  if(BFRweight < -1.) 
+            continue;
+	  //cout <<"weight =  " <<BFRweight <<endl;  
+	  weight =  weight* BFRweight;
+	}
+	
+	
+
+	//make the list of jets which will be comined with leptons
+	vector<LorentzVector>  v_goodJets_cand_p4;
+	vector<LorentzVector> v_goodJets_p4_tmp;	
+       
+	v_goodJets_p4_tmp = v_goodJets_p4; 
+	
+	if( nBtagJets == 0 && veto2Jets){
+	  if(sortJetCandidatesbyPt){
+	    v_goodJets_cand_p4.push_back(v_goodJets_p4[0]);
+	    v_goodJets_cand_p4.push_back(v_goodJets_p4[1]);
+	  }
+	  else if(sortJetCandidatesbyDR) 
+	    v_goodJets_cand_p4=v_goodJets_p4;
+	}
+	else if (nBtagJets == 1){
+	  int overlap_jet_idx = -1; 
+	  overlap_jet_idx = match4vector(v_goodBtagJets_p4[0],v_goodJets_p4);
+	  v_goodJets_p4_tmp.erase(v_goodJets_p4_tmp.begin()+overlap_jet_idx);
+	  if(sortJetCandidatesbyPt){
+	    v_goodJets_cand_p4.push_back(v_goodBtagJets_p4[0]);
+	    v_goodJets_cand_p4.push_back(v_goodJets_p4_tmp[0]);
+	  }
+	  else if(sortJetCandidatesbyDR) {
+	    v_goodJets_cand_p4.push_back(v_goodBtagJets_p4[0]);
+	    for (unsigned int i = 0; i < v_goodJets_p4_tmp.size(); i++){
+	      v_goodJets_cand_p4.push_back(v_goodJets_p4_tmp[i]);
+	    }
+	  }
+	}
+	else if (nBtagJets >= 2){
+	  if(sortJetCandidatesbyPt){
+	    v_goodJets_cand_p4.push_back(v_goodBtagJets_p4[0]);
+	    v_goodJets_cand_p4.push_back(v_goodBtagJets_p4[1]);
+	  }
+	  else if(sortJetCandidatesbyDR) 
+	    v_goodJets_cand_p4=v_goodBtagJets_p4;
+	}
+	
+	npreSelectedEvents++;
+
+	int i_ltbjet =-1;
+	int i_llbjet=-1;
+	//	vector<LorentzVector>  v_goodJets_cand_p4_tmp;
+	//	v_goodJets_cand_p4_tmp = v_goodJets_cand_p4;
+	double dr_ltb, dr_llb;
+	double mass_ltb, mass_llb;
+	double mass_ltbs, mass_llbs;
+	float thefirstJet_pt = -999;
+	float thesecondJet_pt = -999;
+	double m_1, m_2, m_3, m_4;
+	double mass_lb_min, mass_lb_min_otherpair;
+	float massllbb;
+
+	if(v_goodJets_cand_p4.size() > 1) {
+	
+	  
+	    i_ltbjet = match4vector(lt_p4, v_goodJets_cand_p4);
+	    i_llbjet = match4vector(ll_p4, v_goodJets_cand_p4);
+	    if (matchLeptonJetbyMaxDR){
+	      i_ltbjet = antimatch4vector(lt_p4, v_goodJets_cand_p4);
+	      i_llbjet = antimatch4vector(ll_p4, v_goodJets_cand_p4);
+	    }
+	    
+	    if(i_ltbjet==i_llbjet){  // the closest jets are the same. 
+	      dr_ltb=ROOT::Math::VectorUtil::DeltaR(lt_p4, v_goodJets_cand_p4.at(i_ltbjet));
+	      dr_llb=ROOT::Math::VectorUtil::DeltaR(ll_p4, v_goodJets_cand_p4.at(i_llbjet));
+	      if(dr_ltb> dr_llb)i_ltbjet = antimatch4vector(lt_p4, v_goodJets_cand_p4);
+	      else i_llbjet =  antimatch4vector(ll_p4, v_goodJets_cand_p4);
+	      if (matchLeptonJetbyMaxDR){
+		if(dr_ltb< dr_llb)i_ltbjet = match4vector(lt_p4, v_goodJets_cand_p4);
+		else i_llbjet =  match4vector(ll_p4, v_goodJets_cand_p4);
+	      }
+	    }
+	    mass_ltb= (lt_p4+v_goodJets_cand_p4.at(i_ltbjet)).M();
+	    mass_llb= (ll_p4+v_goodJets_cand_p4.at(i_llbjet)).M();
+	    
+	    // if(applyLeptonJetInvMassCut170 && !(mass_ltb > 170 && mass_llb> 170)) continue;
+	    
+	    thefirstJet_pt = v_goodJets_cand_p4.at(i_ltbjet).Pt();
+	    thesecondJet_pt = v_goodJets_cand_p4.at(i_llbjet).Pt();
+	    massllbb=(lt_p4+v_goodJets_cand_p4.at(i_ltbjet)+ll_p4+v_goodJets_cand_p4.at(i_llbjet)).M();
+	}
+	
+	float m_top; 
+	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus;  
+	if(require2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
+	else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4);
+	float tt_mass = (top1_p4+top2_p4).M();
+
+	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
+	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
+	//if(m_top < 0) continue;
+	if(applyLeptonJetInvMassCut450 && !(tt_mass>450 )) continue;
+	if(applyTopSystEta && ! (ttRapidity < 2.0) ) continue;
+	cms = 0.5*(top1_p4+top2_p4);
+	top1_p4.Boost(-cms.BoostVector());
+	top2_p4.Boost(-cms.BoostVector());
+	float top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
+	
+	if( hyp_lt_id()[hypIdx] < 0 ) {
+	  lepPlus.SetXYZT(
+			  hyp_lt_p4()[hypIdx].x(),
+			  hyp_lt_p4()[hypIdx].y(),
+			  hyp_lt_p4()[hypIdx].z(),
+			  hyp_lt_p4()[hypIdx].t()
+			  );
+          
+	  lepMinus.SetXYZT(
+			   hyp_ll_p4()[hypIdx].x(),
+			   hyp_ll_p4()[hypIdx].y(),
+			   hyp_ll_p4()[hypIdx].z(),
+			   hyp_ll_p4()[hypIdx].t()
+			   );
+	}
+	else {
+	  lepPlus.SetXYZT(
+			  hyp_ll_p4()[hypIdx].x(),
+			  hyp_ll_p4()[hypIdx].y(),
+			  hyp_ll_p4()[hypIdx].z(),
+			  hyp_ll_p4()[hypIdx].t()
+			  );
+          
+	  lepMinus.SetXYZT(
+			   hyp_lt_p4()[hypIdx].x(),
+			   hyp_lt_p4()[hypIdx].y(),
+			   hyp_lt_p4()[hypIdx].z(),
+			   hyp_lt_p4()[hypIdx].t()
+			   );
+	}
+	float lep_charge_asymmetry = -999.0;
+	lep_charge_asymmetry = abs(lepPlus.Eta()) - abs(lepMinus.Eta());
+	
+	
+	lepPlus.Boost(-cms.BoostVector());
+	lepPlus.Boost(-top1_p4.BoostVector());
+	lepMinus.Boost(-cms.BoostVector());
+	lepMinus.Boost(-top2_p4.BoostVector());
+      
+        float lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
+	float lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
+	float top_spin_correlation = -999.0;
+
+	top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
+	//if we have gotten here, then all cuts have been passed
+
+	nSelectedEvents = nSelectedEvents + 1.0*weight;
+	//nSelectedEvents++;
+	///some checks for events in the signal region
+	
+// 	if(prefix=="data" && applyLeptonJetInvMassCut450) {
+	 
+// 	  for(unsigned int i = 0; i < v_goodJets.size(); i++) {
+// 	    int idx = v_goodJets[i];
+// 	    LorentzVector goodjetp4 = pfjets_p4()[idx]*pfjets_corL1FastL2L3()[idx]*globalJESRescale;   
+// 	    //  if(passbTagging(v_goodJets[i],  "pfJets", "simpleSecondaryVertexHighEffBJetTag") ) {
+// 	    cout <<"b tag Pt "<< goodjetp4.Pt()<<endl;
+// 	    cout <<"b tag eta "<<goodjetp4.Eta()<<endl;
+// 	    cout <<"b tag phi "<< goodjetp4.Phi()<<endl;
+// 	    cout <<"TCHEL           "<<pfjets_trackCountingHighEffBJetTag()[v_goodJets[i]]<<endl;
+// 	    cout <<"SSVHEM          "<<pfjets_simpleSecondaryVertexHighEffBJetTag()[v_goodJets[i]]<<endl;
+	    
+	
+// 	  }
+
+	//   if (abs(hyp_ll_id()[hypIdx]) == 13   ) cout << "ll muon err" <<cms2.mus_ptErr().at(hyp_ll_index()[hypIdx])<<endl; 
+//           if (abs(hyp_lt_id()[hypIdx]) == 13  ) cout << "lt muon err" <<cms2.mus_ptErr().at(hyp_lt_index()[hypIdx])<<endl; 
+          
+//           //OSV1
+//           if (abs(hyp_ll_id()[hypIdx]) == 11 ) cout << "ll isSpike" <<isSpikeElectron(hyp_ll_index()[hypIdx])<<endl;
+//           if (abs(hyp_lt_id()[hypIdx]) == 11 ) cout << "lt isSpike" <<isSpikeElectron(hyp_lt_index()[hypIdx])<<endl;
+	//}
+      //
+	//	cout <<"type =    " <<type <<"  id_lt =   " <<id_lt <<"  id_ll =   " <<id_ll <<"  lt is from W = " <<leptonIsFromW(idx_lt, id_lt, false) << "  ll is from W = " << leptonIsFromW(idx_ll, id_ll, false)<<endl;
+
+	if(prefix=="ttdil") {
+	  
+	  // cout <<"run number =  " <<cms2.evt_run()<< ";  event number =  " << cms2.evt_event()<<endl;
+	  // dumpDocLines();
+	}
+	
+	int nvtx = 0;
+    
+        for (size_t v = 0; v < cms2.vtxs_position().size(); ++v){
+          if(isGoodVertex(v)) ++nvtx;
+        }
+
+        int ndavtx = 0;
+    
+        for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
+          if(isGoodDAVertex(v)) ++ndavtx;
+        }
+             
+	//cout << "ndavtx = " << ndavtx <<endl;
+	unsigned int jetBin = v_goodJets.size();
+	unsigned int nJets  = v_goodJets.size();
+	if(jetBin > 2)
+	  jetBin = 2;
+	
+
+	//which channel?
+	int myType = 99;
+        if (hyp_type()[hypIdx] == 3)                                myType = 0; // ee
+        if (hyp_type()[hypIdx] == 0)                                myType = 1; // mm
+        if (hyp_type()[hypIdx] == 1 || hyp_type()[hypIdx] == 2)     myType = 2; // em
+        if (myType == 99) { 
+          cout << "Skipping unknown dilepton type = " << hyp_type()[hypIdx] << endl;
+          continue;
+        }
+	
+	hnJet[myType]                     ->Fill(nJets,               weight);
+	hnJet[3]                          ->Fill(nJets,               weight);
+	hnBtagJet[myType]                 ->Fill(nBtagJets,            weight);
+	hnBtagJet[3]                      ->Fill(nBtagJets,            weight);
+
+	hnVtx[myType]                     ->Fill(ndavtx,               weight);
+	hnVtx[3]                          ->Fill(ndavtx,               weight);
+
+	fillHistos( httMass, tt_mass ,  weight, myType, jetBin);
+	fillHistos( hlepChargeAsym, lep_charge_asymmetry ,  weight, myType, jetBin);
+	fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin);
+	fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
+	fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
+	fillHistos( htheleadinglepPt, lt_p4.Pt()  ,  weight, myType, jetBin);
+        fillHistos( hthesecondlepPt, ll_p4.Pt()  ,  weight, myType, jetBin);
+        fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin);
+        fillHistos( hlepEta, ll_p4.Eta()  ,  weight, myType, jetBin);
+	fillHistos( hMET, p_met.first  ,  weight, myType, jetBin);
+	fillHistos( htopMass, m_top ,  weight, myType, jetBin);
+	fillHistos( httRapidity, ttRapidity ,  weight, myType, jetBin);
+	
+	if(v_goodJets_cand_p4.size() > 1){
+			
+	  // DYEst histos
+	  // fill the mass histograms
+	  double DYEst_mass = hyp_p4()[hypIdx].mass();
+	  fillHistos( hdilMassNoMetDYEst , DYEst_mass ,  weight, myType, jetBin);
+	  if ( p_met.first >= 30.  )
+	  	fillHistos( hdilMassWithMetDYEst  , DYEst_mass ,  weight, myType, jetBin);
+	  // fill the met histograms for "in" and "out" regions
+	  if (inZmassWindow(DYEst_mass) ) {
+	  	fillHistos( hmetInDYEst  , p_met.first ,  weight, myType, jetBin); 
+	  }
+	  else {
+	  	fillHistos( hmetOutDYEst  , p_met.first ,  weight, myType, jetBin);
+	  }
+	  
+	
+	  fillHistos( hmassltb,  mass_ltb ,  weight, myType, jetBin);  
+	  fillHistos( hmassllb,  mass_llb ,  weight, myType, jetBin); 
+	  if(mass_llb> 170) fillHistos( hmassltb1Dmasscut,  mass_ltb ,  weight, myType, jetBin);
+	  if(mass_ltb > 170) fillHistos( hmassllb1Dmasscut,  mass_llb ,  weight, myType, jetBin);
+	  //randomly pick up mass_lb
+	  int evtnumber = evt_event();
+	  int evt_rad = rand()%2;
+	  //cout <<"random number " <<evt_rad <<endl;
+	  if(evt_rad ==1){
+	  fillHistos( hmasslb_2d,  mass_ltb , mass_llb,    weight, myType, jetBin);
+	  }
+	  else {//if(evt_rad ==0){
+	   fillHistos( hmasslb_2d,  mass_llb , mass_ltb,    weight, myType, jetBin);
+	  }
+	  fillHistos( htheSumJetPt,      thefirstJet_pt+thesecondJet_pt ,  weight, myType, jetBin);
+	  fillHistos( htheSumLepPt,    lt_p4.Pt()+ ll_p4.Pt()   ,  weight, myType, jetBin);
+	  fillHistos( htheSumBtagJetPt,  theSumBtagJetPt ,    weight, myType, jetBin);
+	  fillHistos( hthefirstJetPt,    thefirstJet_pt  ,    weight, myType, jetBin);
+	  fillHistos( hthesecondJetPt,   thesecondJet_pt  ,   weight, myType, jetBin);
+	  fillHistos( hjetPt,  thefirstJet_pt ,  weight, myType, jetBin);
+	  fillHistos( hjetPt,  thesecondJet_pt ,  weight, myType, jetBin);
+	  fillHistos( hjetEta, v_goodJets_cand_p4.at(i_ltbjet).Eta()  ,  weight, myType, jetBin);
+	  fillHistos( hjetEta, v_goodJets_cand_p4.at(i_llbjet).Eta()  ,  weight, myType, jetBin);
+	  
+	  //none weighted histograms
+	  fillHistos( habcd_2d,  mass_ltb  , mass_llb,    1, myType, jetBin);
+	 
+
+	}
+	float dr_ltjet_gen = -999.0;
+	float dr_lljet_gen = -999.0;
+	float tt_mass_gen;
+	float ttRapidity_gen;
+	float top_costheta_cms_gen;
+	float lep_charge_asymmetry_gen;
+	float top_spin_correlation_gen;
+	float lepPlus_costheta_cms_gen;
+	float lepMinus_costheta_cms_gen;
+	float massllbb_gen;
+	float llbbRapidityQuark_gen;
+	float llbbRapidityGluon_gen;
+	// generator level plots
+	if(!isData && prefix == "ttdil"){
+	  
+     
+
+	  TLorentzVector topplus_genp_p4(0,0,0,0), topminus_genp_p4(0,0,0,0), cms_gen(0,0,0,0), lepPlus_gen(0,0,0,0),lepMinus_gen(0,0,0,0), bPlus_gen(0,0,0,0),bMinus_gen(0,0,0,0);
+	   
+	  bool from_gluon=true;
+	  for(unsigned int i = 0; i < genps_p4().size(); i++) {
+	    if (genps_status()[i] == 3){
+	        if((genps_id_mother()[i]==6 ||genps_id_mother()[i]==24 )){
+                if( (genps_id()[i] ==-11 || genps_id()[i]==-13 ||  genps_id()[i]==-15) ){
+                  lepPlus_gen.SetXYZT(genps_p4()[i].x(),
+				      genps_p4()[i].y(),
+				      genps_p4()[i].z(),
+				      genps_p4()[i].t()
+				      );
+                }
+		else if( genps_id()[i] == 5){
+		  bPlus_gen.SetXYZT(genps_p4()[i].x(),
+				      genps_p4()[i].y(),
+				      genps_p4()[i].z(),
+				      genps_p4()[i].t()
+				      );
+		}
+		}
+		else if( (genps_id_mother()[i]==-6 || genps_id_mother()[i]==-24 )){
+		  if( (genps_id()[i] == 11 || genps_id()[i]== 13 ||  genps_id()[i]== 15) ){
+		    
+		    lepMinus_gen.SetXYZT( genps_p4()[i].x(),
+					  genps_p4()[i].y(),
+					  genps_p4()[i].z(),
+					  genps_p4()[i].t()
+					  );
+		  }
+		  else if( genps_id()[i] == -5){
+		    bMinus_gen.SetXYZT(genps_p4()[i].x(),
+				      genps_p4()[i].y(),
+				      genps_p4()[i].z(),
+				      genps_p4()[i].t()
+				      );
+		  }
+		}
+		
+		if(genps_id()[i]==6 ){
+		  topplus_genp_p4.SetXYZT( genps_p4()[i].x(),
+					   genps_p4()[i].y(),
+					   genps_p4()[i].z(),
+					   genps_p4()[i].t()
+					   );
+		  if (abs(genps_id_mother()[i])==21){
+		    from_gluon=true;
+		  }
+		  else
+		    {
+		    from_gluon=false;
+		    }
+		}
+		else if (genps_id()[i]== -6 ){
+		  topminus_genp_p4.SetXYZT( genps_p4()[i].x(),
+					    genps_p4()[i].y(),
+					    genps_p4()[i].z(),
+					    genps_p4()[i].t()
+					    );
+		  if (abs(genps_id_mother()[i])==21){
+		    from_gluon=true;
+		  }
+		  else
+		    {
+		      from_gluon=false;
+		    }
+		
+		}
+		
+	    }
+	  }
+	  massllbb_gen = (lepPlus_gen+bPlus_gen+lepMinus_gen+bMinus_gen).M();
+	
+	  tt_mass_gen = (topplus_genp_p4 + topminus_genp_p4).M();
+	  ttRapidity_gen = topplus_genp_p4.Rapidity() + topminus_genp_p4.Rapidity();
+	  //ttRapidity_gen = topplus_genp_p4.Eta() + topminus_genp_p4.Eta();
+	
+	  cms_gen = 0.5*(topplus_genp_p4+topminus_genp_p4);
+	  topplus_genp_p4.Boost(-cms_gen.BoostVector());
+	  topminus_genp_p4.Boost(-cms_gen.BoostVector());
+	  top_costheta_cms_gen = topplus_genp_p4.Vect().Dot(cms_gen.Vect())/(topplus_genp_p4.Vect().Mag()*cms_gen.Vect().Mag());
+	  
+
+	  lep_charge_asymmetry_gen = abs(lepPlus_gen.Eta()) - abs(lepMinus_gen.Eta());
+	  
+	  lepPlus_gen.Boost(-cms_gen.BoostVector());
+	  lepPlus_gen.Boost(-topplus_genp_p4.BoostVector());
+	  lepMinus_gen.Boost(-cms_gen.BoostVector());
+	  lepMinus_gen.Boost(-topminus_genp_p4.BoostVector());
+	  
+	  lepPlus_costheta_cms_gen = lepPlus_gen.Vect().Dot(topplus_genp_p4.Vect())/(lepPlus_gen.Vect().Mag()*topplus_genp_p4.Vect().Mag());
+	  lepMinus_costheta_cms_gen = lepMinus_gen.Vect().Dot(topminus_genp_p4.Vect())/(lepMinus_gen.Vect().Mag()*topminus_genp_p4.Vect().Mag());
+
+	  top_spin_correlation_gen = lepPlus_costheta_cms_gen*lepMinus_costheta_cms_gen;
+	  float tt_mass_pull = (tt_mass - tt_mass_gen)/tt_mass_gen;
+	  
+	  fillHistos( httMass_pull, tt_mass_pull,  weight, myType, jetBin);
+	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
+	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
+	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin);
+	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
+	  fillHistos( htopSpinCorr_gen, top_spin_correlation_gen  ,  weight, myType, jetBin);
+	  fillHistos( htopCosTheta_gen, top_costheta_cms_gen   ,  weight, myType, jetBin);
+	  fillHistos( hlepCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);
+	  fillHistos( hlepChargeAsym_2d, lep_charge_asymmetry_gen ,lep_charge_asymmetry,  weight, myType, jetBin);
+	  fillHistos( htopSpinCorr_2d, top_spin_correlation_gen, top_spin_correlation ,  weight, myType, jetBin);
+	  fillHistos( htopCosTheta_2d, top_costheta_cms_gen, top_costheta_cms   ,  weight, myType, jetBin);
+	  fillHistos( hlepCosTheta_2d, lepPlus_costheta_cms_gen  , lepPlus_costheta_cms, weight, myType, jetBin);
+
+	  if (from_gluon==true){
+	    fillHistos( httMassGluongenp, tt_mass_gen  ,  weight, myType, jetBin);
+	    fillHistos( httRapidityGluongenp, ttRapidity_gen  ,  weight, myType, jetBin);
+	    llbbRapidityGluon_gen=  (lepPlus_gen+bPlus_gen).Rapidity()+(lepMinus_gen+bMinus_gen).Rapidity();
+	    fillHistos( hllbbRapidityGluongenp, llbbRapidityGluon_gen  ,  weight, myType, jetBin);
+	  }
+	  else{
+	    fillHistos( httMassQuarkgenp, tt_mass_gen  ,  weight, myType, jetBin);
+	    fillHistos( httRapidityQuarkgenp, ttRapidity_gen  ,  weight, myType, jetBin);
+	    llbbRapidityQuark_gen=  (lepPlus_gen+bPlus_gen).Rapidity()+(lepMinus_gen+bMinus_gen).Rapidity();
+	    fillHistos( hllbbRapidityQuarkgenp,  llbbRapidityQuark_gen ,  weight, myType, jetBin);
+	  }
+	    
+	}//only for mc
+       
+	// fill ntuples 
+	if(createBabyNtuples){
+	  if(createBabyNtuples)InitBabyNtuple();
+	  run_ = cms2.evt_run();
+	  ls_ = cms2.evt_lumiBlock();
+	  evt_ = cms2.evt_event(); 
+	  weight_ = weight;
+	  massltb_ = mass_ltb;
+	  massllb_ = mass_llb;
+	  dr_ltjet_gen_ = dr_ltjet_gen ;
+	  dr_lljet_gen_ = dr_lljet_gen ;
+	  ndavtx_ = ndavtx;
+	  tt_mass_ = tt_mass;
+	  ttRapidity_ = ttRapidity;
+	  lep_charge_asymmetry_ = lep_charge_asymmetry;
+	  top_spin_correlation_ = top_spin_correlation;
+	  top_costheta_cms_     = top_costheta_cms;
+	  lepPlus_costheta_cms_ = lepPlus_costheta_cms;
+	  tt_mass_gen_ = tt_mass_gen;
+	  ttRapidity_gen_ = ttRapidity_gen;
+	  lep_charge_asymmetry_gen_ = lep_charge_asymmetry_gen; 
+	  top_spin_correlation_gen_ = top_spin_correlation_gen;
+	  top_costheta_cms_gen_     = top_costheta_cms_gen;
+	  lepPlus_costheta_cms_gen_ = lepPlus_costheta_cms_gen;
+	  massllbb_ = massllbb;
+	  massllbb_gen_ = massllbb_gen;
+	  //llbbRapidityQuark_gen_=llbbRapidityQuark_gen;
+	  //  llbbRapidityGluon_gen_=llbbRapidityGluon_gen;
+	  babyTree_->Fill();
+	
+	}
+
+      }//good hypothesis loop
+      
+    } // closes loop over events    
+    
+    if(applyNoCuts) cout << "number of events (no cuts) before and after vertex weighting              =  " << nEvents_noCuts_novtxweight<<"   "<< nEvents_noCuts <<endl;
+    
+  
+  }  // closes loop over files
+  
+  if(createBabyNtuples)CloseBabyNtuple();
+  return;
+  
+} // closes myLooper function  
+
+
+//------------------------------------------
+// Initialize baby ntuple variables
+//------------------------------------------
+void topAFB_looper::InitBabyNtuple () 
+{
+  run_ = -1;
+  ls_  = -1;
+  evt_ = -1;
+  t_mass_ = -999;
+  weight_ = 1;
+  massltb_ = -999;
+  massllb_ = -999;
+  dr_ltjet_gen_ = -999.0;
+  dr_lljet_gen_  = -999.0;
+  ndavtx_ = -999;
+  tt_mass_ = -999.0;
+  ttRapidity_ = -999.0;
+  lep_charge_asymmetry_ = -999.0;
+  top_spin_correlation_ = -999.0;
+  top_costheta_cms_     = -999.0;
+  lepPlus_costheta_cms_ = -999.0;
+  tt_mass_gen_ = -999.0;
+  ttRapidity_gen_ = -999.0;
+  lep_charge_asymmetry_gen_ = -999.0;
+  top_spin_correlation_gen_ = -999.0;
+  top_costheta_cms_gen_     = -999.0;
+  lepPlus_costheta_cms_gen_ = -999.0;
+  massllbb_gen_=-999.0;
+  //  llbbRapidityQuark_gen_=-999.0;
+  // llbbRapidityGluon_gen_=-999.0;
+  massllbb_=-999.0;
+  
+}
+//-------------------------------------
+// Book the baby ntuple
+//-------------------------------------
+void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
+{
+    TDirectory *rootdir = gDirectory->GetDirectory("Rint:");
+    rootdir->cd();
+    babyFile_ = new TFile(Form("%s", babyFilename), "RECREATE");
+    babyFile_->cd();
+    babyTree_ = new TTree("tree", "A Baby Ntuple");
+
+    babyTree_->Branch("run",                   &run_,                 "run/I"                  );
+    babyTree_->Branch("ls",                    &ls_,                  "ls/I"                   );
+    babyTree_->Branch("evt",                   &evt_,                 "evt/I"                  );
+    babyTree_->Branch("t_mass",                &t_mass_,              "t_mass/F"               );
+    babyTree_->Branch("weight",                &weight_,              "weight/F"               );
+    babyTree_->Branch("massltb",               &massltb_,             "massltb/F"              );
+    babyTree_->Branch("massllb",               &massllb_,             "massllb/F"              );
+    babyTree_->Branch("dr_ltjet_gen",          &dr_ltjet_gen_,        "dr_ltjet_gen/F"         );
+    babyTree_->Branch("dr_lljet_gen",          &dr_lljet_gen_,        "dr_lljet_gen/F"         );
+    babyTree_->Branch("ndavtx",                &ndavtx_,              "ndavtx/I"               );
+    babyTree_->Branch("tt_mass",               &tt_mass_,             "tt_mass/F"              );
+    babyTree_->Branch("ttRapidity",            &ttRapidity_,          "ttRapidity/F"           );
+    babyTree_->Branch("lep_charge_asymmetry",  &lep_charge_asymmetry_,"lep_charge_asymmetry/F" );
+    babyTree_->Branch("top_spin_correlation",  &top_spin_correlation_,"top_spin_correlation/F" );
+    babyTree_->Branch("top_costheta_cms",      &top_costheta_cms_,    "top_costheta_cms/F"     );
+    babyTree_->Branch("lep_costheta_cms",      &lepPlus_costheta_cms_,"lep_costheta_cms/F"     );
+    babyTree_->Branch("tt_mass_gen",           &tt_mass_gen_,          "tt_mass_gen/F"              );
+    babyTree_->Branch("ttRapidity_gen",            &ttRapidity_gen_,          "ttRapidity_gen/F"            );
+    babyTree_->Branch("lep_charge_asymmetry_gen",  &lep_charge_asymmetry_gen_,"lep_charge_asymmetry_gen_/F" );
+    babyTree_->Branch("top_spin_correlation_gen",  &top_spin_correlation_gen_,"top_spin_correlation_gen/F"  );
+    babyTree_->Branch("top_costheta_cms_gen",      &top_costheta_cms_gen_,    "top_costheta_cms_gen/F"      );
+    babyTree_->Branch("lep_costheta_cms_gen",      &lepPlus_costheta_cms_gen_,"lep_costheta_cms_gen/F"      );
+    babyTree_->Branch("massllbb",               &massllbb_,             "massllbb/F"              );
+    babyTree_->Branch("massllbb_gen",               &massllbb_gen_,             "massllbb_gen/F"              );
+    //  babyTree_->Branch("llbbRapidityQuark_gen",      &llbbRapidityQuark_gen_,    "llbbRapidityQuark_gen/F"     );
+    // babyTree_->Branch("llbbRapidityGluon_gen",      &llbbRapidityGluon_gen_,    "llbbRapidityGluon_gen/F"     );
+   
+   
+}
+//----------------------------------
+// Fill the baby
+//----------------------------------
+void topAFB_looper::FillBabyNtuple()
+{
+    babyTree_->Fill();
+}
+//--------------------------------
+// Close the baby
+//--------------------------------
+void topAFB_looper::CloseBabyNtuple()
+{
+    babyFile_->cd();
+    babyTree_->Write();
+    babyFile_->Close();
+}
+
+
+void topAFB_looper::fillUnderOverFlow(TH1F *h1, float value, float weight)
+{
+  float min = h1->GetXaxis()->GetXmin();
+  float max = h1->GetXaxis()->GetXmax();
+
+  if (value > max) value = h1->GetBinCenter(h1->GetNbinsX());
+  if (value < min) value = h1->GetBinCenter(1);
+
+  h1->Fill(value, weight);
+}
+
+//--------------------------------------------------------------------
+
+void topAFB_looper::fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, float weight)
+{
+  float maxx = h2->GetXaxis()->GetXmax();
+  float minx = h2->GetXaxis()->GetXmin();
+  float maxy = h2->GetYaxis()->GetXmax();
+  float miny = h2->GetYaxis()->GetXmin();
+
+  if (xvalue > maxx) xvalue = h2->GetXaxis()->GetBinCenter(h2->GetNbinsX());
+  if (xvalue < minx) xvalue = h2->GetXaxis()->GetBinCenter(1);
+  if (yvalue > maxy) yvalue = h2->GetYaxis()->GetBinCenter(h2->GetNbinsY());
+  if (yvalue < miny) yvalue = h2->GetYaxis()->GetBinCenter(1);
+
+  h2->Fill(xvalue, yvalue, weight);
+}
+
+
+//--------------------------------------------------------------------
+
+void topAFB_looper::fillOverFlow(TH1F *h1, float value, float weight)
+{
+  float max = h1->GetXaxis()->GetXmax();
+  if (value > max) value = h1->GetBinCenter(h1->GetNbinsX());
+  h1->Fill(value, weight);
+}
+
+//--------------------------------------------------------------------
+
+void topAFB_looper::fillOverFlow(TH2F *h2, float xvalue, float yvalue, float weight)
+{
+  float maxx = h2->GetXaxis()->GetXmax();
+  float maxy = h2->GetYaxis()->GetXmax();
+
+  if (xvalue > maxx) xvalue = h2->GetXaxis()->GetBinCenter(h2->GetNbinsX());
+  if (yvalue > maxy) yvalue = h2->GetYaxis()->GetBinCenter(h2->GetNbinsY());
+
+  h2->Fill(xvalue, yvalue, weight);
+}
+
+//--------------------------------------------------------------------
+
+void topAFB_looper::fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx)
+{
+  fillUnderOverFlow(h1[myType][nJetsIdx], value, weight);      
+  fillUnderOverFlow(h1[myType][3],        value, weight);      
+  fillUnderOverFlow(h1[3][nJetsIdx],      value, weight);      
+  fillUnderOverFlow(h1[3][3],             value, weight);      
+}
+
+//--------------------------------------------------------------------
+
+void topAFB_looper::fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx)
+{
+  fillUnderOverFlow(h2[myType][nJetsIdx], xvalue, yvalue, weight);      
+  fillUnderOverFlow(h2[myType][3],        xvalue, yvalue, weight);      
+  fillUnderOverFlow(h2[3][nJetsIdx],      xvalue, yvalue, weight);      
+  fillUnderOverFlow(h2[3][3],             xvalue, yvalue, weight);      
+}
+
+//--------------------------------------------------------------------
+
+void topAFB_looper::fillHistos(TProfile *h2[4][4],float xvalue, float yvalue, int myType, int nJetsIdx)
+{
+  h2[myType][nJetsIdx] -> Fill(xvalue, yvalue);      
+  h2[myType][3]        -> Fill(xvalue, yvalue);      
+  h2[3][nJetsIdx]      -> Fill(xvalue, yvalue);      
+  h2[3][3]             -> Fill(xvalue, yvalue);      
+}
+
+int topAFB_looper::antimatch4vector(const LorentzVector &lvec, 
+		 const vector<LorentzVector> &vec){
+
+  if( vec.size() == 0 ) return -1;
+  //cout << "size of vec = " << vec.size() << endl;
+  double dR = 0.0; 
+  double x;
+  int iret = -1;
+  for ( unsigned int i=0; i < vec.size();++i) {
+    x = ROOT::Math::VectorUtil::DeltaR(lvec,vec[i]);
+    if (x > dR ) {dR = x; iret = i;}
+  }
+  return iret;
+}

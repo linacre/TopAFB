@@ -1,0 +1,568 @@
+void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, bool runmc = false, bool requireBTag=false, bool require2BTag=false, bool usePF = true, 
+	   bool doFRestimation = false, bool scaleJESMETUp = false, 
+	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = true, bool createBabyNtuples = true, bool doBFR = false)
+{
+  //gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_v5.28.00.so");
+  gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
+  gSystem->Load("/nfs-3/userdata/yanjuntu/lhapdf/lib/libLHAPDF.so");
+  gSystem->AddIncludePath(" -w -I../CORE/topmass -I/nfs-3/userdata/yanjuntu/lhapdf/include");
+  gROOT->ProcessLine(".L ../CORE/topmass/ttdilepsolve.cpp+"); 
+  gROOT->ProcessLine(".L ../CORE/CMS2.cc+");
+  gROOT->ProcessLine(".L ../CORE/utilities.cc+");
+  gROOT->ProcessLine(".L ../CORE/trackSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/eventSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/MITConversionUtilities.cc+");
+  gROOT->ProcessLine(".L ../CORE/muonSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/electronSelectionsParameters.cc+");
+  gROOT->ProcessLine(".L ../CORE/electronSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/metSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/SimpleFakeRate.cc+");
+  gROOT->ProcessLine(".L ../CORE/mcSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/MT2/MT2.cc+");
+  gROOT->ProcessLine(".L ../CORE/triggerUtils.cc+");  
+  gROOT->ProcessLine(".L ../CORE/susySelections.cc+");
+  //gROOT->ProcessLine(".L ../CORE/mcSUSYkfactor.cc+");
+  gROOT->ProcessLine(".L ../CORE/triggerSuperModel.cc+");
+  gROOT->ProcessLine(".L ../CORE/jetSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/ttbarSelections.cc+");
+  gROOT->ProcessLine(".L ../CORE/triggerUtils.cc+");
+  
+
+  gSystem->CompileMacro("histtools.C", "++k", "libhisttools");
+  gSystem->CompileMacro("topAFB_looper.C","++k", "libtopAFB_looper");
+
+  //float lumiToNormalizeTo   = 1144.5e-3; //1090.0e-3; //349.0e-3; //204.0e-3;// 191.0e-3 ; //36.1e-3; 
+  float lumiToNormalizeTo   = 4684.0e-3; //3230.0e-3; //1090.0e-3; //349.0e-3; //204.0e-3;// 191.0e-3 ; //36.1e-3; 
+
+  topAFB_looper * baby = new topAFB_looper();
+  // Flags for files to run over
+  string cms2_skim_location="/nfs-7a/userdata/yanjuntu/TPrimeSkim";
+  string cms2_location="/nfs-6/userdata/cms2";
+
+  bool runskim          = true;
+  bool runSMS           = false;
+  bool runttprime       = runsig;
+  bool runttdil         = true;
+  
+
+  bool runttotr         = runmc ; //false;
+  bool runWjets         = runmc ; //false;
+  bool runDYee          = runmc ; //false;
+  bool runDYmm          = runmc ; //false;
+  bool runDYtautau      = runmc ; //false;
+  bool  runVV           = runmc ; //false;
+  bool  runtW           = runmc ; //false;
+
+
+  bool  runQCDPt15      = false;
+  bool  runQCDPt30      = false;
+  bool  runVqq          = false;
+  bool  runphotonJet15  = false;
+  bool  runphotonVJets  = false;
+  //NLO cross-sections
+  float kttprime    = 1.;
+  float ksms       = 1.;
+  float kttdil    = 1.;
+  float kttotr    = 1.;
+  float kWjets    = 1.;
+  float kDYee     = 1.;
+  float kDYmm     = 1.;
+  float kDYtautau = 1.;
+  float kVV       = 1.;
+  float ktW       = 1.;
+  float kqcd15    = 1.;
+  float kqcd30    = 1.;
+  float kVqq      = 1.;
+  float kphoton15 = 1.;
+
+    vector<TString> v_baseCuts;
+  //v_baseCuts.push_back("applyNoCuts");         // no cuts
+  v_baseCuts.push_back("usePtGt2020");         // use leptons with pt > 20
+  //v_baseCuts.push_back("applyTriggers");       // apply triggers
+  v_baseCuts.push_back("hypDisamb");           // do hyp. disambiguation
+  //v_baseCuts.push_back("usePtGt2010");         // one lepton > 20, other > 10
+  //v_baseCuts.push_back("excludePtGt2020");     // one lepton > 10, < 20 other >20
+
+  if(!usePF) {
+    v_baseCuts.push_back("usejptJets");          // use jpt jets for jet counting      
+    v_baseCuts.push_back("usetcMET");            // use tcMET
+  } else {
+    v_baseCuts.push_back("usepfMET");   //use PFMET   
+    v_baseCuts.push_back("usepfJets");  // use pf jets for jet counting
+  }
+
+
+  //v_baseCuts.push_back("requireEcalEls");
+  v_baseCuts.push_back("useOS");
+  //if(rundata)
+  //v_baseCuts.push_back("applyAlignmentCorrection");
+  // v_baseCuts.push_back("vetoHypMassLt10");
+  v_baseCuts.push_back("vetoHypMassLt12");
+
+  //possible cuts
+  //v_baseCuts.push_back("applyFOv1Cuts");
+  //v_baseCuts.push_back("applyFOv2Cuts");  
+  //v_baseCuts.push_back("applyFOv3Cuts");
+  //v_baseCuts.push_back("applyLooseIDCuts");      // apply loose ID cuts
+  //v_baseCuts.push_back("applylepLooseIsoCuts");// loose iso cuts
+  //v_baseCuts.push_back("requireZmass");        // leptons only in zmass
+  //v_baseCuts.push_back("useCorMET");           // use corrected calo MET ---> NOT SUPPORTED RIGHT NOW
+  //v_baseCuts.push_back("vetoProjectedMET");    // cut on projected MET
+  //v_baseCuts.push_back("usecaloJets");         // use caloJETs for jet counting
+  //v_baseCuts.push_back("useSS");
+  
+  if(scaleJESMETUp)
+    v_baseCuts.push_back("scaleJESMETUp");
+  if(scaleJESMETDown) 
+    v_baseCuts.push_back("scaleJESMETDown");
+  if(requireBTag && !doBFR)
+    v_baseCuts.push_back("requireBTag");  
+  if(require2BTag && !doBFR)
+    v_baseCuts.push_back("require2BTag");
+  if(doBFR)
+    v_baseCuts.push_back("doBFR");
+  v_baseCuts.push_back("sortJetCandidatesbyPt");
+  //v_baseCuts.push_back("sortJetCandidatesbyDR");
+  // v_baseCuts.push_back("matchLeptonJetbyMaxDR");
+  //v_baseCuts.push_back("applyLeptonJetInvMassCut450");
+  // v_baseCuts.push_back("applyMinMassLBCut");
+  v_baseCuts.push_back("requireExact2BTag");
+  
+  v_baseCuts.push_back("generalLeptonVeto");
+  //v_baseCuts.push_back("applyHTCut");
+  if(BTagAlgTCHE)
+    v_baseCuts.push_back("BTagAlgTCHE");
+  if(createBabyNtuples)
+    v_baseCuts.push_back("createBabyNtuples");
+  vector<TString> v_Cuts = v_baseCuts;
+  vector<TString> v_otherCuts;
+  if(!doFRestimation) {
+
+    //base set of cuts that will be used for the yields
+    //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts");
+    //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoMET;veto2Jets");
+    
+    //reduced cuts for DYEst
+    //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;veto2Jets");
+    
+    //full cuts
+    //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass;veto2Jets;vetoMET");
+
+	// MET > 50 
+     v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass;veto2Jets;vetoMET50");
+
+    // //this is to make NJet plots since we don't want to make plots with the njet cut in there
+    //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass");
+    //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass;vetoMET");
+
+  }
+  else {
+    
+    v_otherCuts.push_back("vetoZmass;veto2Jets;vetoMET");
+    
+  }
+  for(unsigned int index = 0; index < v_otherCuts.size(); index++) {
+
+   
+    vector<TString> v_Cuts = v_baseCuts;
+    
+    if(v_otherCuts.at(index).Contains(";")) {
+      TString cut = v_otherCuts.at(index);
+      TObjArray *ob = cut.Tokenize(";");
+      for(int j = 0; j < ob->GetEntries(); j++) {       
+	v_Cuts.push_back(TString(ob->At(j)->GetName()));
+      }
+    } else {
+      v_Cuts.push_back(v_otherCuts.at(index));
+    }
+
+  
+  if(rundata) {
+    TChain  *ch_data= new TChain("Events");  
+    cout << "Doing data" << endl;
+    if(runskim){
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleElectronTriggerSkim/skimmed*.root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleMuTriggerSkim/skimmed*.root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleMuTriggerSkim/skim*root"));
+      
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011B-PromptReco-v1_AOD/V04-02-34/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011B-PromptReco-v1_AOD/V04-02-34/DoubleMuTriggerSkim/skim*root"));
+      
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root")); 
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
+      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"CMSSW_4_2_7_patch1_V04-02-34/MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34//merged*root"));
+    }
+    else{
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/DoubleElectron_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/DoubleMu_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+     
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/DoubleElectron_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/DoubleMu_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/DoubleElectron_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/DoubleMu_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30//MuEG_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+     
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/DoubleElectron_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/DoubleMu_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/MuEG_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/DoubleElectron_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/DoubleMu_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30/MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-34/DoubleElectron_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-34/DoubleMu_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-34/MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
+      /*
+      ch_data->Add("/nfs-4/userdata/cms2/DoubleElectron_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleElectronTriggerSkim/skimmed*.root");
+      ch_data->Add("/nfs-4/userdata/cms2/DoubleMu_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleMuTriggerSkim/skimmed*.root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root"); 
+      ch_data->Add("/nfs-4/userdata/cms2/DoubleElectron_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleElectronTriggerSkim/skim*root");
+      ch_data->Add("/nfs-4/userdata/cms2/DoubleMu_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleMuTriggerSkim/skim*root");
+      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      
+      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleElectron_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleMu_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleElectron_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleMu_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      
+      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleElectron_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleMu_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      ch_data->Add(Form("%s/%s","/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30" ,"MuEG_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
+      ch_data->Add(Form("%s/%s","/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30","MuEG_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
+      ch_data->Add(Form("%s/%s","/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30","MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
+      */
+    }
+    baby->ScanChain(ch_data, v_Cuts, "data", doFRestimation, lumiToNormalizeTo, 1, false);//, 0.01, 1, true);
+    hist::color("data", kRed);
+    delete ch_data;
+  }
+  if(runttprime){
+    TChain  *ch_ttprime350= new TChain("Events");
+    TChain  *ch_ttprime400= new TChain("Events");
+    TChain  *ch_ttprime450= new TChain("Events");
+    TChain  *ch_ttprime500= new TChain("Events");
+    TChain  *ch_ttprime550= new TChain("Events");
+    TChain  *ch_ttprime600= new TChain("Events");
+    if(runskim){
+      cout << "Doing the MadGraph ttbarprime350  " << endl;
+      ch_ttprime350->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-350_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
+      
+      cout << "Doing the MadGraph ttbarprime400  " << endl;
+      ch_ttprime400->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-400_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
+			 
+      cout << "Doing the MadGraph ttbarprime450  " << endl;
+      ch_ttprime450->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-450_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
+
+      cout << "Doing the MadGraph ttbarprime500  " << endl;
+      ch_ttprime500->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-500_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
+
+      cout << "Doing the MadGraph ttbarprime550  " << endl;
+      ch_ttprime550->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-550_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
+      
+      cout << "Doing the MadGraph ttbarprime600  " << endl;
+      ch_ttprime600->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-600_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
+    }
+    
+    else
+      {
+	cout << "Doing the MadGraph ttbarprime350  " << endl;
+	ch_ttprime350->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-350_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
+	
+	cout << "Doing the MadGraph ttbarprime400  " << endl;
+	ch_ttprime400->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-400_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
+	
+	cout << "Doing the MadGraph ttbarprime450  " << endl;
+	ch_ttprime450->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-450_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
+
+	cout << "Doing the MadGraph ttbarprime500  " << endl;
+	ch_ttprime500->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-500_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
+
+	cout << "Doing the MadGraph ttbarprime550  " << endl;
+	ch_ttprime550->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-550_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
+	
+	cout << "Doing the MadGraph ttbarprime600  " << endl;
+	ch_ttprime600->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-600_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
+      }
+    baby->ScanChain(ch_ttprime350, v_Cuts,"ttprime350", doFRestimation, lumiToNormalizeTo, kttprime, false);
+    hist::color("ttprime350", kRed); 
+    baby->ScanChain(ch_ttprime400, v_Cuts,"ttprime400", doFRestimation, lumiToNormalizeTo, kttprime, false);
+    hist::color("ttprime400", kRed);
+    baby->ScanChain(ch_ttprime450, v_Cuts,"ttprime450", doFRestimation, lumiToNormalizeTo, kttprime, false);
+    hist::color("ttprime450", kRed);  
+    baby->ScanChain(ch_ttprime500, v_Cuts,"ttprime500", doFRestimation, lumiToNormalizeTo, kttprime, false);
+    hist::color("ttprime500", kRed);  
+    baby->ScanChain(ch_ttprime550, v_Cuts,"ttprime550", doFRestimation, lumiToNormalizeTo, kttprime, false);
+    hist::color("ttprime550", kRed);  
+    baby->ScanChain(ch_ttprime600, v_Cuts,"ttprime600", doFRestimation, lumiToNormalizeTo, kttprime, false);
+    hist::color("ttprime600", kRed);  
+  }
+  
+if(runttdil) {
+    TChain  *ch_ttbar= new TChain("Events");
+    if(runskim){
+      cout << "Doing the MadGraph ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*root"));
+
+      // cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/skimmed*root"));
+    } 
+    else{
+      cout << "Doing the MadGraph ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
+    
+      //cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root"); 
+    }
+      
+    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo, kttdil, false);
+    hist::color("ttdil", kGreen);
+    //delete ch_ttbar;
+  }
+
+ if(runSMS) {
+   TChain  *ch_sms= new TChain("Events");
+   if(runskim){
+     ch_sms->Add(Form("%s/%s", cms2_skim_location.c_str(),"SMS-T2tt_Mstop-225to1200_mLSP-50to1025_7TeV-Pythia6Z_Summer11-PU_START42_V11_FastSim-v1/skimmed*.root"));
+   }
+   else{
+     cout << "Doing the fast sim SMS.. " << endl;
+     ch_sms->Add("/nfs-7/userdata/cms2/SMS-T2blnu_x-0p25to0p75_mStop-50to850_mLSP-50to800_7TeV-Pythia6Z_Summer11-PU_START42_V11_FSIM-v2/VB04-02-29_Fastsim/merged*.root");
+   }
+   
+   baby->ScanChain(ch_sms, v_Cuts,"sms", doFRestimation, lumiToNormalizeTo, ksms, false);
+   hist::color("sms", kYellow);
+   //delete ch_sms;                                                                                                                                                                   
+ }
+  
+  if(runttotr) {
+    TChain  *ch_ttor= new TChain("Events");
+    if(runskim){
+      ch_ttor->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*root"));
+    }
+    else{
+      cout << "Doing the MadGraph ttbar no-dileptons.. " << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
+    }
+      
+    baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo, kttotr, false);
+    hist::color("ttotr", kYellow);
+    //delete ch_ttor;
+  }
+     
+  if (runWjets) {
+    TChain  *ch_wjets= new TChain("Events");
+    cout << "Processing Wjets.."<<endl;
+  
+    if(runskim){
+      ch_wjets->Add(Form("%s/%s", cms2_skim_location.c_str(),"WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/skimmed*root")); 
+    }
+    else{
+      ch_wjets->Add("/hadoop/cms/store/user/imacneill/Summer11MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/DileptonHyp/merged*root"); 
+    }
+    baby->ScanChain(ch_wjets,v_Cuts, "wjets", doFRestimation, lumiToNormalizeTo, kWjets, false);
+    hist::color("wjets", kViolet);
+  }
+  if (runDYee) {
+    TChain  *ch_dyee= new TChain("Events");
+    cout << "Processing DY->ee" << endl;
+    if(runskim){
+      ch_dyee->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYToEE_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_dyee->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYToEE_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_dyee->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root")); 
+    }
+    else{
+      ch_dyee->Add("/nfs-7/userdata/cms2/DYToEE_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dyee->Add("/nfs-7/userdata/cms2/DYToEE_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dyee->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+    }
+    baby->ScanChain(ch_dyee, v_Cuts, "DYee",doFRestimation, lumiToNormalizeTo, kDYee, false);
+    hist::color("DYee", kMagenta);
+    //delete ch_dyee;
+  }
+
+  if (runDYmm) {
+    TChain  *ch_dymm= new TChain("Events");
+    cout << "Processing DY->mm" << endl;
+    if(runskim){
+      ch_dymm->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYToMuMu_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_dymm->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_dymm->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root")); 
+    }
+    else{
+      ch_dymm->Add("/nfs-7/userdata/cms2/DYToMuMu_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dymm->Add("/nfs-7/userdata/cms2/DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dymm->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+    }
+ 
+    baby->ScanChain(ch_dymm, v_Cuts, "DYmm",doFRestimation, lumiToNormalizeTo, kDYmm, false);
+    hist::color("DYmm", kCyan);
+    //delete ch_dymm;
+  }
+    
+  if (runDYtautau) {
+    TChain  *ch_dytt= new TChain("Events");
+    cout << "Processing DY->tautau" << endl;
+    if(runskim){
+      ch_dytt->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYToTauTau_M-10To20_TuneZ2_7TeV-pythia6-tauola_Summer11-PU_S3_START42_V11-v2/V04-02-29/skimmed*.root"));
+      ch_dytt->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_dytt->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+    }
+    else{
+      ch_dytt->Add("/nfs-3/userdata/cms2/DYToTauTau_M-10To20_TuneZ2_7TeV-pythia6-tauola_Summer11-PU_S3_START42_V11-v2/V04-02-29/merged*.root");
+
+      ch_dytt->Add("/nfs-7/userdata/cms2/DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dytt->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+    }
+    baby->ScanChain(ch_dytt,v_Cuts, "DYtautau",doFRestimation, lumiToNormalizeTo, kDYtautau, false);
+    hist::color("DYtautau", kBlack);
+    //delete ch_dytt;
+  }
+  if(runVV) {
+    TChain  *ch_vv= new TChain("Events");
+    cout << "Processing VV" << endl;
+    if(runskim){
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WWJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WZJetsTo3LNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZJetsTo4L_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      /*
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WWTo2L2Nu_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZ_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WZ_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      */
+    }
+    else{
+      ch_vv->Add("/nfs-7/userdata/cms2/WWJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
+      ch_vv->Add("/nfs-7/userdata/cms2/WZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
+      ch_vv->Add("/nfs-7/userdata/cms2/WZJetsTo3LNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
+      ch_vv->Add("/nfs-7/userdata/cms2/ZZJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+      ch_vv->Add("/nfs-7/userdata/cms2/ZZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+      ch_vv->Add("/nfs-7/userdata/cms2/ZZJetsTo4L_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+     /*
+      ch_vv->Add("/nfs-7/userdata/cms2/WWTo2L2Nu_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_vv->Add("/nfs-7/userdata/cms2/ZZ_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_vv->Add("/nfs-7/userdata/cms2/WZ_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      */
+      }
+    baby->ScanChain(ch_vv, v_Cuts, "VV" ,doFRestimation, lumiToNormalizeTo, kVV, false);
+    hist::color("vv", 31);
+    //delete ch_vv;
+  }
+
+  if(runtW) {
+    TChain  *ch_tw= new TChain("Events");
+    cout << "Processing tW" << endl;
+    if(runskim){
+      
+      ch_tw->Add(Form("%s/%s", cms2_skim_location.c_str(),"T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_tw->Add(Form("%s/%s", cms2_skim_location.c_str(),"Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_tw->Add(Form("%s/%s", cms2_skim_location.c_str(),"T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_tw->Add(Form("%s/%s", cms2_skim_location.c_str(),"Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_tw->Add(Form("%s/%s", cms2_skim_location.c_str(),"T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_tw->Add(Form("%s/%s", cms2_skim_location.c_str(),"Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      /*
+      ch_tw->Add(Form("%s/%s", "/nfs-4/userdata/yanjuntu/TPrimeSkim","TToBLNu_TuneZ2_t-channel_7TeV-madgraph_Spring11-PU_S1_START311_V1G1-v1/V04-01-01/skimmed*.root"));
+      ch_tw->Add(Form("%s/%s", "/nfs-4/userdata/yanjuntu/TPrimeSkim","TToBLNu_TuneZ2_s-channel_7TeV-madgraph_Spring11-PU_S1_START311_V1G1-v1/V04-01-01/skimmed*.root"));
+      ch_tw->Add(Form("%s/%s", "/nfs-4/userdata/yanjuntu/TPrimeSkim","TToBLNu_TuneZ2_tW-channel_7TeV-madgraph_Spring11-PU_S1_START311_V1G1-v1/V04-01-01/skimmed*.root")); 
+      */
+    }
+    else{
+      ch_tw->Add("/nfs-7/userdata/cms2/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1//V04-02-29/merged*.root");
+      ch_tw->Add("/nfs-7/userdata/cms2/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/nfs-7/userdata/cms2/T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/nfs-7/userdata/cms2/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/nfs-7/userdata/cms2/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/nfs-7/userdata/cms2/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+    
+    }
+    baby->ScanChain(ch_tw, v_Cuts, "tw", doFRestimation, lumiToNormalizeTo, ktW, false);
+    hist::color("tw", kRed-3);
+    //delete ch_tw;
+  }
+     
+
+  if(runQCDPt15) {
+    TChain  *ch_qcdpt15= new TChain("Events");
+    cout << "Processing QCDPt15" << endl;
+    ch_qcdpt15->Add("/nfs-3/userdata/cms2/QCD_Pt15_Spring10-START3X_V26_S09-v1/V03-04-13-07/diLepPt2010Skim/skimmed_ntuple.root");
+    baby->ScanChain(ch_qcdpt15, v_Cuts, "qcd15", doFRestimation, lumiToNormalizeTo, kQCDPt15, false);
+    hist::color("qcd15", 28);
+    // delete ch_qcdpt15;
+  }
+     
+
+  if(runQCDPt30) {
+    TChain  *ch_qcdpt30= new TChain("Events");
+    cout << "Processing QCDPt30" << endl;
+    ch_qcdpt30->Add("/nfs-3/userdata/cms2/QCD_Pt30_Spring10-START3X_V26_S09-v1/V03-04-13-07/diLepPt2010Skim/skimmed_ntuple.root");
+    baby->ScanChain(ch_qcdpt30, v_Cuts, "qcd30", doFRestimation, lumiToNormalizeTo, kQCDPt30, false);
+    hist::color("qcd30", 29);
+    //delete ch_qcdpt30;
+  }
+
+
+  if(runVqq) {
+    TChain  *ch_vqq             = new TChain("Events");
+    cout << "Processing Vqq" << endl;
+    ch_vqq->Add("/nfs-3/userdata/cms2/VqqJets-madgraph_Spring10-START3X_V26_S09-v1/merged*.root" );
+    baby->ScanChain(ch_vqq, v_Cuts, "vqq", doFRestimation, lumiToNormalizeTo, kVqq, false);
+    //delete ch_vqq;
+  }
+      
+     
+  if(runphotonJet15) {
+
+    cout << "USING OLD PHOTON JET SAMPLE" << endl;
+    TChain  *ch_photonjet15= new TChain("Events"); 
+    cout << "Processing PhotonJet15" << endl;
+    ch_photonjet15->Add("/nfs-3/userdata/cms2/PhotonJet_Pt15_Spring10-START3X_V26_S09-v1/V03-04-08-01/merged_ntuple*.root");
+    baby->ScanChain(ch_photonjet15, v_Cuts, "photonjet15", doFRestimation, lumiToNormalizeTo, 1, false);
+    hist::color("photonjet15", 30);
+    //delete ch_photonjet15;
+  }
+
+
+  if(runphotonVJets) {
+      
+    cout << "Using Photon VJets sample" << endl;
+    TChain *ch_photonVJets = new TChain("Events");
+    cout << "Processing PhotonVJets" << endl;
+    ch_photonVJets->Add("/nfs-3/userdata/cms2/PhotonVJets-madgraph_Spring10-START3X_V26_S09-v1/V03-04-13-07/merged*.root");
+    baby->ScanChain(ch_photonVJets, v_Cuts, "photonVJets", doFRestimation, lumiToNormalizeTo, 1, false);
+    //delete ch_photonVJets;
+
+  }
+  TString cutstring = "";
+  for(unsigned int i = 0; i < v_Cuts.size(); i++) 
+    cutstring   = cutstring + "_" + v_Cuts.at(i);
+
+  if(doFRestimation) 
+    cutstring = outputDir + "/FRhist" + cutstring + ".root";
+  else  
+    cutstring   = outputDir + "/hist" + cutstring + ".root";
+    
+  cout << "Saving histograms to: " << cutstring << endl;
+  hist::saveHist(cutstring.Data());
+  cout << "done saving" << endl;
+
+  hist::deleteHistos();
+  
+
+
+  }
+
+
+}
