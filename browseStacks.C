@@ -92,7 +92,7 @@ void browseStacks(vector<TString> v_samples, vector<Color_t> v_colors,
     for (int i_channel=first_channel_canvas; i_channel<4; i_channel++) {//loop over the channels
       vector<TH1F*> v_hists;
       TH1F *hdata = NULL;
-      TH1F *httprime350 = NULL;
+      TH1F *httprime = NULL;
             
       for(unsigned int i_prefix = 0; i_prefix < v_samples.size(); i_prefix++) {
 	
@@ -175,7 +175,7 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	    htemp->SetMarkerStyle(v_style.at(i_prefix));
 	    htemp->SetMarkerColor(v_colors.at(i_prefix));
 	  }
-	  if(v_samples.at(i_prefix) == "ttprime350") {
+	  if(v_samples.at(i_prefix).Contains("ttprime")) {
 	    //htemp->SetMarkerStyle(v_style.at(i_prefix));
 	    htemp->SetLineColor(kBlue+2);
 	    //htemp->SetMarkerSize(0.5);
@@ -190,8 +190,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	}
 	
 	//don't add the ttprime histogram to the stack
-	if(v_samples.at(i_prefix) == "ttprime350") {
-	  httprime350 = htemp;	  
+	if(v_samples.at(i_prefix).Contains("ttprime")) {
+	  httprime = htemp;	  
 	  continue;
 	}
 
@@ -203,8 +203,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	htemp->Add(v_hists.back());
 	v_hists.push_back(htemp);
       }//prefix loop			
-	if(httprime350 != NULL)
-	v_hists.push_back(httprime350);	
+	if(httprime != NULL)
+	v_hists.push_back(httprime);	
 	if(hdata != NULL)
 	v_hists.push_back(hdata);
 
@@ -266,7 +266,7 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
       }
       
 
-      if(drawDiffs) {
+      if(drawDiffs && hdata != NULL) {
 	p2->cd();
 	int tempnbins = hdata->GetNbinsX();
 	TString s_hname = "diff_";
@@ -333,8 +333,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	    (*it)->Draw("Pesame");
 
 	}	
-	//else if(TString((*it)->GetName()).Contains("ttprime350")) {
-	//		httprime350 = (*it);
+	//else if(TString((*it)->GetName()).Contains("ttprime")) {
+	//		httprime = (*it);
 	//		if(it == v_hists.rbegin()) 
 	//    		(*it)->Draw("P");	 
 	//		else 	  
@@ -349,8 +349,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	}
       }//loop over MC
       
-	if(httprime350 != NULL) {
-	httprime350->Draw("histsame");
+	if(httprime != NULL) {
+	httprime->Draw("histsame");
 	}
 
       if(hdata != NULL) {
@@ -426,8 +426,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	  	TLine *line170 = new TLine();                                                                                                                                                                                                                                                                                                                                            
       	line170->SetLineColor(kGreen+3);                                                                                                                                                                                                                                                                                                                                          
       	line170->SetLineWidth(2);                                                                                                                                                                                                                                                                                                                                             
-       	if(drawLogY) line170->DrawLine(170.,0.0,170.,0.1*hdata->GetMaximum());                                                                                                                                                                                                                                                                                                     
-       	else line170->DrawLine(170.,0.0,170.,hdata->GetMaximum());
+       	if(drawLogY && hdata != NULL) line170->DrawLine(170.,0.0,170.,0.1*hdata->GetMaximum());                                                                                                                                                                                                                                                                                                     
+       	else if(hdata != NULL) line170->DrawLine(170.,0.0,170.,hdata->GetMaximum());
        	
        	TArrow *arrow170 = new TArrow();
         arrow170->SetLineWidth(2);
@@ -546,25 +546,31 @@ TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, 
   float max = 1e-6;
   float lowY, highY;
   float rangeY = hmax->GetYaxis()->GetXmax() - hmax->GetYaxis()->GetXmin();
-  for(int bin = lowBinX; bin < highBinX+1; bin++) {
-    if(hmax->GetBinContent(bin) >= hdata->GetBinContent(bin)) {
-      if(max < hmax->GetBinContent(bin))
-	max = hmax->GetBinContent(bin);
-    } else {
-      if(max < hdata->GetBinContent(bin))
-	 max = hdata->GetBinContent(bin);
+  if(hdata != NULL){
+    for(int bin = lowBinX; bin < highBinX+1; bin++) {
+      if(hmax->GetBinContent(bin) >= hdata->GetBinContent(bin)) {
+        if(max < hmax->GetBinContent(bin))
+	  max = hmax->GetBinContent(bin);
+      } else {
+        if(max < hdata->GetBinContent(bin))
+  	 max = hdata->GetBinContent(bin);
+      }
     }
   }
       
   //cout << "max: " << max << endl;
-  rangeY = hdata->GetMinimum();
-  if(hdata->GetMaximum() > hmax->GetMinimum())
-    rangeY = hdata->GetMaximum() - rangeY;
-  else 
-    rangeY = hmax->GetMaximum() - rangeY;
+  if(hdata != NULL){
+    rangeY = hdata->GetMinimum();
+    if(hdata->GetMaximum() > hmax->GetMinimum())
+      rangeY = hdata->GetMaximum() - rangeY;
+    else 
+      rangeY = hmax->GetMaximum() - rangeY;
+  }
+  else rangeY = hmax->GetMaximum() - hmax->GetMinimum() ; 
 
-  if(drawLogY) {
+  if(drawLogY) {  	
     lowY = 5*max;
+    if(GetMinimum(v_hists)>max) lowY = 10*GetMinimum(v_hists);
     if(histName.Contains("1Dmasscut")) lowY = 1.; //for 1.09 fb-1
     highY = lowY + 10*rangeY;
     if(histName.Contains("1Dmasscut")) highY = 300.; //for 1.09 fb-1
@@ -579,7 +585,7 @@ TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, 
     leg = new TLegend(lowX,lowY,highX,highY, "", "br"); 
   else 
     leg = new TLegend(0.7, 0.55, 0.92, 0.90, "", "brNDC");
-  if((histName.Contains("nJet") || histName.Contains("bTag")) && drawLogY) {
+  if((histName.Contains("nJet") || histName.Contains("bTag")) && drawLogY && hdata != NULL ) {
     int temp = hdata->GetNbinsX();
     leg = new TLegend(hdata->GetNbinsX()-1.5, lowY, temp - 0.45*hdata->GetBinWidth(temp), highY, "", "br");
           
@@ -645,7 +651,7 @@ TPaveText *getPaveText(const vector<TH1F*> &v_hists, int i_channel, float lumi, 
     //blah = pt1->AddText("");
     blah->SetTextSize(0.036);
   blah->SetTextAlign(11);  
-  TString temp = formatFloat(lumi,"%6.2f");
+  TString temp = formatFloat(lumi,"%6.1f");
   temp.ReplaceAll(" " , "" );
   temp = temp + TString(" fb^{-1} at   #sqrt{s}=7 TeV");
   blah = pt1->AddText(temp.Data());
