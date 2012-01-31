@@ -1825,6 +1825,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float lep_charge_asymmetry = -999.0;
 	lep_charge_asymmetry = abs(lepPlus.Eta()) - abs(lepMinus.Eta());
 	
+	float lep_azimuthal_asymmetry =-999.0;
+	lep_azimuthal_asymmetry = cos(lepPlus.DeltaPhi(lepMinus));
 	
 	lepPlus.Boost(-cms.BoostVector());
 	lepPlus.Boost(-top1_p4.BoostVector());
@@ -1912,6 +1914,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	fillHistos( httMass, tt_mass ,  weight, myType, jetBin);
 	fillHistos( hlepChargeAsym, lep_charge_asymmetry ,  weight, myType, jetBin);
+	fillHistos( hlepAzimAsym, lep_azimuthal_asymmetry ,  weight, myType, jetBin);
 	fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin);
 	fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
 	fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
@@ -1975,6 +1978,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float ttRapidity_gen;
 	float top_costheta_cms_gen;
 	float lep_charge_asymmetry_gen;
+	float lep_azimuthal_asymmetry_gen;
 	float top_spin_correlation_gen;
 	float lepPlus_costheta_cms_gen;
 	float lepMinus_costheta_cms_gen;
@@ -2070,7 +2074,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  
 
 	  lep_charge_asymmetry_gen = abs(lepPlus_gen.Eta()) - abs(lepMinus_gen.Eta());
-	  
+	  lep_azimuthal_asymmetry_gen = cos(lepPlus_gen.DeltaPhi(lepMinus_gen));	  
+
 	  lepPlus_gen.Boost(-cms_gen.BoostVector());
 	  lepPlus_gen.Boost(-topplus_genp_p4.BoostVector());
 	  lepMinus_gen.Boost(-cms_gen.BoostVector());
@@ -2087,10 +2092,12 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
 	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
+	  fillHistos( hlepAzimAsym_gen, lep_azimuthal_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( htopSpinCorr_gen, top_spin_correlation_gen  ,  weight, myType, jetBin);
 	  fillHistos( htopCosTheta_gen, top_costheta_cms_gen   ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);
 	  fillHistos( hlepChargeAsym_2d, lep_charge_asymmetry_gen ,lep_charge_asymmetry,  weight, myType, jetBin);
+	  fillHistos( hlepAzimAsym_2d, lep_azimuthal_asymmetry_gen ,lep_azimuthal_asymmetry,  weight, myType, jetBin);
 	  fillHistos( htopSpinCorr_2d, top_spin_correlation_gen, top_spin_correlation ,  weight, myType, jetBin);
 	  fillHistos( htopCosTheta_2d, top_costheta_cms_gen, top_costheta_cms   ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta_2d, lepPlus_costheta_cms_gen  , lepPlus_costheta_cms, weight, myType, jetBin);

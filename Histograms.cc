@@ -51,6 +51,11 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hlepChargeAsym_2d[i][j]->GetYaxis()->SetTitle("Charge_Asymmetry_lep_rec");
       hlepChargeAsym_2d[i][j]->Sumw2();
 
+      hlepAzimAsym_2d[i][j] = new TH2F(Form("%s_hlepAzimAsym2d_%s",prefix,suffix),Form("%s_lepAzimAsym2d_%s",prefix,suffix),4,-2,2, 4,-2,2);
+      hlepAzimAsym_2d[i][j]->GetXaxis()->SetTitle("Azimuthal_Asymmetry_lep_gen");
+      hlepAzimAsym_2d[i][j]->GetYaxis()->SetTitle("Azimuthal_Asymmetry_lep_rec");
+      hlepAzimAsym_2d[i][j]->Sumw2();
+
       htopSpinCorr_2d[i][j] = new TH2F(Form("%s_htopSpinCorr2d_%s",prefix,suffix),Form("%s_topSpinCorr2d_%s",prefix,suffix),4,-2,2,4,-2,2);
       htopSpinCorr_2d[i][j]->GetXaxis()->SetTitle("Spin_Correlation_top_gen");
       htopSpinCorr_2d[i][j]->GetYaxis()->SetTitle("Spin_Correlation_top_rec");
@@ -71,6 +76,10 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hlepChargeAsym_gen[i][j]->GetXaxis()->SetTitle("Charge_Asymmetry_lep_gen");
       hlepChargeAsym_gen[i][j]->Sumw2();
 
+      hlepAzimAsym_gen[i][j] = new TH1F(Form("%s_hlepAzimAsymGen_%s",prefix,suffix),Form("%s_lepAzimAsymGen_%s",prefix,suffix),4,-2,2);
+      hlepAzimAsym_gen[i][j]->GetXaxis()->SetTitle("Azimuthal_Asymmetry_lep_gen");
+      hlepAzimAsym_gen[i][j]->Sumw2();
+
       htopSpinCorr_gen[i][j] = new TH1F(Form("%s_htopSpinCorrGen_%s",prefix,suffix),Form("%s_topSpinCorrgen_%s",prefix,suffix),4,-2,2);
       htopSpinCorr_gen[i][j]->GetXaxis()->SetTitle("Spin_Correlation_top_gen");
       htopSpinCorr_gen[i][j]->Sumw2();
@@ -82,11 +91,14 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hlepCosTheta_gen[i][j] = new TH1F(Form("%s_hlepCosThetaGen_%s",prefix,suffix),Form("%s_lepCosThetaGen_%s",prefix,suffix),4,-2,2);
       hlepCosTheta_gen[i][j]->GetXaxis()->SetTitle("Cos(theta)_lep_gen");
       hlepCosTheta_gen[i][j]->Sumw2();
-      
-
+ 
       hlepChargeAsym[i][j] = new TH1F(Form("%s_hlepChargeAsym_%s",prefix,suffix),Form("%s_lepChargeAsym_%s",prefix,suffix),4,-2,2);
       hlepChargeAsym[i][j]->GetXaxis()->SetTitle("Charge_Asymmetry_lep");
       hlepChargeAsym[i][j]->Sumw2();
+
+      hlepAzimAsym[i][j] = new TH1F(Form("%s_hlepAzimAsym_%s",prefix,suffix),Form("%s_lepAzimAsym_%s",prefix,suffix),4,-2,2);
+      hlepAzimAsym[i][j]->GetXaxis()->SetTitle("Azimuthal_Asymmetry_lep");
+      hlepAzimAsym[i][j]->Sumw2();
 
       htopSpinCorr[i][j] = new TH1F(Form("%s_htopSpinCorr_%s",prefix,suffix),Form("%s_topSpinCorr_%s",prefix,suffix),4,-2,2);
       htopSpinCorr[i][j]->GetXaxis()->SetTitle("Spin_Correlation_top");

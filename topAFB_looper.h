@@ -166,14 +166,17 @@ class topAFB_looper
 	TH1F *htopCosTheta[4][4];
 	TH1F *hlepCosTheta[4][4];
 	TH1F *hlepChargeAsym[4][4];
+	TH1F *hlepAzimAsym[4][4];
 	TH1F *htopSpinCorr[4][4];
 	TH1F *htopCosTheta_gen[4][4];
 	TH1F *hlepCosTheta_gen[4][4];
 	TH1F *hlepChargeAsym_gen[4][4];
+	TH1F *hlepAzimAsym_gen[4][4];
 	TH1F *htopSpinCorr_gen[4][4];
 	TH2F *htopCosTheta_2d[4][4];
 	TH2F *hlepCosTheta_2d[4][4];
 	TH2F *hlepChargeAsym_2d[4][4];
+	TH2F *hlepAzimAsym_2d[4][4];
 	TH2F *htopSpinCorr_2d[4][4];
 	TH2F *httMass_2d[4][4];
 
