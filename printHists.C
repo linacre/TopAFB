@@ -32,13 +32,13 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
  
 
   bool haveVVsamples = false;
-  if(gROOT->FindObjectAny("ww_hnJet_ee") != NULL || 
-     gROOT->FindObjectAny("zz_hnJet_ee") != NULL || 
-     gROOT->FindObjectAny("wz_hnJet_ee") != NULL)
+  if(gROOT->FindObjectAny("ww_hnBtagJet_ee") != NULL || 
+     gROOT->FindObjectAny("zz_hnBtagJet_ee") != NULL || 
+     gROOT->FindObjectAny("wz_hnBtagJet_ee") != NULL)
     haveVVsamples = true;
 
   bool haveData = false;
-  if(gROOT->FindObjectAny("data_hnJet_ee") != NULL)
+  if(gROOT->FindObjectAny("data_hnBtagJet_ee") != NULL)
     haveData = true;
 
 
@@ -60,12 +60,14 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
     
   vector<pair<int, int> > v_binranges;
   if(combineJetBins) 
-    v_binranges.push_back(make_pair(1,10));
+    v_binranges.push_back(make_pair(1,7));
   else {
-    v_binranges.push_back(make_pair(1,1)); //0 jet bin
-    v_binranges.push_back(make_pair(2,2)); //1 jet bin
-    v_binranges.push_back(make_pair(3,10)); //>=2 jet bin
-    v_binranges.push_back(make_pair(1,10)); //all jet bins
+    v_binranges.push_back(make_pair(1,1)); //0 jet bin 
+    v_binranges.push_back(make_pair(2,2)); //1 jet bin 
+    v_binranges.push_back(make_pair(3,3)); //2 jet bin
+    v_binranges.push_back(make_pair(4,4)); //3 jet bin
+    v_binranges.push_back(make_pair(5,7)); //>=4 jet bin
+    //v_binranges.push_back(make_pair(1,7)); //all jet bins
   }
   
   for(unsigned int i_bins = 0; i_bins <  v_binranges.size(); i_bins++) {
@@ -75,14 +77,14 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
 
     if(latex) {
       if(combineJetBins) 
-	cout << "\\textrm{All Jets:} " << endL << endl;
+	cout << "\\textrm{Combined:} " << endL << endl;
       else {
-	if(i_bins < 2)
-	cout << "\\textrm{" << i_bins << " Jet Bin:}" << endL << endl;
-	else if(i_bins == 2) 
-	  cout << "\\textrm{$>=$ 2 Jet Bin:}" << endL << endl;
-	else if(i_bins == 3)
-	  cout << "\\textrm{All Jets:} " << endL << endl;
+	if(i_bins <4)
+	cout << "\\textrm{" << i_bins << " b-tagged Jet Bin:}" << endL << endl;
+	else if(i_bins == 4) 
+	  cout << "\\textrm{$>=$ 4 b-tagged Jets:}" << endL << endl;
+	else if(i_bins == 5)
+	  cout << "\\textrm{Total ($>=$ 0 b-tagged Jets):} " << endL << endl;
 	cout << "\\textrm{ } " << endL << endl;
 	cout << "\\begin{tabular}{l |  c  c  c  c}" << endl;
 	cout << "\\hline" << endl;
@@ -117,9 +119,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
 	if(!(v_prefixes.at(i).Contains("DY")))
 	  continue;
 
-	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_ee");
-	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_mm");
-	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_em");
+	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
+	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
+	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
 	
 	n_ee = n_ee + GetEntries(hee, lowBin, highBin);
 	n_mm = n_mm + GetEntries(hmm, lowBin, highBin);
@@ -130,13 +132,13 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
 
 	n_all = n_ee + n_mm + n_em;
 	nE_all = sqrt(pow(nE_ee, 2) + pow(nE_mm, 2) + pow(nE_em, 2) );
-	cout	<< formatFloat(n_ee,formatS)	<< pmSign	<< formatFloat(nE_ee, formatS)	<< colSep;
-	cout	<< formatFloat(n_mm, formatS)	<< pmSign	<< formatFloat(nE_mm, formatS)	<< colSep;
-	cout	<< formatFloat(n_em, formatS)	<< pmSign	<< formatFloat(nE_em, formatS)	<< colSep;
-	cout	<< formatFloat(n_all, formatS)	<< pmSign	<< formatFloat(nE_all, formatS) << 	endL	<< endl;
       }
+      cout	<< formatFloat(n_ee,formatS)	<< pmSign	<< formatFloat(nE_ee, formatS)	<< colSep;
+      cout	<< formatFloat(n_mm, formatS)	<< pmSign	<< formatFloat(nE_mm, formatS)	<< colSep;
+      cout	<< formatFloat(n_em, formatS)	<< pmSign	<< formatFloat(nE_em, formatS)	<< colSep;
+      cout	<< formatFloat(n_all, formatS)	<< pmSign	<< formatFloat(nE_all, formatS) << 	endL	<< endl;
     }//combineDYsamples
-
+   
 
     if(haveVVsamples && combineVVsamples) {
       if(latex) 
@@ -158,9 +160,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
       
 	if(!(v_prefixes.at(i).Contains("WW") || v_prefixes.at(i).Contains("WZ") || v_prefixes.at(i).Contains("ZZ")))
 	  continue;
-	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_ee");
-	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_mm");
-	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_em");
+	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
+	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
+	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
 
 
 	n_ee = n_ee + GetEntries(hee, lowBin, highBin);
@@ -204,9 +206,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
 	cout << beginL << Form("%9s ",v_prefixes.at(i).Data()) <<  colSep;
       else
 	cout << beginL << " *" << v_prefixes.at(i) << "* " << colSep;
-      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_ee");
-      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_mm");
-      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_em");
+      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
+      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
+      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
       
       n_ee =  GetEntries(hee, lowBin, highBin);
       n_mm =  GetEntries(hmm, lowBin, highBin);
@@ -252,9 +254,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
       if(v_prefixes.at(i).Contains("ttprime"))
         continue;
      
-      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_ee");
-      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_mm");
-      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnJet_em");
+      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
+      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
+      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
      
       n_ee = n_ee + GetEntries(hee, lowBin, highBin);
       n_mm = n_mm + GetEntries(hmm, lowBin, highBin);
@@ -283,7 +285,7 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
       else
 	cout << beginL << " *Data* " << colSep;
       for(unsigned int i = 0 ; i < 4; i++) {
-	TString name = "data_hnJet_" + TString(suffix[i]);
+	TString name = "data_hnBtagJet_" + TString(suffix[i]);
 	TH1F *h = (TH1F*)gDirectory->Get(name.Data());
 	float n = 0;
 	float nE = 0;
