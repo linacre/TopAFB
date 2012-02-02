@@ -41,7 +41,7 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
 
   bool runskim          = true;
   bool runSMS           = false;
-  bool runttprime       = runsig;
+  bool runwprime       = runsig;
   bool runttdil         = true;
   
 
@@ -60,7 +60,7 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
   bool  runphotonJet15  = false;
   bool  runphotonVJets  = false;
   //NLO cross-sections
-  float kttprime    = 1.;
+  float kwprime    = 1.;
   float ksms       = 1.;
   float kttdil    = 1.;
   float kttotr    = 1.;
@@ -125,6 +125,7 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
   //v_baseCuts.push_back("sortJetCandidatesbyDR");
   // v_baseCuts.push_back("matchLeptonJetbyMaxDR");
   //v_baseCuts.push_back("applyLeptonJetInvMassCut450");
+  //v_baseCuts.push_back("applyTopSystEta");
   // v_baseCuts.push_back("applyMinMassLBCut");
   v_baseCuts.push_back("requireExact2BTag");
   
@@ -252,65 +253,25 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
     hist::color("data", kRed);
     delete ch_data;
   }
-  if(runttprime){
-    TChain  *ch_ttprime350= new TChain("Events");
-    TChain  *ch_ttprime400= new TChain("Events");
-    TChain  *ch_ttprime450= new TChain("Events");
-    TChain  *ch_ttprime500= new TChain("Events");
-    TChain  *ch_ttprime550= new TChain("Events");
-    TChain  *ch_ttprime600= new TChain("Events");
+  if(runwprime){
+    TChain  *ch_wprime= new TChain("Events");
+   
     if(runskim){
-      cout << "Doing the MadGraph ttbarprime350  " << endl;
-      ch_ttprime350->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-350_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
+      //cout << "Doing the MadGraph ttbarprime350  " << endl;
+      // ch_wprime350->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-350_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
       
-      cout << "Doing the MadGraph ttbarprime400  " << endl;
-      ch_ttprime400->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-400_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
-			 
-      cout << "Doing the MadGraph ttbarprime450  " << endl;
-      ch_ttprime450->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-450_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
-
-      cout << "Doing the MadGraph ttbarprime500  " << endl;
-      ch_ttprime500->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-500_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
-
-      cout << "Doing the MadGraph ttbarprime550  " << endl;
-      ch_ttprime550->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-550_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
-      
-      cout << "Doing the MadGraph ttbarprime600  " << endl;
-      ch_ttprime600->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-600_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
     }
     
     else
       {
-	cout << "Doing the MadGraph ttbarprime350  " << endl;
-	ch_ttprime350->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-350_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
+	cout << "Doing the MadGraph wprime  " << endl;
+	ch_wprime->Add("/nfs-7a/userdata/yanjuntu/Wprime_SM_400_Madgraph_v2_yanjuntu-Wprime_SM_400_Madgraph_v2-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
 	
-	cout << "Doing the MadGraph ttbarprime400  " << endl;
-	ch_ttprime400->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-400_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
-	
-	cout << "Doing the MadGraph ttbarprime450  " << endl;
-	ch_ttprime450->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-450_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
 
-	cout << "Doing the MadGraph ttbarprime500  " << endl;
-	ch_ttprime500->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-500_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
-
-	cout << "Doing the MadGraph ttbarprime550  " << endl;
-	ch_ttprime550->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-550_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
-	
-	cout << "Doing the MadGraph ttbarprime600  " << endl;
-	ch_ttprime600->Add("/nfs-7/userdata/cms2/TprimeTprimeToBWBWinc_M-600_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/merged*root");
       }
-    baby->ScanChain(ch_ttprime350, v_Cuts,"ttprime350", doFRestimation, lumiToNormalizeTo, kttprime, false);
-    hist::color("ttprime350", kRed); 
-    baby->ScanChain(ch_ttprime400, v_Cuts,"ttprime400", doFRestimation, lumiToNormalizeTo, kttprime, false);
-    hist::color("ttprime400", kRed);
-    baby->ScanChain(ch_ttprime450, v_Cuts,"ttprime450", doFRestimation, lumiToNormalizeTo, kttprime, false);
-    hist::color("ttprime450", kRed);  
-    baby->ScanChain(ch_ttprime500, v_Cuts,"ttprime500", doFRestimation, lumiToNormalizeTo, kttprime, false);
-    hist::color("ttprime500", kRed);  
-    baby->ScanChain(ch_ttprime550, v_Cuts,"ttprime550", doFRestimation, lumiToNormalizeTo, kttprime, false);
-    hist::color("ttprime550", kRed);  
-    baby->ScanChain(ch_ttprime600, v_Cuts,"ttprime600", doFRestimation, lumiToNormalizeTo, kttprime, false);
-    hist::color("ttprime600", kRed);  
+    baby->ScanChain(ch_wprime, v_Cuts,"wprime", doFRestimation, lumiToNormalizeTo, kwprime, false);
+    hist::color("wprime", kRed); 
+   
   }
   
 if(runttdil) {
@@ -326,7 +287,7 @@ if(runttdil) {
       //cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root"); 
     }
       
-    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo, kttdil, false);
+    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*165.8/157.5, kttdil, false);
     hist::color("ttdil", kGreen);
     //delete ch_ttbar;
   }
@@ -355,7 +316,7 @@ if(runttdil) {
       cout << "Doing the MadGraph ttbar no-dileptons.. " << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
     }
       
-    baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo, kttotr, false);
+    baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*165.8/157.5, kttotr, false);
     hist::color("ttotr", kYellow);
     //delete ch_ttor;
   }

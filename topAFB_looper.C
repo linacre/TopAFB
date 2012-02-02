@@ -265,7 +265,7 @@ double topAFB_looper::getBFRWeight(const int hypIdx, vector<LorentzVector> & v_g
 
   double bjetfr =1.0;
  
-  double weight = 1.0;
+  double weight = 0.0;
   int nFO=0;    //FOs are non-b jets that give mass_ltb > 170 && mass_llb > 170
   bool isFO = false;
   vector<double> weight_tmp ;
@@ -1579,7 +1579,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   		
 
   		
-  		double btageffdata = 0.63;
+  		double btageffdata = 0.66;
   		double ctageffdata = 0.13;
   		double  nonb_pt, nonb_eta,bjet_pt,bjet_eta;
   		
@@ -1785,8 +1785,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
 	//if(m_top < 0) continue;
-	if(applyLeptonJetInvMassCut450 && !(tt_mass>450 )) continue;
-	if(applyTopSystEta && ! (ttRapidity < 2.0) ) continue;
+	if(applyLeptonJetInvMassCut450 && !(tt_mass<450 )) continue;
+ 	if(applyTopSystEta && ! (ttRapidity < 2.0) ) continue;
+
 	cms = 0.5*(top1_p4+top2_p4);
 	top1_p4.Boost(-cms.BoostVector());
 	top2_p4.Boost(-cms.BoostVector());
@@ -1986,7 +1987,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float llbbRapidityQuark_gen;
 	float llbbRapidityGluon_gen;
 	// generator level plots
-	if(!isData && prefix == "ttdil"){
+	if(!isData && (prefix == "ttdil"|| prefix == "wprime")){
 	  
      
 
