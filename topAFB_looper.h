@@ -11,6 +11,7 @@
 // top mass                                                                                                                                                       
 #include "../CORE/topmass/ttdilepsolve.cpp" 
 #include "../CORE/topmass/getTopMassEstimate.icc" 
+#include "../CORE/jetSelections.cc"
 //class TChain;
 
 class topAFB_looper
@@ -123,12 +124,14 @@ class topAFB_looper
 	float tt_mass_ ;
 	float ttRapidity_ ;
 	float lep_charge_asymmetry_ ;
+	float lep_azimuthal_asymmetry_ ;
 	float top_spin_correlation_ ;
 	float top_costheta_cms_    ;
 	float lepPlus_costheta_cms_ ;
 	float tt_mass_gen_ ;
 	float ttRapidity_gen_ ;
 	float lep_charge_asymmetry_gen_ ;
+	float lep_azimuthal_asymmetry_gen_ ;
 	float top_spin_correlation_gen_ ;
 	float  top_costheta_cms_gen_    ;
 	float lepPlus_costheta_cms_gen_ ;

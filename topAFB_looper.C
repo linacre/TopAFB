@@ -2133,12 +2133,14 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  tt_mass_ = tt_mass;
 	  ttRapidity_ = ttRapidity;
 	  lep_charge_asymmetry_ = lep_charge_asymmetry;
+	  lep_azimuthal_asymmetry_ = lep_azimuthal_asymmetry;
 	  top_spin_correlation_ = top_spin_correlation;
 	  top_costheta_cms_     = top_costheta_cms;
 	  lepPlus_costheta_cms_ = lepPlus_costheta_cms;
 	  tt_mass_gen_ = tt_mass_gen;
 	  ttRapidity_gen_ = ttRapidity_gen;
 	  lep_charge_asymmetry_gen_ = lep_charge_asymmetry_gen; 
+	  lep_azimuthal_asymmetry_gen_ = lep_azimuthal_asymmetry_gen;
 	  top_spin_correlation_gen_ = top_spin_correlation_gen;
 	  top_costheta_cms_gen_     = top_costheta_cms_gen;
 	  lepPlus_costheta_cms_gen_ = lepPlus_costheta_cms_gen;
@@ -2183,12 +2185,14 @@ void topAFB_looper::InitBabyNtuple ()
   tt_mass_ = -999.0;
   ttRapidity_ = -999.0;
   lep_charge_asymmetry_ = -999.0;
+  lep_azimuthal_asymmetry_ = -999.0;
   top_spin_correlation_ = -999.0;
   top_costheta_cms_     = -999.0;
   lepPlus_costheta_cms_ = -999.0;
   tt_mass_gen_ = -999.0;
   ttRapidity_gen_ = -999.0;
-  lep_charge_asymmetry_gen_ = -999.0;
+  lep_charge_asymmetry_gen_ = -999.0; 
+  lep_azimuthal_asymmetry_gen_ = -999.0;
   top_spin_correlation_gen_ = -999.0;
   top_costheta_cms_gen_     = -999.0;
   lepPlus_costheta_cms_gen_ = -999.0;
@@ -2222,12 +2226,14 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("tt_mass",               &tt_mass_,             "tt_mass/F"              );
     babyTree_->Branch("ttRapidity",            &ttRapidity_,          "ttRapidity/F"           );
     babyTree_->Branch("lep_charge_asymmetry",  &lep_charge_asymmetry_,"lep_charge_asymmetry/F" );
+    babyTree_->Branch("lep_azimuthal_asymmetry",&lep_azimuthal_asymmetry_,  "lep_azimuthal_asymmetry/F"   );
     babyTree_->Branch("top_spin_correlation",  &top_spin_correlation_,"top_spin_correlation/F" );
     babyTree_->Branch("top_costheta_cms",      &top_costheta_cms_,    "top_costheta_cms/F"     );
     babyTree_->Branch("lep_costheta_cms",      &lepPlus_costheta_cms_,"lep_costheta_cms/F"     );
     babyTree_->Branch("tt_mass_gen",           &tt_mass_gen_,          "tt_mass_gen/F"              );
     babyTree_->Branch("ttRapidity_gen",            &ttRapidity_gen_,          "ttRapidity_gen/F"            );
     babyTree_->Branch("lep_charge_asymmetry_gen",  &lep_charge_asymmetry_gen_,"lep_charge_asymmetry_gen_/F" );
+    babyTree_->Branch("lep_azimuthal_asymmetry_gen",    &lep_azimuthal_asymmetry_gen_,  "lep_azimuthal_asymmetry_gen_/F"   );
     babyTree_->Branch("top_spin_correlation_gen",  &top_spin_correlation_gen_,"top_spin_correlation_gen/F"  );
     babyTree_->Branch("top_costheta_cms_gen",      &top_costheta_cms_gen_,    "top_costheta_cms_gen/F"      );
     babyTree_->Branch("lep_costheta_cms_gen",      &lepPlus_costheta_cms_gen_,"lep_costheta_cms_gen/F"      );
@@ -2351,3 +2357,4 @@ int topAFB_looper::antimatch4vector(const LorentzVector &lvec,
   }
   return iret;
 }
+
