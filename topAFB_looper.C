@@ -1778,15 +1778,22 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	
 	float m_top; 
 	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus;  
-	if(require2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
+	if(require2BTag || requireExact2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
 	else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4);
 	float tt_mass = (top1_p4+top2_p4).M();
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
-	//if(m_top < 0) continue;
+	if(m_top < 0) continue;
 	if(applyLeptonJetInvMassCut450 && !(tt_mass<450 )) continue;
  	if(applyTopSystEta && ! (ttRapidity < 2.0) ) continue;
+
+	float top_rapiditydiff_cms = -999.0;
+	top_rapiditydiff_cms = (top1_p4.Rapidity() - top2_p4.Rapidity())*(top1_p4.Rapidity() + top2_p4.Rapidity());
+	
+	float top_pseudorapiditydiff_cms = -999.0;
+	top_pseudorapiditydiff_cms = abs(top1_p4.Eta()) - abs(top2_p4.Eta());
+	
 
 	cms = 0.5*(top1_p4+top2_p4);
 	top1_p4.Boost(-cms.BoostVector());
@@ -1825,7 +1832,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	float lep_charge_asymmetry = -999.0;
 	lep_charge_asymmetry = abs(lepPlus.Eta()) - abs(lepMinus.Eta());
-	
+
+
 	float lep_azimuthal_asymmetry =-999.0;
 	lep_azimuthal_asymmetry = cos(lepPlus.DeltaPhi(lepMinus));
 	
@@ -1986,8 +1994,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float massllbb_gen;
 	float llbbRapidityQuark_gen;
 	float llbbRapidityGluon_gen;
+	float top_rapiditydiff_cms_gen;
+	float top_pseudorapiditydiff_cms_gen;
 	// generator level plots
-	if(!isData && (prefix == "ttdil"|| prefix == "wprime")){
+	if(!isData && (prefix == "ttdil"|| prefix == "wprime400"|| prefix == "wprime600")){
 	  
      
 
@@ -2067,7 +2077,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  tt_mass_gen = (topplus_genp_p4 + topminus_genp_p4).M();
 	  ttRapidity_gen = topplus_genp_p4.Rapidity() + topminus_genp_p4.Rapidity();
 	  //ttRapidity_gen = topplus_genp_p4.Eta() + topminus_genp_p4.Eta();
+	  
+	  top_rapiditydiff_cms_gen = (topplus_genp_p4.Rapidity() - topminus_genp_p4.Rapidity())*(topplus_genp_p4.Rapidity() + topminus_genp_p4.Rapidity());
+	  top_pseudorapiditydiff_cms_gen = abs(topplus_genp_p4.Eta()) - abs(topminus_genp_p4.Eta());
 	
+
 	  cms_gen = 0.5*(topplus_genp_p4+topminus_genp_p4);
 	  topplus_genp_p4.Boost(-cms_gen.BoostVector());
 	  topminus_genp_p4.Boost(-cms_gen.BoostVector());
@@ -2136,6 +2150,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  lep_azimuthal_asymmetry_ = lep_azimuthal_asymmetry;
 	  top_spin_correlation_ = top_spin_correlation;
 	  top_costheta_cms_     = top_costheta_cms;
+	  top_rapiditydiff_cms_ = top_rapiditydiff_cms;
+	  top_pseudorapiditydiff_cms_ = top_pseudorapiditydiff_cms;
+	  top_rapiditydiff_cms_gen_ = top_rapiditydiff_cms_gen;
+	  top_pseudorapiditydiff_cms_gen_ = top_pseudorapiditydiff_cms_gen;
 	  lepPlus_costheta_cms_ = lepPlus_costheta_cms;
 	  tt_mass_gen_ = tt_mass_gen;
 	  ttRapidity_gen_ = ttRapidity_gen;
@@ -2188,6 +2206,10 @@ void topAFB_looper::InitBabyNtuple ()
   lep_azimuthal_asymmetry_ = -999.0;
   top_spin_correlation_ = -999.0;
   top_costheta_cms_     = -999.0;
+  top_rapiditydiff_cms_           = -999.0;
+  top_pseudorapiditydiff_cms_     = -999.0;
+  top_rapiditydiff_cms_gen_           = -999.0;
+  top_pseudorapiditydiff_cms_gen_     = -999.0;
   lepPlus_costheta_cms_ = -999.0;
   tt_mass_gen_ = -999.0;
   ttRapidity_gen_ = -999.0;
@@ -2230,6 +2252,10 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("top_spin_correlation",  &top_spin_correlation_,"top_spin_correlation/F" );
     babyTree_->Branch("top_costheta_cms",      &top_costheta_cms_,    "top_costheta_cms/F"     );
     babyTree_->Branch("lep_costheta_cms",      &lepPlus_costheta_cms_,"lep_costheta_cms/F"     );
+    babyTree_->Branch("top_rapidtiydiff_cms",      &top_rapiditydiff_cms_,"top_rapiditydiff_cms/F"     );
+    babyTree_->Branch("top_pseudorapidtiydiff_cms",      &top_pseudorapiditydiff_cms_,"top_pseudorapiditydiff_cms/F"     );
+    babyTree_->Branch("top_rapidtiydiff_cms_gen",      &top_rapiditydiff_cms_gen_,"top_rapiditydiff_cms_gen/F"     );
+    babyTree_->Branch("top_pseudorapidtiydiff_cms_gen",      &top_pseudorapiditydiff_cms_gen_,"top_pseudorapiditydiff_cms_gen/F"     );
     babyTree_->Branch("tt_mass_gen",           &tt_mass_gen_,          "tt_mass_gen/F"              );
     babyTree_->Branch("ttRapidity_gen",            &ttRapidity_gen_,          "ttRapidity_gen/F"            );
     babyTree_->Branch("lep_charge_asymmetry_gen",  &lep_charge_asymmetry_gen_,"lep_charge_asymmetry_gen_/F" );

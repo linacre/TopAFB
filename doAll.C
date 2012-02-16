@@ -1,4 +1,4 @@
-void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, bool runmc = false, bool requireBTag=false, bool require2BTag=false, bool usePF = true, 
+void doAll(TString outputDir="results", bool rundata=false, bool runsig=true, bool runmc = false, bool requireBTag=false, bool require2BTag=false, bool usePF = true, 
 	   bool doFRestimation = false, bool scaleJESMETUp = false, 
 	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = true, bool createBabyNtuples = true, bool doBFR = false)
 {
@@ -39,10 +39,10 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
   string cms2_skim_location="/nfs-7a/userdata/yanjuntu/TPrimeSkim";
   string cms2_location="/nfs-6/userdata/cms2";
 
-  bool runskim          = true;
+  bool runskim          = false;
   bool runSMS           = false;
   bool runwprime       = runsig;
-  bool runttdil         = true;
+  bool runttdil         = false;
   
 
   bool runttotr         = runmc ; //false;
@@ -60,7 +60,8 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
   bool  runphotonJet15  = false;
   bool  runphotonVJets  = false;
   //NLO cross-sections
-  float kwprime    = 1.;
+  float kWprime400    = 1.;
+  float kWprime600    = 1.;
   float ksms       = 1.;
   float kttdil    = 1.;
   float kttotr    = 1.;
@@ -254,8 +255,8 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
     delete ch_data;
   }
   if(runwprime){
-    TChain  *ch_wprime= new TChain("Events");
-   
+    TChain  *ch_wprime400= new TChain("Events");
+    TChain  *ch_wprime600= new TChain("Events");
     if(runskim){
       //cout << "Doing the MadGraph ttbarprime350  " << endl;
       // ch_wprime350->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-350_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));
@@ -264,14 +265,16 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
     
     else
       {
-	cout << "Doing the MadGraph wprime  " << endl;
-	ch_wprime->Add("/nfs-7a/userdata/yanjuntu/Wprime_SM_400_Madgraph_v2_yanjuntu-Wprime_SM_400_Madgraph_v2-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
-	
+	cout << "Doing the MadGraph wprime 400 " << endl;
+	ch_wprime400->Add("/nfs-7a/userdata/yanjuntu/Wprime_SM_400_Madgraph_v2_yanjuntu-Wprime_SM_400_Madgraph_v2-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
+	cout << "Doing the MadGraph wprime 600 " << endl;
+        ch_wprime600->Add("/nfs-7a/userdata/yanjuntu/Wprime_ttbar_600_Madgraph-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
 
       }
-    baby->ScanChain(ch_wprime, v_Cuts,"wprime", doFRestimation, lumiToNormalizeTo, kwprime, false);
-    hist::color("wprime", kRed); 
-   
+    baby->ScanChain(ch_wprime400, v_Cuts,"wprime400", doFRestimation, lumiToNormalizeTo, kWprime400, false);
+    hist::color("wprime400", kRed); 
+    baby->ScanChain(ch_wprime600, v_Cuts,"wprime600", doFRestimation, lumiToNormalizeTo, kWprime600, false);
+    hist::color("wprime600", kRed);
   }
   
 if(runttdil) {

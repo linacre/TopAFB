@@ -127,6 +127,8 @@ class topAFB_looper
 	float lep_azimuthal_asymmetry_ ;
 	float top_spin_correlation_ ;
 	float top_costheta_cms_    ;
+	float top_rapiditydiff_cms_    ;
+	float top_pseudorapiditydiff_cms_    ;
 	float lepPlus_costheta_cms_ ;
 	float tt_mass_gen_ ;
 	float ttRapidity_gen_ ;
@@ -135,6 +137,8 @@ class topAFB_looper
 	float top_spin_correlation_gen_ ;
 	float  top_costheta_cms_gen_    ;
 	float lepPlus_costheta_cms_gen_ ;
+	float top_rapiditydiff_cms_gen_    ;
+	float top_pseudorapiditydiff_cms_gen_;  
 	float massllbb_ ;
 	float massllbb_gen_;
 	//	float llbbRapidityQuark_gen_;

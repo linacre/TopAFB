@@ -59,7 +59,9 @@ void makeTable(bool isData=false){
   std::string mathSep = latex ? "$" : "";
   
   const char* formatS = "%6.3f";
-  TCut baseline = "tt_mass <450 && ttRapidity >2.0";
+   TCut baseline = "tt_mass > 0 && tt_mass >450 && ttRapidity >2.0";
+  //TCut baseline = "tt_mass >450";
+  // TCut baseline = "tt_mass >0";
   
   float lepChargeA    ;
   float lepChargeA_plus;
@@ -119,10 +121,38 @@ void makeTable(bool isData=false){
   
   calculateA( baseline, "top_spin_correlation", false, topSpinCorrA, topSpinCorrA_plus, topSpinCorrA_minus, topSpinCorrA_corr,  topSpinCorrA_quant, topSpinCorrA_err );
   calculateA( baseline, "top_spin_correlation", true, topSpinCorrA, topSpinCorrA_plus_gen, topSpinCorrA_minus_gen, topSpinCorrA_corr,  topSpinCorrA_quant_gen, topSpinCorrA_err_gen );
+
+  float toprapiditydiffA    ;
+  float toprapiditydiffA_plus;
+  float toprapiditydiffA_minus;
+  float toprapiditydiffA_corr ;
+  float toprapiditydiffA_quant ;
+  float toprapiditydiffA_err  ;
+  float toprapiditydiffA_plus_gen ;
+  float toprapiditydiffA_minus_gen ;
+  float toprapiditydiffA_quant_gen ;
+  float toprapiditydiffA_err_gen   ;
+  
+  calculateA( baseline, "top_rapiditydiff_cms", false, toprapiditydiffA, toprapiditydiffA_plus, toprapiditydiffA_minus, toprapiditydiffA_corr,  toprapiditydiffA_quant, toprapiditydiffA_err );
+  calculateA( baseline, "top_rapiditydiff_cms", true, toprapiditydiffA, toprapiditydiffA_plus_gen, toprapiditydiffA_minus_gen, toprapiditydiffA_corr,  toprapiditydiffA_quant_gen, toprapiditydiffA_err_gen );
+  
+  float pseudorapiditydiffA    ;
+  float pseudorapiditydiffA_plus;
+  float pseudorapiditydiffA_minus;
+  float pseudorapiditydiffA_corr ;
+  float pseudorapiditydiffA_quant ;
+  float pseudorapiditydiffA_err  ;
+  float pseudorapiditydiffA_plus_gen ;
+  float pseudorapiditydiffA_minus_gen ;
+  float pseudorapiditydiffA_quant_gen ;
+  float pseudorapiditydiffA_err_gen   ;
+  
+  calculateA( baseline, "top_pseudorapiditydiff_cms", false, pseudorapiditydiffA, pseudorapiditydiffA_plus, pseudorapiditydiffA_minus, pseudorapiditydiffA_corr,  pseudorapiditydiffA_quant, pseudorapiditydiffA_err );
+  calculateA( baseline, "top_pseudorapiditydiff_cms", true, pseudorapiditydiffA, pseudorapiditydiffA_plus_gen, pseudorapiditydiffA_minus_gen, pseudorapiditydiffA_corr,  pseudorapiditydiffA_quant_gen, pseudorapiditydiffA_err_gen );
   
 
   if(!isData){
-
+    
   cout << "\\begin{tabular}{l| c  c  c  c c c}" << endl;
   cout << "\\hline" << endl;
   cout << beginL <<"Var "<< colSep << "     "  << colSep<< "Total Events"  << colSep  <<"Plus Sign"        << colSep <<"Minus Sign "     << colSep << "Prob of Corr Sign"  << colSep << "Asym" << endL <<endl;
@@ -138,6 +168,10 @@ void makeTable(bool isData=false){
  cout << beginL <<"Top Spin Correlation"<<colSep << " Gen  "     << colSep<< topSpinCorrA      << colSep  <<topSpinCorrA_plus_gen    << colSep <<topSpinCorrA_minus_gen  << colSep << "-"  << colSep <<formatFloat(topSpinCorrA_quant_gen, formatS) <<pmSign << formatFloat(topSpinCorrA_err_gen,formatS)<< endL <<endl;
  cout << beginL <<"Top Spin Correlation"<<colSep << " Reco "     << colSep << topSpinCorrA      << colSep  <<topSpinCorrA_plus    << colSep <<topSpinCorrA_minus  << colSep <<formatFloat(topSpinCorrA_corr,formatS) << colSep <<formatFloat(topSpinCorrA_quant,formatS) <<pmSign << formatFloat(topSpinCorrA_err, formatS) << endL <<endl;
 
+ cout << beginL <<"Top Rapidity Diff"<<colSep << " Gen  "     << colSep<< toprapiditydiffA      << colSep  <<toprapiditydiffA_plus_gen    << colSep <<toprapiditydiffA_minus_gen  << colSep << "-"  << colSep <<formatFloat(toprapiditydiffA_quant_gen, formatS) <<pmSign << formatFloat(toprapiditydiffA_err_gen,formatS)<< endL <<endl;
+ cout << beginL <<"Top Rapidity Diff"<<colSep << " Reco "     << colSep << toprapiditydiffA      << colSep  <<toprapiditydiffA_plus    << colSep <<toprapiditydiffA_minus  << colSep <<formatFloat(toprapiditydiffA_corr,formatS) << colSep <<formatFloat(toprapiditydiffA_quant,formatS) <<pmSign << formatFloat(toprapiditydiffA_err, formatS) << endL <<endl;
+ cout << beginL <<"Top PseudoRapidity Diff"<<colSep << " Gen  "     << colSep<< pseudorapiditydiffA      << colSep  <<pseudorapiditydiffA_plus_gen    << colSep <<pseudorapiditydiffA_minus_gen  << colSep << "-"  << colSep <<formatFloat(pseudorapiditydiffA_quant_gen, formatS) <<pmSign << formatFloat(pseudorapiditydiffA_err_gen,formatS)<< endL <<endl;
+ cout << beginL <<"Top PseudoRapidity Diff"<<colSep << " Reco "     << colSep << pseudorapiditydiffA      << colSep  <<pseudorapiditydiffA_plus    << colSep <<pseudorapiditydiffA_minus  << colSep <<formatFloat(pseudorapiditydiffA_corr,formatS) << colSep <<formatFloat(pseudorapiditydiffA_quant,formatS) <<pmSign << formatFloat(pseudorapiditydiffA_err, formatS) << endL <<endl;
 
 
   cout << "\\hline" << endl;
