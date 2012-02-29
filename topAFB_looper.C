@@ -1997,7 +1997,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float top_rapiditydiff_cms_gen;
 	float top_pseudorapiditydiff_cms_gen;
 	// generator level plots
-	if(!isData && (prefix == "ttdil"|| prefix == "wprime400"|| prefix == "wprime600")){
+	if(!isData && (prefix == "ttdil"|| prefix == "wprime400"|| prefix == "wprime600" || prefix == "axigluonR")){
 	  
      
 
