@@ -36,7 +36,7 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=true, bo
 
   topAFB_looper * baby = new topAFB_looper();
   // Flags for files to run over
-  string cms2_skim_location="/nfs-7a/userdata/yanjuntu/TPrimeSkim";
+  string cms2_skim_location="/nfs-6/userdata/yanjuntu/TPrimeSkim";
   string cms2_location="/nfs-6/userdata/cms2";
 
   bool runskim          = false;
@@ -266,14 +266,14 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=true, bo
     else
       {
 	cout << "Doing the MadGraph wprime 400 " << endl;
-	ch_wprime400->Add("/nfs-7a/userdata/yanjuntu/Wprime_SM_400_Madgraph_v2_yanjuntu-Wprime_SM_400_Madgraph_v2-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
+	ch_wprime400->Add("/nfs-6/userdata/yanjuntu/Wprime_SM_400_Madgraph_v2_yanjuntu-Wprime_SM_400_Madgraph_v2-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
 	cout << "Doing the MadGraph wprime 600 " << endl;
-        ch_wprime600->Add("/nfs-7a/userdata/yanjuntu/Wprime_ttbar_600_Madgraph-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
+        ch_wprime600->Add("/nfs-6/userdata/yanjuntu/Wprime_ttbar_600_Madgraph-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
 
       }
-    baby->ScanChain(ch_wprime400, v_Cuts,"wprime400", doFRestimation, lumiToNormalizeTo, kWprime400, false);
+    baby->ScanChain(ch_wprime400, v_Cuts,"wprime400", doFRestimation, lumiToNormalizeTo*6.2539/1.0, kWprime400, false);
     hist::color("wprime400", kRed); 
-    baby->ScanChain(ch_wprime600, v_Cuts,"wprime600", doFRestimation, lumiToNormalizeTo, kWprime600, false);
+    baby->ScanChain(ch_wprime600, v_Cuts,"wprime600", doFRestimation, lumiToNormalizeTo*79997/99997, kWprime600, false);
     hist::color("wprime600", kRed);
   }
   
