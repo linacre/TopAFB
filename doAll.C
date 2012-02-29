@@ -1,10 +1,11 @@
-void doAll(TString outputDir="results", bool rundata=false, bool runsig=true, bool runmc = false, bool requireBTag=false, bool require2BTag=false, bool usePF = true, 
+void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, bool runmc = false, bool requireBTag=false, bool require2BTag=false, bool usePF = true, 
 	   bool doFRestimation = false, bool scaleJESMETUp = false, 
 	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = true, bool createBabyNtuples = true, bool doBFR = false)
 {
   //gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_v5.28.00.so");
   gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
   gSystem->Load("/nfs-3/userdata/yanjuntu/lhapdf/lib/libLHAPDF.so");
+  
   gSystem->AddIncludePath(" -w -I../CORE/topmass -I/nfs-3/userdata/yanjuntu/lhapdf/include");
   gROOT->ProcessLine(".L ../CORE/topmass/ttdilepsolve.cpp+"); 
   gROOT->ProcessLine(".L ../CORE/CMS2.cc+");
@@ -41,7 +42,8 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=true, bo
 
   bool runskim          = false;
   bool runSMS           = false;
-  bool runwprime       = runsig;
+  bool runwprime        = runsig;
+  bool runAxigluon      = runsig;
   bool runttdil         = false;
   
 
@@ -62,6 +64,7 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=true, bo
   //NLO cross-sections
   float kWprime400    = 1.;
   float kWprime600    = 1.;
+  float kAxigluonR    = 1.;
   float ksms       = 1.;
   float kttdil    = 1.;
   float kttotr    = 1.;
@@ -276,6 +279,23 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=true, bo
     baby->ScanChain(ch_wprime600, v_Cuts,"wprime600", doFRestimation, lumiToNormalizeTo*79997/99997, kWprime600, false);
     hist::color("wprime600", kRed);
   }
+
+
+ if(runAxigluon){
+    TChain  *ch_axigluonR= new TChain("Events");
+    if(runskim){
+      //cout << "Doing the MadGraph ttbarprime350  " << endl;
+      // ch_wprime350->Add(Form("%s/%s", cms2_skim_location.c_str(),"TprimeTprimeToBWBWinc_M-350_7TeV-madgraph_Summer11-PU_S4_START42_V11-v2/V04-02-29/skimmed*root"));     
+    }
+    
+    else
+      {
+	cout << "Doing the MadGraph Axigluon rght-handed " << endl;
+	ch_axigluonR->Add("/nfs-3/userdata/cms2/AxigluonR_2TeV_ttbar_MadGraph_sergo-AxigluonR_2TeV_ttbar_MadGraph/VB04-02-29_Fastsim/merged_ntuple*.root");
+      }
+    baby->ScanChain(ch_axigluonR, v_Cuts,"axigluonR", doFRestimation, lumiToNormalizeTo, kAxigluonR, false);
+    hist::color("axigluonR", kRed); 
+ }
   
 if(runttdil) {
     TChain  *ch_ttbar= new TChain("Events");

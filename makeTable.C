@@ -1,6 +1,5 @@
 #include "CommonFunctions.C"
 #include " TH1F.h"
-#include <iostream>
 void calculateA( TCut baseline, const char* var, bool isGen, float& event_total, float& event_plus, float& event_minus, float& event_corr,  float& asymm, float& asymm_err ){
 
   const char* temp = Form("(%s*%s_gen) >0", var, var);
@@ -9,20 +8,21 @@ void calculateA( TCut baseline, const char* var, bool isGen, float& event_total,
   TCut plusSign  ;
   TCut minusSign ;
   if(!isGen){
-    plusSign =  Form("%s >0", var) && baseline ;
+    plusSign = Form("%s >0", var)  && baseline;
     minusSign = Form("%s <0", var) && baseline;
  
   }
   else{
-    plusSign = Form("%s_gen >0 ", var) && baseline ;
-    minusSign = Form("%s_gen <0 ", var) && baseline ;
+    plusSign = Form("%s_gen >0", var)  && baseline;
+    minusSign = Form("%s_gen <0", var) && baseline;
   }
  
   TH1F* hlepChargeA = new TH1F("lepChargeA", "lepChargeA", 4, -10, 10);
   TH1F* hlepChargeA_plus = new TH1F("lepChargeA_plus", "lepChargeA_plus", 4, -10, 10);
   TH1F* hlepChargeA_minus = new TH1F("lepChargeA_minus", "lepChargeA_minus", 4, -10, 10);
   TH1F* hlepChargeA_corr = new TH1F("lepChargeA_corr", "lepChargeA_corr", 4, -10, 10);
-  tree->Draw(Form("%s >> %s", var, "lepChargeA"),       baseline*"weight" );
+
+  tree->Draw(Form("%s >> %s", var, "lepChargeA"),       baseline*"weight");
   tree->Draw(Form("%s >> %s", var, "lepChargeA_corr"),  corrSign*"weight");
   
   if(!isGen){
@@ -43,6 +43,7 @@ void calculateA( TCut baseline, const char* var, bool isGen, float& event_total,
   event_corr  = (lepChargeA_corr->Integral(0, nbins+1))/event_total;
   asymm = (event_plus-event_minus)/(event_plus+event_minus);
   asymm_err   = sqrt(4*(event_plus*event_minus)/(event_total*event_total*event_total));
+
   delete  hlepChargeA ;
   delete  hlepChargeA_plus;
   delete  hlepChargeA_minus;
@@ -60,10 +61,8 @@ void makeTable(bool isData=false){
   std::string mathSep = latex ? "$" : "";
   
   const char* formatS = "%6.3f";
-  TCut baseline = "tt_mass > 0 && tt_mass >450 && ((ttRapidity) >2.0 ||(ttRapidity <-2.0))";
-  //TCut baseline = "tt_mass >450";
-  // TCut baseline = "tt_mass >0";
-  
+  TCut baseline = "tt_mass > 0 && tt_mass >450 && ((ttRapidity > 2.0)||(ttRapidity < -2.0))";
+
   float lepChargeA    ;
   float lepChargeA_plus;
   float lepChargeA_minus;
@@ -77,6 +76,21 @@ void makeTable(bool isData=false){
   
   calculateA( baseline, "lep_charge_asymmetry", false, lepChargeA, lepChargeA_plus, lepChargeA_minus, lepChargeA_corr,  lepChargeA_quant, lepChargeA_err );
   calculateA( baseline, "lep_charge_asymmetry", true, lepChargeA, lepChargeA_plus_gen, lepChargeA_minus_gen, lepChargeA_corr,  lepChargeA_quant_gen, lepChargeA_err_gen );
+
+  
+  float lepAzimA    ;
+  float lepAzimA_plus;
+  float lepAzimA_minus;
+  float lepAzimA_corr ;
+  float lepAzimA_quant ;
+  float lepAzimA_err  ;
+  float lepAzimA_plus_gen ;
+  float lepAzimA_minus_gen ;
+  float lepAzimA_quant_gen ;
+  float lepAzimA_err_gen   ;
+  
+  calculateA( baseline, "lep_azimuthal_asymmetry", false, lepAzimA, lepAzimA_plus, lepAzimA_minus, lepAzimA_corr,  lepAzimA_quant, lepAzimA_err );
+  calculateA( baseline, "lep_azimuthal_asymmetry", true, lepAzimA, lepAzimA_plus_gen, lepAzimA_minus_gen, lepAzimA_corr,  lepAzimA_quant_gen, lepAzimA_err_gen );
 
   float topCosThetaA    ;
   float topCosThetaA_plus;
@@ -153,13 +167,18 @@ void makeTable(bool isData=false){
   //cout.unsetf(ios::floatfield);            // floatfield not set
   cout.precision(4);
 
+
   if(!isData){
-    
+
   cout << "\\begin{tabular}{l| c  c  c  c c c}" << endl;
   cout << "\\hline" << endl;
-  cout << beginL <<"Var "<< colSep << "     "  << colSep<< "Events"  << colSep  <<"Plus"        << colSep <<"Minus"     << colSep << "Prob of Corr Sign"  << colSep << "Asym" << endL <<endl;
+  cout << beginL <<"Var "<< colSep << "     "  << colSep<< "Total Events"  << colSep  <<"Plus Sign"        << colSep <<"Minus Sign "     << colSep << "Prob of Corr Sign"  << colSep << "Asym" << endL <<endl;
+ 
   cout << beginL <<"Lep Charge Asy"<<colSep << " Gen  "     << colSep<< lepChargeA      << colSep  <<lepChargeA_plus_gen    << colSep <<lepChargeA_minus_gen  << colSep << "-"  << colSep <<formatFloat(lepChargeA_quant_gen, formatS) <<pmSign << formatFloat(lepChargeA_err_gen,formatS)<< endL <<endl;
   cout << beginL <<"Lep Charge Asy"<<colSep << " Reco "     << colSep << lepChargeA      << colSep  <<lepChargeA_plus    << colSep <<lepChargeA_minus  << colSep <<formatFloat(lepChargeA_corr,formatS) << colSep <<formatFloat(lepChargeA_quant,formatS) <<pmSign << formatFloat(lepChargeA_err, formatS) << endL <<endl;
+ cout << beginL <<"Lep Azim Asy"<<colSep << " Gen  "     << colSep<< lepAzimA      << colSep  <<lepAzimA_plus_gen    << colSep <<lepAzimA_minus_gen  << colSep << "-"  << colSep <<formatFloat(lepAzimA_quant_gen, formatS) <<pmSign << formatFloat(lepAzimA_err_gen,formatS)<< endL <<endl;
+  cout << beginL <<"Lep Azim Asy"<<colSep << " Reco "     << colSep << lepAzimA      << colSep  <<lepAzimA_plus    << colSep <<lepAzimA_minus  << colSep <<formatFloat(lepAzimA_corr,formatS) << colSep <<formatFloat(lepAzimA_quant,formatS) <<pmSign << formatFloat(lepAzimA_err, formatS) << endL <<endl;
+
 
   cout << beginL <<"Top Charge Asy"<<colSep << " Gen  "     << colSep<< topCosThetaA      << colSep  <<topCosThetaA_plus_gen    << colSep <<topCosThetaA_minus_gen  << colSep << "-"  << colSep <<formatFloat(topCosThetaA_quant_gen, formatS) <<pmSign << formatFloat(topCosThetaA_err_gen,formatS)<< endL <<endl;
   cout << beginL <<"Top Charge Asy"<<colSep << " Reco "     << colSep << topCosThetaA      << colSep  <<topCosThetaA_plus    << colSep <<topCosThetaA_minus  << colSep <<formatFloat(topCosThetaA_corr,formatS) << colSep <<formatFloat(topCosThetaA_quant,formatS) <<pmSign << formatFloat(topCosThetaA_err, formatS) << endL <<endl;
@@ -176,6 +195,7 @@ void makeTable(bool isData=false){
  cout << beginL <<"Top Asy II"<<colSep << " Reco "     << colSep << pseudorapiditydiffA      << colSep  <<pseudorapiditydiffA_plus    << colSep <<pseudorapiditydiffA_minus  << colSep <<formatFloat(pseudorapiditydiffA_corr,formatS) << colSep <<formatFloat(pseudorapiditydiffA_quant,formatS) <<pmSign << formatFloat(pseudorapiditydiffA_err, formatS) << endL <<endl;
 
 
+
   cout << "\\hline" << endl;
   cout << "\\end{tabular}" << endl;
   }
@@ -184,13 +204,15 @@ void makeTable(bool isData=false){
     
   cout << "\\begin{tabular}{l| c  c  c  c c c}" << endl;
   cout << "\\hline" << endl;
-  cout << beginL <<"Var "<< colSep<< "Total"  << colSep  <<"Plus"        << colSep <<"Minus"     << colSep << "Asym" << endL <<endl;
+  cout << beginL <<"Var "<< colSep<< "Total Events"  << colSep  <<"Plus Sign"        << colSep <<"Minus Sign "     << colSep << "Asym" << endL <<endl;
   cout << beginL <<"Lep Charge Asy" << colSep << lepChargeA      << colSep  <<lepChargeA_plus    << colSep <<lepChargeA_minus   << colSep <<formatFloat(lepChargeA_quant,formatS) <<pmSign << formatFloat(lepChargeA_err, formatS) << endL <<endl;
 
-  cout << beginL <<"Top Charge Asy"     << colSep << topCosThetaA      << colSep  <<topCosThetaA_plus    << colSep <<topCosThetaA_minus   << colSep <<formatFloat(topCosThetaA_quant,formatS) <<pmSign << formatFloat(topCosThetaA_err, formatS) << endL <<endl;
+  cout << beginL <<"Lep Azim Asy" << colSep << lepAzimA      << colSep  <<lepAzimA_plus    << colSep <<lepAzimA_minus   << colSep <<formatFloat(lepAzimA_quant,formatS) <<pmSign << formatFloat(lepAzimA_err, formatS) << endL <<endl;
+
+  cout << beginL <<"Top AFB"     << colSep << topCosThetaA      << colSep  <<topCosThetaA_plus    << colSep <<topCosThetaA_minus   << colSep <<formatFloat(topCosThetaA_quant,formatS) <<pmSign << formatFloat(topCosThetaA_err, formatS) << endL <<endl;
 
 
-  cout << beginL <<"Top Polarization"   << colSep << lepCosThetaA      << colSep  <<lepCosThetaA_plus    << colSep <<lepCosThetaA_minus   << colSep <<formatFloat(lepCosThetaA_quant,formatS) <<pmSign << formatFloat(lepCosThetaA_err, formatS) << endL <<endl;
+  cout << beginL <<"Top Polorization"   << colSep << lepCosThetaA      << colSep  <<lepCosThetaA_plus    << colSep <<lepCosThetaA_minus   << colSep <<formatFloat(lepCosThetaA_quant,formatS) <<pmSign << formatFloat(lepCosThetaA_err, formatS) << endL <<endl;
 
 
  cout << beginL <<"Top Spin Correlation"  << colSep << topSpinCorrA      << colSep  <<topSpinCorrA_plus    << colSep <<topSpinCorrA_minus   << colSep <<formatFloat(topSpinCorrA_quant,formatS) <<pmSign << formatFloat(topSpinCorrA_err, formatS) << endL <<endl;
