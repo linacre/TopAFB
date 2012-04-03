@@ -1190,10 +1190,17 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	int nBtagJets = 0; 
 	vector<unsigned int> v_goodBtagJets;
 	vector<unsigned int> v_goodNonBtagJets;
-	TString btag_algo;
-	if(BTagAlgTCHE) btag_algo = "trackCountingHighEffBJetTag";
+	TString btag_algo, btag_algo_name ;
+	if(BTagAlgTCHE) 
+	  {
+	    btag_algo = "trackCountingHighEffBJetTag";
+	    btag_algo_name = "TCHEM" ; 
+	  }
 	//else btag_algo = "simpleSecondaryVertexHighEffBJetTag";
-	else btag_algo = "combinedSecondaryVertexBJetTag";
+	else {
+	  btag_algo = "combinedSecondaryVertexBJetTag";
+	  btag_algo_name = "CSVM" ; 
+	}
 	
 	for(unsigned int i = 0; i < v_goodJets.size(); i++) {
 	  
@@ -1595,8 +1602,13 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   		int nMistags = 0;
   		int ncMistags = 0;
 		double btag_sf = 1.0;
-		if(BTagAlgTCHE)btag_sf = getBTagSF("TCHE", 3.3);
-		else btag_sf = getBTagSF("CSV", 0.679);
+		
+		if(BTagAlgTCHE){
+		  btag_sf = getBTagSF("TCHE", 3.3);
+		}
+		else {
+		  btag_sf = getBTagSF("CSV", 0.679);
+		}
   	
 		for(unsigned int j = 0; j < nBtagJets; j++) {
   			bjet_pt =  v_goodBtagJets_p4.at(j).Pt();
@@ -1617,7 +1629,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   			}
   			else{
   				nMistags++;
-  				weightmistag *= getMisTagSF( bjet_pt, bjet_eta  , "TCHEM");
+  				weightmistag *= getMisTagSF( bjet_pt, bjet_eta  , btag_algo_name.Data());
   				if( j_unmatched[j] ==-1) cout<<"something went wrong filling v_goodBtagJets_unmatched_p4"<<endl;
   			}
   		}
@@ -1668,7 +1680,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 			//to keep within the range of the function 
 			if(nonb_pt>499.0) {nonb_pt =  499.0; }
 			if(nonb_eta>2.3) {nonb_eta =  2.3; }
-			double bjetfrdata =  getMisTagRate( nonb_pt, nonb_eta  , "TCHEM");
+			double bjetfrdata =  getMisTagRate( nonb_pt, nonb_eta  , btag_algo_name.Data());
 			
 			//if the matched real b or c is already matched to a btag jet, the matching to the nonb is overridden
 			bool alreadymatched=false;
@@ -1680,7 +1692,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 			//if(alreadymatchedc) cout<<"alreadymatchedc"<<endl;
 			if( !(i_nonb_matching_b[i] ==-1 || alreadymatched) ) weightbnottagged *= (1.-btageffdata)/(1.-btageffdata/btag_sf );
 			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && !(i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightcnotmistagged *= (1.-ctageffdata)/(1.-ctageffdata/btag_sf );
-  			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && (i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightnotmistagged *= (1.-bjetfrdata)/(1.-bjetfrdata/getMisTagSF( nonb_pt, nonb_eta  , "TCHEM"));
+  			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && (i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightnotmistagged *= (1.-bjetfrdata)/(1.-bjetfrdata/getMisTagSF( nonb_pt, nonb_eta  , btag_algo_name.Data()));
 		}
 		//if(nGenc>0) cout<<"weightb, weightbnottagged, weightcmistag, weightcnotmistagged, weightmistag, weightnotmistagged: "<<weightb<<" , "<<weightbnottagged <<" , "<<weightcmistag<<" , "<<weightcnotmistagged <<" , "<<weightmistag<<" , "<<weightnotmistagged <<endl;
 		weight = weight*weightb*weightbnottagged*weightcmistag*weightcnotmistagged*weightmistag*weightnotmistagged;
@@ -1797,7 +1809,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
-	if(m_top < 0) continue;
+	//if(m_top < 0) continue;
 	if(applyLeptonJetInvMassCut450 && !(tt_mass<450 )) continue;
  	if(applyTopSystEta && ! (ttRapidity < 2.0) ) continue;
 
