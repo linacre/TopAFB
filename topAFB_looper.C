@@ -54,6 +54,8 @@ bool topAFB_looper::passbTagging(const unsigned int jet_idx, const string jetAlg
   if(jetAlgo == "jptJets") {
     if(bTagDiscriminator == "trackCountingHighEffBJetTag" && jpts_trackCountingHighEffBJetTag()[jet_idx] > 3.3)
       return true;
+    else if(bTagDiscriminator == "combinedSecondaryVertexBJetTag" && jpts_combinedSecondaryVertexBJetTag()[jet_idx] > 0.679)
+      return true;
     else if(bTagDiscriminator == "simpleSecondaryVertexHighEffBJetTag" && jpts_simpleSecondaryVertexHighEffBJetTag()[jet_idx] > 1.74)
       return true;
     else if(bTagDiscriminator == "simpleSecondaryVertexHighPurBJetTag" && jpts_simpleSecondaryVertexHighPurBJetTags()[jet_idx] > 2)
@@ -64,6 +66,8 @@ bool topAFB_looper::passbTagging(const unsigned int jet_idx, const string jetAlg
   if(jetAlgo == "caloJets") {
     if(bTagDiscriminator == "trackCountingHighEffBJetTag" && jets_trackCountingHighEffBJetTag()[jet_idx] > 3.3)
       return true;
+    else if(bTagDiscriminator == "combinedSecondaryVertexBJetTag" && jets_combinedSecondaryVertexBJetTag()[jet_idx] > 0.679)
+      return true;
     else if(bTagDiscriminator == "simpleSecondaryVertexHighEffBJetTag" && jets_simpleSecondaryVertexHighEffBJetTag()[jet_idx] > 1.74)
       return true;
     else if(bTagDiscriminator == "simpleSecondaryVertexHighPurBJetTag" && jets_simpleSecondaryVertexHighPurBJetTags()[jet_idx] > 2)
@@ -73,6 +77,8 @@ bool topAFB_looper::passbTagging(const unsigned int jet_idx, const string jetAlg
   
   if(jetAlgo == "pfJets") {
     if(bTagDiscriminator == "trackCountingHighEffBJetTag" && pfjets_trackCountingHighEffBJetTag()[jet_idx] > 3.3)
+      return true;
+    else if(bTagDiscriminator == "combinedSecondaryVertexBJetTag" && pfjets_combinedSecondaryVertexBJetTag()[jet_idx] > 0.679)
       return true;
     else if(bTagDiscriminator == "simpleSecondaryVertexHighEffBJetTag" && pfjets_simpleSecondaryVertexHighEffBJetTag()[jet_idx] > 1.74)
       return true;
@@ -1186,7 +1192,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	vector<unsigned int> v_goodNonBtagJets;
 	TString btag_algo;
 	if(BTagAlgTCHE) btag_algo = "trackCountingHighEffBJetTag";
-	else btag_algo = "simpleSecondaryVertexHighEffBJetTag";
+	//else btag_algo = "simpleSecondaryVertexHighEffBJetTag";
+	else btag_algo = "combinedSecondaryVertexBJetTag";
 	
 	for(unsigned int i = 0; i < v_goodJets.size(); i++) {
 	  
@@ -1587,7 +1594,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   		int nBtagJets_real = 0;
   		int nMistags = 0;
   		int ncMistags = 0;
-  		for(unsigned int j = 0; j < nBtagJets; j++) {
+		double btag_sf = 1.0;
+		if(BTagAlgTCHE)btag_sf = getBTagSF("TCHE", 3.3);
+		else btag_sf = getBTagSF("CSV", 0.679);
+  	
+		for(unsigned int j = 0; j < nBtagJets; j++) {
   			bjet_pt =  v_goodBtagJets_p4.at(j).Pt();
   			bjet_eta =  fabs(v_goodBtagJets_p4.at(j).Eta());
   			//to keep within the range of the function
@@ -1595,13 +1606,13 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   			if(bjet_eta>2.3) {bjet_eta =  2.3; }
   			if(i_matching_b[j]>-1) {
   				nBtagJets_real++;
-  				weightb *= getBTagSF( bjet_pt, bjet_eta  , "TCHEM");
+  				weightb *= btag_sf;
   				if( j_unmatched[j] !=-1) cout<<"something went wrong filling v_goodBtagJets_unmatched_p4"<<endl;
   			}
   			else if(i_matching_c[j_unmatched[j]]>-1) {
 			        //cout<<"nUnmatched, j, j_unmatched[j], i_matching_c "<<nUnmatchedBtagJets<<" "<<j<<" "<<j_unmatched[j]<<" "<<i_matching_c[j_unmatched[j]]<<endl;
   				ncMistags++;
-  				weightcmistag *= getBTagSF( bjet_pt, bjet_eta  , "TCHEM");
+  				weightcmistag *= btag_sf;
   				if( j_unmatched[j] ==-1) cout<<"something went wrong filling v_goodBtagJets_unmatched_p4"<<endl;
   			}
   			else{
@@ -1667,9 +1678,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 				if(j_unmatched[j] >-1) if(i_nonb_matching_c[i] != -1 && i_nonb_matching_c[i] == i_matching_c[j_unmatched[j]]) alreadymatchedc=true;
 			}
 			//if(alreadymatchedc) cout<<"alreadymatchedc"<<endl;
-			if( !(i_nonb_matching_b[i] ==-1 || alreadymatched) ) weightbnottagged *= (1.-btageffdata)/(1.-btageffdata/getBTagSF( nonb_pt, nonb_eta  , "TCHEM") );
-			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && !(i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightcnotmistagged *= (1.-ctageffdata)/(1.-ctageffdata/getBTagSF( nonb_pt, nonb_eta  , "TCHEM") );
-  			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && (i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightnotmistagged *= (1.-bjetfrdata)/(1.-bjetfrdata/getMisTagSF( nonb_pt, nonb_eta  , "TCHEM") );
+			if( !(i_nonb_matching_b[i] ==-1 || alreadymatched) ) weightbnottagged *= (1.-btageffdata)/(1.-btageffdata/btag_sf );
+			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && !(i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightcnotmistagged *= (1.-ctageffdata)/(1.-ctageffdata/btag_sf );
+  			if( (i_nonb_matching_b[i] ==-1 || alreadymatched) && (i_nonb_matching_c[i] ==-1 || alreadymatchedc) ) weightnotmistagged *= (1.-bjetfrdata)/(1.-bjetfrdata/getMisTagSF( nonb_pt, nonb_eta  , "TCHEM"));
 		}
 		//if(nGenc>0) cout<<"weightb, weightbnottagged, weightcmistag, weightcnotmistagged, weightmistag, weightnotmistagged: "<<weightb<<" , "<<weightbnottagged <<" , "<<weightcmistag<<" , "<<weightcnotmistagged <<" , "<<weightmistag<<" , "<<weightnotmistagged <<endl;
 		weight = weight*weightb*weightbnottagged*weightcmistag*weightcnotmistagged*weightmistag*weightnotmistagged;
@@ -1779,7 +1790,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float m_top; 
 	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus;  
 	if(require2BTag || requireExact2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
+	else if(requireBTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
 	else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4);
+	
 	float tt_mass = (top1_p4+top2_p4).M();
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
@@ -1850,6 +1863,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	//if we have gotten here, then all cuts have been passed
 
 	nSelectedEvents = nSelectedEvents + 1.0*weight;
+
+	//	weight_ = weight ;
 	//nSelectedEvents++;
 	///some checks for events in the signal region
 	
