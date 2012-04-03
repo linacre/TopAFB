@@ -61,8 +61,8 @@ void makeTable(bool isData=false){
   std::string mathSep = latex ? "$" : "";
   
   const char* formatS = "%6.3f";
-  TCut baseline = "tt_mass > 0 && tt_mass >450 && ((ttRapidity > 2.0)||(ttRapidity < -2.0))";
-
+  //TCut baseline = "t_mass > 0 && tt_mass >450 && ((ttRapidity > 2.0)||(ttRapidity < -2.0))";
+  TCut baseline = "t_mass > 0 && tt_mass >450 ";
   float lepChargeA    ;
   float lepChargeA_plus;
   float lepChargeA_minus;
@@ -172,7 +172,7 @@ void makeTable(bool isData=false){
 
   cout << "\\begin{tabular}{l| c  c  c  c c c}" << endl;
   cout << "\\hline" << endl;
-  cout << beginL <<"Var "<< colSep << "     "  << colSep<< "Total Events"  << colSep  <<"Plus Sign"        << colSep <<"Minus Sign "     << colSep << "Prob of Corr Sign"  << colSep << "Asym" << endL <<endl;
+  cout << beginL <<"Var "<< colSep << "     "  << colSep<< "Total Events"  << colSep  <<"Plus Sign"        << colSep <<"Minus Sign "     << colSep << "Prob of Corr Sign"  << colSep << "Asy" << endL <<endl;
  
   cout << beginL <<"Lep Charge Asy"<<colSep << " Gen  "     << colSep<< lepChargeA      << colSep  <<lepChargeA_plus_gen    << colSep <<lepChargeA_minus_gen  << colSep << "-"  << colSep <<formatFloat(lepChargeA_quant_gen, formatS) <<pmSign << formatFloat(lepChargeA_err_gen,formatS)<< endL <<endl;
   cout << beginL <<"Lep Charge Asy"<<colSep << " Reco "     << colSep << lepChargeA      << colSep  <<lepChargeA_plus    << colSep <<lepChargeA_minus  << colSep <<formatFloat(lepChargeA_corr,formatS) << colSep <<formatFloat(lepChargeA_quant,formatS) <<pmSign << formatFloat(lepChargeA_err, formatS) << endL <<endl;
@@ -204,7 +204,7 @@ void makeTable(bool isData=false){
     
   cout << "\\begin{tabular}{l| c  c  c  c c c}" << endl;
   cout << "\\hline" << endl;
-  cout << beginL <<"Var "<< colSep<< "Total Events"  << colSep  <<"Plus Sign"        << colSep <<"Minus Sign "     << colSep << "Asym" << endL <<endl;
+  cout << beginL <<"Var "<< colSep<< "Total Events"  << colSep  <<"Plus Sign"        << colSep <<"Minus Sign "     << colSep << "Asy" << endL <<endl;
   cout << beginL <<"Lep Charge Asy" << colSep << lepChargeA      << colSep  <<lepChargeA_plus    << colSep <<lepChargeA_minus   << colSep <<formatFloat(lepChargeA_quant,formatS) <<pmSign << formatFloat(lepChargeA_err, formatS) << endL <<endl;
 
   cout << beginL <<"Lep Azim Asy" << colSep << lepAzimA      << colSep  <<lepAzimA_plus    << colSep <<lepAzimA_minus   << colSep <<formatFloat(lepAzimA_quant,formatS) <<pmSign << formatFloat(lepAzimA_err, formatS) << endL <<endl;
