@@ -1809,7 +1809,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
-	//if(m_top < 0) continue;
+	if(m_top < 0) continue;
 	if(applyLeptonJetInvMassCut450 && !(tt_mass<450 )) continue;
  	if(applyTopSystEta && ! (ttRapidity < 2.0) ) continue;
 
@@ -2172,6 +2172,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  dr_lljet_gen_ = dr_lljet_gen ;
 	  ndavtx_ = ndavtx;
 	  tt_mass_ = tt_mass;
+	  t_mass_  = m_top; 
 	  ttRapidity_ = ttRapidity;
 	  lep_charge_asymmetry_ = lep_charge_asymmetry;
 	  lep_azimuthal_asymmetry_ = lep_azimuthal_asymmetry;
