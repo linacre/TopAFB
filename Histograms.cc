@@ -116,7 +116,7 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       httMass[i][j]->GetXaxis()->SetTitle("TTBar Mass Estimate (GeV/c^{2})");
       httMass[i][j]->Sumw2();
       
-      httMass_pull[i][j] = new TH1F(Form("%s_httMass_%s",prefix,suffix),Form("%s_ttMass_%s",prefix,suffix),200,-3,3);
+      httMass_pull[i][j] = new TH1F(Form("%s_httMasspull_%s",prefix,suffix),Form("%s_ttMasspull_%s",prefix,suffix),200,-3,3);
       httMass_pull[i][j]->GetXaxis()->SetTitle("(Reco-Gen)/Gen");
       httMass_pull[i][j]->Sumw2();
       
