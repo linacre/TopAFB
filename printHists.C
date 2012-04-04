@@ -66,8 +66,8 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
     v_binranges.push_back(make_pair(2,2)); //1 jet bin 
     v_binranges.push_back(make_pair(3,3)); //2 jet bin
     v_binranges.push_back(make_pair(4,4)); //3 jet bin
-    v_binranges.push_back(make_pair(5,7)); //>=4 jet bin
-    //v_binranges.push_back(make_pair(1,7)); //all jet bins
+    v_binranges.push_back(make_pair(3,7)); //>=2 jet bin
+    v_binranges.push_back(make_pair(1,7)); //all jet bins
   }
   
   for(unsigned int i_bins = 0; i_bins <  v_binranges.size(); i_bins++) {
@@ -82,7 +82,7 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
 	if(i_bins <4)
 	cout << "\\textrm{" << i_bins << " b-tagged Jet Bin:}" << endL << endl;
 	else if(i_bins == 4) 
-	  cout << "\\textrm{$>=$ 4 b-tagged Jets:}" << endL << endl;
+	  cout << "\\textrm{$>=$ 2 b-tagged Jets:}" << endL << endl;
 	else if(i_bins == 5)
 	  cout << "\\textrm{Total ($>=$ 0 b-tagged Jets):} " << endL << endl;
 	cout << "\\textrm{ } " << endL << endl;
@@ -223,9 +223,11 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
       cout << formatFloat(n_mm, formatS) << pmSign << formatFloat(nE_mm, formatS) << colSep;
       cout << formatFloat(n_em, formatS) << pmSign << formatFloat(nE_em, formatS) << colSep;
       cout << formatFloat(n_all, formatS) << pmSign << formatFloat(nE_all, formatS) << endL;
-      if((v_prefixes.at(i).Contains("ttprime") || i == v_prefixes.size() -1) && latex)
+      if((v_prefixes.at(i).Contains("tprime") || i == v_prefixes.size() -1) && latex)
 	cout << " \\hline " << endl;
-      else if ((v_prefixes.at(i).Contains("ttprime350") || i == v_prefixes.size() -1) && latex)
+      else if ((v_prefixes.at(i).Contains("wprime") || i == v_prefixes.size() -1) && latex)
+        cout << " \\hline " << endl;
+      else if ((v_prefixes.at(i).Contains("axigluon") || i == v_prefixes.size() -1) && latex)
 	cout << " \\hline " << endl;
       else
 	cout << endl;
@@ -251,7 +253,11 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
      
       if(v_prefixes.at(i).Contains("data"))
 	continue;
-      if(v_prefixes.at(i).Contains("ttprime"))
+      if(v_prefixes.at(i).Contains("tprime"))
+        continue;
+      if(v_prefixes.at(i).Contains("wprime"))
+        continue;
+      if(v_prefixes.at(i).Contains("axigluon"))
         continue;
      
       TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
