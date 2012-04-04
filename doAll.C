@@ -1,6 +1,6 @@
-void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, bool runmc = false, bool requireBTag=false, bool require2BTag=false, bool usePF = true, 
+void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, bool runmc = true, bool requireBTag=true, bool require2BTag=false, bool usePF = true, 
 	   bool doFRestimation = false, bool scaleJESMETUp = false, 
-	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = true, bool createBabyNtuples = true, bool doBFR = false)
+	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = false, bool createBabyNtuples = true, bool doBFR = false)
 {
   //gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_v5.28.00.so");
   gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
@@ -40,11 +40,11 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
   string cms2_skim_location="/nfs-6/userdata/yanjuntu/TPrimeSkim";
   string cms2_location="/nfs-6/userdata/cms2";
 
-  bool runskim          = false;
+  bool runskim          = true;
   bool runSMS           = false;
   bool runwprime        = runsig;
   bool runAxigluon      = runsig;
-  bool runttdil         = false;
+  bool runttdil         = runmc;
   
 
   bool runttotr         = runmc ; //false;
@@ -131,7 +131,7 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
   //v_baseCuts.push_back("applyLeptonJetInvMassCut450");
   //v_baseCuts.push_back("applyTopSystEta");
   // v_baseCuts.push_back("applyMinMassLBCut");
-  v_baseCuts.push_back("requireExact2BTag");
+  //v_baseCuts.push_back("requireExact2BTag");
   
   v_baseCuts.push_back("generalLeptonVeto");
   //v_baseCuts.push_back("applyHTCut");
@@ -154,7 +154,8 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
     //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass;veto2Jets;vetoMET");
 
 	// MET > 50 
-     v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass;veto2Jets;vetoMET50");
+    //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass;veto2Jets;vetoMET50");
+    v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass;veto2Jets;vetoMET");
 
     // //this is to make NJet plots since we don't want to make plots with the njet cut in there
     //v_otherCuts.push_back("applylepIDCuts;applylepIsoCuts;vetoZmass");
@@ -271,7 +272,8 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
 	cout << "Doing the MadGraph wprime 400 " << endl;
 	ch_wprime400->Add("/nfs-6/userdata/yanjuntu/Wprime_SM_400_Madgraph_v2_yanjuntu-Wprime_SM_400_Madgraph_v2-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
 	cout << "Doing the MadGraph wprime 600 " << endl;
-        ch_wprime600->Add("/nfs-6/userdata/yanjuntu/Wprime_ttbar_600_Madgraph-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
+        //ch_wprime600->Add("/nfs-6/userdata/yanjuntu/Wprime_ttbar_600_Madgraph-f3d3f52ad6235ba5a3ccb05162c152b9_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
+	ch_wprime600->Add("/nfs-6/userdata/yanjuntu/Wprime_ttbar_600_inclusive_Madgraph-6bfefe7ba7e693b7a5695fa468de1212_USER/VB04-02-29_Fastsim/merged_ntuple*.root");
 
       }
     baby->ScanChain(ch_wprime400, v_Cuts,"wprime400", doFRestimation, lumiToNormalizeTo*6.2539/1.0, kWprime400, false);
@@ -311,6 +313,7 @@ if(runttdil) {
     }
       
     baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*165.8/157.5, kttdil, false);
+    //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo, kttdil, false);
     hist::color("ttdil", kGreen);
     //delete ch_ttbar;
   }
@@ -340,6 +343,7 @@ if(runttdil) {
     }
       
     baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*165.8/157.5, kttotr, false);
+    //baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo, kttotr, false);
     hist::color("ttotr", kYellow);
     //delete ch_ttor;
   }
