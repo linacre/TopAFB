@@ -1593,8 +1593,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   		
 
   		
-  		double btageffdata = 0.66;
-  		double ctageffdata = 0.13;
+  		double btageffdata = 0.66;    //NEEDS TO BE UPDATED FOR CSV (=getBTagEff("CSV", 0.679, false))
+  		double ctageffdata = 0.13;    //NEEDS TO BE UPDATED FOR CSV
   		double  nonb_pt, nonb_eta,bjet_pt,bjet_eta;
   		
   		//b tagged jet weighting, using number of matching real bs, cs and mistags
@@ -1800,18 +1800,22 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	
 	float m_top; 
-	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus;  
-	if(require2BTag || requireExact2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
-	else if(requireBTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
-	else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4);
+	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus; 
+	 
+	//if(require2BTag || requireExact2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
+	//else if(requireBTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
+	//else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4);
+	//filling v_goodJets_cand_p4 does the same thing:
+	m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
+	
 	
 	float tt_mass = (top1_p4+top2_p4).M();
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
 	if(m_top < 0) continue;
-	if(applyLeptonJetInvMassCut450 && !(tt_mass<450 )) continue;
- 	if(applyTopSystEta && ! (ttRapidity < 2.0) ) continue;
+ 	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
+  	if(applyTopSystEta &&  (fabs(ttRapidity) < 2.0) ) continue;
 
 	float top_rapiditydiff_cms = -999.0;
 	top_rapiditydiff_cms = (top1_p4.Rapidity() - top2_p4.Rapidity())*(top1_p4.Rapidity() + top2_p4.Rapidity());
@@ -2024,7 +2028,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float top_rapiditydiff_cms_gen;
 	float top_pseudorapiditydiff_cms_gen;
 	// generator level plots
-	if(!isData && (prefix == "ttdil"|| prefix == "wprime400"|| prefix == "wprime600" || prefix == "axigluonR")){
+	//if(!isData && (prefix == "ttdil"|| prefix == "wprime400"|| prefix == "wprime600" || prefix == "axigluonR")){
+	if(!isData){
 	  
      
 
@@ -2130,7 +2135,6 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  float tt_mass_pull = (tt_mass - tt_mass_gen)/tt_mass_gen;
 	  
 	  fillHistos( httMass_pull, tt_mass_pull,  weight, myType, jetBin);
-	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
 	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
 	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
