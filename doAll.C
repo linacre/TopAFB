@@ -33,7 +33,7 @@ void doAll(TString outputDir="results", bool rundata=false, bool runsig=false, b
   gSystem->CompileMacro("topAFB_looper.C","++k", "libtopAFB_looper");
 
   //float lumiToNormalizeTo   = 1144.5e-3; //1090.0e-3; //349.0e-3; //204.0e-3;// 191.0e-3 ; //36.1e-3; 
-  float lumiToNormalizeTo   = 4684.0e-3; //3230.0e-3; //1090.0e-3; //349.0e-3; //204.0e-3;// 191.0e-3 ; //36.1e-3; 
+  float lumiToNormalizeTo   = 4980.0e-3; //4684.0e-3; //3230.0e-3; //1090.0e-3; //349.0e-3; //204.0e-3;// 191.0e-3 ; //36.1e-3; 
 
   topAFB_looper * baby = new topAFB_looper();
   // Flags for files to run over
@@ -312,8 +312,8 @@ if(runttdil) {
       //cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root"); 
     }
       
-    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*165.8/157.5, kttdil, false);
-    //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo, kttdil, false);
+    //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*165.8/157.5, kttdil, false);
+    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
     hist::color("ttdil", kGreen);
     //delete ch_ttbar;
   }
@@ -342,8 +342,8 @@ if(runttdil) {
       cout << "Doing the MadGraph ttbar no-dileptons.. " << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
     }
       
-    baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*165.8/157.5, kttotr, false);
-    //baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo, kttotr, false);
+    // baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*165.8/157.5, kttotr, false);
+    baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*154./157.5, kttotr, false);
     hist::color("ttotr", kYellow);
     //delete ch_ttor;
   }
