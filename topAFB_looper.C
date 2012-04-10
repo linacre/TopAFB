@@ -2209,6 +2209,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
     
     if(applyNoCuts) cout << "number of events (no cuts) before and after vertex weighting              =  " << nEvents_noCuts_novtxweight<<"   "<< nEvents_noCuts <<endl;
     
+    float nEvents_primary = cms2.evt_nEvts();
+    cout << "acceptance                       =  " << (1.0*nSelectedEvents)/(nEvents_primary*kFactor * evt_scale1fb() * lumi) <<endl;
+   
   
   }  // closes loop over files
   
