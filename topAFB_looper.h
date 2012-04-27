@@ -124,6 +124,7 @@ class topAFB_looper
 	float tt_mass_ ;
 	float ttRapidity_ ;
 	float lep_charge_asymmetry_ ;
+	float lep_pseudorap_diff_ ;
 	float lep_azimuthal_asymmetry_ ;
 	float top_spin_correlation_ ;
 	float top_costheta_cms_    ;
@@ -171,6 +172,8 @@ class topAFB_looper
 	TH1F *hMET[4][4];
 	TH1F *htheSumLepPt[4][4];
 	TH1F *htopCosTheta[4][4];
+	TH1F *hpseudorapiditydiff[4][4];
+	TH1F *hrapiditydiff[4][4];
 	TH1F *hlepCosTheta[4][4];
 	TH1F *hlepChargeAsym[4][4];
 	TH1F *hlepAzimAsym[4][4];
@@ -180,6 +183,27 @@ class topAFB_looper
 	TH1F *hlepChargeAsym_gen[4][4];
 	TH1F *hlepAzimAsym_gen[4][4];
 	TH1F *htopSpinCorr_gen[4][4];
+	
+	TH1F *hlepRapDiff[4][4];
+	TH1F *hlepAngleBetween[4][4];
+	TH1F *hlepAngleBetweenCMS[4][4];
+	TH1F *hpseudorapiditydiff2[4][4];
+	TH1F *hrapiditydiff2[4][4];
+	TH1F *hlepPlusCosTheta[4][4];
+	TH1F *hlepMinusCosTheta[4][4];
+	TH1F *hjetAzimAsym[4][4];
+	TH1F *hjetRapDiff[4][4];
+	TH1F *hjetAngleBetween[4][4];
+	TH1F *hjetAngleBetweenCMS[4][4];
+	TH1F *hlepPhi[4][4];
+	TH1F *hlepPlusPhi[4][4];
+	TH1F *hlepMinusPhi[4][4];
+	TH1F *hjetPhi[4][4];
+	TH1F *hlepPlusEta[4][4];
+	TH1F *hlepMinusEta[4][4];
+	TH1F *hlepPlusPt[4][4];
+	TH1F *hlepMinusPt[4][4];
+	
 	TH2F *htopCosTheta_2d[4][4];
 	TH2F *hlepCosTheta_2d[4][4];
 	TH2F *hlepChargeAsym_2d[4][4];

@@ -63,10 +63,10 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
     v_binranges.push_back(make_pair(1,7));
   else {
     v_binranges.push_back(make_pair(1,1)); //0 jet bin 
-    v_binranges.push_back(make_pair(2,7)); //1 jet bin 
+    v_binranges.push_back(make_pair(2,2)); //1 jet bin 
     v_binranges.push_back(make_pair(3,3)); //2 jet bin
     v_binranges.push_back(make_pair(4,4)); //3 jet bin
-    v_binranges.push_back(make_pair(5,7)); //>=4 jet bin
+    v_binranges.push_back(make_pair(3,7)); //>=2 jet bin
     v_binranges.push_back(make_pair(1,7)); //all jet bins
   }
   

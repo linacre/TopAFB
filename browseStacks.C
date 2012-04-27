@@ -92,7 +92,7 @@ void browseStacks(vector<TString> v_samples, vector<Color_t> v_colors,
     for (int i_channel=first_channel_canvas; i_channel<4; i_channel++) {//loop over the channels
       vector<TH1F*> v_hists;
       TH1F *hdata = NULL;
-      TH1F *httprime = NULL;
+      TH1F *hwprime = NULL;
             
       for(unsigned int i_prefix = 0; i_prefix < v_samples.size(); i_prefix++) {
 	
@@ -175,7 +175,7 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	    htemp->SetMarkerStyle(v_style.at(i_prefix));
 	    htemp->SetMarkerColor(v_colors.at(i_prefix));
 	  }
-	  if(v_samples.at(i_prefix).Contains("ttprime")) {
+	  if(v_samples.at(i_prefix).Contains("wprime")) {
 	    //htemp->SetMarkerStyle(v_style.at(i_prefix));
 	    htemp->SetLineColor(kBlue+2);
 	    //htemp->SetMarkerSize(0.5);
@@ -189,9 +189,9 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	  continue;
 	}
 	
-	//don't add the ttprime histogram to the stack
-	if(v_samples.at(i_prefix).Contains("ttprime")) {
-	  httprime = htemp;	  
+	//don't add the wprime histogram to the stack
+	if(v_samples.at(i_prefix).Contains("wprime")) {
+	  hwprime = htemp;	  
 	  continue;
 	}
 
@@ -203,8 +203,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	htemp->Add(v_hists.back());
 	v_hists.push_back(htemp);
       }//prefix loop			
-	if(httprime != NULL)
-	v_hists.push_back(httprime);	
+	if(hwprime != NULL)
+	v_hists.push_back(hwprime);	
 	if(hdata != NULL)
 	v_hists.push_back(hdata);
 
@@ -333,8 +333,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	    (*it)->Draw("Pesame");
 
 	}	
-	//else if(TString((*it)->GetName()).Contains("ttprime")) {
-	//		httprime = (*it);
+	//else if(TString((*it)->GetName()).Contains("wprime")) {
+	//		hwprime = (*it);
 	//		if(it == v_hists.rbegin()) 
 	//    		(*it)->Draw("P");	 
 	//		else 	  
@@ -349,8 +349,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	}
       }//loop over MC
       
-	if(httprime != NULL) {
-	httprime->Draw("histsame");
+	if(hwprime != NULL) {
+	hwprime->Draw("histsame");
 	}
 
       if(hdata != NULL) {
@@ -584,7 +584,7 @@ TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, 
   if(drawLogY)
     leg = new TLegend(lowX,lowY,highX,highY, "", "br"); 
   else 
-    leg = new TLegend(0.7, 0.55, 0.92, 0.90, "", "brNDC");
+    leg = new TLegend(0.72, 0.65, 0.92, 0.93, "", "brNDC");
   if((histName.Contains("nJet") || histName.Contains("bTag")) && drawLogY && hdata != NULL ) {
     int temp = hdata->GetNbinsX();
     leg = new TLegend(hdata->GetNbinsX()-1.5, lowY, temp - 0.45*hdata->GetBinWidth(temp), highY, "", "br");

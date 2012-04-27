@@ -1800,7 +1800,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	
 	float m_top; 
-	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus; 
+	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus, jet1,jet2; 
 	 
 	//if(require2BTag || requireExact2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
 	//else if(requireBTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
@@ -1824,8 +1824,16 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float top_pseudorapiditydiff_cms = -999.0;
 	top_pseudorapiditydiff_cms = abs(top1_p4.Eta()) - abs(top2_p4.Eta());
 	
+	float top_rapiditydiff2_cms = -999.0;
+	top_rapiditydiff2_cms = (top1_p4.Rapidity() - top2_p4.Rapidity());
+	
+	float top_pseudorapiditydiff2_cms = -999.0;
+	top_pseudorapiditydiff2_cms = (top1_p4.Eta()) - (top2_p4.Eta());
 
-	cms = 0.5*(top1_p4+top2_p4);
+	
+
+	//cms = 0.5*(top1_p4+top2_p4);
+	cms = top1_p4+top2_p4;
 	top1_p4.Boost(-cms.BoostVector());
 	top2_p4.Boost(-cms.BoostVector());
 	float top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
@@ -1860,22 +1868,63 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 			   hyp_lt_p4()[hypIdx].t()
 			   );
 	}
+
+	
+	jet1.SetXYZT(
+			v_goodJets_cand_p4[0].x(),
+			v_goodJets_cand_p4[0].y(),
+			v_goodJets_cand_p4[0].z(),
+			v_goodJets_cand_p4[0].t()
+			);
+          
+	jet2.SetXYZT(
+			v_goodJets_cand_p4[1].x(),
+			v_goodJets_cand_p4[1].y(),
+			v_goodJets_cand_p4[1].z(),
+			v_goodJets_cand_p4[1].t()
+			);
+
+
 	float lep_charge_asymmetry = -999.0;
 	lep_charge_asymmetry = abs(lepPlus.Eta()) - abs(lepMinus.Eta());
-
 
 	float lep_azimuthal_asymmetry =-999.0;
 	lep_azimuthal_asymmetry = cos(lepPlus.DeltaPhi(lepMinus));
 	
-	lepPlus.Boost(-cms.BoostVector());
-	lepPlus.Boost(-top1_p4.BoostVector());
-	lepMinus.Boost(-cms.BoostVector());
-	lepMinus.Boost(-top2_p4.BoostVector());
-      
-        float lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
-	float lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
-	float top_spin_correlation = -999.0;
+	float lep_pseudorap_diff =-999.0;
+	lep_pseudorap_diff = (lepPlus.Eta()) - (lepMinus.Eta());
 
+	float lep_cosalpha =  lepPlus.Vect().Dot( lepMinus.Vect() )/(lepPlus.Vect().Mag()*lepMinus.Vect().Mag());
+	float lepPlus_phi = lepPlus.Phi();
+	float lepMinus_phi = lepMinus.Phi();
+	float lepPlus_Eta = lepPlus.Eta();
+	float lepMinus_Eta = lepMinus.Eta();
+	float lepPlus_Pt = lepPlus.Pt();
+	float lepMinus_Pt = lepMinus.Pt();
+
+	float jet_azimuthal_asymmetry = cos(jet1.DeltaPhi(jet2));
+	float jet_pseudorap_diff = jet1.Eta() - jet2.Eta();
+	float jet_cosalpha =  jet1.Vect().Dot( jet2.Vect() )/(jet1.Vect().Mag()*jet2.Vect().Mag());
+	float jet1_phi = jet1.Phi();
+	float jet2_phi = jet2.Phi();
+	
+	lepPlus.Boost(-cms.BoostVector());
+	lepMinus.Boost(-cms.BoostVector());
+	
+	jet1.Boost(-cms.BoostVector());
+	jet2.Boost(-cms.BoostVector());
+
+	float lep_cosalpha_cms = lepPlus.Vect().Dot( lepMinus.Vect() )/(lepPlus.Vect().Mag()*lepMinus.Vect().Mag());
+	float jet_cosalpha_cms =  jet1.Vect().Dot( jet2.Vect() )/(jet1.Vect().Mag()*jet2.Vect().Mag());
+
+	
+	lepPlus.Boost(-top1_p4.BoostVector());
+	lepMinus.Boost(-top2_p4.BoostVector());
+	
+	float lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
+	float lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
+	
+	float top_spin_correlation = -999.0;
 	top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
 	//if we have gotten here, then all cuts have been passed
 
@@ -1958,7 +2007,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	fillHistos( hlepAzimAsym, lep_azimuthal_asymmetry ,  weight, myType, jetBin);
 	fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin);
 	fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
+        fillHistos( hpseudorapiditydiff, top_pseudorapiditydiff_cms ,  weight, myType, jetBin);
+	fillHistos( hrapiditydiff, top_rapiditydiff_cms ,  weight, myType, jetBin);
 	fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
+	fillHistos( hlepCosTheta, lepMinus_costheta_cms  ,  weight, myType, jetBin);
 	fillHistos( htheleadinglepPt, lt_p4.Pt()  ,  weight, myType, jetBin);
         fillHistos( hthesecondlepPt, ll_p4.Pt()  ,  weight, myType, jetBin);
         fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin);
@@ -1966,6 +2018,29 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	fillHistos( hMET, p_met.first  ,  weight, myType, jetBin);
 	fillHistos( htopMass, m_top ,  weight, myType, jetBin);
 	fillHistos( httRapidity, ttRapidity ,  weight, myType, jetBin);
+	
+	fillHistos( hlepRapDiff,  lep_pseudorap_diff, weight, myType, jetBin);
+	fillHistos( hlepAngleBetween,  lep_cosalpha, weight, myType, jetBin);
+	fillHistos( hlepAngleBetweenCMS,  lep_cosalpha_cms, weight, myType, jetBin);
+	fillHistos( hpseudorapiditydiff2,  top_pseudorapiditydiff2_cms, weight, myType, jetBin);
+	fillHistos( hrapiditydiff2,  top_rapiditydiff2_cms, weight, myType, jetBin);
+	fillHistos( hlepPlusCosTheta,  lepPlus_costheta_cms, weight, myType, jetBin);
+	fillHistos( hlepMinusCosTheta,  lepMinus_costheta_cms, weight, myType, jetBin);
+	fillHistos( hjetAzimAsym,  jet_azimuthal_asymmetry, weight, myType, jetBin);
+	fillHistos( hjetRapDiff,  jet_pseudorap_diff, weight, myType, jetBin);
+	fillHistos( hjetAngleBetween,  jet_cosalpha, weight, myType, jetBin);
+	fillHistos( hjetAngleBetweenCMS,  jet_cosalpha_cms, weight, myType, jetBin);
+	fillHistos( hlepPhi,  lepPlus_phi, weight, myType, jetBin);
+	fillHistos( hlepPhi,  lepMinus_phi, weight, myType, jetBin);
+	fillHistos( hlepPlusPhi,  lepPlus_phi, weight, myType, jetBin);
+	fillHistos( hlepMinusPhi,  lepMinus_phi, weight, myType, jetBin);
+	fillHistos( hjetPhi,  jet1_phi, weight, myType, jetBin);
+	fillHistos( hjetPhi,  jet2_phi, weight, myType, jetBin);
+	fillHistos( hlepPlusEta,  lepPlus_Eta, weight, myType, jetBin);
+	fillHistos( hlepMinusEta,  lepMinus_Eta, weight, myType, jetBin);
+	fillHistos( hlepPlusPt,  lepPlus_Pt, weight, myType, jetBin);
+	fillHistos( hlepMinusPt,  lepMinus_Pt, weight, myType, jetBin);
+	
 	
 	if(v_goodJets_cand_p4.size() > 1){
 			
@@ -2115,7 +2190,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  top_pseudorapiditydiff_cms_gen = abs(topplus_genp_p4.Eta()) - abs(topminus_genp_p4.Eta());
 	
 
-	  cms_gen = 0.5*(topplus_genp_p4+topminus_genp_p4);
+	  //cms_gen = 0.5*(topplus_genp_p4+topminus_genp_p4);
+	  cms_gen = topplus_genp_p4+topminus_genp_p4;
 	  topplus_genp_p4.Boost(-cms_gen.BoostVector());
 	  topminus_genp_p4.Boost(-cms_gen.BoostVector());
 	  top_costheta_cms_gen = topplus_genp_p4.Vect().Dot(cms_gen.Vect())/(topplus_genp_p4.Vect().Mag()*cms_gen.Vect().Mag());
@@ -2180,6 +2256,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  t_mass_  = m_top; 
 	  ttRapidity_ = ttRapidity;
 	  lep_charge_asymmetry_ = lep_charge_asymmetry;
+	  lep_pseudorap_diff_ =  lep_pseudorap_diff;
 	  lep_azimuthal_asymmetry_ = lep_azimuthal_asymmetry;
 	  top_spin_correlation_ = top_spin_correlation;
 	  top_costheta_cms_     = top_costheta_cms;
@@ -2209,8 +2286,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
     
     if(applyNoCuts) cout << "number of events (no cuts) before and after vertex weighting              =  " << nEvents_noCuts_novtxweight<<"   "<< nEvents_noCuts <<endl;
     
-    float nEvents_primary = cms2.evt_nEvts();
-    cout << "acceptance                       =  " << (1.0*nSelectedEvents)/(nEvents_primary*kFactor * evt_scale1fb() * lumi) <<endl;
+    //float nEvents_primary = cms2.evt_nEvts();
+    //cout << "acceptance                       =  " << (1.0*nSelectedEvents)/(nEvents_primary*kFactor * evt_scale1fb() * lumi) <<endl;
    
   
   }  // closes loop over files
@@ -2239,6 +2316,7 @@ void topAFB_looper::InitBabyNtuple ()
   tt_mass_ = -999.0;
   ttRapidity_ = -999.0;
   lep_charge_asymmetry_ = -999.0;
+  lep_pseudorap_diff_ = -999.0;
   lep_azimuthal_asymmetry_ = -999.0;
   top_spin_correlation_ = -999.0;
   top_costheta_cms_     = -999.0;
@@ -2284,6 +2362,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("tt_mass",               &tt_mass_,             "tt_mass/F"              );
     babyTree_->Branch("ttRapidity",            &ttRapidity_,          "ttRapidity/F"           );
     babyTree_->Branch("lep_charge_asymmetry",  &lep_charge_asymmetry_,"lep_charge_asymmetry/F" );
+    babyTree_->Branch("lep_pseudorap_diff",  & lep_pseudorap_diff_,"lep_pseudorap_diff/F" );    
     babyTree_->Branch("lep_azimuthal_asymmetry",&lep_azimuthal_asymmetry_,  "lep_azimuthal_asymmetry/F"   );
     babyTree_->Branch("top_spin_correlation",  &top_spin_correlation_,"top_spin_correlation/F" );
     babyTree_->Branch("top_costheta_cms",      &top_costheta_cms_,    "top_costheta_cms/F"     );

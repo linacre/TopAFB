@@ -26,7 +26,7 @@
 void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypDisamb_usepfMET_usepfJets_requireEcalEls_useOS_vetoHypMassLt12_require2BTag_sortJetCandidatesbyDR_applylepIDCuts_applylepIsoCuts_vetoZmass_veto2Jets_vetoMET.root",     
 		int rebin=1, bool drawtprime = false,
 		const TString pat="default", 
-		float scaleMC=4.68, bool drawLogY = false, bool allhypOnly = false, bool drawDiffs = false,
+		float scaleMC=4.98, bool drawLogY = false, bool allhypOnly = false, bool drawDiffs = false,
                 bool replacewFRest = false, bool replacewDYest = false,
                 bool drawFullErrors = false, bool scalebTagMCbyDataDrivenEsts = false) {
 
@@ -36,34 +36,74 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   
   if(pat!="default") hist::loadHist(FName.Data(),0,pat.Data());
   else {
- //  hist::loadHist(FName.Data(),0,"*hnJet*");
-//   hist::loadHist(FName.Data(),0,"*hnVtx*");
-//   hist::loadHist(FName.Data(),0,"*hnBtagJet*");
-//   hist::loadHist(FName.Data(),0,"*hmassltb_2j*");
-//   hist::loadHist(FName.Data(),0,"*hmassllb_2j*");
-//   hist::loadHist(FName.Data(),0,"*thefirstJetPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*thesecondJetPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*hjetPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*theSumJetPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*theSumBtagJetPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*hjetEta_2j*");
-//   hist::loadHist(FName.Data(),0,"*htheleadinglepPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*hthesecondlepPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*theSumLepPt_2j*");
-//   hist::loadHist(FName.Data(),0,"*hlepEta_2j*");
-//   hist::loadHist(FName.Data(),0,"*hMET_2j*");
-    hist::loadHist(FName.Data(),0,"*htopMass_2j*");
-    hist::loadHist(FName.Data(),0,"*htopCosTheta_2j*");
-    hist::loadHist(FName.Data(),0,"*hlepChargeAsym_2j*");
-    hist::loadHist(FName.Data(),0,"*hlepCosTheta_2j*");
-    hist::loadHist(FName.Data(),0,"*htopSpinCorr_2j*");
-    hist::loadHist(FName.Data(),0,"*htopCosThetaGen_2j*");
-    hist::loadHist(FName.Data(),0,"*hlepChargeAsymGen_2j*");
-    hist::loadHist(FName.Data(),0,"*hlepCosThetaGen_2j*");
-    hist::loadHist(FName.Data(),0,"*htopSpinCorrGen_2j*");
-  }
-  if(drawtprime && ! drawLogY) hist::scale("ttprime*", 10);
 
+  hist::loadHist(FName.Data(),0,"*hnJet*");
+  hist::loadHist(FName.Data(),0,"*hnVtx*");
+  hist::loadHist(FName.Data(),0,"*hnBtagJet*");
+
+  hist::loadHist(FName.Data(),0,"*hlepPt_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepPlusPt_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepMinusPt_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepEta_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepPlusEta_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepMinusEta_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepPhi_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepPlusPhi_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepMinusPhi_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepAzimAsym_2j*");
+  
+  hist::loadHist(FName.Data(),0,"*hjetPt_2j*");
+  hist::loadHist(FName.Data(),0,"*hjetEta_2j*");
+  //hist::loadHist(FName.Data(),0,"*hjetPhi_2j*");
+  //hist::loadHist(FName.Data(),0,"*thefirstJetPt_2j*");
+  //hist::loadHist(FName.Data(),0,"*thesecondJetPt_2j*");
+  //hist::loadHist(FName.Data(),0,"*theSumJetPt_2j*");
+  //hist::loadHist(FName.Data(),0,"*theSumBtagJetPt_2j*");
+ 
+  //hist::loadHist(FName.Data(),0,"*htheleadinglepPt_2j*");
+  //hist::loadHist(FName.Data(),0,"*hthesecondlepPt_2j*");
+  //hist::loadHist(FName.Data(),0,"*theSumLepPt_2j*");
+  hist::loadHist(FName.Data(),0,"*hMET_2j*");
+  //hist::loadHist(FName.Data(),0,"*hmassltb_2j*");
+  //hist::loadHist(FName.Data(),0,"*hmassllb_2j*");
+
+
+  hist::loadHist(FName.Data(),0,"*hlepChargeAsym_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepAzimAsym_2j*");
+  hist::loadHist(FName.Data(),0,"*htopCosTheta_2j*");
+  hist::loadHist(FName.Data(),0,"*hpseudorapiditydiff_2j*");
+  hist::loadHist(FName.Data(),0,"*hrapiditydiff_2j*");
+  hist::loadHist(FName.Data(),0,"*htopSpinCorr_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepPlusCosTheta_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepMinusCosTheta_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepCosTheta_2j*");
+
+  hist::loadHist(FName.Data(),0,"*htopMass_2j*");
+  hist::loadHist(FName.Data(),0,"*httMass_2j*");    
+  hist::loadHist(FName.Data(),0,"*httRapidity_2j*");        
+
+  hist::loadHist(FName.Data(),0,"*hpseudorapiditydiff2_2j*");
+  hist::loadHist(FName.Data(),0,"*hrapiditydiff2_2j*");
+
+  hist::loadHist(FName.Data(),0,"*hlepRapDiff_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepAngleBetween_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepAngleBetweenCMS_2j*");  
+  
+  hist::loadHist(FName.Data(),0,"*hjetAzimAsym_2j*");
+  hist::loadHist(FName.Data(),0,"*hjetRapDiff_2j*");
+  hist::loadHist(FName.Data(),0,"*hjetAngleBetween_2j*");
+  hist::loadHist(FName.Data(),0,"*hjetAngleBetweenCMS_2j*");
+    
+  //  hist::loadHist(FName.Data(),0,"*htopCosThetaGen_2j*");
+  //  hist::loadHist(FName.Data(),0,"*hlepChargeAsymGen_2j*");
+  //  hist::loadHist(FName.Data(),0,"*hlepCosThetaGen_2j*");
+  //  hist::loadHist(FName.Data(),0,"*htopSpinCorrGen_2j*");
+  }
+  //if(drawtprime && ! drawLogY) hist::scale("ttprime*", 10);
+  
+  //hist::scale("ttdil*", 8976.9/8191.2); //powheg
+  //hist::scale("ttdil*", 8976.9/7984.8); //mc@nlo
+  
   //if(scalebTagMCbyDataDrivenEsts) {                                                                                                                                                                                                
   vector<TString> v_samples;
   vector<Color_t> v_colors;
@@ -153,10 +193,10 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
     
 
   if(drawtprime) {
-    v_samples.push_back("ttprime350");
+    v_samples.push_back("wprime400");
     v_colors.push_back(kBlue-2);
-    if(drawLogY) v_legEntries.push_back("t'#bar{t'} 350 GeV");
-    else v_legEntries.push_back("10 #times t'#bar{t'} 350 GeV");
+    if(drawLogY) v_legEntries.push_back("W' 400 GeV");
+    else v_legEntries.push_back("W' 400 GeV");
     v_styles.push_back(0);
   }
 
