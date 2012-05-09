@@ -192,6 +192,10 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hlepAzimAsym[i][j]->GetXaxis()->SetTitle("cos(#Delta #phi_{l^{+}l^{-}})");
       hlepAzimAsym[i][j]->Sumw2();
 
+      hlepAzimAsym_2[i][j] = new TH1F(Form("%s_hlepAzimAsym_2_%s",prefix,suffix),Form("%s_lepAzimAsym_2_%s",prefix,suffix),10,0,3.14);
+      hlepAzimAsym_2[i][j]->GetXaxis()->SetTitle("#Delta #phi_{l^{+}l^{-}}");
+      hlepAzimAsym_2[i][j]->Sumw2();
+
       htopSpinCorr[i][j] = new TH1F(Form("%s_htopSpinCorr_%s",prefix,suffix),Form("%s_topSpinCorr_%s",prefix,suffix),80,-1,1);
       htopSpinCorr[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} )");
       htopSpinCorr[i][j]->Sumw2();

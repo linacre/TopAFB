@@ -672,8 +672,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   requireExact2BTag    = find(v_Cuts.begin(), v_Cuts.end(), "requireExact2BTag"                      ) != v_Cuts.end();
   applyTopSystEta       = find(v_Cuts.begin(), v_Cuts.end(), "applyTopSystEta"                      ) != v_Cuts.end();
   // top mass
-  if ( scaleJESMETUp) globalJESRescale = 1.05 ;
-  else if (scaleJESMETDown)globalJESRescale = 0.95;
+  if ( scaleJESMETUp) globalJESRescale = 1.075 ;
+  else if (scaleJESMETDown)globalJESRescale = 0.925;
 
   already_seen.clear();
  
@@ -697,7 +697,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   }
 
   /*
-  if(prefix == "ttdil" || prefix == "ttotr") {
+  if(prefix == "ttdil" ) {
        cout<<"using Fall11 vertex weighting"<<endl;
        set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root",false);
   }
@@ -706,8 +706,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
   }
   */
-
+  
   set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
+  //set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root",false);
   //set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_3p5fb_Zselection.root",false);
   //set_vtxreweight_rootfile("vtxreweight_Spring11MC_336pb_Zselection.root",false);
   //set_vtxreweight_rootfile("vtxreweight_Summer11MC_1160pb_Zselection.root",false);
@@ -1813,8 +1814,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
-
 	//if(m_top < 0) continue;
+	if((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
  	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
   	if(applyTopSystEta &&  (fabs(ttRapidity) < 2.0) ) continue;
 
@@ -1890,6 +1891,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	float lep_azimuthal_asymmetry =-999.0;
 	lep_azimuthal_asymmetry = cos(lepPlus.DeltaPhi(lepMinus));
+
+	float lep_azimuthal_asymmetry_2 =-999.0;
+	lep_azimuthal_asymmetry_2 = acos(lep_azimuthal_asymmetry);
 	
 	float lep_pseudorap_diff =-999.0;
 	lep_pseudorap_diff = (lepPlus.Eta()) - (lepMinus.Eta());
@@ -2005,12 +2009,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	fillHistos( httMass, tt_mass ,  weight, myType, jetBin);
 	fillHistos( hlepChargeAsym, lep_charge_asymmetry ,  weight, myType, jetBin);
 	fillHistos( hlepAzimAsym, lep_azimuthal_asymmetry ,  weight, myType, jetBin);
-	fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin);
-	fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
-        fillHistos( hpseudorapiditydiff, top_pseudorapiditydiff_cms ,  weight, myType, jetBin);
-	fillHistos( hrapiditydiff, top_rapiditydiff_cms ,  weight, myType, jetBin);
-	fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
-	fillHistos( hlepCosTheta, lepMinus_costheta_cms  ,  weight, myType, jetBin);
+	fillHistos( hlepAzimAsym_2, lep_azimuthal_asymmetry_2 ,  weight, myType, jetBin);
+	if(m_top >0){
+	  fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin);
+	  fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
+	  fillHistos( hpseudorapiditydiff, top_pseudorapiditydiff_cms ,  weight, myType, jetBin);
+	  fillHistos( hrapiditydiff, top_rapiditydiff_cms ,  weight, myType, jetBin);
+	  fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
+	  fillHistos( hlepCosTheta, lepMinus_costheta_cms  ,  weight, myType, jetBin);
+	}
 	fillHistos( htheleadinglepPt, lt_p4.Pt()  ,  weight, myType, jetBin);
         fillHistos( hthesecondlepPt, ll_p4.Pt()  ,  weight, myType, jetBin);
         fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin);
