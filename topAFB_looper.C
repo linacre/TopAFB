@@ -1594,8 +1594,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   		
 
   		
-  		double btageffdata = 0.66;    //NEEDS TO BE UPDATED FOR CSV (=getBTagEff("CSV", 0.679, false))
-  		double ctageffdata = 0.13;    //NEEDS TO BE UPDATED FOR CSV
+  		double btageffdata = getBTagEff("CSV", 0.679, false);
+  		double ctageffdata = getCTagEff("CSV", 0.679, false);
   		double  nonb_pt, nonb_eta,bjet_pt,bjet_eta;
   		
   		//b tagged jet weighting, using number of matching real bs, cs and mistags
