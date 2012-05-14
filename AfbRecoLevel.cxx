@@ -35,16 +35,14 @@ int lineWidth=3;
 
 void GetAfb(TH1D* h, Float_t &afb, Float_t  &afberr){
   Int_t nbins = h->GetNbinsX();
-  Float_t event_minus;//  = h->Integral(0,nbins/2);
-  Float_t event_plus;//   = h->Integral(nbins/2+1,nbins+1);
-  Float_t event_total;// = event_plus + event_minus;
+  Float_t event_minus;
+  Float_t event_plus;
+  Float_t event_total;
   //  afb = (event_plus-event_minus)/(event_plus+event_minus);
   //  afberr   = sqrt(4*(event_plus*event_minus)/(event_total*event_total*event_total));
   Double_t event_plus_err;
   Double_t event_minus_err;
 
-  cout<<h->GetEntries()<<"\n";
-  
   event_minus  = h-> IntegralAndError(0, nbins/2, event_plus_err,"");
   event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_minus_err,"");
   event_total = event_plus + event_minus;
@@ -211,23 +209,10 @@ cout.precision(2);
 
   //  Now test with data and with BKG subtraction
 
-  TChain *ch_bkg = new TChain("tree");
-  TChain *ch_top = new TChain("tree");
+  hData->Sumw2();
+  hTop->Sumw2();
+  hBkg->Sumw2();
 
-  TChain *ch_data = new TChain("tree");
- 
-  ch_data->Add("../data.root");
-
-  ch_top->Add("../ttdil_powheg.root");
-
-  ch_bkg->Add("../ttotr.root");
-  ch_bkg->Add("../wjets.root");
-  ch_bkg->Add("../DYee.root");
-  ch_bkg->Add("../DYmm.root");
-  ch_bkg->Add("../DYtautau.root");
-  ch_bkg->Add("../tw.root");
-  ch_bkg->Add("../VV.root");
- 
   const char* var=observablename;
   TCut baseline = "1";
   if  (Region=="Signal")  
@@ -237,14 +222,25 @@ cout.precision(2);
   if ( (Region=="") && (iVar<2) ) 
     baseline = "1";
 
-  hData->Sumw2();
-  hTop->Sumw2();
-  hBkg->Sumw2();
-
+  TChain *ch_data = new TChain("tree");
+  ch_data->Add("../data.root");
   ch_data->Draw(Form("%s >> %s", var, "Data"),     baseline*"weight");
-  ch_bkg->Draw(Form("%s >> %s", var, "Background"),       baseline*"weight");
+
+  TChain *ch_top = new TChain("tree");
+  ch_top->Add("../ttdil_powheg.root");
   ch_top->Draw(Form("%s >> %s", var, "Top"), baseline*"weight");
 
+  TChain *ch_bkg = new TChain("tree");
+  ch_bkg->Add("../ttotr.root");
+  ch_bkg->Add("../wjets.root");
+  ch_bkg->Add("../DYee.root");
+  ch_bkg->Add("../DYmm.root");
+  ch_bkg->Add("../DYtautau.root");
+  ch_bkg->Add("../tw.root");
+  ch_bkg->Add("../VV.root");
+  ch_bkg->Draw(Form("%s >> %s", var, "Background"),       baseline*"weight");
+  
+  hTop->Scale(_topScalingFactor);
   TH1D* hTop_bkgAdd= (TH1D*) hTop->Clone();
   hTop_bkgAdd->Add(hBkg);  
 
@@ -278,7 +274,7 @@ cout.precision(2);
 
   hs->SetMinimum(0.0);
   hs->SetMaximum( 2.0* hs->GetMaximum());
-  hs->Draw();
+  hs->Draw("hist");
   hs->GetXaxis()->SetTitle(xaxislabel);
   hs->GetYaxis()->SetTitleOffset(1.3);
   hs->GetYaxis()->SetTitle("Events");
