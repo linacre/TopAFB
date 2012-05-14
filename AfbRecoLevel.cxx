@@ -17,6 +17,7 @@ using std::endl;
 #include "TLegend.h"
 #include "TColor.h"
 #include "THStack.h"
+#include "TCut.h"
 
 
 //==============================================================================
@@ -34,11 +35,25 @@ int lineWidth=3;
 
 void GetAfb(TH1D* h, Float_t &afb, Float_t  &afberr){
   Int_t nbins = h->GetNbinsX();
-  Float_t event_minus  = h->Integral(0,nbins/2);
-  Float_t event_plus   = h->Integral(nbins/2+1,nbins+1);
-  Float_t event_total = event_plus + event_minus;
+  Float_t event_minus;//  = h->Integral(0,nbins/2);
+  Float_t event_plus;//   = h->Integral(nbins/2+1,nbins+1);
+  Float_t event_total;// = event_plus + event_minus;
+  //  afb = (event_plus-event_minus)/(event_plus+event_minus);
+  //  afberr   = sqrt(4*(event_plus*event_minus)/(event_total*event_total*event_total));
+  Double_t event_plus_err;
+  Double_t event_minus_err;
+
+  cout<<h->GetEntries()<<"\n";
+  
+  event_minus  = h-> IntegralAndError(0, nbins/2, event_plus_err,"");
+  event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_minus_err,"");
+  event_total = event_plus + event_minus;
+
   afb = (event_plus-event_minus)/(event_plus+event_minus);
-  afberr   = sqrt(4*(event_plus*event_minus)/(event_total*event_total*event_total));
+  afberr   = sqrt(4*(event_plus*event_plus*event_minus_err*event_minus_err 
+		     + event_minus*event_minus*event_plus_err*event_plus_err)/
+		  (event_total*event_total*event_total*event_total));
+
 }
 
 // This function is only needed for proper error estimation of the unfolded distributions, not used in this macro
@@ -93,9 +108,6 @@ gStyle->SetOptFit();
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
 cout.precision(2);
-
-// TString Region="Signal";
-//  TString Region="";
 
   TString observablename;
   TString xaxislabel;
@@ -215,57 +227,23 @@ cout.precision(2);
   ch_bkg->Add("../DYtautau.root");
   ch_bkg->Add("../tw.root");
   ch_bkg->Add("../VV.root");
+ 
+  const char* var=observablename;
+  TCut baseline = "1";
+  if  (Region=="Signal")  
+    baseline = "t_mass > 0 && tt_mass >450";
+  if ( (Region=="") && (iVar>=2) ) 
+    baseline = "t_mass > 0 && tt_mass > 0";
+  if ( (Region=="") && (iVar<2) ) 
+    baseline = "1";
 
-  ch_data->SetBranchAddress(observablename,    &observable);
-  ch_data->SetBranchAddress("weight",&weight);
-  ch_data->SetBranchAddress("tt_mass",&ttmass);
-  ch_data->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_data->SetBranchAddress("t_mass",&tmass);
+  hData->Sumw2();
+  hTop->Sumw2();
+  hBkg->Sumw2();
 
-
-  for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
-    ch_data->GetEntry(i);
-    if ( (Region=="Signal") && (ttmass>_ttMassCut) )  
-      hData->Fill(observable,weight);
-    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
-      hData->Fill(observable,    weight);    
-    if ( (Region=="") && (iVar<2) ) 
-      hData->Fill(observable,    weight);   
-    }
-
-  ch_bkg->SetBranchAddress(observablename,    &observable);
-  ch_bkg->SetBranchAddress("weight",&weight);
-  ch_bkg->SetBranchAddress("tt_mass",&ttmass);
-  ch_bkg->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_bkg->SetBranchAddress("t_mass",&tmass);
-
-  for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
-    ch_bkg->GetEntry(i);
-    if ( (Region=="Signal") && (ttmass>_ttMassCut) )  
-      hBkg->Fill(observable    ,weight);
-    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
-      hBkg->Fill(observable,    weight);    
-    if ( (Region=="") && (iVar<2) ) 
-      hBkg->Fill(observable,    weight);   
-  }
-
-  ch_top->SetBranchAddress(observablename,    &observable);
-  ch_top->SetBranchAddress(observablename+"_gen",&observable_gen);
-  ch_top->SetBranchAddress("weight",&weight);
-  ch_top->SetBranchAddress("tt_mass",&ttmass);
-  ch_top->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_top->SetBranchAddress("t_mass",&tmass);
-
-  for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
-    ch_top->GetEntry(i);
-    if ( (Region=="Signal") && (ttmass>_ttMassCut) ) 
-      hTop->Fill(observable, weight*_topScalingFactor);    
-    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
-      hTop->Fill(observable, weight*_topScalingFactor);    
-    if ( (Region=="") && (iVar<2) ) 
-      hTop->Fill(observable, weight*_topScalingFactor);    
-  }
-
+  ch_data->Draw(Form("%s >> %s", var, "Data"),     baseline*"weight");
+  ch_bkg->Draw(Form("%s >> %s", var, "Background"),       baseline*"weight");
+  ch_top->Draw(Form("%s >> %s", var, "Top"), baseline*"weight");
 
   TH1D* hTop_bkgAdd= (TH1D*) hTop->Clone();
   hTop_bkgAdd->Add(hBkg);  
@@ -307,11 +285,11 @@ cout.precision(2);
 
   hData->Draw("E same");
 
-  TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");                                                                           
-  leg1->SetEntrySeparation(100);                                                                                                          
-  leg1->SetBorderSize(0);                                                                                                                  
-  leg1->SetTextSize(0.03);                                                                                                                 
-  leg1->AddEntry(hData, "Data");                                                                                       
+  TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");
+  leg1->SetEntrySeparation(100);  
+  leg1->SetBorderSize(0);                                                                                 
+  leg1->SetTextSize(0.03);
+  leg1->AddEntry(hData, "Data");
   leg1->AddEntry(hTop,  "t-tbar");                                                               
   leg1->AddEntry(hBkg,  "Background");                                                               
   leg1->Draw();                
