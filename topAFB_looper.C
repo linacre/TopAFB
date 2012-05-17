@@ -1814,6 +1814,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
+	float ttRapidity2 = (top1_p4+top2_p4).Rapidity();
 	//if(m_top < 0) continue;
 	if((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
  	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
@@ -2009,7 +2010,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	fillHistos( httMass, tt_mass ,  weight, myType, jetBin);
 	fillHistos( hlepChargeAsym, lep_charge_asymmetry ,  weight, myType, jetBin);
 	fillHistos( hlepAzimAsym, lep_azimuthal_asymmetry ,  weight, myType, jetBin);
-	fillHistos( hlepAzimAsym_2, lep_azimuthal_asymmetry_2 ,  weight, myType, jetBin);
+	fillHistos( hlepAzimAsym2, lep_azimuthal_asymmetry_2 ,  weight, myType, jetBin);
 	if(m_top >0){
 	  fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin);
 	  fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
@@ -2017,26 +2018,26 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  fillHistos( hrapiditydiff, top_rapiditydiff_cms ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta, lepMinus_costheta_cms  ,  weight, myType, jetBin);
+	  fillHistos( hlepPlusCosTheta,  lepPlus_costheta_cms, weight, myType, jetBin);
+	  fillHistos( hlepMinusCosTheta,  lepMinus_costheta_cms, weight, myType, jetBin);
+	  fillHistos( httRapidity, ttRapidity ,  weight, myType, jetBin);
+	  fillHistos( httRapidity2, ttRapidity2 ,  weight, myType, jetBin);
+	  fillHistos( hlepAngleBetweenCMS,  lep_cosalpha_cms, weight, myType, jetBin);
+	  fillHistos( hjetAngleBetweenCMS,  jet_cosalpha_cms, weight, myType, jetBin);
+	  fillHistos( hpseudorapiditydiff2,  top_pseudorapiditydiff2_cms, weight, myType, jetBin);
+	  fillHistos( hrapiditydiff2,  top_rapiditydiff2_cms, weight, myType, jetBin);
 	}
 	fillHistos( htheleadinglepPt, lt_p4.Pt()  ,  weight, myType, jetBin);
-        fillHistos( hthesecondlepPt, ll_p4.Pt()  ,  weight, myType, jetBin);
-        fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin);
-        fillHistos( hlepEta, ll_p4.Eta()  ,  weight, myType, jetBin);
+         fillHistos( hthesecondlepPt, ll_p4.Pt()  ,  weight, myType, jetBin);
+         fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin);
+         fillHistos( hlepEta, ll_p4.Eta()  ,  weight, myType, jetBin);
 	fillHistos( hMET, p_met.first  ,  weight, myType, jetBin);
-	fillHistos( htopMass, m_top ,  weight, myType, jetBin);
-	fillHistos( httRapidity, ttRapidity ,  weight, myType, jetBin);
-	
+	fillHistos( htopMass, m_top ,  weight, myType, jetBin);	
 	fillHistos( hlepRapDiff,  lep_pseudorap_diff, weight, myType, jetBin);
 	fillHistos( hlepAngleBetween,  lep_cosalpha, weight, myType, jetBin);
-	fillHistos( hlepAngleBetweenCMS,  lep_cosalpha_cms, weight, myType, jetBin);
-	fillHistos( hpseudorapiditydiff2,  top_pseudorapiditydiff2_cms, weight, myType, jetBin);
-	fillHistos( hrapiditydiff2,  top_rapiditydiff2_cms, weight, myType, jetBin);
-	fillHistos( hlepPlusCosTheta,  lepPlus_costheta_cms, weight, myType, jetBin);
-	fillHistos( hlepMinusCosTheta,  lepMinus_costheta_cms, weight, myType, jetBin);
 	fillHistos( hjetAzimAsym,  jet_azimuthal_asymmetry, weight, myType, jetBin);
 	fillHistos( hjetRapDiff,  jet_pseudorap_diff, weight, myType, jetBin);
 	fillHistos( hjetAngleBetween,  jet_cosalpha, weight, myType, jetBin);
-	fillHistos( hjetAngleBetweenCMS,  jet_cosalpha_cms, weight, myType, jetBin);
 	fillHistos( hlepPhi,  lepPlus_phi, weight, myType, jetBin);
 	fillHistos( hlepPhi,  lepMinus_phi, weight, myType, jetBin);
 	fillHistos( hlepPlusPhi,  lepPlus_phi, weight, myType, jetBin);
@@ -2223,6 +2224,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym_gen, lep_azimuthal_asymmetry_gen ,  weight, myType, jetBin);
+	  fillHistos( hlepAzimAsym2_gen, acos(lep_azimuthal_asymmetry_gen) ,  weight, myType, jetBin);
 	  fillHistos( htopSpinCorr_gen, top_spin_correlation_gen  ,  weight, myType, jetBin);
 	  fillHistos( htopCosTheta_gen, top_costheta_cms_gen   ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);

@@ -77,8 +77,12 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hlepChargeAsym_gen[i][j]->Sumw2();
 
       hlepAzimAsym_gen[i][j] = new TH1F(Form("%s_hlepAzimAsymGen_%s",prefix,suffix),Form("%s_lepAzimAsymGen_%s",prefix,suffix),80,-1,1);
-      hlepAzimAsym_gen[i][j]->GetXaxis()->SetTitle("Azimuthal_Asymmetry_lep_gen");
+      hlepAzimAsym_gen[i][j]->GetXaxis()->SetTitle("cos(#Delta #phi_{l^{+}l^{-}})");
       hlepAzimAsym_gen[i][j]->Sumw2();
+
+      hlepAzimAsym2_gen[i][j] = new TH1F(Form("%s_hlepAzimAsym2Gen_%s",prefix,suffix),Form("%s_lepAzimAsym2Gen_%s",prefix,suffix),80,0,3.141592653589793);
+      hlepAzimAsym2_gen[i][j]->GetXaxis()->SetTitle("#Delta #phi_{l^{+}l^{-}}");
+      hlepAzimAsym2_gen[i][j]->Sumw2();
 
       htopSpinCorr_gen[i][j] = new TH1F(Form("%s_htopSpinCorrGen_%s",prefix,suffix),Form("%s_topSpinCorrgen_%s",prefix,suffix),80,-1,1);
       htopSpinCorr_gen[i][j]->GetXaxis()->SetTitle("Spin_Correlation_top_gen");
@@ -192,9 +196,9 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hlepAzimAsym[i][j]->GetXaxis()->SetTitle("cos(#Delta #phi_{l^{+}l^{-}})");
       hlepAzimAsym[i][j]->Sumw2();
 
-      hlepAzimAsym_2[i][j] = new TH1F(Form("%s_hlepAzimAsym_2_%s",prefix,suffix),Form("%s_lepAzimAsym_2_%s",prefix,suffix),10,0,3.14);
-      hlepAzimAsym_2[i][j]->GetXaxis()->SetTitle("#Delta #phi_{l^{+}l^{-}}");
-      hlepAzimAsym_2[i][j]->Sumw2();
+      hlepAzimAsym2[i][j] = new TH1F(Form("%s_hlepAzimAsym2_%s",prefix,suffix),Form("%s_lepAzimAsym2_%s",prefix,suffix),80,0,3.141592653589793);
+      hlepAzimAsym2[i][j]->GetXaxis()->SetTitle("#Delta #phi_{l^{+}l^{-}}");
+      hlepAzimAsym2[i][j]->Sumw2();
 
       htopSpinCorr[i][j] = new TH1F(Form("%s_htopSpinCorr_%s",prefix,suffix),Form("%s_topSpinCorr_%s",prefix,suffix),80,-1,1);
       htopSpinCorr[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} )");
@@ -238,9 +242,13 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hllbbMass[i][j]->Sumw2();
       
 
-      httRapidity[i][j] = new TH1F(Form("%s_httRapidity_%s",prefix,suffix),Form("%s_ttRapidity_%s",prefix,suffix),100,-7,7);
+      httRapidity[i][j] = new TH1F(Form("%s_httRapidity_%s",prefix,suffix),Form("%s_ttRapidity_%s",prefix,suffix),120,-6,6);
       httRapidity[i][j]->GetXaxis()->SetTitle("y_{t} + y_{#bar{t}} estimate");
       httRapidity[i][j]->Sumw2();
+      
+      httRapidity2[i][j] = new TH1F(Form("%s_httRapidity2_%s",prefix,suffix),Form("%s_ttRapidity2_%s",prefix,suffix),120,-6,6);
+      httRapidity2[i][j]->GetXaxis()->SetTitle("y_{t#bar{t}} estimate");
+      httRapidity2[i][j]->Sumw2();
 
       htopMass[i][j] = new TH1F(Form("%s_htopMass_%s",prefix,suffix),Form("%s_topMass_%s",prefix,suffix),100,0.,500.);
       htopMass[i][j]->GetXaxis()->SetTitle("M_{t} estimate (GeV/c^{2})");

@@ -41,12 +41,13 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   hist::loadHist(FName.Data(),0,"*hnVtx*");
   hist::loadHist(FName.Data(),0,"*hnBtagJet*");
 
-  hist::loadHist(FName.Data(),0,"*hlepPt_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepPt_2j*");
   hist::loadHist(FName.Data(),0,"*hlepPlusPt_2j*");
   hist::loadHist(FName.Data(),0,"*hlepMinusPt_2j*");
-  hist::loadHist(FName.Data(),0,"*hlepEta_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepEta_2j*");
   hist::loadHist(FName.Data(),0,"*hlepPlusEta_2j*");
   hist::loadHist(FName.Data(),0,"*hlepMinusEta_2j*");
+  hist::loadHist(FName.Data(),0,"*theSumLepPt_2j*");
   //hist::loadHist(FName.Data(),0,"*hlepPhi_2j*");
   //hist::loadHist(FName.Data(),0,"*hlepPlusPhi_2j*");
   //hist::loadHist(FName.Data(),0,"*hlepMinusPhi_2j*");
@@ -57,42 +58,43 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   //hist::loadHist(FName.Data(),0,"*hjetPhi_2j*");
   //hist::loadHist(FName.Data(),0,"*thefirstJetPt_2j*");
   //hist::loadHist(FName.Data(),0,"*thesecondJetPt_2j*");
-  //hist::loadHist(FName.Data(),0,"*theSumJetPt_2j*");
+  hist::loadHist(FName.Data(),0,"*theSumJetPt_2j*");
   //hist::loadHist(FName.Data(),0,"*theSumBtagJetPt_2j*");
  
   //hist::loadHist(FName.Data(),0,"*htheleadinglepPt_2j*");
   //hist::loadHist(FName.Data(),0,"*hthesecondlepPt_2j*");
-  //hist::loadHist(FName.Data(),0,"*theSumLepPt_2j*");
+
   hist::loadHist(FName.Data(),0,"*hMET_2j*");
   //hist::loadHist(FName.Data(),0,"*hmassltb_2j*");
   //hist::loadHist(FName.Data(),0,"*hmassllb_2j*");
 
+  hist::loadHist(FName.Data(),0,"*htopMass_2j*");
+  hist::loadHist(FName.Data(),0,"*httMass_2j*"); 
+  hist::loadHist(FName.Data(),0,"*httRapidity_2j*");   
+  hist::loadHist(FName.Data(),0,"*httRapidity2_2j*");   
 
   hist::loadHist(FName.Data(),0,"*hlepChargeAsym_2j*");
   hist::loadHist(FName.Data(),0,"*hlepAzimAsym_2j*");
-  hist::loadHist(FName.Data(),0,"*htopCosTheta_2j*");
-  hist::loadHist(FName.Data(),0,"*hpseudorapiditydiff_2j*");
-  hist::loadHist(FName.Data(),0,"*hrapiditydiff_2j*");
-  hist::loadHist(FName.Data(),0,"*htopSpinCorr_2j*");
-  hist::loadHist(FName.Data(),0,"*hlepPlusCosTheta_2j*");
-  hist::loadHist(FName.Data(),0,"*hlepMinusCosTheta_2j*");
-  hist::loadHist(FName.Data(),0,"*hlepCosTheta_2j*");
+  hist::loadHist(FName.Data(),0,"*hlepAzimAsym2_2j*");
+  //hist::loadHist(FName.Data(),0,"*htopCosTheta_2j*");
+  //hist::loadHist(FName.Data(),0,"*hpseudorapiditydiff_2j*");
+  //hist::loadHist(FName.Data(),0,"*hrapiditydiff_2j*");
+  //hist::loadHist(FName.Data(),0,"*htopSpinCorr_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepPlusCosTheta_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepMinusCosTheta_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepCosTheta_2j*");
 
-  hist::loadHist(FName.Data(),0,"*htopMass_2j*");
-  hist::loadHist(FName.Data(),0,"*httMass_2j*");    
-  hist::loadHist(FName.Data(),0,"*httRapidity_2j*");        
+  //hist::loadHist(FName.Data(),0,"*hpseudorapiditydiff2_2j*");
+  //hist::loadHist(FName.Data(),0,"*hrapiditydiff2_2j*");
 
-  hist::loadHist(FName.Data(),0,"*hpseudorapiditydiff2_2j*");
-  hist::loadHist(FName.Data(),0,"*hrapiditydiff2_2j*");
-
-  hist::loadHist(FName.Data(),0,"*hlepRapDiff_2j*");
-  hist::loadHist(FName.Data(),0,"*hlepAngleBetween_2j*");
-  hist::loadHist(FName.Data(),0,"*hlepAngleBetweenCMS_2j*");  
+  //hist::loadHist(FName.Data(),0,"*hlepRapDiff_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepAngleBetween_2j*");
+  //hist::loadHist(FName.Data(),0,"*hlepAngleBetweenCMS_2j*");  
   
-  hist::loadHist(FName.Data(),0,"*hjetAzimAsym_2j*");
-  hist::loadHist(FName.Data(),0,"*hjetRapDiff_2j*");
-  hist::loadHist(FName.Data(),0,"*hjetAngleBetween_2j*");
-  hist::loadHist(FName.Data(),0,"*hjetAngleBetweenCMS_2j*");
+  //hist::loadHist(FName.Data(),0,"*hjetAzimAsym_2j*");
+  //hist::loadHist(FName.Data(),0,"*hjetRapDiff_2j*");
+  //hist::loadHist(FName.Data(),0,"*hjetAngleBetween_2j*");
+  //hist::loadHist(FName.Data(),0,"*hjetAngleBetweenCMS_2j*");
     
   //  hist::loadHist(FName.Data(),0,"*htopCosThetaGen_2j*");
   //  hist::loadHist(FName.Data(),0,"*hlepChargeAsymGen_2j*");
@@ -100,9 +102,8 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   //  hist::loadHist(FName.Data(),0,"*htopSpinCorrGen_2j*");
   }
   //if(drawtprime && ! drawLogY) hist::scale("ttprime*", 10);
-  
-  //hist::scale("ttdil*", 8976.9/8191.2); //powheg
-  //hist::scale("ttdil*", 8976.9/7984.8); //mc@nlo
+
+  //hist::scale("ttdil*", 1.+(9746. - 9012.934570)/8255.404297 ); //scale powheg to data
   
   //if(scalebTagMCbyDataDrivenEsts) {                                                                                                                                                                                                
   vector<TString> v_samples;

@@ -583,8 +583,9 @@ TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, 
   TLegend *leg;
   if(drawLogY)
     leg = new TLegend(lowX,lowY,highX,highY, "", "br"); 
-  else 
-    leg = new TLegend(0.72, 0.65, 0.92, 0.93, "", "brNDC");
+  else if(histName.Contains("lepAzimAsym2_") || histName.Contains("hlepAngleBetween_"))
+    leg = new TLegend(0.58, 0.65, 0.78, 0.93, "", "brNDC");
+  else leg = new TLegend(0.72, 0.65, 0.92, 0.93, "", "brNDC");
   if((histName.Contains("nJet") || histName.Contains("bTag")) && drawLogY && hdata != NULL ) {
     int temp = hdata->GetNbinsX();
     leg = new TLegend(hdata->GetNbinsX()-1.5, lowY, temp - 0.45*hdata->GetBinWidth(temp), highY, "", "br");
@@ -593,7 +594,8 @@ TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, 
 
   leg->SetFillColor(kWhite);
   leg->SetBorderSize(0);
-  leg->SetFillStyle(1001);    
+  //leg->SetFillStyle(1001);
+  leg->SetFillStyle(0);     
 
   if(v_hists.size() != v_legEntries.size()) {
     cout << "the number of entries in the legend vector are not the same as the number"

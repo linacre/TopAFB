@@ -148,7 +148,8 @@ class topAFB_looper
 	TH1F* hnBtagJet[4];                   // NBTagjet distributions  
 	TH1F* hnVtx[4];          
 	//Top Mass Plots
-	TH1F *httRapidity[4][4];     
+	TH1F *httRapidity[4][4];
+	TH1F *httRapidity2[4][4];     
 	TH1F *httMass[4][4]; 
 	TH1F *hllbbMass[4][4];
 	TH1F *hllbbMass_gen[4][4];
@@ -177,12 +178,13 @@ class topAFB_looper
 	TH1F *hlepCosTheta[4][4];
 	TH1F *hlepChargeAsym[4][4];
 	TH1F *hlepAzimAsym[4][4];
-	TH1F *hlepAzimAsym_2[4][4];
+	TH1F *hlepAzimAsym2[4][4];
 	TH1F *htopSpinCorr[4][4];
 	TH1F *htopCosTheta_gen[4][4];
 	TH1F *hlepCosTheta_gen[4][4];
 	TH1F *hlepChargeAsym_gen[4][4];
 	TH1F *hlepAzimAsym_gen[4][4];
+	TH1F *hlepAzimAsym2_gen[4][4];
 	TH1F *htopSpinCorr_gen[4][4];
 	
 	TH1F *hlepRapDiff[4][4];
