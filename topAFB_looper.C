@@ -2267,6 +2267,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  lep_charge_asymmetry_ = lep_charge_asymmetry;
 	  lep_pseudorap_diff_ =  lep_pseudorap_diff;
 	  lep_azimuthal_asymmetry_ = lep_azimuthal_asymmetry;
+	  lep_azimuthal_asymmetry2_ = lep_azimuthal_asymmetry_2;
 	  top_spin_correlation_ = top_spin_correlation;
 	  top_costheta_cms_     = top_costheta_cms;
 	  top_rapiditydiff_cms_ = top_rapiditydiff_cms;
@@ -2327,6 +2328,7 @@ void topAFB_looper::InitBabyNtuple ()
   lep_charge_asymmetry_ = -999.0;
   lep_pseudorap_diff_ = -999.0;
   lep_azimuthal_asymmetry_ = -999.0;
+  lep_azimuthal_asymmetry2_ = -999.0;
   top_spin_correlation_ = -999.0;
   top_costheta_cms_     = -999.0;
   top_rapiditydiff_cms_           = -999.0;
@@ -2373,6 +2375,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("lep_charge_asymmetry",  &lep_charge_asymmetry_,"lep_charge_asymmetry/F" );
     babyTree_->Branch("lep_pseudorap_diff",  & lep_pseudorap_diff_,"lep_pseudorap_diff/F" );    
     babyTree_->Branch("lep_azimuthal_asymmetry",&lep_azimuthal_asymmetry_,  "lep_azimuthal_asymmetry/F"   );
+    babyTree_->Branch("lep_azimuthal_asymmetry2",&lep_azimuthal_asymmetry2_,  "lep_azimuthal_asymmetry2/F"   );
     babyTree_->Branch("top_spin_correlation",  &top_spin_correlation_,"top_spin_correlation/F" );
     babyTree_->Branch("top_costheta_cms",      &top_costheta_cms_,    "top_costheta_cms/F"     );
     babyTree_->Branch("lep_costheta_cms",      &lepPlus_costheta_cms_,"lep_costheta_cms/F"     );

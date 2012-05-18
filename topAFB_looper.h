@@ -126,6 +126,7 @@ class topAFB_looper
 	float lep_charge_asymmetry_ ;
 	float lep_pseudorap_diff_ ;
 	float lep_azimuthal_asymmetry_ ;
+	float lep_azimuthal_asymmetry2_ ;
 	float top_spin_correlation_ ;
 	float top_costheta_cms_    ;
 	float top_rapiditydiff_cms_    ;
