@@ -130,6 +130,7 @@ class topAFB_looper
 	float top_spin_correlation_ ;
 	float top_costheta_cms_    ;
 	float top_rapiditydiff_cms_    ;
+	float top_rapiditydiff_Marco_    ;
 	float top_pseudorapiditydiff_cms_    ;
 	float lepPlus_costheta_cms_ ;
 	float tt_mass_gen_ ;
@@ -140,6 +141,7 @@ class topAFB_looper
 	float  top_costheta_cms_gen_    ;
 	float lepPlus_costheta_cms_gen_ ;
 	float top_rapiditydiff_cms_gen_    ;
+	float top_rapiditydiff_Marco_gen_    ;
 	float top_pseudorapiditydiff_cms_gen_;  
 	float massllbb_ ;
 	float massllbb_gen_;
@@ -207,6 +209,27 @@ class topAFB_looper
 	TH1F *hlepMinusEta[4][4];
 	TH1F *hlepPlusPt[4][4];
 	TH1F *hlepMinusPt[4][4];
+	
+	TH1F *hlepPt[4][4];
+	TH1F *hrapiditydiffMarco[4][4];
+	
+	TH1F *hlepPlusCosTheta_gen[4][4];
+	TH1F *hlepMinusCosTheta_gen[4][4];
+	TH1F *hpseudorapiditydiff_gen[4][4];
+	TH1F *hrapiditydiff_gen[4][4];
+	TH1F *hrapiditydiffMarco_gen[4][4];
+
+	TH2F *hlepChargeAsym_gen2d[4][4];
+	TH2F *hlepAzimAsym_gen2d[4][4];
+	TH2F *hlepAzimAsym2_gen2d[4][4];
+	TH2F *htopSpinCorr_gen2d[4][4];
+	TH2F *htopCosTheta_gen2d[4][4];
+	TH2F *hlepCosTheta_gen2d[4][4];
+	TH2F *hlepPlusCosTheta_gen2d[4][4];
+	TH2F *hlepMinusCosTheta_gen2d[4][4];
+	TH2F *hpseudorapiditydiff_gen2d[4][4];
+	TH2F *hrapiditydiff_gen2d[4][4];
+	TH2F *hrapiditydiffMarco_gen2d[4][4];	
 	
 	TH2F *htopCosTheta_2d[4][4];
 	TH2F *hlepCosTheta_2d[4][4];

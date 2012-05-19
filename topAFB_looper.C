@@ -1826,6 +1826,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float top_pseudorapiditydiff_cms = -999.0;
 	top_pseudorapiditydiff_cms = abs(top1_p4.Eta()) - abs(top2_p4.Eta());
 	
+	float top_rapiditydiff_Marco = abs(top1_p4.Rapidity()) - abs(top2_p4.Rapidity());
+	
 	float top_rapiditydiff2_cms = -999.0;
 	top_rapiditydiff2_cms = (top1_p4.Rapidity() - top2_p4.Rapidity());
 	
@@ -2016,6 +2018,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
 	  fillHistos( hpseudorapiditydiff, top_pseudorapiditydiff_cms ,  weight, myType, jetBin);
 	  fillHistos( hrapiditydiff, top_rapiditydiff_cms ,  weight, myType, jetBin);
+	  fillHistos( hrapiditydiffMarco, top_rapiditydiff_Marco ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta, lepMinus_costheta_cms  ,  weight, myType, jetBin);
 	  fillHistos( hlepPlusCosTheta,  lepPlus_costheta_cms, weight, myType, jetBin);
@@ -2048,6 +2051,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	fillHistos( hlepMinusEta,  lepMinus_Eta, weight, myType, jetBin);
 	fillHistos( hlepPlusPt,  lepPlus_Pt, weight, myType, jetBin);
 	fillHistos( hlepMinusPt,  lepMinus_Pt, weight, myType, jetBin);
+	fillHistos( hlepPt,  lepPlus_Pt, weight, myType, jetBin);
+	fillHistos( hlepPt,  lepMinus_Pt, weight, myType, jetBin);
 	
 	
 	if(v_goodJets_cand_p4.size() > 1){
@@ -2110,6 +2115,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float llbbRapidityQuark_gen;
 	float llbbRapidityGluon_gen;
 	float top_rapiditydiff_cms_gen;
+	float top_rapiditydiff_Marco_gen;
 	float top_pseudorapiditydiff_cms_gen;
 	// generator level plots
 	//if(!isData && (prefix == "ttdil"|| prefix == "wprime400"|| prefix == "wprime600" || prefix == "axigluonR")){
@@ -2196,6 +2202,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  
 	  top_rapiditydiff_cms_gen = (topplus_genp_p4.Rapidity() - topminus_genp_p4.Rapidity())*(topplus_genp_p4.Rapidity() + topminus_genp_p4.Rapidity());
 	  top_pseudorapiditydiff_cms_gen = abs(topplus_genp_p4.Eta()) - abs(topminus_genp_p4.Eta());
+	  top_rapiditydiff_Marco_gen = abs(topplus_genp_p4.Rapidity()) - abs(topminus_genp_p4.Rapidity());
 	
 
 	  //cms_gen = 0.5*(topplus_genp_p4+topminus_genp_p4);
@@ -2225,9 +2232,37 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym_gen, lep_azimuthal_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym2_gen, acos(lep_azimuthal_asymmetry_gen) ,  weight, myType, jetBin);
+	  if(m_top >0){
 	  fillHistos( htopSpinCorr_gen, top_spin_correlation_gen  ,  weight, myType, jetBin);
 	  fillHistos( htopCosTheta_gen, top_costheta_cms_gen   ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);
+	  fillHistos( hlepCosTheta_gen, lepMinus_costheta_cms_gen  ,  weight, myType, jetBin);
+	  fillHistos( hlepPlusCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);
+	  fillHistos( hlepMinusCosTheta_gen, lepMinus_costheta_cms_gen  ,  weight, myType, jetBin);
+	  fillHistos( hpseudorapiditydiff_gen, top_pseudorapiditydiff_cms_gen ,  weight, myType, jetBin);
+	  fillHistos( hrapiditydiff_gen, top_rapiditydiff_cms_gen ,  weight, myType, jetBin);
+	  fillHistos( hrapiditydiffMarco_gen, top_rapiditydiff_Marco_gen ,  weight, myType, jetBin);
+	  }
+	  
+	  
+	  
+	  fillHistos( hlepChargeAsym_gen2d, lep_charge_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hlepAzimAsym_gen2d, lep_azimuthal_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hlepAzimAsym2_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  tt_mass_gen, weight, myType, jetBin);
+	  if(m_top >0){
+	  fillHistos( htopSpinCorr_gen2d, top_spin_correlation_gen  ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( htopCosTheta_gen2d, top_costheta_cms_gen   ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hlepCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hlepCosTheta_gen2d, lepMinus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hlepPlusCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hlepMinusCosTheta_gen2d, lepMinus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hpseudorapiditydiff_gen2d, top_pseudorapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hrapiditydiff_gen2d, top_rapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hrapiditydiffMarco_gen2d, top_rapiditydiff_Marco_gen ,  tt_mass_gen, weight, myType, jetBin);
+	  }
+	  
+	  
+	  
 	  fillHistos( hlepChargeAsym_2d, lep_charge_asymmetry_gen ,lep_charge_asymmetry,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym_2d, lep_azimuthal_asymmetry_gen ,lep_azimuthal_asymmetry,  weight, myType, jetBin);
 	  fillHistos( htopSpinCorr_2d, top_spin_correlation_gen, top_spin_correlation ,  weight, myType, jetBin);
@@ -2271,8 +2306,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  top_spin_correlation_ = top_spin_correlation;
 	  top_costheta_cms_     = top_costheta_cms;
 	  top_rapiditydiff_cms_ = top_rapiditydiff_cms;
+	  top_rapiditydiff_Marco_ = top_rapiditydiff_Marco;
 	  top_pseudorapiditydiff_cms_ = top_pseudorapiditydiff_cms;
 	  top_rapiditydiff_cms_gen_ = top_rapiditydiff_cms_gen;
+	  top_rapiditydiff_Marco_gen_ = top_rapiditydiff_Marco_gen;
 	  top_pseudorapiditydiff_cms_gen_ = top_pseudorapiditydiff_cms_gen;
 	  lepPlus_costheta_cms_ = lepPlus_costheta_cms;
 	  tt_mass_gen_ = tt_mass_gen;
@@ -2332,7 +2369,9 @@ void topAFB_looper::InitBabyNtuple ()
   top_spin_correlation_ = -999.0;
   top_costheta_cms_     = -999.0;
   top_rapiditydiff_cms_           = -999.0;
+  top_rapiditydiff_Marco_           = -999.0;
   top_pseudorapiditydiff_cms_     = -999.0;
+  top_rapiditydiff_Marco_gen_           = -999.0;
   top_rapiditydiff_cms_gen_           = -999.0;
   top_pseudorapiditydiff_cms_gen_     = -999.0;
   lepPlus_costheta_cms_ = -999.0;
@@ -2380,8 +2419,10 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("top_costheta_cms",      &top_costheta_cms_,    "top_costheta_cms/F"     );
     babyTree_->Branch("lep_costheta_cms",      &lepPlus_costheta_cms_,"lep_costheta_cms/F"     );
     babyTree_->Branch("top_rapidtiydiff_cms",      &top_rapiditydiff_cms_,"top_rapiditydiff_cms/F"     );
+    babyTree_->Branch("top_rapidtiydiff_Marco",      &top_rapiditydiff_Marco_,"top_rapiditydiff_Marco/F"     );
     babyTree_->Branch("top_pseudorapidtiydiff_cms",      &top_pseudorapiditydiff_cms_,"top_pseudorapiditydiff_cms/F"     );
     babyTree_->Branch("top_rapidtiydiff_cms_gen",      &top_rapiditydiff_cms_gen_,"top_rapiditydiff_cms_gen/F"     );
+    babyTree_->Branch("top_rapidtiydiff_Marco_gen",      &top_rapiditydiff_Marco_gen_,"top_rapiditydiff_Marco_gen/F"     );
     babyTree_->Branch("top_pseudorapidtiydiff_cms_gen",      &top_pseudorapiditydiff_cms_gen_,"top_pseudorapiditydiff_cms_gen/F"     );
     babyTree_->Branch("tt_mass_gen",           &tt_mass_gen_,          "tt_mass_gen/F"              );
     babyTree_->Branch("ttRapidity_gen",            &ttRapidity_gen_,          "ttRapidity_gen/F"            );
