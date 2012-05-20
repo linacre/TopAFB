@@ -37,7 +37,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   Double_t bins1[] =  { -4., -2., -1., 0., 1., 2., 4.}; 
   Double_t bins2[] = {-1., -0.6, -0.3, 0., 0.3, 0.6, 1.}; 
 
-  if(histname.Contains("lepChargeAsym")) {
+  if(histname.Contains("lepChargeAsym") ||  histname.Contains("rapiditydiff")) {
   	histo1 = (TH1F*) histo1->Rebin(6,Form("numerator_%s", histname.Data()),bins1);
   	histo2 = (TH1F*) histo2->Rebin(6,Form("denominator_%s", histname.Data()),bins1);
   }
