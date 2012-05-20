@@ -678,7 +678,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   already_seen.clear();
  
   // Make a baby ntuple
- if (createBabyNtuples){
+ if (createBabyNtuples && !applyNoCuts){
    TString babyFilename = prefix +".root";
    MakeBabyNtuple(babyFilename.Data());
  }
@@ -753,7 +753,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   nEventsChain = nEvents;
   unsigned int nEventsTotal = 0;   
   float nEvents_noCuts = 0;
+  float nEvents_noCuts_dil = 0;
   float nEvents_noCuts_novtxweight = 0;
+  float nEvents_noCuts_novtxweight_dil = 0;
   float nSelectedEvents = 0;
   unsigned int npreSelectedEvents = 0;
   unsigned int npreSelectedEvents_genmatch1 = 0;
@@ -777,7 +779,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       
    
       if(print_evt_weight && !isData){
-	cout << "Event Weight = " << evt_scale1fb() * lumi << endl;
+	cout << "Event Weight = " << kFactor * evt_scale1fb() * lumi << endl;
 	print_evt_weight = false;
       }
       // skip duplicates
@@ -789,6 +791,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
       }
       
+      int myType = 2;
+      unsigned int jetBin = 2;
+      int ndavtx = 0;      
+      double weight = 1.0;
+      float lepPlus_costheta_cms , lep_azimuthal_asymmetry , lep_azimuthal_asymmetry_2 , lep_charge_asymmetry , lep_pseudorap_diff , top_costheta_cms;
+      float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity , tt_mass , massllbb;
+      float m_top = -999.0;
+      double mass_ltb, mass_llb;      
+      
       float ndavtxweight = vtxweight(isData,true);
       //get the channels correct
       int nels= 0;
@@ -797,11 +808,13 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       int nleps = 0;
       if(!isData)
 	nleps = leptonGenpCount_lepTauDecays(nels, nmus, ntaus);
-      if (prefix == "ttdil"    &&  nleps != 2) continue;
-      if (prefix == "ttotr"    &&  nleps == 2) continue;
-      if (prefix == "DYee"     &&  nels != 2) continue;
-      if (prefix == "DYmm"     &&  nmus != 2) continue;
-      if (prefix == "DYtautau" &&  ntaus != 2) continue;
+      if(!applyNoCuts){
+        if (prefix == "ttdil"    &&  nleps != 2) continue;
+        if (prefix == "ttotr"    &&  nleps == 2) continue;
+        if (prefix == "DYee"     &&  nels != 2) continue;
+        if (prefix == "DYmm"     &&  nmus != 2) continue;
+        if (prefix == "DYtautau" &&  ntaus != 2) continue;
+      }
       
       if (prefix == "ttdil"    &&  nleps == 2) ++nEventsTotal;
       // Progress feedback to the user
@@ -815,7 +828,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       }//if(nEventsTotal%20000 == 0) {
 
       
-     
+     if(!applyNoCuts){
        if( isData && !goodrun(cms2.evt_run(), cms2.evt_lumiBlock()) ) continue;
       //if( isData && !goodrun_json(cms2.evt_run(), cms2.evt_lumiBlock()) ) continue;
       //did it pass all the good event cuts?
@@ -845,7 +858,16 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       float pthat_cutoff = 30.;
       if (prefix == "qcdpt15" && genps_pthat() > pthat_cutoff)
 	continue;
+
       
+      if( isData ){
+	weight = 1;
+      }else{
+	 weight = kFactor * evt_scale1fb() * lumi*ndavtxweight; 
+	  //if(require2BTag)weight = kFactor * evt_scale1fb() * lumi * 0.95 * 0.95 * ndavtxweight; //the MC-data scale factor for bjet tagging is now applied later (after the number of btags is counted)
+      }
+     }//!applyNoCuts
+     
       //splice together the DY samples - if its madgraph, then we do nothing
       if(TString(prefix).Contains("DY") && TString(evt_dataset()).Contains("madgraph") == false) {
 	bool doNotContinue = false;
@@ -856,32 +878,28 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	if(doNotContinue)
 	  continue;
       }
-      
-      float weight = 1.0;
-      if( isData ){
-	weight = 1;
-      }else{
-	 weight = kFactor * evt_scale1fb() * lumi*ndavtxweight; 
-	  //if(require2BTag)weight = kFactor * evt_scale1fb() * lumi * 0.95 * 0.95 * ndavtxweight; //the MC-data scale factor for bjet tagging is now applied later (after the number of btags is counted)
-      }
 
       if(applyNoCuts){
-	int ndavtx = 0;	
+	if(!isData) weight = kFactor * evt_scale1fb() * lumi;	
 	for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
 	  if(isGoodDAVertex(v)) ++ndavtx;
 	}
-	//hnVtx[myType]->Fill(ndavtx,1);
-	hnVtx[3]->Fill(ndavtx,1);
-	//if(isData) hnVtx[3]->Fill(ndavtx,1);
-	//else  hnVtx[3]->Fill(ndavtx,ndavtxweight);
-	if (cms2.davtxs_position().size() >0 ) {
-	  nEvents_noCuts_novtxweight += 1.; 	
-	  if(isData) nEvents_noCuts += 1.;
-	  else  nEvents_noCuts += ndavtxweight;
-	}
-	continue;
+	hnVtx[3]->Fill(ndavtx, ndavtxweight);
+	nEvents_noCuts_novtxweight += 1.; 	
+	if(isData) nEvents_noCuts += 1.;
+	else  nEvents_noCuts += ndavtxweight;
+  
+         if (prefix == "ttdil"    &&  nleps != 2) continue;
+         if (prefix == "ttotr"    &&  nleps == 2) continue;
+         if (prefix == "DYee"     &&  nels != 2) continue;
+         if (prefix == "DYmm"     &&  nmus != 2) continue;
+         if (prefix == "DYtautau" &&  ntaus != 2) continue;
+
+	nEvents_noCuts_novtxweight_dil += 1.; 	
+	if(isData) nEvents_noCuts_dil += 1.;
+	else  nEvents_noCuts_dil += ndavtxweight;
       }
-      
+            
        vector<unsigned int> v_goodHyps;
        v_goodHyps.clear();
        vector<float> v_weights;
@@ -892,6 +910,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
        ngoodlep_ = 0;
        ngoodel_  = 0;
        ngoodmu_  = 0;
+       
+     if(!applyNoCuts){
        
        if( generalLeptonVeto ){
           
@@ -1067,11 +1087,18 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	v_weights.push_back(goodHyp_weight);
       }//if(hypDisamb)
 
+     }//!applyNoCuts
+      
+
       //now loop over the good hypotheses. If we require hypothesis disambiguation,
       //we will only have one entry in the vector of good hypothesis
       bool hasGoodHyp = false;
-      for(unsigned int i = 0; i < v_goodHyps.size(); i++) {
-	
+      int goodHyps_size = v_goodHyps.size();
+      if(applyNoCuts) goodHyps_size = 1;
+      
+      for(unsigned int i = 0; i < goodHyps_size; i++) {
+      	
+       if(!applyNoCuts){
 	unsigned int hypIdx = v_goodHyps[i];
       	weight = weight*v_weights[i];
 	int type = hyp_type()[hypIdx];
@@ -1762,13 +1789,12 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	//	vector<LorentzVector>  v_goodJets_cand_p4_tmp;
 	//	v_goodJets_cand_p4_tmp = v_goodJets_cand_p4;
 	double dr_ltb, dr_llb;
-	double mass_ltb, mass_llb;
+	//double mass_ltb, mass_llb;
 	double mass_ltbs, mass_llbs;
 	float thefirstJet_pt = -999;
 	float thesecondJet_pt = -999;
 	double m_1, m_2, m_3, m_4;
 	double mass_lb_min, mass_lb_min_otherpair;
-	float massllbb;
 
 	if(v_goodJets_cand_p4.size() > 1) {
 	
@@ -1800,7 +1826,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	    massllbb=(lt_p4+v_goodJets_cand_p4.at(i_ltbjet)+ll_p4+v_goodJets_cand_p4.at(i_llbjet)).M();
 	}
 	
-	float m_top; 
+	//float m_top; 
 	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus, jet1,jet2; 
 	 
 	//if(require2BTag || requireExact2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
@@ -1809,24 +1835,27 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	//filling v_goodJets_cand_p4 does the same thing:
 	m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
 	
-	
-	float tt_mass = (top1_p4+top2_p4).M();
+	tt_mass = -999.0;
+	tt_mass = (top1_p4+top2_p4).M();
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
-	float ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
+	
+	ttRapidity = -999.0;
+	ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
 	float ttRapidity2 = (top1_p4+top2_p4).Rapidity();
 	//if(m_top < 0) continue;
 	if((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
  	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
   	if(applyTopSystEta &&  (fabs(ttRapidity) < 2.0) ) continue;
 
-	float top_rapiditydiff_cms = -999.0;
+	top_rapiditydiff_cms = -999.0;
 	top_rapiditydiff_cms = (top1_p4.Rapidity() - top2_p4.Rapidity())*(top1_p4.Rapidity() + top2_p4.Rapidity());
 	
-	float top_pseudorapiditydiff_cms = -999.0;
+	top_pseudorapiditydiff_cms = -999.0;
 	top_pseudorapiditydiff_cms = abs(top1_p4.Eta()) - abs(top2_p4.Eta());
 	
-	float top_rapiditydiff_Marco = abs(top1_p4.Rapidity()) - abs(top2_p4.Rapidity());
+	top_rapiditydiff_Marco = -999.0;
+	top_rapiditydiff_Marco = abs(top1_p4.Rapidity()) - abs(top2_p4.Rapidity());
 	
 	float top_rapiditydiff2_cms = -999.0;
 	top_rapiditydiff2_cms = (top1_p4.Rapidity() - top2_p4.Rapidity());
@@ -1840,7 +1869,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	cms = top1_p4+top2_p4;
 	top1_p4.Boost(-cms.BoostVector());
 	top2_p4.Boost(-cms.BoostVector());
-	float top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
+	
+	top_costheta_cms = -999.0;
+	top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
 	
 	if( hyp_lt_id()[hypIdx] < 0 ) {
 	  lepPlus.SetXYZT(
@@ -1889,16 +1920,16 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 			);
 
 
-	float lep_charge_asymmetry = -999.0;
+	lep_charge_asymmetry = -999.0;
 	lep_charge_asymmetry = abs(lepPlus.Eta()) - abs(lepMinus.Eta());
 
-	float lep_azimuthal_asymmetry =-999.0;
+	lep_azimuthal_asymmetry =-999.0;
 	lep_azimuthal_asymmetry = cos(lepPlus.DeltaPhi(lepMinus));
 
-	float lep_azimuthal_asymmetry_2 =-999.0;
+	lep_azimuthal_asymmetry_2 =-999.0;
 	lep_azimuthal_asymmetry_2 = acos(lep_azimuthal_asymmetry);
 	
-	float lep_pseudorap_diff =-999.0;
+	lep_pseudorap_diff =-999.0;
 	lep_pseudorap_diff = (lepPlus.Eta()) - (lepMinus.Eta());
 
 	float lep_cosalpha =  lepPlus.Vect().Dot( lepMinus.Vect() )/(lepPlus.Vect().Mag()*lepMinus.Vect().Mag());
@@ -1928,10 +1959,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	lepPlus.Boost(-top1_p4.BoostVector());
 	lepMinus.Boost(-top2_p4.BoostVector());
 	
-	float lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
+	lepPlus_costheta_cms = -999.0;
+	lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
 	float lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
 	
-	float top_spin_correlation = -999.0;
+	top_spin_correlation = -999.0;
 	top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
 	//if we have gotten here, then all cuts have been passed
 
@@ -1978,21 +2010,24 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
           if(isGoodVertex(v)) ++nvtx;
         }
 
-        int ndavtx = 0;
+        //int ndavtx = 0;
+        ndavtx = 0;
     
         for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
           if(isGoodDAVertex(v)) ++ndavtx;
         }
              
 	//cout << "ndavtx = " << ndavtx <<endl;
-	unsigned int jetBin = v_goodJets.size();
+	//unsigned int jetBin = v_goodJets.size();
+	jetBin = v_goodJets.size();
 	unsigned int nJets  = v_goodJets.size();
 	if(jetBin > 2)
 	  jetBin = 2;
 	
 
 	//which channel?
-	int myType = 99;
+	//int myType = 99;
+	myType = 99;
         if (hyp_type()[hypIdx] == 3)                                myType = 0; // ee
         if (hyp_type()[hypIdx] == 0)                                myType = 1; // mm
         if (hyp_type()[hypIdx] == 1 || hyp_type()[hypIdx] == 2)     myType = 2; // em
@@ -2101,6 +2136,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	 
 
 	}
+	}//!applyNoCuts
+	
 	float dr_ltjet_gen = -999.0;
 	float dr_lljet_gen = -999.0;
 	float tt_mass_gen;
@@ -2224,15 +2261,18 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  lepMinus_costheta_cms_gen = lepMinus_gen.Vect().Dot(topminus_genp_p4.Vect())/(lepMinus_gen.Vect().Mag()*topminus_genp_p4.Vect().Mag());
 
 	  top_spin_correlation_gen = lepPlus_costheta_cms_gen*lepMinus_costheta_cms_gen;
+	  
+	  if(!applyNoCuts){
 	  float tt_mass_pull = (tt_mass - tt_mass_gen)/tt_mass_gen;
 	  
 	  fillHistos( httMass_pull, tt_mass_pull,  weight, myType, jetBin);
 	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
+	  }
 	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym_gen, lep_azimuthal_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym2_gen, acos(lep_azimuthal_asymmetry_gen) ,  weight, myType, jetBin);
-	  if(m_top >0){
+	  if(m_top >0 || applyNoCuts){
 	  fillHistos( htopSpinCorr_gen, top_spin_correlation_gen  ,  weight, myType, jetBin);
 	  fillHistos( htopCosTheta_gen, top_costheta_cms_gen   ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);
@@ -2249,7 +2289,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  fillHistos( hlepChargeAsym_gen2d, lep_charge_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym_gen2d, lep_azimuthal_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym2_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  tt_mass_gen, weight, myType, jetBin);
-	  if(m_top >0){
+	  if(m_top >0 || applyNoCuts){
 	  fillHistos( htopSpinCorr_gen2d, top_spin_correlation_gen  ,  tt_mass_gen, weight, myType, jetBin);
 	  fillHistos( htopCosTheta_gen2d, top_costheta_cms_gen   ,  tt_mass_gen, weight, myType, jetBin);
 	  fillHistos( hlepCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
@@ -2262,12 +2302,13 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  }
 	  
 	  
-	  
+	  if(!applyNoCuts){
 	  fillHistos( hlepChargeAsym_2d, lep_charge_asymmetry_gen ,lep_charge_asymmetry,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym_2d, lep_azimuthal_asymmetry_gen ,lep_azimuthal_asymmetry,  weight, myType, jetBin);
 	  fillHistos( htopSpinCorr_2d, top_spin_correlation_gen, top_spin_correlation ,  weight, myType, jetBin);
 	  fillHistos( htopCosTheta_2d, top_costheta_cms_gen, top_costheta_cms   ,  weight, myType, jetBin);
 	  fillHistos( hlepCosTheta_2d, lepPlus_costheta_cms_gen  , lepPlus_costheta_cms, weight, myType, jetBin);
+	  }
 
 	  if (from_gluon==true){
 	    fillHistos( httMassGluongenp, tt_mass_gen  ,  weight, myType, jetBin);
@@ -2285,8 +2326,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}//only for mc
        
 	// fill ntuples 
-	if(createBabyNtuples){
-	  if(createBabyNtuples)InitBabyNtuple();
+	if(createBabyNtuples && !applyNoCuts){
+	  if(createBabyNtuples && !applyNoCuts)InitBabyNtuple();
 	  run_ = cms2.evt_run();
 	  ls_ = cms2.evt_lumiBlock();
 	  evt_ = cms2.evt_event(); 
@@ -2332,6 +2373,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
     } // closes loop over events    
     
     if(applyNoCuts) cout << "number of events (no cuts) before and after vertex weighting              =  " << nEvents_noCuts_novtxweight<<"   "<< nEvents_noCuts <<endl;
+    if(applyNoCuts) cout << "number of dilepton events (no cuts) before and after vertex weighting              =  " << nEvents_noCuts_novtxweight_dil<<"   "<< nEvents_noCuts_dil <<endl;
     
     //float nEvents_primary = cms2.evt_nEvts();
     //cout << "acceptance                       =  " << (1.0*nSelectedEvents)/(nEvents_primary*kFactor * evt_scale1fb() * lumi) <<endl;
@@ -2339,7 +2381,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   
   }  // closes loop over files
   
-  if(createBabyNtuples)CloseBabyNtuple();
+  if(createBabyNtuples && !applyNoCuts)CloseBabyNtuple();
   return;
   
 } // closes myLooper function  

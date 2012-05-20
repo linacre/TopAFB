@@ -82,7 +82,7 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=true, boo
   float kphoton15 = 1.;
 
     vector<TString> v_baseCuts;
-  //v_baseCuts.push_back("applyNoCuts");         // no cuts
+  //v_baseCuts.push_back("applyNoCuts");         // no cuts, set runskim=false too
   v_baseCuts.push_back("usePtGt2020");         // use leptons with pt > 20
   //v_baseCuts.push_back("applyTriggers");       // apply triggers
   v_baseCuts.push_back("hypDisamb");           // do hyp. disambiguation
@@ -550,7 +550,8 @@ if(runttdil) {
   if(doFRestimation) 
     cutstring = outputDir + "/FRhist" + cutstring + ".root";
   else  
-    cutstring   = outputDir + "/hist" + cutstring + ".root";
+    cutstring   = outputDir + "/hist" + cutstring + ".root";    
+    if( cutstring.Contains("applyNoCuts") ) cutstring  = outputDir + "/hist_noCuts.root";
     
   cout << "Saving histograms to: " << cutstring << endl;
   hist::saveHist(cutstring.Data());
