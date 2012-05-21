@@ -380,7 +380,7 @@ if(runttdil) {
       ch_dyee->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root")); 
     }
     else{
-      ch_dyee->Add("/nfs-7/userdata/cms2/DYToEE_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dyee->Add("/nfs-3/userdata/cms2/DYToEE_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
       ch_dyee->Add("/nfs-7/userdata/cms2/DYToEE_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
       ch_dyee->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
     }
@@ -398,8 +398,8 @@ if(runttdil) {
       ch_dymm->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root")); 
     }
     else{
-      ch_dymm->Add("/nfs-7/userdata/cms2/DYToMuMu_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_dymm->Add("/nfs-7/userdata/cms2/DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dymm->Add("/nfs-3/userdata/cms2/DYToMuMu_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dymm->Add("/nfs-3/userdata/cms2/DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
       ch_dymm->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
     }
  
