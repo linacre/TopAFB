@@ -801,6 +801,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       double mass_ltb, mass_llb;      
       
       float ndavtxweight = vtxweight(isData,true);
+      if(TString(prefix).Contains("wprime") || TString(prefix).Contains("axigluon")) ndavtxweight = 1.;
+      
       //get the channels correct
       int nels= 0;
       int nmus= 0;
