@@ -200,6 +200,8 @@ void AfbUnfoldExample()
   TH1D *acceptM = (TH1D*) file->Get("accept_"+acceptanceName);
   acceptM->Scale(1.0/acceptM->Integral());
 
+  TH1D *denominatorM = (TH1D*) file->Get("denominator_"+acceptanceName);
+
   for (Int_t i= 1; i<=nbins1D; i++) {
 
     if (acceptM->GetBinContent(i)!=0) {
@@ -236,6 +238,9 @@ void AfbUnfoldExample()
 
   GetAfb(hTop_gen, Afb, AfbErr);
   cout<<" True Top: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  
+  GetAfb(denominatorM, Afb, AfbErr);
+  cout<<" True Top from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
