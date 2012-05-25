@@ -71,6 +71,15 @@ void AfbUnfoldExample()
   TH1D* hMeas= new TH1D ("meas", "Measured", nbins2D, xbins2D);
   TH1D* hData_bkgSub;
 
+  hData->Sumw2();
+  hBkg->Sumw2();
+  hTop->Sumw2();
+  hTop_gen->Sumw2();
+  hData_unfolded->Sumw2();
+  hTrue->Sumw2();
+  hMeas->Sumw2();      
+
+
   TMatrixD m_unfoldE(nbins2D,nbins2D);
   TMatrixD m_correctE(nbins2D,nbins2D);
 
@@ -214,6 +223,34 @@ void AfbUnfoldExample()
 
   acceptM->Scale(1.0/acceptM->Integral());
 
+
+  TH2D *denomM_2d = (TH2D*) file->Get("denominator_"+acceptanceName+"_mtt");
+  TH1D* denomM = new TH1D ("denom", "denom",    nbins2D, xbins2D);
+  
+  denomM->SetBinContent(1,denomM_2d->GetBinContent(1,3));
+  denomM->SetBinContent(2,denomM_2d->GetBinContent(1,2));
+  denomM->SetBinContent(3,denomM_2d->GetBinContent(1,1));
+
+  denomM->SetBinContent(4,denomM_2d->GetBinContent(2,1));
+  denomM->SetBinContent(5,denomM_2d->GetBinContent(2,2));
+  denomM->SetBinContent(6,denomM_2d->GetBinContent(2,3));  
+  
+  TH1D* denomM_0 = new TH1D ("denominator0", "denominator0",    2, -1500.,1500.);
+  TH1D* denomM_1 = new TH1D ("denominator1", "denominator1",    2, -1500.,1500.);
+  TH1D* denomM_2 = new TH1D ("denominator2", "denominator2",    2, -1500.,1500.);
+
+  denomM_2->SetBinContent(1,denomM_2d->GetBinContent(1,3));
+  denomM_1->SetBinContent(1,denomM_2d->GetBinContent(1,2));
+  denomM_0->SetBinContent(1,denomM_2d->GetBinContent(1,1));
+
+  denomM_0->SetBinContent(2,denomM_2d->GetBinContent(2,1));
+  denomM_1->SetBinContent(2,denomM_2d->GetBinContent(2,2));
+  denomM_2->SetBinContent(2,denomM_2d->GetBinContent(2,3));
+
+
+
+
+
   for (Int_t i= 1; i<=nbins2D; i++) {
 
     if (acceptM->GetBinContent(i)!=0) {
@@ -251,6 +288,16 @@ void AfbUnfoldExample()
 
   GetAfb(hTop_gen, Afb, AfbErr);
   cout<<" True Top: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+    
+  GetAfb(denomM, Afb, AfbErr);
+  cout<<" True Top from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+    
+  GetAfb(denomM_0, Afb, AfbErr);
+  cout<<" True Top 0 from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  GetAfb(denomM_1, Afb, AfbErr);
+  cout<<" True Top 1 from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  GetAfb(denomM_2, Afb, AfbErr);
+  cout<<" True Top 2 from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
