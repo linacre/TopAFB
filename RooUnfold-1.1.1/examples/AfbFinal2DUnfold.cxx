@@ -88,8 +88,8 @@ void AfbUnfoldExample()
   
   ch_data->Add(path+"data.root");
 
-  //ch_top->Add(path+"ttdil_mcnlo.root");
   ch_top->Add(path+"ttdil_powheg.root");
+  //ch_top->Add(path+"ttdil_mcnlo.root");
 
   ch_bkg->Add(path+"ttotr.root");
   ch_bkg->Add(path+"wjets.root");
@@ -200,6 +200,7 @@ void AfbUnfoldExample()
 
 
   TFile *file = new TFile("../acceptance/powheg/accept_"+acceptanceName+".root");
+  //TFile *file = new TFile("../acceptance/mcnlo/accept_"+acceptanceName+".root");
   TH2D *acceptM_2d = (TH2D*) file->Get("accept_"+acceptanceName+"_mtt");
 
   TH1D* acceptM = new TH1D ("accept", "accept",    nbins2D, xbins2D);
@@ -221,8 +222,8 @@ void AfbUnfoldExample()
     }
 
     if (acceptM->GetBinContent(i)!=0) {
-      hTop_gen->SetBinContent(i, hTop->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
-      hTop_gen->SetBinError  (i, hTop->GetBinError(i)  *1.0/acceptM->GetBinContent(i));
+      hTop_gen->SetBinContent(i, hTop_gen->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
+      hTop_gen->SetBinError  (i, hTop_gen->GetBinError(i)  *1.0/acceptM->GetBinContent(i));
     }
   }
   
