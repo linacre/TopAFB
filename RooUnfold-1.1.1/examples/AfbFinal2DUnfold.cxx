@@ -88,7 +88,8 @@ void AfbUnfoldExample()
   
   ch_data->Add(path+"data.root");
 
-  ch_top->Add(path+"ttdil_mcnlo.root");
+  //ch_top->Add(path+"ttdil_mcnlo.root");
+  ch_top->Add(path+"ttdil_powheg.root");
 
   ch_bkg->Add(path+"ttotr.root");
   ch_bkg->Add(path+"wjets.root");
