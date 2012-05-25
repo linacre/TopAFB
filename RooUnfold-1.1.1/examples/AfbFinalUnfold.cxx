@@ -70,7 +70,13 @@ void AfbUnfoldExample()
   TH1D* hData_bkgSub;
 
   hData->Sumw2();
+  hBkg->Sumw2();
   hTop->Sumw2();
+  hTop_gen->Sumw2();
+  hData_unfolded->Sumw2();
+  hTrue->Sumw2();
+  hMeas->Sumw2(); 
+  
 
   TMatrixD m_unfoldE (nbins1D,nbins1D);
   TMatrixD m_correctE(nbins1D,nbins1D);
