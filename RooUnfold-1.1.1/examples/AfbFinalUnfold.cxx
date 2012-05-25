@@ -190,6 +190,12 @@ void AfbUnfoldExample()
   hData_unfolded = (TH1D*) unfold.Hreco();  
   m_unfoldE = unfold.Ereco(); 
 
+  TCanvas* c_d = new TCanvas("c_d","c_d",500,500); 
+  TH1D* dvec=unfold.Impl()->GetD();
+  dvec->Draw();
+  c_d->SetLogy();
+  c_d->SaveAs("D_"+observablename+Region+".pdf");
+
   TFile *file = new TFile("../acceptance/powheg/accept_"+acceptanceName+".root");
   TH1D *acceptM = (TH1D*) file->Get("accept_"+acceptanceName);
   acceptM->Scale(1.0/acceptM->Integral());

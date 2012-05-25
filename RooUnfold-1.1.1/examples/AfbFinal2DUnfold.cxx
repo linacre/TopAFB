@@ -15,7 +15,7 @@
 #include "THStack.h"
 #include "TCut.h"
 
-
+#include "src/RooUnfold.h"
 #include "src/RooUnfoldResponse.h"
 #include "src/RooUnfoldBayes.h"
 #include "src/RooUnfoldSvd.h"
@@ -88,7 +88,7 @@ void AfbUnfoldExample()
   
   ch_data->Add(path+"data.root");
 
-  ch_top->Add(path+"ttdil_powheg.root");
+  ch_top->Add(path+"ttdil_mcnlo.root");
 
   ch_bkg->Add(path+"ttotr.root");
   ch_bkg->Add(path+"wjets.root");
@@ -189,6 +189,14 @@ void AfbUnfoldExample()
   unfold.Setup(&response,hData_bkgSub);                                                                                                         
   hData_unfolded = (TH1D*) unfold.Hreco();  
   m_unfoldE = unfold.Ereco(); 
+  TCanvas* c_d = new TCanvas("c_d","c_d",500,500);
+  TH1D* dvec=unfold.Impl()->GetD();
+  dvec->Draw();
+  c_d->SetLogy();
+  c_d->SaveAs("D_2d_"+observablename+Region+".pdf");
+
+
+
 
   TFile *file = new TFile("../acceptance/powheg/accept_"+acceptanceName+".root");
   TH2D *acceptM_2d = (TH2D*) file->Get("accept_"+acceptanceName+"_mtt");
@@ -245,7 +253,8 @@ void AfbUnfoldExample()
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
-  //  TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
+
+  TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
   hData_unfolded->GetXaxis()->SetTitle("M_{t#bar t}");
   hData_unfolded->GetYaxis()->SetTitle("d#sigma/dM_{t#bar t}");
   hData_unfolded->SetMinimum(0.0);
@@ -270,7 +279,7 @@ void AfbUnfoldExample()
   leg1->AddEntry(hTop_gen,    "Powheg parton", "F");                                                               
   leg1->Draw();                
 
-  c_test->SaveAs("finalplot_2D_unfolded_"+observablename+Region+".pdf");
+  c_test->SaveAs("Mtt_2D_unfolded_"+observablename+Region+".pdf");
 
   vector<double> afb_m;
   vector<double> afb_merr;
