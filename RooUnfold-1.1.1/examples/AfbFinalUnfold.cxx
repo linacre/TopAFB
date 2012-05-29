@@ -221,14 +221,13 @@ void AfbUnfoldExample()
     }  
   } 
 
-  double dataIntegral = hData_unfolded->Integral();
-  hData_unfolded->Scale(xsection/hData_unfolded->Integral());
-  hTop_gen->Scale(xsection/hTop_gen->Integral());
+  //scaling is now moved to after Afb is calculated
+  //double dataIntegral = hData_unfolded->Integral();
   
   for(int l=0;l<nbins1D;l++){
       for(int j=0;j<nbins1D;j++){
 	double corr = 1.0 / ( acceptM->GetBinContent(l+1) * acceptM->GetBinContent(j+1) );
-	corr = corr * pow(xsection / dataIntegral,2) ;
+	//corr = corr * pow(xsection / dataIntegral,2) ;
 	m_correctE(l,j) = m_unfoldE(l,j) * corr;
       }
   }
@@ -250,6 +249,17 @@ void AfbUnfoldExample()
 
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+
+
+  //divide bin contents by bin widths then scale to total xsec,  so that differential xsec is plotted
+  hData_unfolded->SetBinContent(i, hData_unfolded->GetBinContent(i)/hData_unfolded->GetBinWidth(i) );
+  hData_unfolded->SetBinError(i, hData_unfolded->GetBinError(i)/hData_unfolded->GetBinWidth(i) );
+  hTop_gen->SetBinContent(i, hTop_gen->GetBinContent(i)/hTop_gen->GetBinWidth(i) );
+  hTop_gen->SetBinError(i, hTop_gen->GetBinError(i)/hTop_gen->GetBinWidth(i) );
+      
+  hData_unfolded->Scale(xsection/hData_unfolded->Integral());
+  hTop_gen->Scale(xsection/hTop_gen->Integral());
+
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
   hData_unfolded->GetXaxis()->SetTitle(xaxislabel);

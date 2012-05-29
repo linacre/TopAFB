@@ -301,8 +301,9 @@ void AfbUnfoldExample()
 
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
-
-
+  //GetAfb(hData_unfolded, Afb, AfbErr);
+  //cout<<" Unfolded (ignoring correlations): "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
   hData_unfolded->GetXaxis()->SetTitle("M_{t#bar t}");
   hData_unfolded->GetYaxis()->SetTitle("d#sigma/dM_{t#bar t}");
