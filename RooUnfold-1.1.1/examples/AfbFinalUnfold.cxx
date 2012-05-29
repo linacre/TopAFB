@@ -251,14 +251,9 @@ void AfbUnfoldExample()
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
 
-  //divide bin contents by bin widths then scale to total xsec,  so that differential xsec is plotted
-  hData_unfolded->SetBinContent(i, hData_unfolded->GetBinContent(i)/hData_unfolded->GetBinWidth(i) );
-  hData_unfolded->SetBinError(i, hData_unfolded->GetBinError(i)/hData_unfolded->GetBinWidth(i) );
-  hTop_gen->SetBinContent(i, hTop_gen->GetBinContent(i)/hTop_gen->GetBinWidth(i) );
-  hTop_gen->SetBinError(i, hTop_gen->GetBinError(i)/hTop_gen->GetBinWidth(i) );
-      
-  hData_unfolded->Scale(xsection/hData_unfolded->Integral());
-  hTop_gen->Scale(xsection/hTop_gen->Integral());
+  //scale to total xsec with option "width",  so that differential xsec is plotted
+  hData_unfolded->Scale(xsection/hData_unfolded->Integral(),"width");
+  hTop_gen->Scale(xsection/hTop_gen->Integral(),"width");
 
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
@@ -284,7 +279,7 @@ void AfbUnfoldExample()
   leg1->SetBorderSize(0);                                                                                                                  
   leg1->SetTextSize(0.03);                                                                                                                 
   leg1->AddEntry(hData_unfolded, "( Data - BG ) Unfolded");  
-  leg1->AddEntry(hTop_gen,    "Powheg Parton", "F");                                                               
+  leg1->AddEntry(hTop_gen,    "powheg parton level", "F");                                                               
   leg1->Draw();                
   c_test->SaveAs("finalplot_unfolded_"+observablename+Region+".pdf");
   }
