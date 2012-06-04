@@ -292,12 +292,14 @@ void AfbUnfoldExample()
   GetAfb(denomM, Afb, AfbErr);
   cout<<" True Top from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
     
-  GetAfb(denomM_0, Afb, AfbErr);
-  cout<<" True Top 0 from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
-  GetAfb(denomM_1, Afb, AfbErr);
-  cout<<" True Top 1 from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
-  GetAfb(denomM_2, Afb, AfbErr);
-  cout<<" True Top 2 from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  Float_t AfbG[3];
+    
+  GetAfb(denomM_0, AfbG[0], AfbErr);
+  cout<<" True Top 0 from acceptance denominator: "<< AfbG[0] <<" +/-  "<< AfbErr<<"\n";
+  GetAfb(denomM_1, AfbG[1], AfbErr);
+  cout<<" True Top 1 from acceptance denominator: "<< AfbG[1] <<" +/-  "<< AfbErr<<"\n";
+  GetAfb(denomM_2, AfbG[2], AfbErr);
+  cout<<" True Top 2 from acceptance denominator: "<< AfbG[2] <<" +/-  "<< AfbErr<<"\n";
 
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
@@ -338,26 +340,41 @@ void AfbUnfoldExample()
   for (int nb=0; nb<3; nb++) {
       hAfbVsMtt->SetBinContent(nb+1,afb_m[nb]);
       hAfbVsMtt->SetBinError(nb+1,afb_merr[nb]);
-    }
+  }
   
   //  GetAvsY(hTop_gen, m_unfoldE, afb_m, afb_merr);  
  
-  //  TH1D* hTop_AfbVsMtt = new TH1D ("Top_AfbVsMtt",  "Top_AfbVsMtt",  3, xbins2D);
-  //  for (int nb=0; nb<3; nb++) {
-  //      hTop_AfbVsMtt->SetBinContent(nb+1,afb_m[nb]);
-  //      hTop_AfbVsMtt->SetBinError(nb+1,afb_merr[nb]);
-  //    }
-
+   TH1D* hTop_AfbVsMtt = new TH1D ("Top_AfbVsMtt",  "Top_AfbVsMtt",  3, xbins2D);
+   for (int nb=0; nb<3; nb++) {
+       hTop_AfbVsMtt->SetBinContent(nb+1,AfbG[nb]);
+       hTop_AfbVsMtt->SetBinError(nb+1,0);
+   }
+   
   tdrStyle->SetErrorX(0.5);
   hAfbVsMtt->SetMinimum(-0.3);
   hAfbVsMtt->SetMaximum( 0.3);
   hAfbVsMtt->SetLineWidth( 2.0 );
   hAfbVsMtt->Draw("E");
-  //  hTop_AfbVsMtt->SetLineColor(kGreen);
-  hAfbVsMtt->GetYaxis()->SetTitle("A("+xaxislabel+")");
+  hTop_AfbVsMtt->SetLineColor(kGreen);
+  hTop_AfbVsMtt->SetMarkerColor(kGreen);
+  hTop_AfbVsMtt->SetMarkerSize(0);
+  hTop_AfbVsMtt->SetLineWidth( 2.0 );
+  hAfbVsMtt->GetYaxis()->SetTitle(""+xaxislabel);
   hAfbVsMtt->GetYaxis()->SetTitleOffset(1.2);
-  hAfbVsMtt->GetXaxis()->SetTitle("M_{t #bar t} GeV");
-  //  hTop_AfbVsMtt->Draw("E same");
+  hAfbVsMtt->GetXaxis()->SetTitle("M_{t#bar t} (GeV/c^{2})");
+  hTop_AfbVsMtt->Draw("E same");
+  
+  leg1=new TLegend(0.6,0.72,0.9,0.938,NULL,"brNDC");   
+  leg1->SetEntrySeparation(100);                                                                                                          
+  leg1->SetFillColor(0);                                                                                                                  
+  leg1->SetLineColor(0);                                                                                                                   
+  leg1->SetBorderSize(0);                                                                                                                  
+  leg1->SetTextSize(0.03);                                                                              
+  leg1->AddEntry(hAfbVsMtt, "data");                                                                                       
+  leg1->AddEntry(hTop_AfbVsMtt,    "powheg parton level");                                                               
+  leg1->Draw();           
+  
+  
   c_test->SaveAs("AfbVsMtt_unfolded_"+observablename+Region+".pdf");
 
   }
