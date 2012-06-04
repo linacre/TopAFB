@@ -2,7 +2,7 @@
 #include "TMatrixD.h"
 #include "TMath.h"
 
-double xsection = 154.0;
+double xsection = 154.0*0.06451;
 
 int lineWidth=3;
 
