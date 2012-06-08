@@ -15,7 +15,8 @@
 #include "TColor.h"
 #include "THStack.h"
 #include "TCut.h"
-
+#include "TPaveText.h"
+#include "TLatex.h"
 
 #include "src/RooUnfoldResponse.h"
 #include "src/RooUnfoldBayes.h"
@@ -252,13 +253,15 @@ void AfbUnfoldExample()
 
 
   //scale to total xsec with option "width",  so that differential xsec is plotted
-  hData_unfolded->Scale(xsection/hData_unfolded->Integral(),"width");
-  hTop_gen->Scale(xsection/hTop_gen->Integral(),"width");
+  //hData_unfolded->Scale(xsection/hData_unfolded->Integral(),"width");
+  //hTop_gen->Scale(xsection/hTop_gen->Integral(),"width");
+  hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
+  hTop_gen->Scale(1./hTop_gen->Integral(),"width");
 
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
   hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
-  hData_unfolded->GetYaxis()->SetTitle("d#sigma/d("+xaxislabel+")");
+  hData_unfolded->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
   hData_unfolded->SetMinimum(0.0);
   hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
   hData_unfolded->SetMarkerStyle(23);
@@ -272,15 +275,27 @@ void AfbUnfoldExample()
   hTop_gen->Draw("hist same");
   hData_unfolded->Draw("E same");
 
-  TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");                                                                           
+  TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");                                                                           
   leg1->SetEntrySeparation(100);                                                                                                          
   leg1->SetFillColor(0);                                                                                                                  
   leg1->SetLineColor(0);                                                                                                                   
   leg1->SetBorderSize(0);                                                                                                                  
   leg1->SetTextSize(0.03);                                                                                                                 
   leg1->AddEntry(hData_unfolded, "( Data - BG ) Unfolded");  
-  leg1->AddEntry(hTop_gen,    "powheg parton level", "F");                                                               
-  leg1->Draw();                
+  leg1->AddEntry(hTop_gen,    "SM parton level (powheg)", "F");                                                               
+  leg1->Draw();
+
+  TPaveText *pt1 = new TPaveText(0.19, 0.85, 0.42, 0.89, "brNDC");
+  pt1->SetName("pt1name");
+  pt1->SetBorderSize(0);
+  pt1->SetFillStyle(0);
+
+  TText *blah;
+  blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
+  blah->SetTextSize(0.032);
+  blah->SetTextAlign(11);
+  pt1->Draw();
+
   c_test->SaveAs("finalplot_unfolded_"+observablename+Region+".pdf");
   }
 
