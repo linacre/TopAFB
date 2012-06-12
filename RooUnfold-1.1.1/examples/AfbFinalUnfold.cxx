@@ -65,6 +65,12 @@ void AfbUnfoldExample()
   TH1D* hTop = new TH1D ("Top",  "Top",    nbins1D, xbins1D);
   TH1D* hTop_gen = new TH1D ("Top Gen",  "Top Gen",    nbins1D, xbins1D);
   TH1D* hData_unfolded= new TH1D ("Data_Unfold", "Data with background subtracted and unfolded", nbins1D, xbins1D);
+  
+  double xbins1D_arccos[nbins1D+1];
+  //xbins1D_arccos[0]=acos(-1.0); xbins1D_arccos[1]=acos(-0.6); xbins1D_arccos[2]=acos(-0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(0.3); xbins1D_arccos[5]=acos(0.6); xbins1D_arccos[6]=acos(1.0);
+  xbins1D_arccos[0]=acos(1.0); xbins1D_arccos[1]=acos(0.6); xbins1D_arccos[2]=acos(0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(-0.3); xbins1D_arccos[5]=acos(-0.6); xbins1D_arccos[6]=acos(-1.0);
+  TH1D* hData_unfolded_arccos= new TH1D ("Data_Unfold_arccos", "Data with background subtracted and unfolded arccos", nbins1D, xbins1D_arccos);
+  TH1D* hTop_gen_arccos = new TH1D ("Top Gen arccos",  "Top Gen arccos",    nbins1D, xbins1D_arccos);
 
   TH1D* hTrue= new TH1D ("true", "Truth",    nbins1D, xbins1D);
   TH1D* hMeas= new TH1D ("meas", "Measured", nbins1D, xbins1D);
@@ -76,7 +82,9 @@ void AfbUnfoldExample()
   hTop_gen->Sumw2();
   hData_unfolded->Sumw2();
   hTrue->Sumw2();
-  hMeas->Sumw2(); 
+  hMeas->Sumw2();
+  hData_unfolded_arccos->Sumw2();
+  hTop_gen_arccos->Sumw2();
   
 
   TMatrixD m_unfoldE (nbins1D,nbins1D);
@@ -214,11 +222,17 @@ void AfbUnfoldExample()
     if (acceptM->GetBinContent(i)!=0) {
             hData_unfolded->SetBinContent(i, hData_unfolded->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
             hData_unfolded->SetBinError  (i, hData_unfolded->GetBinError  (i)*1.0/acceptM->GetBinContent(i));
+            
+            hData_unfolded_arccos->SetBinContent(nbins1D +1 - i, hData_unfolded->GetBinContent(i));
+            hData_unfolded_arccos->SetBinError  (nbins1D +1 - i, hData_unfolded->GetBinError(i));
     }
 
     if (acceptM->GetBinContent(i)!=0) {
       hTop_gen->SetBinContent(i, hTop_gen->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
       hTop_gen->SetBinError  (i, hTop_gen->GetBinError(i)  *1.0/acceptM->GetBinContent(i));
+      
+      hTop_gen_arccos->SetBinContent(nbins1D +1 - i, hTop_gen->GetBinContent(i) );
+      hTop_gen_arccos->SetBinError  (nbins1D +1 - i, hTop_gen->GetBinError(i) );
     }  
   } 
 
@@ -250,6 +264,9 @@ void AfbUnfoldExample()
 
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  
+  GetCorrectedAfb(hData_unfolded_arccos, m_correctE, Afb, AfbErr);
+  cout<<" Unfolded (from arccos histo): "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
 
   //scale to total xsec with option "width",  so that differential xsec is plotted
@@ -257,9 +274,28 @@ void AfbUnfoldExample()
   //hTop_gen->Scale(xsection/hTop_gen->Integral(),"width");
   hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
   hTop_gen->Scale(1./hTop_gen->Integral(),"width");
+  hData_unfolded_arccos->Scale(1./hData_unfolded_arccos->Integral(),"width");
+  hTop_gen_arccos->Scale(1./hTop_gen_arccos->Integral(),"width");
 
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
+  if(observablename=="lep_azimuthal_asymmetry") {
+  hData_unfolded_arccos->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
+  hData_unfolded_arccos->GetYaxis()->SetTitle("1/#sigma d#sigma/d(#Delta#phi_{l+l-})");
+  hData_unfolded_arccos->SetMinimum(0.0);
+  hData_unfolded_arccos->SetMaximum( 2.0* hData_unfolded_arccos->GetMaximum());
+  hData_unfolded_arccos->SetMarkerStyle(23);
+  hData_unfolded_arccos->SetMarkerSize(1.5);
+  hData_unfolded_arccos->Draw("E");
+  hData_unfolded_arccos->SetLineWidth(lineWidth);
+  hTop_gen_arccos->SetLineWidth(lineWidth);
+  hTop_gen_arccos->SetLineColor(TColor::GetColorDark(kGreen));
+  hTop_gen_arccos->SetFillColor(TColor::GetColorDark(kGreen));
+  hTop_gen_arccos->SetFillStyle(3353);
+  hTop_gen_arccos->Draw("hist same");
+  hData_unfolded_arccos->Draw("E same");
+  }
+  else {
   hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
   hData_unfolded->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
   hData_unfolded->SetMinimum(0.0);
@@ -274,15 +310,22 @@ void AfbUnfoldExample()
   hTop_gen->SetFillStyle(3353);
   hTop_gen->Draw("hist same");
   hData_unfolded->Draw("E same");
+  }
 
   TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");                                                                           
   leg1->SetEntrySeparation(100);                                                                                                          
   leg1->SetFillColor(0);                                                                                                                  
   leg1->SetLineColor(0);                                                                                                                   
-  leg1->SetBorderSize(0);                                                                                                                  
-  leg1->SetTextSize(0.03);                                                                                                                 
-  leg1->AddEntry(hData_unfolded, "( Data - BG ) Unfolded");  
-  leg1->AddEntry(hTop_gen,    "SM parton level (powheg)", "F");                                                               
+  leg1->SetBorderSize(0);                    
+  leg1->SetTextSize(0.03);
+  if(observablename=="lep_azimuthal_asymmetry") {
+  	leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) Unfolded");  
+  	leg1->AddEntry(hTop_gen_arccos,    "SM parton level (powheg)", "F"); 
+  }
+  else{
+  	leg1->AddEntry(hData_unfolded, "( Data - BG ) Unfolded");  
+  	leg1->AddEntry(hTop_gen,    "SM parton level (powheg)", "F");                                                               
+  }
   leg1->Draw();
 
   TPaveText *pt1 = new TPaveText(0.19, 0.85, 0.42, 0.89, "brNDC");
