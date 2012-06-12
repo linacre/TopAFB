@@ -42,11 +42,14 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   
   std::cout << "Opened " << Form("ttdil_h%sGen_allj_all", histname.Data()) << " and "<< Form("ttdil_h%sGen2d_allj_all", histname.Data()) <<"\n";
   
+  Double_t pi = 3.141592653589793;
   Double_t bins1[] =  { -4., -2., -1., 0., 1., 2., 4.}; 
   Double_t bins2[] = {-1., -0.6, -0.3, 0., 0.3, 0.6, 1.}; 
+  Double_t bins3[] = {0., 4.*pi/20., 7.*pi/20., 10.*pi/20., 13.*pi/20., 16.*pi/20., pi}; 
   Double_t binsMtt[] = {0., 450., 550.,1200.}; 
   Double_t bins1forMtt[] = {-4., 0., 4.}; 
   Double_t bins2forMtt[] = {-1., 0., 1.}; 
+  Double_t bins3forMtt[] = {-pi, 0., pi};
   
   if(histname.Contains("lepChargeAsym") ||  histname.Contains("rapiditydiff")) {
 
@@ -63,6 +66,31 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   	}
   	
   	hdenominator2drebinned = new TH2F(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins1forMtt,3, binsMtt);
+  	TAxis *xaxisd = hdenominator2d->GetXaxis();
+  	TAxis *yaxisd = hdenominator2d->GetYaxis();
+  	for (int j=1;j<=yaxisd->GetNbins();j++) {
+  		for (int i=1;i<=xaxisd->GetNbins();i++) {
+  			hdenominator2drebinned->Fill(xaxisd->GetBinCenter(i),yaxisd->GetBinCenter(j), hdenominator2d->GetBinContent(i,j));
+  		}
+  	}
+  	
+  }
+  
+  else  if(histname.Contains("lepAzimAsym2") ) {
+
+  	hnumerator = (TH1F*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins3);
+  	hdenominator = (TH1F*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins3);
+
+  	hnumerator2drebinned = new TH2F(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
+  	TAxis *xaxis = hnumerator2d->GetXaxis();
+  	TAxis *yaxis = hnumerator2d->GetYaxis();
+  	for (int j=1;j<=yaxis->GetNbins();j++) {
+  		for (int i=1;i<=xaxis->GetNbins();i++) {
+  			hnumerator2drebinned->Fill(xaxis->GetBinCenter(i),yaxis->GetBinCenter(j), hnumerator2d->GetBinContent(i,j));
+  		}
+  	}
+  	
+  	hdenominator2drebinned = new TH2F(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
   	TAxis *xaxisd = hdenominator2d->GetXaxis();
   	TAxis *yaxisd = hdenominator2d->GetYaxis();
   	for (int j=1;j<=yaxisd->GetNbins();j++) {
