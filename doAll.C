@@ -4,9 +4,10 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=true, boo
 {
   //gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_v5.28.00.so");
   gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
-  gSystem->Load("/nfs-3/userdata/yanjuntu/lhapdf/lib/libLHAPDF.so");
+  //gSystem->Load("/nfs-3/userdata/yanjuntu/lhapdf/lib/libLHAPDF.so");
+  gSystem->Load("/nfs-6/userdata/yanjuntu/LHAPDF/lib/libLHAPDF.so");
   
-  gSystem->AddIncludePath(" -w -I../CORE/topmass -I/nfs-3/userdata/yanjuntu/lhapdf/include");
+  gSystem->AddIncludePath(" -w -I../CORE/topmass -I/nfs-6/userdata/yanjuntu/LHAPDF/include");
   gROOT->ProcessLine(".L ../CORE/topmass/ttdilepsolve.cpp+"); 
   gROOT->ProcessLine(".L ../CORE/CMS2.cc+");
   gROOT->ProcessLine(".L ../CORE/utilities.cc+");
