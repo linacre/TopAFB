@@ -265,8 +265,17 @@ void AfbUnfoldExample()
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
   
-  GetCorrectedAfb(hData_unfolded_arccos, m_correctE, Afb, AfbErr);
-  cout<<" Unfolded (from arccos histo): "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  //GetCorrectedAfb(hData_unfolded_arccos, m_correctE, Afb, AfbErr);
+  //cout<<" Unfolded (from arccos histo): "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  
+  //GetAfbBinByBin(hData_unfolded);
+
+  //GetAfb(hData_unfolded, Afb, AfbErr);
+  //cout<<" Unfolded (ignoring correlation): "<< Afb <<" +/-  "<< AfbErr<<"\n";
+
+  vector<double> afb_bins;
+  vector<double> afb_bins;  
+  GetCorrectedAfbBinByBin(hData_unfolded, m_correctE, afb_bins, afb_bins);
 
 
   //scale to total xsec with option "width",  so that differential xsec is plotted
@@ -276,6 +285,8 @@ void AfbUnfoldExample()
   hTop_gen->Scale(1./hTop_gen->Integral(),"width");
   hData_unfolded_arccos->Scale(1./hData_unfolded_arccos->Integral(),"width");
   hTop_gen_arccos->Scale(1./hTop_gen_arccos->Integral(),"width");
+  
+  for(int i=1;i<nbins1D+1;i++){ cout<<i<<" bin = "<<hData_unfolded->GetBinContent(i)<<" +/- "<<hData_unfolded->GetBinError(i)<<endl; }
 
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 

@@ -38,9 +38,13 @@ void GetAfb(TH1D* h, Float_t &afb, Float_t  &afberr){
   Double_t event_plus_err;
   Double_t event_minus_err;
 
-  event_minus  = h-> IntegralAndError(0, nbins/2, event_plus_err,"");
-  event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_minus_err,"");
+  //event_minus  = h-> IntegralAndError(0, nbins/2, event_plus_err,"");
+  event_minus  = h-> IntegralAndError(0, nbins/2, event_minus_err,"");
+  //event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_minus_err,"");
+  event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_plus_err,"");
   event_total = event_plus + event_minus;
+  
+  //cout<<event_minus<<" "<<event_minus_err<<" "<<event_plus<<" "<<event_plus_err<<" "<<event_total<<endl;
 
   afb = (event_plus-event_minus)/(event_plus+event_minus);
   afberr   = sqrt(4*(event_plus*event_plus*event_minus_err*event_minus_err 
@@ -49,6 +53,43 @@ void GetAfb(TH1D* h, Float_t &afb, Float_t  &afberr){
 
 }
 
+
+//void GetAfbBinByBin(TH1D* h, Float_t &afbbin, Float_t  &afberrbin){
+void GetAfbBinByBin(TH1D* h){
+ 
+  Int_t nbins = h->GetNbinsX();
+  const int nbins2 = nbins/2 +1;
+  Float_t event_minus[nbins2];
+  Float_t event_plus[nbins2];
+  Float_t event_total[nbins2];
+  Double_t event_plus_err[nbins2];
+  Double_t event_minus_err[nbins2];
+  Double_t afbbin[nbins2];
+  Double_t afberrbin[nbins2];
+
+  Double_t event_plus_total = 0.;
+  Double_t event_minus_total = 0.;
+  Double_t event_total_total = 0.;
+  
+  for(int i=0;i<nbins2;i++){
+  	//event_minus[i]  = h-> IntegralAndError(i, i, event_plus_err[i],"");
+  	event_minus[i]  = h-> IntegralAndError(i, i, event_minus_err[i],"");
+  	event_minus_total += event_minus[i];
+  	//event_plus[i]   = h-> IntegralAndError(nbins+1-i, nbins+1-i, event_minus_err[i],"");
+  	event_plus[i]   = h-> IntegralAndError(nbins+1-i, nbins+1-i, event_plus_err[i],"");
+  	event_plus_total += event_plus[i];
+  	event_total[i] = event_plus[i] + event_minus[i];
+  	event_total_total += event_total[i];
+  	
+  	//cout<<event_minus[i]<<" "<<event_minus_err[i]<<" "<<event_plus[i]<<" "<<event_plus_err[i]<<" "<<event_total[i]<<endl;
+  	
+  	afbbin[i] = (event_plus[i]-event_minus[i])/(event_plus[i]+event_minus[i]);
+  	afberrbin[i]   = sqrt(4*(event_plus[i]*event_plus[i]*event_minus_err[i]*event_minus_err[i] 
+		     + event_minus[i]*event_minus[i]*event_plus_err[i]*event_plus_err[i])/
+		  (event_total[i]*event_total[i]*event_total[i]*event_total[i]));
+	cout<<i<<" AFB = "<<afbbin[i]<<" +/- "<<afberrbin[i]<<endl;
+  }
+}
 
 
 void GetAvsY(TH1* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr){
@@ -169,6 +210,82 @@ void GetCorrectedAfb(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float
 
     //    cout<<"AFB = "<<afb<<" "<<afberr<<endl;
 }
+
+
+
+
+void GetCorrectedAfbBinByBin(TH1D* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr){
+
+    //Need to calculate AFB and Error for the fully corrected distribution, m_correctE(j,i)
+        
+    myafb.clear();
+    myerr.clear();
+
+    //Get histogram info
+    int nbins = histogram->GetNbinsX();
+    const int nbins2 = nbins/2;
+
+    Double_t afbbin[nbins2];
+    Double_t afberrbin[nbins2];
+    
+    double n[16];
+    for(int i=0;i<nbins;i++){
+      n[i] = histogram->GetBinContent(i+1);
+    }
+
+    //Setup Alpha Vector
+    double alpha[16], beta[16];
+    for(int i=0;i<nbins;i++) if(i < nbins/2 ){ alpha[i] = -1;}else{ alpha[i] = 1;}
+
+    //Components of the error calculation
+    double sum_n[nbins2];
+    double sum_alpha_n[nbins2];
+    double sum_n_total = 0.;
+    double sum_alpha_n_total = 0.;
+    
+    
+    for(int i=0;i<nbins2;i++){
+      sum_n[i] = n[i] + n[nbins-1-i];
+      sum_alpha_n[i] = alpha[i] * n[i] + alpha[nbins-1-i] * n[nbins-1-i];
+      sum_n_total += sum_n[i];
+      sum_alpha_n_total += sum_alpha_n[i];
+    }
+
+    double dfdn[16];
+    for(int i=0;i<nbins;i++){
+       int k = -999;
+       if (i < nbins2) k = i;
+       else k = nbins-1-i;
+      dfdn[i] = ( alpha[i] * sum_n[k] - sum_alpha_n[k] ) / pow(sum_n[k],2);
+    }
+
+    //Error Calculation
+
+    for(int k=0;k<nbins2;k++){
+    	afberrbin[k] = 0.;
+    	for(int i=0;i<nbins;i++){
+      		for(int j=0;j<nbins;j++){
+      			if( (i==k || i==nbins-1-k ) && (j==k || j==nbins-1-k ) ) {
+      				afberrbin[k] += covarianceM(i,j) * dfdn[i] * dfdn[j];
+      				//cout<<covarianceM(i,j)<<" "<<dfdn[i]<<" "<<dfdn[j]<<" "<<endl;
+      			}
+      		}
+    	}
+    	afberrbin[k] = sqrt(afberrbin[k]);
+    	afbbin[k] = sum_alpha_n[k] / sum_n[k];
+    	cout<<k<<" AFB = "<<afbbin[k]<<" +/- "<<afberrbin[k]<<endl;
+	myafb.push_back(afbbin[k]);
+	myerr.push_back(afberrbin[k]);
+    }
+    double afb = sum_alpha_n_total / sum_n_total;
+    //cout<<"AFB = "<<afb<<endl;
+}
+
+
+
+
+
+
 
 void Initialize1DBinning(int iVar){
 
