@@ -1,4 +1,4 @@
-void doAll(TString outputDir="results", bool rundata=true, bool runsig=true, bool runmc = true, bool requireBTag=true, bool require2BTag=false, bool usePF = true, 
+void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bool runmc = true, bool requireBTag=true, bool require2BTag=false, bool usePF = true, 
 	   bool doFRestimation = false, bool scaleJESMETUp = false, 
 	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = false, bool createBabyNtuples = true, bool doBFR = false)
 {
@@ -46,7 +46,7 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=true, boo
   bool runwprime        = runsig;
   bool runAxigluon      = runsig;
   bool runttdil         = runmc;
-  
+  bool runttdilsys      = false;
 
   bool runttotr         = runmc ; //false;
   bool runWjets         = runmc ; //false;
@@ -328,7 +328,22 @@ if(runttdil) {
     hist::color("ttdil", kGreen);
     //delete ch_ttbar;
   }
-
+ if(runttdilsys) {
+   TChain  *ch_ttbar= new TChain("Events");
+   //  cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-4/userdata/cms2/TTJets_TuneZ2_mass178_5_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v3/V04-02-29/merged*root");
+   //    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil_m178",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
+   //    hist::color("ttdil_m178", kGreen);
+   //  cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-4/userdata/cms2/TTJets_TuneZ2_mass166_5_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v3/V04-02-29/merged*root");
+   //    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil_m166",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
+   //    hist::color("ttdil_m166", kGreen);
+   //   cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-4/userdata/cms2/TTjets_TuneZ2_matchingup_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
+   // cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-4/userdata/cms2/TTjets_TuneZ2_matchingdown_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
+   cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/hadoop/cms/store/group/snt/papers2011/Fall11MC/TTjets_TuneZ2_scaleup_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1/V04-02-29/merged*root");
+   //cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-6/userdata/cms2/TTjets_TuneZ2_scaledown_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v2/V04-02-29/merged*root");
+   baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
+   hist::color("ttdil", kGreen);
+    
+ }
  if(runSMS) {
    TChain  *ch_sms= new TChain("Events");
    if(runskim){
