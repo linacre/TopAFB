@@ -38,6 +38,8 @@
 #include "Histograms.cc"
 #include "../Tools/vtxreweight.cc"
 #include "../Tools/bTagEff_BTV.cc"
+#include "../CORE/jetcorr/SimpleJetCorrectionUncertainty.icc"
+#include "../CORE/jetcorr/JetCorrectionUncertainty.icc"
 
 // // top mass
 // #include "../CORE/topmass/ttdilepsolve.cpp"
@@ -672,8 +674,38 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   requireExact2BTag    = find(v_Cuts.begin(), v_Cuts.end(), "requireExact2BTag"                      ) != v_Cuts.end();
   applyTopSystEta       = find(v_Cuts.begin(), v_Cuts.end(), "applyTopSystEta"                      ) != v_Cuts.end();
   // top mass
-  if ( scaleJESMETUp) globalJESRescale = 1.075 ;
-  else if (scaleJESMETDown)globalJESRescale = 0.925;
+
+  //std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
+  //FactorizedJetCorrector *jet_corrector_pfL1FastJetL2L3;
+
+  //jetcorr_filenames_pfL1FastJetL2L3.clear();
+
+  string pfUncertaintyFile;
+  
+  if ( TString(prefix).Contains("data") ) {
+    //jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L1FastJet.txt");
+    //jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L2Relative.txt");
+    //jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L3Absolute.txt");
+    //jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/GR_R_42_V23_AK5PF_L2L3Residual.txt");
+
+    pfUncertaintyFile = "../CORE/jetcorr/jetCorrectionFiles/GR_R_42_V23_AK5PF_Uncertainty.txt";
+  } 
+  else {
+    //jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/DESIGN42_V17_AK5PF_L1FastJet.txt");
+    //jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/DESIGN42_V17_AK5PF_L2Relative.txt");
+    //jetcorr_filenames_pfL1FastJetL2L3.push_back  ("jetCorrections/DESIGN42_V17_AK5PF_L3Absolute.txt");
+
+    pfUncertaintyFile = "../CORE/jetcorr/jetCorrectionFiles/DESIGN42_V17_AK5PF_Uncertainty.txt";
+  }
+
+  //jet_corrector_pfL1FastJetL2L3  = makeJetCorrector(jetcorr_filenames_pfL1FastJetL2L3);
+
+  JetCorrectionUncertainty *pfUncertainty   = new JetCorrectionUncertainty( pfUncertaintyFile );
+
+  //if ( scaleJESMETUp) globalJESRescale = 1.075 ;
+  //else if (scaleJESMETDown)globalJESRescale = 0.925;
+  
+
 
   already_seen.clear();
  
@@ -1158,6 +1190,12 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	vector<unsigned int> v_goodJets;
 	vector<unsigned int> v_goodJetsNoEtaCut;
 	vector<LorentzVector> v_jetP4s;
+	float dmetx  = 0.0;
+	float dmety  = 0.0;
+	float jetptx = 0.0;
+	float jetpty = 0.0;
+
+
 	if(usecaloJets) {
 	  for(unsigned int i = 0; i < jets_p4().size(); i++) 
 	    v_jetP4s.push_back(jets_p4()[i]*jets_cor()[i]*globalJESRescale); //jets are uncorrected in our ntuples
@@ -1168,8 +1206,16 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	if(usepfJets) {
 	  // for (unsigned int i = 0; i < jpts_p4().size(); i++) //this is a bug
-	  for (unsigned int i = 0; i < pfjets_p4().size(); i++)
+	  for (unsigned int i = 0; i < pfjets_p4().size(); i++){
+	    LorentzVector vjet   = pfjets_p4()[i] * pfjets_corL1FastL2L3()[i];
+	    pfUncertainty->setJetEta(vjet.eta());
+	    pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
+	    double unc = pfUncertainty->getUncertainty(true);
+	    if ( scaleJESMETUp)globalJESRescale=1+unc;
+	    if ( scaleJESMETDown)globalJESRescale=1-unc;
 	    v_jetP4s.push_back(pfjets_p4()[i] * pfjets_corL1FastL2L3()[i]*globalJESRescale);
+
+	  }
 	}
 	
 	for (unsigned int j = 0; j < v_jetP4s.size(); ++j) {
@@ -1194,7 +1240,13 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  v_goodJetsNoEtaCut.push_back(j);
 	  if( fabs(v_jetP4s.at(j).eta() ) > 2.5 )            continue;
 	  v_goodJets.push_back(j);
-	  
+	
+	  if(  v_jetP4s.at(j).pt()  > 10 ){
+	    dmetx  += v_jetP4s.at(j).px() - (pfjets_p4()[j]*pfjets_corL1FastL2L3()[j]).px()  ;
+	    dmety  += v_jetP4s.at(j).py() - (pfjets_p4()[j]*pfjets_corL1FastL2L3()[j]).py()  ;
+	    jetptx += (pfjets_p4()[j]*pfjets_corL1FastL2L3()[j]).px() ;
+	    jetpty += (pfjets_p4()[j]*pfjets_corL1FastL2L3()[j]).py() ;
+	  }
 	}
 
 
@@ -1304,12 +1356,40 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	    float lepx = hyp_p4()[hypIdx].Px();
 	    float lepy = hyp_p4()[hypIdx].Py();
-	        
+	    
+	    //--------------------------------------------------------
+	    // calculate unclustered energy x and y components
+	    // unclustered energy = -1 X ( MET + jets + leptons )
+	    //--------------------------------------------------------
+	    
+	    float unclustered_x = -1 * ( metx + jetptx );
+	    float unclustered_y = -1 * ( mety + jetpty );
+
+	    for( int ilep = 0 ; ilep < goodLeptons.size() ; ilep++ ){
+	      unclustered_x -= goodLeptons.at(ilep).px();
+	      unclustered_y -= goodLeptons.at(ilep).py();
+	    }
+      
+	    //------------------------------------------------------------------------------
+	    // now vary jets according to JEC uncertainty, vary unclustered energy by 10%
+	    //------------------------------------------------------------------------------
+	    float metNewx;
+	    float metNewy;
+	    if ( scaleJESMETUp){
+	      metNewx = metx - dmetx - 0.1 * unclustered_x; 
+	      metNewy = mety - dmety - 0.1 * unclustered_y; 
+	    }
+	    if ( scaleJESMETDown){
+	      metNewx = metx + dmetx + 0.1 * unclustered_x; 
+	      metNewy = mety + dmety + 0.1 * unclustered_y; 
+	    }
+	    /*
 	    //hadronic component of MET (well, mostly), scaled
 	    float metHx = (metx + lepx)*globalJESRescale;
 	    float metHy = (mety + lepy)*globalJESRescale;
 	    float metNewx = metHx - lepx;
 	    float metNewy = metHy - lepy;
+	    */
 	    float metNewPhi = atan2(metNewy, metNewx);
 	    p_met = make_pair(sqrt(metNewx*metNewx + metNewy*metNewy), metNewPhi);
 	  }
@@ -1369,9 +1449,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  else if(usejptJets)  
 	    v_goodJets_p4.push_back(jpts_p4()[v_goodJets[i]]*jpts_corL1FastL2L3()[v_goodJets[i]]*globalJESRescale);
 	  
-	  else if(usepfJets)    
+	  else if(usepfJets) {
+	    LorentzVector vjet   = pfjets_p4()[v_goodJets[i]] * pfjets_corL1FastL2L3()[v_goodJets[i]];
+            pfUncertainty->setJetEta(vjet.eta());
+            pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt                                                                               
+            double unc = pfUncertainty->getUncertainty(true);
+            if ( scaleJESMETUp)globalJESRescale=1+unc;
+            if ( scaleJESMETDown)globalJESRescale=1-unc;
 	    v_goodJets_p4.push_back(pfjets_p4()[v_goodJets[i]]*pfjets_corL1FastL2L3()[v_goodJets[i]]*globalJESRescale);
-	  
+	  }
 	}
 	
  	float theSumJetPt = 0.;
@@ -1390,9 +1476,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  else if(usejptJets)  
 	    v_goodBtagJets_p4.push_back(jpts_p4()[v_goodBtagJets[i]]*jpts_corL1FastL2L3()[v_goodBtagJets[i]]*globalJESRescale);
 	  
-	  else if(usepfJets)    
+	  else if(usepfJets) {
+	    LorentzVector vjet   = pfjets_p4()[v_goodBtagJets[i]] * pfjets_corL1FastL2L3()[v_goodBtagJets[i]];
+	    pfUncertainty->setJetEta(vjet.eta());
+            pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
+	    double unc = pfUncertainty->getUncertainty(true);
+	    if ( scaleJESMETUp)globalJESRescale=1+unc;
+	    if ( scaleJESMETDown)globalJESRescale=1-unc;
 	    v_goodBtagJets_p4.push_back(pfjets_p4()[v_goodBtagJets[i]]*pfjets_corL1FastL2L3()[v_goodBtagJets[i]]*globalJESRescale);
-	  
+	  }
 	}
 	
 
@@ -1407,9 +1499,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  else if(usejptJets)  
 	    v_goodNonBtagJets_p4.push_back(jpts_p4()[v_goodNonBtagJets[i]]*jpts_corL1FastL2L3()[v_goodNonBtagJets[i]]*globalJESRescale);
 	  
-	  else if(usepfJets)    
+	  else if(usepfJets) {
+	    LorentzVector vjet   = pfjets_p4()[v_goodNonBtagJets[i]] * pfjets_corL1FastL2L3()[v_goodNonBtagJets[i]];
+            pfUncertainty->setJetEta(vjet.eta());
+            pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt 
+	    double unc = pfUncertainty->getUncertainty(true);
+            if ( scaleJESMETUp)globalJESRescale=1+unc;
+            if ( scaleJESMETDown)globalJESRescale=1-unc;
 	    v_goodNonBtagJets_p4.push_back(pfjets_p4()[v_goodNonBtagJets[i]]*pfjets_corL1FastL2L3()[v_goodNonBtagJets[i]]*globalJESRescale);
-	  
+	  }
 	}
 	
 
@@ -2147,6 +2245,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float top_costheta_cms_gen;
 	float lep_charge_asymmetry_gen;
 	float lep_azimuthal_asymmetry_gen;
+	float lep_azimuthal_asymmetry_gen2;
 	float top_spin_correlation_gen;
 	float lepPlus_costheta_cms_gen;
 	float lepMinus_costheta_cms_gen;
@@ -2253,6 +2352,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	  lep_charge_asymmetry_gen = abs(lepPlus_gen.Eta()) - abs(lepMinus_gen.Eta());
 	  lep_azimuthal_asymmetry_gen = cos(lepPlus_gen.DeltaPhi(lepMinus_gen));	  
+	  lep_azimuthal_asymmetry_gen2 = acos(lep_azimuthal_asymmetry_gen);	  
 
 	  lepPlus_gen.Boost(-cms_gen.BoostVector());
 	  lepPlus_gen.Boost(-topplus_genp_p4.BoostVector());
@@ -2359,6 +2459,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  ttRapidity_gen_ = ttRapidity_gen;
 	  lep_charge_asymmetry_gen_ = lep_charge_asymmetry_gen; 
 	  lep_azimuthal_asymmetry_gen_ = lep_azimuthal_asymmetry_gen;
+	  lep_azimuthal_asymmetry_gen2_ = lep_azimuthal_asymmetry_gen2;
 	  top_spin_correlation_gen_ = top_spin_correlation_gen;
 	  top_costheta_cms_gen_     = top_costheta_cms_gen;
 	  lepPlus_costheta_cms_gen_ = lepPlus_costheta_cms_gen;
@@ -2423,6 +2524,7 @@ void topAFB_looper::InitBabyNtuple ()
   ttRapidity_gen_ = -999.0;
   lep_charge_asymmetry_gen_ = -999.0; 
   lep_azimuthal_asymmetry_gen_ = -999.0;
+  lep_azimuthal_asymmetry_gen2_ = -999.0;
   top_spin_correlation_gen_ = -999.0;
   top_costheta_cms_gen_     = -999.0;
   lepPlus_costheta_cms_gen_ = -999.0;
@@ -2472,6 +2574,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("ttRapidity_gen",            &ttRapidity_gen_,          "ttRapidity_gen/F"            );
     babyTree_->Branch("lep_charge_asymmetry_gen",  &lep_charge_asymmetry_gen_,"lep_charge_asymmetry_gen_/F" );
     babyTree_->Branch("lep_azimuthal_asymmetry_gen",    &lep_azimuthal_asymmetry_gen_,  "lep_azimuthal_asymmetry_gen_/F"   );
+    babyTree_->Branch("lep_azimuthal_asymmetry_gen2",    &lep_azimuthal_asymmetry_gen2_,  "lep_azimuthal_asymmetry_gen2_/F"   );
     babyTree_->Branch("top_spin_correlation_gen",  &top_spin_correlation_gen_,"top_spin_correlation_gen/F"  );
     babyTree_->Branch("top_costheta_cms_gen",      &top_costheta_cms_gen_,    "top_costheta_cms_gen/F"      );
     babyTree_->Branch("lep_costheta_cms_gen",      &lepPlus_costheta_cms_gen_,"lep_costheta_cms_gen/F"      );

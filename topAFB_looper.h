@@ -12,6 +12,7 @@
 #include "../CORE/topmass/ttdilepsolve.cpp" 
 #include "../CORE/topmass/getTopMassEstimate.icc" 
 #include "../CORE/jetSelections.cc"
+#include "../CORE/jetSmearingTools.h"
 //class TChain;
 
 class topAFB_looper
@@ -49,6 +50,7 @@ class topAFB_looper
         //
         // BABY NTUPLE VARIABLES
         //
+	JetSmearer* jet_smearer_;
         TFile *babyFile_;
         TTree *babyTree_;
 	bool applyNoCuts;
@@ -86,6 +88,7 @@ class topAFB_looper
 	bool vetoHypMassLt12;
 	bool scaleJESMETUp; 
 	bool scaleJESMETDown; 
+	bool doJESmear; 
 	bool estimateQCD;
 	bool estimateWJets;
 	bool requireBTag;
@@ -137,6 +140,7 @@ class topAFB_looper
 	float ttRapidity_gen_ ;
 	float lep_charge_asymmetry_gen_ ;
 	float lep_azimuthal_asymmetry_gen_ ;
+	float lep_azimuthal_asymmetry_gen2_ ;
 	float top_spin_correlation_gen_ ;
 	float  top_costheta_cms_gen_    ;
 	float lepPlus_costheta_cms_gen_ ;
