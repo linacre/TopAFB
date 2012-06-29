@@ -330,7 +330,7 @@ void Initialize1DBinning(int iVar){
     case 3:
       {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta_{l,n})";
+xaxislabel="cos(#theta^{+}_{l})";
       acceptanceName="lepPlusCosTheta";
       xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
       xmin=-1.0;
@@ -379,6 +379,17 @@ void Initialize1DBinning(int iVar){
       xbins1D[0]=-3.0; xbins1D[1]=-2.0; xbins1D[2]=-1.0; xbins1D[3]=0.0; xbins1D[4]=1.0; xbins1D[5]=2.0; xbins1D[6]=3.0;
       xmin=-3.0;
       xmax= 3.0;
+      break;
+      }
+        //   Top Polarization 2
+    case 8:
+      {
+      observablename="lepMinus_costheta_cms";
+      xaxislabel="cos(#theta^{-}_{l})";
+      acceptanceName="lepMinusCosTheta";
+      xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+      xmin=-1.0;
+      xmax= 1.0;
       break;
       }
     default:

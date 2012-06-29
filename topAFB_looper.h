@@ -136,6 +136,7 @@ class topAFB_looper
 	float top_rapiditydiff_Marco_    ;
 	float top_pseudorapiditydiff_cms_    ;
 	float lepPlus_costheta_cms_ ;
+	float lepMinus_costheta_cms_ ;
 	float tt_mass_gen_ ;
 	float ttRapidity_gen_ ;
 	float lep_charge_asymmetry_gen_ ;
@@ -144,6 +145,7 @@ class topAFB_looper
 	float top_spin_correlation_gen_ ;
 	float  top_costheta_cms_gen_    ;
 	float lepPlus_costheta_cms_gen_ ;
+	float lepMinus_costheta_cms_gen_ ;
 	float top_rapiditydiff_cms_gen_    ;
 	float top_rapiditydiff_Marco_gen_    ;
 	float top_pseudorapiditydiff_cms_gen_;  

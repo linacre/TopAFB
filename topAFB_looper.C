@@ -828,6 +828,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       int ndavtx = 0;      
       double weight = 1.0;
       float lepPlus_costheta_cms , lep_azimuthal_asymmetry , lep_azimuthal_asymmetry_2 , lep_charge_asymmetry , lep_pseudorap_diff , top_costheta_cms;
+      float lepMinus_costheta_cms;
       float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity , tt_mass , massllbb;
       float m_top = -999.0;
       double mass_ltb, mass_llb;      
@@ -2061,7 +2062,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	
 	lepPlus_costheta_cms = -999.0;
 	lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
-	float lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
+	lepMinus_costheta_cms = -999.0;
+	lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
 	
 	top_spin_correlation = -999.0;
 	top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
@@ -2455,6 +2457,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  top_rapiditydiff_Marco_gen_ = top_rapiditydiff_Marco_gen;
 	  top_pseudorapiditydiff_cms_gen_ = top_pseudorapiditydiff_cms_gen;
 	  lepPlus_costheta_cms_ = lepPlus_costheta_cms;
+	  lepMinus_costheta_cms_ = lepMinus_costheta_cms;
 	  tt_mass_gen_ = tt_mass_gen;
 	  ttRapidity_gen_ = ttRapidity_gen;
 	  lep_charge_asymmetry_gen_ = lep_charge_asymmetry_gen; 
@@ -2463,6 +2466,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  top_spin_correlation_gen_ = top_spin_correlation_gen;
 	  top_costheta_cms_gen_     = top_costheta_cms_gen;
 	  lepPlus_costheta_cms_gen_ = lepPlus_costheta_cms_gen;
+	  lepMinus_costheta_cms_gen_ = lepMinus_costheta_cms_gen;
 	  massllbb_ = massllbb;
 	  massllbb_gen_ = massllbb_gen;
 	  //llbbRapidityQuark_gen_=llbbRapidityQuark_gen;
@@ -2520,6 +2524,7 @@ void topAFB_looper::InitBabyNtuple ()
   top_rapiditydiff_cms_gen_           = -999.0;
   top_pseudorapiditydiff_cms_gen_     = -999.0;
   lepPlus_costheta_cms_ = -999.0;
+  lepMinus_costheta_cms_ = -999.0;
   tt_mass_gen_ = -999.0;
   ttRapidity_gen_ = -999.0;
   lep_charge_asymmetry_gen_ = -999.0; 
@@ -2528,6 +2533,7 @@ void topAFB_looper::InitBabyNtuple ()
   top_spin_correlation_gen_ = -999.0;
   top_costheta_cms_gen_     = -999.0;
   lepPlus_costheta_cms_gen_ = -999.0;
+  lepMinus_costheta_cms_gen_ = -999.0;
   massllbb_gen_=-999.0;
   //  llbbRapidityQuark_gen_=-999.0;
   // llbbRapidityGluon_gen_=-999.0;
@@ -2564,6 +2570,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("top_spin_correlation",  &top_spin_correlation_,"top_spin_correlation/F" );
     babyTree_->Branch("top_costheta_cms",      &top_costheta_cms_,    "top_costheta_cms/F"     );
     babyTree_->Branch("lep_costheta_cms",      &lepPlus_costheta_cms_,"lep_costheta_cms/F"     );
+    babyTree_->Branch("lepMinus_costheta_cms",      &lepMinus_costheta_cms_,"lepMinus_costheta_cms/F"     );
     babyTree_->Branch("top_rapidtiydiff_cms",      &top_rapiditydiff_cms_,"top_rapiditydiff_cms/F"     );
     babyTree_->Branch("top_rapidtiydiff_Marco",      &top_rapiditydiff_Marco_,"top_rapiditydiff_Marco/F"     );
     babyTree_->Branch("top_pseudorapidtiydiff_cms",      &top_pseudorapiditydiff_cms_,"top_pseudorapiditydiff_cms/F"     );
@@ -2578,6 +2585,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("top_spin_correlation_gen",  &top_spin_correlation_gen_,"top_spin_correlation_gen/F"  );
     babyTree_->Branch("top_costheta_cms_gen",      &top_costheta_cms_gen_,    "top_costheta_cms_gen/F"      );
     babyTree_->Branch("lep_costheta_cms_gen",      &lepPlus_costheta_cms_gen_,"lep_costheta_cms_gen/F"      );
+    babyTree_->Branch("lepMinus_costheta_cms_gen",      &lepMinus_costheta_cms_gen_,"lepMinus_costheta_cms_gen/F"      );
     babyTree_->Branch("massllbb",               &massllbb_,             "massllbb/F"              );
     babyTree_->Branch("massllbb_gen",               &massllbb_gen_,             "massllbb_gen/F"              );
     //  babyTree_->Branch("llbbRapidityQuark_gen",      &llbbRapidityQuark_gen_,    "llbbRapidityQuark_gen/F"     );
