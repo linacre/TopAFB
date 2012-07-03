@@ -168,13 +168,20 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   hacceptance->SetMaximum(1.25*hacceptance->GetMaximum());
   if(hacceptance->GetMinimum() <0.15 *hacceptance->GetMaximum() ) hacceptance->SetMinimum(0.);  
   if(hacceptance->GetMinimum() > 0.) hacceptance->SetMinimum(0.75*hacceptance->GetMinimum() );  
+  
+  hacceptance->GetYaxis()->SetTitle("Acceptance");
+  hacceptance->GetYaxis()->SetTitleOffset(1.6);
+
+  if(histname.Contains("lepPlusCosTheta") ) {
+  	hacceptance->GetXaxis()->SetTitle("cos(#theta^{+}_{l})");
+  }
 
   if(!drawnorm){
   	hacceptance->Draw("hist TEXT00E");
   }
   else{
-  	hacceptance->SetMaximum(0.45);
-  	hacceptance->SetMinimum(0.); 
+        //hacceptance->SetMaximum(0.45);
+        //hacceptance->SetMinimum(0.); 
   	hacceptance->DrawNormalized("hist");
   	hnumerator->DrawNormalized("histsame");
   	hdenominator->DrawNormalized("histsame");
@@ -189,7 +196,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   if(drawnorm) leg->AddEntry(hnumerator, "numerator","l");
   if(drawnorm) leg->AddEntry(hdenominator, "denominator","l");
 
-  leg->Draw("same");
+  //leg->Draw("same");
 
 
   TPaveText *pt1 = new TPaveText(0.18, 0.86, 0.40, 0.92, "brNDC");
