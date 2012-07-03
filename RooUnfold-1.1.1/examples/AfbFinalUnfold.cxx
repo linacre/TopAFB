@@ -52,7 +52,7 @@ void AfbUnfoldExample()
   TString Region="";
  
   int kterm=3; 
-  int nVars =8;
+  int nVars =9;
 
   Float_t observable, observable_gen, weight, ttmass, ttRapidity, tmass;
 
@@ -287,6 +287,8 @@ void AfbUnfoldExample()
   hTop_gen_arccos->Scale(1./hTop_gen_arccos->Integral(),"width");
   
   for(int i=1;i<nbins1D+1;i++){ cout<<i<<" bin = "<<hData_unfolded->GetBinContent(i)<<" +/- "<<hData_unfolded->GetBinError(i)<<endl; }
+  
+  //for(int i=1;i<nbins1D+1;i++){ cout<<i<<" bin = "<<hData_unfolded_arccos->GetBinContent(i)<<" +/- "<<hData_unfolded_arccos->GetBinError(i)<<endl; }
 
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
