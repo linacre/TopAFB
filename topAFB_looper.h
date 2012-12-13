@@ -278,6 +278,12 @@ class topAFB_looper
 	TH2F *hmasslbgenmatch1_2d[4][4];
 	TH2F *hmasslbgenmatch_2d[4][4];
 	TH2F *htopptdrgenp_2d[4][4];
+	
+	TH1F *hlepPlusCosThetaTau_gen[4][4];
+	TH1F *hlepMinusCosThetaTau_gen[4][4];
+	
+	TH1F *hlepPlusxTau_gen[4][4];
+	TH1F *hlepMinusxTau_gen[4][4];
 
 	// For the DY Estimation
 	TH1F* hmetInDYEst[4][4];         // MET in Z window for the DY Estimation

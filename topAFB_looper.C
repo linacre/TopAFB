@@ -862,6 +862,115 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
       }//if(nEventsTotal%20000 == 0) {
 
+
+     //daughter lepton angle in tau rest frame to check if MC is correctly using the tau polarisation
+     bool weighttaudecay = false;
+     double weight_taudecay = 1.;
+     if(ntaus>0){
+
+	  TLorentzVector cms_gen(0,0,0,0), lepPlus_gen(0,0,0,0),lepMinus_gen(0,0,0,0), lepPlus_gen_status1(0,0,0,0),lepMinus_gen_status1(0,0,0,0);
+	  bool lepPlusIsTau = false;
+	  bool lepMinusIsTau = false;
+	  
+	  for(unsigned int i = 0; i < genps_p4().size(); i++) {
+	  	
+	    if (genps_status()[i] == 3){
+	     if( genps_id_mother()[i]==24 ){
+                if( (genps_id()[i] ==-11 || genps_id()[i]==-13 ||  genps_id()[i]==-15) ){
+                  lepPlus_gen.SetXYZT(genps_p4()[i].x(),
+				      genps_p4()[i].y(),
+				      genps_p4()[i].z(),
+				      genps_p4()[i].t()
+				      );
+                  if(genps_id()[i]==-15 ) {
+                  //if(genps_id()[i]==-15 && genps_lepdaughter_id()[i].size()==3 ) {   //cosTheta* distribution is only flat for unpolarised tau decay in the simple case of 3 daughters
+		    	double lepPlus_genX = 0;
+		    	double lepPlus_genY = 0;
+		    	double lepPlus_genZ = 0;
+		    	double lepPlus_genT = 0;
+		    	for(unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++) {
+    				int daughterID = abs(genps_lepdaughter_id()[i][kk]);
+    				if( daughterID == 11 || daughterID == 13) {
+                  				lepPlus_gen_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                  				lepPlusIsTau = true;
+    				}
+    				lepPlus_genX += genps_lepdaughter_p4()[i][kk].x();
+    				lepPlus_genY += genps_lepdaughter_p4()[i][kk].y();
+    				lepPlus_genZ += genps_lepdaughter_p4()[i][kk].z();
+    				lepPlus_genT += genps_lepdaughter_p4()[i][kk].T();
+    				lepPlus_gen.SetXYZT(lepPlus_genX, lepPlus_genY, lepPlus_genZ, lepPlus_genT);
+		    	}
+                  }
+                }
+	     }
+	     else if( genps_id_mother()[i]==-24 ){
+                if( (genps_id()[i] == 11 || genps_id()[i]== 13 ||  genps_id()[i]== 15) ){
+		    lepMinus_gen.SetXYZT( genps_p4()[i].x(),
+					  genps_p4()[i].y(),
+					  genps_p4()[i].z(),
+					  genps_p4()[i].t()
+					  );
+		    if(genps_id()[i]==15 ) {
+		    //if(genps_id()[i]==-15 && genps_lepdaughter_id()[i].size()==3 ) {   //cosTheta* distribution is only flat for unpolarised tau decay in the simple case of 3 daughters
+		    	double lepMinus_genX = 0;
+		    	double lepMinus_genY = 0;
+		    	double lepMinus_genZ = 0;
+		    	double lepMinus_genT = 0;
+		    	for(unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++) {
+    				int daughterID = abs(genps_lepdaughter_id()[i][kk]);
+    				if( daughterID == 11 || daughterID == 13) {
+		    			lepMinus_gen_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+		    			lepMinusIsTau = true;
+    				}
+    				lepMinus_genX += genps_lepdaughter_p4()[i][kk].x();
+    				lepMinus_genY += genps_lepdaughter_p4()[i][kk].y();
+    				lepMinus_genZ += genps_lepdaughter_p4()[i][kk].z();
+    				lepMinus_genT += genps_lepdaughter_p4()[i][kk].T();
+    				lepMinus_gen.SetXYZT(lepMinus_genX, lepMinus_genY, lepMinus_genZ, lepMinus_genT);
+		    	}
+		    }
+                }
+	     }
+	    }
+	  }
+	  
+	  bool fillEvent = true;
+	  if (prefix == "ttdil"    &&  nleps != 2) fillEvent = false;
+	  if (prefix == "ttotr"    &&  nleps == 2) fillEvent = false;
+	  if (prefix == "DYee"     &&  nels != 2) fillEvent = false;
+	  if (prefix == "DYmm"     &&  nmus != 2) fillEvent = false;
+	  if (prefix == "DYtautau" &&  ntaus != 2) fillEvent = false;
+	  
+	  if(lepPlusIsTau)  {
+	  	lepPlus_gen_status1.Boost(-lepPlus_gen.BoostVector());
+	  	double cosTheta_lepPlus_status1 = lepPlus_gen_status1.Vect().Dot(lepPlus_gen.Vect())/(lepPlus_gen_status1.Vect().Mag()*lepPlus_gen.Vect().Mag());
+	  	double EoverEmax_lepPlus = 2.*lepPlus_gen_status1.E()/lepPlus_gen.M();
+	  	if(EoverEmax_lepPlus>1.) EoverEmax_lepPlus = 1.;
+	  	//if(EoverEmax_lepPlus>1.) {cout<<"**********x>1********"<<endl; cout<<EoverEmax_lepPlus<<" "<<lepPlus_gen_status1.E()<<" "<<lepPlus_gen.M()<<endl;}
+	  	//double weight_lepPlus = 1.+cosTheta_lepPlus_status1/3.;  //approximation: cosTheta dependence varies with x
+	  	double weight_lepPlus = 1. + cosTheta_lepPlus_status1*( 1. - 2.*EoverEmax_lepPlus )/( 2.*EoverEmax_lepPlus - 3. );
+	  	//cout<<"P "<<(weighttaudecay?weight_lepPlus:1.)<<endl;
+	  	if(fillEvent) fillHistos( hlepPlusCosThetaTau_gen,  cosTheta_lepPlus_status1, weighttaudecay?weight_lepPlus:1., myType, jetBin);
+	  	if(fillEvent) fillHistos( hlepPlusxTau_gen,  EoverEmax_lepPlus, weighttaudecay?weight_lepPlus:1., myType, jetBin);
+	  	weight_taudecay *= weight_lepPlus;
+	  }
+	  if(lepMinusIsTau)  {
+	  	lepMinus_gen_status1.Boost(-lepMinus_gen.BoostVector());
+	  	double cosTheta_lepMinus_status1 = lepMinus_gen_status1.Vect().Dot(lepMinus_gen.Vect())/(lepMinus_gen_status1.Vect().Mag()*lepMinus_gen.Vect().Mag());
+	  	double EoverEmax_lepMinus = 2.*lepMinus_gen_status1.E()/lepMinus_gen.M();
+	  	if(EoverEmax_lepMinus>1.) EoverEmax_lepMinus = 1.;
+	  	//if(EoverEmax_lepMinus>1.) {cout<<"**********x>1********"<<endl; cout<<EoverEmax_lepMinus<<" "<<lepMinus_gen_status1.E()<<" "<<lepMinus_gen.M()<<endl;}
+	  	//double weight_lepMinus = 1.+cosTheta_lepMinus_status1/3.;  //approximation: cosTheta dependence varies with x
+	  	double weight_lepMinus = 1. + cosTheta_lepMinus_status1*( 1. - 2.*EoverEmax_lepMinus )/( 2.*EoverEmax_lepMinus - 3. );
+	  	//cout<<"M "<<(weighttaudecay?weight_lepMinus:1.)<<endl;
+	  	if(fillEvent) fillHistos( hlepMinusCosThetaTau_gen,  cosTheta_lepMinus_status1, weighttaudecay?weight_lepMinus:1., myType, jetBin);
+	  	if(fillEvent) fillHistos( hlepMinusxTau_gen,  EoverEmax_lepMinus, weighttaudecay?weight_lepMinus:1., myType, jetBin);
+	  	weight_taudecay *= weight_lepMinus;
+	  }
+
+     } //ntaus>0
+     //cout<<weight_taudecay<<endl;
+
       
      if(!applyNoCuts){
        if( isData && !goodrun(cms2.evt_run(), cms2.evt_lumiBlock()) ) continue;
@@ -898,7 +1007,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       if( isData ){
 	weight = 1;
       }else{
-	 weight = kFactor * evt_scale1fb() * lumi*ndavtxweight; 
+	 weight = kFactor * evt_scale1fb() * lumi*ndavtxweight;
+	 if(weighttaudecay && prefix == "ttdil" && ntaus > 0) weight *= weight_taudecay;
 	  //if(require2BTag)weight = kFactor * evt_scale1fb() * lumi * 0.95 * 0.95 * ndavtxweight; //the MC-data scale factor for bjet tagging is now applied later (after the number of btags is counted)
       }
      }//!applyNoCuts
@@ -915,7 +1025,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       }
 
       if(applyNoCuts){
-	if(!isData) weight = kFactor * evt_scale1fb() * lumi;	
+	if(!isData) weight = kFactor * evt_scale1fb() * lumi;
+	if(weighttaudecay && prefix == "ttdil" && ntaus > 0) weight *= weight_taudecay;	
 	for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
 	  if(isGoodDAVertex(v)) ++ndavtx;
 	}

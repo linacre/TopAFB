@@ -527,6 +527,25 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hmasslbgenmatch_2d[i][j]->GetYaxis()->SetTitle("Gen M_{l1b1}(GeV/c^{2})");
       hmasslbgenmatch_2d[i][j]->Sumw2();
       
+      
+      //daughter lepton angle in tau rest frame to check if MC is correctly using the tau polarisation
+      hlepPlusCosThetaTau_gen[i][j] = new TH1F(Form("%s_hlepPlusCosThetaTauGen_%s",prefix,suffix),Form("%s_lepPlusCosThetaTauGen_%s",prefix,suffix),80,-1,1);
+      hlepPlusCosThetaTau_gen[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{#tau})");
+      hlepPlusCosThetaTau_gen[i][j]->Sumw2();
+      
+      hlepMinusCosThetaTau_gen[i][j] = new TH1F(Form("%s_hlepMinusCosThetaTauGen_%s",prefix,suffix),Form("%s_lepMinusCosThetaTauGen_%s",prefix,suffix),80,-1,1);
+      hlepMinusCosThetaTau_gen[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{-}}^{#tau})");
+      hlepMinusCosThetaTau_gen[i][j]->Sumw2();
+
+      //daughter lepton E/Emax in tau rest frame to check if MC is correctly using the tau polarisation
+      hlepPlusxTau_gen[i][j] = new TH1F(Form("%s_hlepPlusxTauGen_%s",prefix,suffix),Form("%s_lepPlusxTauGen_%s",prefix,suffix),80,0,1);
+      hlepPlusxTau_gen[i][j]->GetXaxis()->SetTitle("x");
+      hlepPlusxTau_gen[i][j]->Sumw2();
+      
+      hlepMinusxTau_gen[i][j] = new TH1F(Form("%s_hlepMinusxTauGen_%s",prefix,suffix),Form("%s_lepMinusxTauGen_%s",prefix,suffix),80,0,1);
+      hlepMinusxTau_gen[i][j]->GetXaxis()->SetTitle("x");
+      hlepMinusxTau_gen[i][j]->Sumw2();
+
             
       //DYEst histos
       hdilMassWithMetDYEst[i][j] = new TH1F(Form("%s_hdilMassWithMetDYEst_%s",  prefix,suffix), "Di-lepton mass with MET for DY Estimation", 40, 0., 200.);
