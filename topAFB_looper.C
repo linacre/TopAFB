@@ -868,31 +868,48 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
      double weight_taudecay = 1.;
      if(ntaus>0){
 
-	  TLorentzVector cms_gen(0,0,0,0), lepPlus_gen(0,0,0,0),lepMinus_gen(0,0,0,0), lepPlus_gen_status1(0,0,0,0),lepMinus_gen_status1(0,0,0,0);
+	  TLorentzVector lepPlus_gen(0,0,0,0),lepMinus_gen(0,0,0,0), lepPlus_gen_status1(0,0,0,0),lepMinus_gen_status1(0,0,0,0);
 	  bool lepPlusIsTau = false;
+	  bool lepPlusIsTauEle = false;
+	  bool lepPlusIsTauMuo = false;
 	  bool lepMinusIsTau = false;
+	  bool lepMinusIsTauEle = false;
+	  bool lepMinusIsTauMuo = false;
 	  
-	  for(unsigned int i = 0; i < genps_p4().size(); i++) {
-	  	
-	    if (genps_status()[i] == 3){
-	     if( genps_id_mother()[i]==24 ){
-                if( (genps_id()[i] ==-11 || genps_id()[i]==-13 ||  genps_id()[i]==-15) ){
-                  lepPlus_gen.SetXYZT(genps_p4()[i].x(),
-				      genps_p4()[i].y(),
-				      genps_p4()[i].z(),
-				      genps_p4()[i].t()
-				      );
+	  for(unsigned int i = 0; i < genps_p4().size(); i++) {	  	
+	    if (genps_status()[i] == 3 && fabs(genps_id_mother()[i]) == 24 ){
+
                   if(genps_id()[i]==-15 ) {
                   //if(genps_id()[i]==-15 && genps_lepdaughter_id()[i].size()==3 ) {   //cosTheta* distribution is only flat for unpolarised tau decay in the simple case of 3 daughters
 		    	double lepPlus_genX = 0;
 		    	double lepPlus_genY = 0;
 		    	double lepPlus_genZ = 0;
 		    	double lepPlus_genT = 0;
+		    	
 		    	for(unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++) {
     				int daughterID = abs(genps_lepdaughter_id()[i][kk]);
-    				if( daughterID == 11 || daughterID == 13) {
+    				if( daughterID == 12) {
+    					lepPlusIsTauEle = true;
+    					lepPlusIsTau = true;
+    					break;
+    				}
+    				if( daughterID == 14) {
+    					lepPlusIsTauMuo = true;
+    					lepPlusIsTau = true;
+    					break;
+    				}
+    				// only neutrinos are definitely from leptonic tau decay (see comment for leptonGenpCount_lepTauDecays)
+		    	}
+		    	
+		    	for(unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++) {
+    				int daughterID = abs(genps_lepdaughter_id()[i][kk]);
+    				if( daughterID == 11 && lepPlusIsTauEle) {
                   				lepPlus_gen_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
-                  				lepPlusIsTau = true;
+                  				lepPlusIsTauEle = false;  //so that any secondary daughter electrons don't overwrite the first one
+    				}
+				if( daughterID == 13 && lepPlusIsTauMuo) {
+                  				lepPlus_gen_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                  				lepPlusIsTauMuo = false;  //so that any secondary daughter muons don't overwrite the first one
     				}
     				lepPlus_genX += genps_lepdaughter_p4()[i][kk].x();
     				lepPlus_genY += genps_lepdaughter_p4()[i][kk].y();
@@ -900,27 +917,40 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
     				lepPlus_genT += genps_lepdaughter_p4()[i][kk].T();
     				lepPlus_gen.SetXYZT(lepPlus_genX, lepPlus_genY, lepPlus_genZ, lepPlus_genT);
 		    	}
+
                   }
-                }
-	     }
-	     else if( genps_id_mother()[i]==-24 ){
-                if( (genps_id()[i] == 11 || genps_id()[i]== 13 ||  genps_id()[i]== 15) ){
-		    lepMinus_gen.SetXYZT( genps_p4()[i].x(),
-					  genps_p4()[i].y(),
-					  genps_p4()[i].z(),
-					  genps_p4()[i].t()
-					  );
-		    if(genps_id()[i]==15 ) {
-		    //if(genps_id()[i]==-15 && genps_lepdaughter_id()[i].size()==3 ) {   //cosTheta* distribution is only flat for unpolarised tau decay in the simple case of 3 daughters
+
+                  if(genps_id()[i]==15 ) {
+                  //if(genps_id()[i]==15 && genps_lepdaughter_id()[i].size()==3 ) {   //cosTheta* distribution is only flat for unpolarised tau decay in the simple case of 3 daughters
 		    	double lepMinus_genX = 0;
 		    	double lepMinus_genY = 0;
 		    	double lepMinus_genZ = 0;
 		    	double lepMinus_genT = 0;
+		    	
 		    	for(unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++) {
     				int daughterID = abs(genps_lepdaughter_id()[i][kk]);
-    				if( daughterID == 11 || daughterID == 13) {
-		    			lepMinus_gen_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
-		    			lepMinusIsTau = true;
+    				if( daughterID == 12) {
+    					lepMinusIsTauEle = true;
+    					lepMinusIsTau = true;
+    					break;
+    				}
+    				if( daughterID == 14) {
+    					lepMinusIsTauMuo = true;
+    					lepMinusIsTau = true;
+    					break;
+    				}
+    				// only neutrinos are definitely from leptonic tau decay (see comment for leptonGenpCount_lepTauDecays)
+		    	}
+		    	
+		    	for(unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++) {
+    				int daughterID = abs(genps_lepdaughter_id()[i][kk]);
+    				if( daughterID == 11 && lepMinusIsTauEle) {
+                  				lepMinus_gen_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                  				lepMinusIsTauEle = false;  //so that any secondary daughter electrons don't overwrite the first one
+    				}
+				if( daughterID == 13 && lepMinusIsTauMuo) {
+                  				lepMinus_gen_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                  				lepMinusIsTauMuo = false;  //so that any secondary daughter muons don't overwrite the first one
     				}
     				lepMinus_genX += genps_lepdaughter_p4()[i][kk].x();
     				lepMinus_genY += genps_lepdaughter_p4()[i][kk].y();
@@ -928,9 +958,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
     				lepMinus_genT += genps_lepdaughter_p4()[i][kk].T();
     				lepMinus_gen.SetXYZT(lepMinus_genX, lepMinus_genY, lepMinus_genZ, lepMinus_genT);
 		    	}
-		    }
-                }
-	     }
+
+                  }
+
 	    }
 	  }
 	  
