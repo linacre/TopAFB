@@ -845,7 +845,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	nleps = leptonGenpCount_lepTauDecays(nels, nmus, ntaus);
       if(!applyNoCuts){
         if (prefix == "ttdil"    &&  nleps != 2) continue;
-        if (prefix == "ttotr"    &&  nleps == 2) continue;
+	if (prefix == "ttotr"    &&  nleps == 2) continue;
         if (prefix == "DYee"     &&  nels != 2) continue;
         if (prefix == "DYmm"     &&  nmus != 2) continue;
         if (prefix == "DYtautau" &&  ntaus != 2) continue;
@@ -1065,11 +1065,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	if(isData) nEvents_noCuts += 1.;
 	else  nEvents_noCuts += ndavtxweight;
   
-         if (prefix == "ttdil"    &&  nleps != 2) continue;
-         if (prefix == "ttotr"    &&  nleps == 2) continue;
-         if (prefix == "DYee"     &&  nels != 2) continue;
-         if (prefix == "DYmm"     &&  nmus != 2) continue;
-         if (prefix == "DYtautau" &&  ntaus != 2) continue;
+	if (prefix == "ttdil"    &&  nleps != 2) continue;
+	if (prefix == "ttotr"    &&  nleps == 2) continue;
+	if (prefix == "DYee"     &&  nels != 2) continue;
+	if (prefix == "DYmm"     &&  nmus != 2) continue;
+	if (prefix == "DYtautau" &&  ntaus != 2) continue;
 
 	nEvents_noCuts_novtxweight_dil += 1.; 	
 	if(isData) nEvents_noCuts_dil += 1.;
@@ -1108,7 +1108,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	 }
 	 
        }
-
+       
+      if (ngoodlep_ > 2) continue; //veto the third lepton
 
       for(unsigned int ihyp = 0; ihyp < hyp_p4().size(); ++ihyp) 
       {
@@ -1204,7 +1205,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 
 	if(vetoHypMassLt12) {
-	  if(hyp_p4()[ihyp].mass() < 12.) 
+	  // if(hyp_p4()[ihyp].mass() < 12.) 
+	  if(hyp_p4()[ihyp].mass() < 20.) 
 	    continue;
 	  if(verbose)
 	    cout << "Passed Hyp Mass > 12 cut" << endl;
@@ -1539,12 +1541,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  //20 for emu
 	  if(vetoMET) {
 	    if(hyp_type()[hypIdx] == 0 || hyp_type()[hypIdx] == 3) {
-	      if(p_met.first < 30.) continue;
+	      //if(p_met.first < 30.) continue;
+	      if(p_met.first < 40.) continue;
 	    }
+	    /*
 	    if(hyp_type()[hypIdx] == 1 || hyp_type()[hypIdx] == 2) {
 	      if(p_met.first < 30.)   continue;
 	      
 	    }
+	    */
 	    if(verbose)
 	      cout << "Event passes MET cut" << endl;
 	  }
@@ -2075,8 +2080,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	//else if(requireBTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
 	//else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4);
 	//filling v_goodJets_cand_p4 does the same thing:
-	m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
-	
+	if(prefix=="data")m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1000, top1_p4,top2_p4);
+	else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4); 
 	tt_mass = -999.0;
 	tt_mass = (top1_p4+top2_p4).M();
 
