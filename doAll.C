@@ -3,7 +3,8 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
 	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = false, bool createBabyNtuples = true, bool doBFR = false)
 {
   //gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_v5.28.00.so");
-  gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
+  // gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
+  gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_CMSSW_5_3_2_patch4_V05-03-13.so");
   //gSystem->Load("/nfs-3/userdata/yanjuntu/lhapdf/lib/libLHAPDF.so");
   gSystem->Load("/nfs-6/userdata/yanjuntu/LHAPDF/lib/libLHAPDF.so");
   
@@ -38,7 +39,8 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
 
   topAFB_looper * baby = new topAFB_looper();
   // Flags for files to run over
-  string cms2_skim_location="/nfs-6/userdata/yanjuntu/TPrimeSkim";
+  //string cms2_skim_location="/nfs-6/userdata/yanjuntu/TPrimeSkim";
+  string cms2_skim_location="/nfs-6/userdata/yanjuntu/AfbSkim";
   string cms2_location="/nfs-6/userdata/cms2";
 
   bool runskim          = true;
@@ -83,7 +85,7 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
   float kphoton15 = 1.;
 
     vector<TString> v_baseCuts;
-  //v_baseCuts.push_back("applyNoCuts");         // no cuts, set runskim=false too
+    // v_baseCuts.push_back("applyNoCuts");         // no cuts, set runskim=false too
   v_baseCuts.push_back("usePtGt2020");         // use leptons with pt > 20
   //v_baseCuts.push_back("applyTriggers");       // apply triggers
   v_baseCuts.push_back("hypDisamb");           // do hyp. disambiguation
@@ -189,28 +191,31 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
     TChain  *ch_data= new TChain("Events");  
     cout << "Doing data" << endl;
     if(runskim){
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleElectronTriggerSkim/skimmed*.root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleMuTriggerSkim/skimmed*.root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleMuTriggerSkim/skim*root"));
       
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_4_V04-02-20/DoubleElectron_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_4_V04-02-20/DoubleMu_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+     
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_4_V04-02-20/DoubleElectron_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_4_V04-02-20/DoubleMu_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
       
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/DoubleElectron_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/DoubleMu_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30//MuEG_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+     
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/DoubleElectron_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/DoubleMu_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/MuEG_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
       
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleElectron_Run2011B-PromptReco-v1_AOD/V04-02-34/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"DoubleMu_Run2011B-PromptReco-v1_AOD/V04-02-34/DoubleMuTriggerSkim/skim*root"));
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/DoubleElectron_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/DoubleMu_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-30/MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root");
       
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root")); 
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
-      ch_data->Add(Form("%s/%s", cms2_skim_location.c_str(),"CMSSW_4_2_7_patch1_V04-02-34/MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34//merged*root"));
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-34/DoubleElectron_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-34/DoubleMu_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
+      ch_data->Add("/nfs-6/userdata/yanjuntu/AfbSkim/CMSSW_4_2_7_patch1_V04-02-34/MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
+      
     }
     else{
       ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/DoubleElectron_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
@@ -236,25 +241,7 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
       ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-34/DoubleElectron_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
       ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-34/DoubleMu_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
       ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-34/MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-34_merged/V04-02-34/merged*root");
-      /*
-      ch_data->Add("/nfs-4/userdata/cms2/DoubleElectron_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleElectronTriggerSkim/skimmed*.root");
-      ch_data->Add("/nfs-4/userdata/cms2/DoubleMu_Run2011A-May10ReReco-v1_AOD/V04-02-20/DoubleMuTriggerSkim/skimmed*.root");
-      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-May10ReReco-v1_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root"); 
-      ch_data->Add("/nfs-4/userdata/cms2/DoubleElectron_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleElectronTriggerSkim/skim*root");
-      ch_data->Add("/nfs-4/userdata/cms2/DoubleMu_Run2011A-PromptReco-v4_AOD/V04-02-20/DoubleMuTriggerSkim/skim*root");
-      ch_data->Add("/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_4_V04-02-20/MuEG_Run2011A-PromptReco-v4_AOD/CMSSW_4_2_4_V04-02-20_merged/V04-02-20/merged*root");
-      
-      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleElectron_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleMu_Run2011A-05Aug2011-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleElectron_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleMu_Run2011A-PromptReco-v6_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
-      
-      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleElectron_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleElectronTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s", cms2_location.c_str(),"DoubleMu_Run2011B-PromptReco-v1_AOD/V04-02-30/DoubleMuTriggerSkim/skim*root"));
-      ch_data->Add(Form("%s/%s","/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30" ,"MuEG_Run2011A-05Aug2011-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
-      ch_data->Add(Form("%s/%s","/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30","MuEG_Run2011A-PromptReco-v6_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
-      ch_data->Add(Form("%s/%s","/hadoop/cms/store/user/yanjuntu/CMSSW_4_2_7_patch1_V04-02-30","MuEG_Run2011B-PromptReco-v1_AOD/CMSSW_4_2_7_patch1_V04-02-30_merged/V04-02-30/merged*root"));
-      */
+    
     }
     baby->ScanChain(ch_data, v_Cuts, "data", doFRestimation, lumiToNormalizeTo, 1, false);//, 0.01, 1, true);
     hist::color("data", kRed);
@@ -308,9 +295,10 @@ if(runttdil) {
     if(runskim){
       // cout << "Doing the MadGraph ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*root"));
 
-      cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/skimmed*root"));
+      cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*root"));
       
-     // cout << "Doing the Fall11 mc@nlo ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/skimmed*root"));
+      
+      // cout << "Doing the Fall11 mc@nlo ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/skimmed*root"));
      
     } 
     else{
@@ -319,6 +307,7 @@ if(runttdil) {
       cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
       
       //cout << "Doing the Fall11 MC@NLO ttbar sample" << endl; ch_ttbar->Add("/nfs-6/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29/preprocessing/ntuple*root");  
+      //cout << "Doing the Fall11 MC@NLO ttbar sample" << endl; ch_ttbar->Add("/nfs-6/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1_genfix/V04-02-29/merged*root");  
     }
       
     //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*165.8/157.5, kttdil, false);
@@ -351,7 +340,8 @@ if(runttdil) {
    }
    else{
      cout << "Doing the fast sim SMS.. " << endl;
-     ch_sms->Add("/nfs-7/userdata/cms2/SMS-T2blnu_x-0p25to0p75_mStop-50to850_mLSP-50to800_7TeV-Pythia6Z_Summer11-PU_START42_V11_FSIM-v2/VB04-02-29_Fastsim/merged*.root");
+     // ch_sms->Add("/nfs-7/userdata/cms2/SMS-T2blnu_x-0p25to0p75_mStop-50to850_mLSP-50to800_7TeV-Pythia6Z_Summer11-PU_START42_V11_FSIM-v2/VB04-02-29_Fastsim/merged*.root");
+     ch_sms->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/SMS-T2tt_Mstop-225to1200_mLSP-50to1025_7TeV-Pythia6Z_Summer11-PU_START42_V11_FastSim-v1/V04-02-20-04/merged*.root");
    }
    
    baby->ScanChain(ch_sms, v_Cuts,"sms", doFRestimation, lumiToNormalizeTo, ksms, false);
@@ -362,10 +352,11 @@ if(runttdil) {
   if(runttotr) {
     TChain  *ch_ttor= new TChain("Events");
     if(runskim){
-      ch_ttor->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*root"));
+      cout << "Doing the powheg ttbar sample" << endl; ch_ttor->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1//V04-02-29/skimmed*root"));
+            
     }
     else{
-      cout << "Doing the MadGraph ttbar no-dileptons.. " << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
+      // cout << "Doing the MadGraph ttbar no-dileptons.. " << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
     }
       
     // baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*165.8/157.5, kttotr, false);
@@ -379,7 +370,7 @@ if(runttdil) {
     cout << "Processing Wjets.."<<endl;
   
     if(runskim){
-      ch_wjets->Add(Form("%s/%s", cms2_skim_location.c_str(),"WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/skimmed*root")); 
+      ch_wjets->Add(Form("%s/%s", cms2_skim_location.c_str(),"WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29_singleLepton/skimmed*root")); 
     }
     else{
       ch_wjets->Add("/hadoop/cms/store/user/imacneill/Summer11MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/DileptonHyp/merged*root"); 
