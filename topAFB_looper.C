@@ -728,8 +728,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
      isData = true;    
   }
 
-  /*
-  if(prefix == "ttdil" ) {
+  
+  if(prefix == "ttdil" || prefix == "ttotr") {
        cout<<"using Fall11 vertex weighting"<<endl;
        set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root",false);
   }
@@ -737,9 +737,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       cout<<"using Summer11 vertex weighting"<<endl;
       set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
   }
-  */
   
-  set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
+  
+  //set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
   //set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root",false);
   //set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_3p5fb_Zselection.root",false);
   //set_vtxreweight_rootfile("vtxreweight_Spring11MC_336pb_Zselection.root",false);
@@ -784,11 +784,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   unsigned int nEvents = chain->GetEntries();
   nEventsChain = nEvents;
   unsigned int nEventsTotal = 0;   
-  float nEvents_noCuts = 0;
-  float nEvents_noCuts_dil = 0;
-  float nEvents_noCuts_novtxweight = 0;
-  float nEvents_noCuts_novtxweight_dil = 0;
-  float nSelectedEvents = 0;
+  double nEvents_noCuts = 0;
+  double nEvents_noCuts_dil = 0;
+  ULong64_t nEvents_noCuts_novtxweight = 0;
+  ULong64_t nEvents_noCuts_novtxweight_dil = 0;
+  double nSelectedEvents = 0;
   unsigned int npreSelectedEvents = 0;
   unsigned int npreSelectedEvents_genmatch1 = 0;
   unsigned int npreSelectedEvents_genmatch2 = 0;
@@ -845,7 +845,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	nleps = leptonGenpCount_lepTauDecays(nels, nmus, ntaus);
       if(!applyNoCuts){
         if (prefix == "ttdil"    &&  nleps != 2) continue;
-	if (prefix == "ttotr"    &&  nleps == 2) continue;
+        if (prefix == "ttotr"    &&  nleps == 2) continue;
         if (prefix == "DYee"     &&  nels != 2) continue;
         if (prefix == "DYmm"     &&  nmus != 2) continue;
         if (prefix == "DYtautau" &&  ntaus != 2) continue;
@@ -1038,8 +1038,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	weight = 1;
       }else{
 	 weight = kFactor * evt_scale1fb() * lumi*ndavtxweight;
-	 if(weighttaudecay && prefix == "ttdil" && ntaus > 0) weight *= weight_taudecay;
-	  //if(require2BTag)weight = kFactor * evt_scale1fb() * lumi * 0.95 * 0.95 * ndavtxweight; //the MC-data scale factor for bjet tagging is now applied later (after the number of btags is counted)
+	 //negative weights for MC@NLO
+	 if(prefix == "ttdil" || prefix == "ttotr") weight = weight* fabs(genps_weight())/genps_weight();
+	 //tau decay cosTheta* weighting  
+	 if(weighttaudecay && (prefix == "ttdil" || prefix == "ttotr")  && ntaus > 0) weight *= weight_taudecay;
       }
      }//!applyNoCuts
      
@@ -1056,12 +1058,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
       if(applyNoCuts){
 	if(!isData) weight = kFactor * evt_scale1fb() * lumi;
-	if(weighttaudecay && prefix == "ttdil" && ntaus > 0) weight *= weight_taudecay;	
+	//negative weights for MC@NLO
+	if(prefix == "ttdil" || prefix == "ttotr") weight = weight* fabs(genps_weight())/genps_weight();
+	//tau decay cosTheta* weighting  
+	if(weighttaudecay && (prefix == "ttdil" || prefix == "ttotr")  && ntaus > 0) weight *= weight_taudecay;	
 	for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
 	  if(isGoodDAVertex(v)) ++ndavtx;
 	}
 	hnVtx[3]->Fill(ndavtx, ndavtxweight);
-	nEvents_noCuts_novtxweight += 1.; 	
+	nEvents_noCuts_novtxweight += 1; 	
 	if(isData) nEvents_noCuts += 1.;
 	else  nEvents_noCuts += ndavtxweight;
   
@@ -1071,7 +1076,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	if (prefix == "DYmm"     &&  nmus != 2) continue;
 	if (prefix == "DYtautau" &&  ntaus != 2) continue;
 
-	nEvents_noCuts_novtxweight_dil += 1.; 	
+	nEvents_noCuts_novtxweight_dil += 1; 	
 	if(isData) nEvents_noCuts_dil += 1.;
 	else  nEvents_noCuts_dil += ndavtxweight;
       }

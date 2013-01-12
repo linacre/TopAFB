@@ -381,7 +381,7 @@ xaxislabel="cos(#theta^{+}_{l})";
       xmax= 3.0;
       break;
       }
-        //   Top Polarization 2
+        //   Top Polarization using negatively charged leptons
     case 8:
       {
       observablename="lepMinus_costheta_cms";
@@ -422,7 +422,7 @@ void Initialize2DBinning(int iVar){
     case 1:
       {
       observablename="lep_costheta_cms";
-      xaxislabel="P_{n}";
+      xaxislabel="cos(#theta^{+}_{l})";
       acceptanceName="lepPlusCosTheta";
       xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
       xmin=xbins2D[0];
@@ -468,6 +468,17 @@ void Initialize2DBinning(int iVar){
       observablename="top_rapidtiydiff_Marco";
       xaxislabel="A_{III}";
       acceptanceName="rapiditydiffMarco";
+      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+      }
+  //   Top Polarization using negatively charged leptons
+    case 6:
+      {
+      observablename="lepMinus_costheta_cms";
+      xaxislabel="cos(#theta^{-}_{l})";
+      acceptanceName="lepMinusCosTheta";
       xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];

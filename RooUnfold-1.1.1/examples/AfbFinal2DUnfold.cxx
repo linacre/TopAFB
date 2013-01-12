@@ -52,7 +52,7 @@ void AfbUnfoldExample()
  double xsection = 154.0;
 
  int kterm=4;
- int nVars =6;
+ int nVars =7;
 
  Float_t observable, observable_gen, weight, ttmass, ttmass_gen, ttRapidity, tmass;
 
@@ -97,8 +97,7 @@ void AfbUnfoldExample()
   
   ch_data->Add(path+"data.root");
 
-  ch_top->Add(path+"ttdil_powheg.root");
-  //ch_top->Add(path+"ttdil_mcnlo.root");
+  ch_top->Add(path+"ttdil.root");
 
   ch_bkg->Add(path+"ttotr.root");
   ch_bkg->Add(path+"wjets.root");
@@ -208,8 +207,8 @@ void AfbUnfoldExample()
 
 
 
-  TFile *file = new TFile("../acceptance/powheg/accept_"+acceptanceName+".root");
-  //TFile *file = new TFile("../acceptance/mcnlo/accept_"+acceptanceName+".root");
+  TFile *file = new TFile("../acceptance/mcnlo/accept_"+acceptanceName+".root");
+
   TH2D *acceptM_2d = (TH2D*) file->Get("accept_"+acceptanceName+"_mtt");
 
   TH1D* acceptM = new TH1D ("accept", "accept",    nbins2D, xbins2D);
@@ -326,7 +325,7 @@ void AfbUnfoldExample()
   leg1->SetBorderSize(0);                                                                                                                  
   leg1->SetTextSize(0.03);                                                                              
   leg1->AddEntry(hData_unfolded, "( Data-BG ) Unfolded");                                                                                       
-  leg1->AddEntry(hTop_gen,    "Powheg parton", "F");                                                               
+  leg1->AddEntry(hTop_gen,    "mc@nlo parton", "F");                                                               
   leg1->Draw();                
 
   c_test->SaveAs("Mtt_2D_unfolded_"+observablename+Region+".pdf");
@@ -371,7 +370,7 @@ void AfbUnfoldExample()
   leg1->SetBorderSize(0);                                                                                                                  
   leg1->SetTextSize(0.03);                                                                              
   leg1->AddEntry(hAfbVsMtt, "data");                                                                                       
-  leg1->AddEntry(hTop_AfbVsMtt,    "powheg parton level");                                                               
+  leg1->AddEntry(hTop_AfbVsMtt,    "mc@nlo parton level");                                                               
   leg1->Draw();           
   
   

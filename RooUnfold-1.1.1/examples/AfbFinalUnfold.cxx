@@ -104,7 +104,7 @@ void AfbUnfoldExample()
 
   ch_data->Add(path+"data.root");
 
-  ch_top->Add(path+"ttdil_powheg.root");
+  ch_top->Add(path+"ttdil.root");
 
   ch_bkg->Add(path+"ttotr.root");
   ch_bkg->Add(path+"wjets.root");
@@ -173,30 +173,7 @@ void AfbUnfoldExample()
     }
   }
 
-  TChain *ch_top_mcnlo = new TChain("tree");
-  ch_top_mcnlo->Add("../ttdil_mcnlo.root");
-
-  ch_top_mcnlo->SetBranchAddress(observablename,    &observable);
-  ch_top_mcnlo->SetBranchAddress(observablename+"_gen",&observable_gen);
-  ch_top_mcnlo->SetBranchAddress("weight",&weight);
-  ch_top_mcnlo->SetBranchAddress("tt_mass",&ttmass);
-  ch_top_mcnlo->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_top_mcnlo->SetBranchAddress("t_mass",&tmass);
-
-  for (Int_t i= 0; i<ch_top_mcnlo->GetEntries(); i++) {
-    ch_top_mcnlo->GetEntry(i);
-    if ( (Region=="Signal") && (ttmass>450) ) {
-      //      response.Fill (observable, observable_gen);
-    }
-    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
-      //      response.Fill (observable, observable_gen);
-    }
-    if ( (Region=="") && (iVar<2) ) {
-      //      response.Fill (observable, observable_gen);
-    }
-  }
-
-
+ 
   hData_bkgSub= (TH1D*) hData->Clone();
   hData_bkgSub->Add(hBkg,-1.0);
  
@@ -211,7 +188,7 @@ void AfbUnfoldExample()
   c_d->SetLogy();
   c_d->SaveAs("D_"+observablename+Region+".pdf");
 
-  TFile *file = new TFile("../acceptance/powheg/accept_"+acceptanceName+".root");
+  TFile *file = new TFile("../acceptance/mcnlo/accept_"+acceptanceName+".root");
   TH1D *acceptM = (TH1D*) file->Get("accept_"+acceptanceName);
   acceptM->Scale(1.0/acceptM->Integral());
 
@@ -332,11 +309,11 @@ void AfbUnfoldExample()
   leg1->SetTextSize(0.03);
   if(observablename=="lep_azimuthal_asymmetry") {
   	leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) Unfolded");  
-  	leg1->AddEntry(hTop_gen_arccos,    "SM parton level (powheg)", "F"); 
+  	leg1->AddEntry(hTop_gen_arccos,    "SM parton level (mc@nlo)", "F"); 
   }
   else{
   	leg1->AddEntry(hData_unfolded, "( Data - BG ) Unfolded");  
-  	leg1->AddEntry(hTop_gen,    "SM parton level (powheg)", "F");                                                               
+  	leg1->AddEntry(hTop_gen,    "SM parton level (mc@nlo)", "F");                                                               
   }
   leg1->Draw();
 
