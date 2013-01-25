@@ -2079,14 +2079,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	
 	//float m_top; 
-	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus, jet1,jet2; 
-	 
-	//if(require2BTag || requireExact2BTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodBtagJets_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
-	//else if(requireBTag) m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
-	//else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4);
-	//filling v_goodJets_cand_p4 does the same thing:
-	if(prefix=="data")m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1000, top1_p4,top2_p4);
-	else m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4); 
+	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus, jet1,jet2;
+
+	//m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4);
+	m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4); 
+
 	tt_mass = -999.0;
 	tt_mass = (top1_p4+top2_p4).M();
 
@@ -2579,10 +2576,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  }
 	    
 	}//only for mc
-       
+
 	// fill ntuples 
 	if(createBabyNtuples && !applyNoCuts){
-	  if(createBabyNtuples && !applyNoCuts)InitBabyNtuple();
+	  InitBabyNtuple();
 	  run_ = cms2.evt_run();
 	  ls_ = cms2.evt_lumiBlock();
 	  evt_ = cms2.evt_event(); 
