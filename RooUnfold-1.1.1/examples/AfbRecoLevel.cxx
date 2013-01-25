@@ -114,7 +114,7 @@ cout.precision(2);
   const int nbins=6;
   double xbins[nbins+1];
 
-  int nVars =8;
+  int nVars =9;
 
   Float_t observable, observable_gen, weight, ttmass, ttRapidity, tmass;
 
@@ -203,6 +203,15 @@ cout.precision(2);
       xmax= 3.0;
       break;
       }
+    case 8:
+      {
+      observablename="lepMinus_costheta_cms";
+      xaxislabel="cos(#theta^{-}_{l})";
+      xbins[0]=-1.0; xbins[1]=-0.6; xbins[2]=-0.3; xbins[3]=0.0; xbins[4]=0.3; xbins[5]=0.6; xbins[6]=1.0;
+      xmin=-1.0;
+      xmax= 1.0;
+      break;
+      }
     default:
       {
       cout<<"Set the variable switch";
@@ -235,7 +244,7 @@ cout.precision(2);
   ch_data->Draw(Form("%s >> %s", var, "Data"),     baseline*"weight");
 
   TChain *ch_top = new TChain("tree");
-  ch_top->Add("../ttdil_powheg.root");
+  ch_top->Add("../ttdil.root");
   ch_top->Draw(Form("%s >> %s", var, "Top"), baseline*"weight");
 
   TChain *ch_bkg = new TChain("tree");
@@ -297,7 +306,7 @@ cout.precision(2);
   leg1->AddEntry(hTop,  "t-tbar");                                                               
   leg1->AddEntry(hBkg,  "Background");                                                               
   leg1->Draw();                
-  c_test->SaveAs("finalplot_"+observablename+Region+".png");
+  c_test->SaveAs("finalplot_"+observablename+Region+".pdf");
 
   delete hData;
   delete hBkg;
