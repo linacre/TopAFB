@@ -303,7 +303,8 @@ if(runttdil) {
       //cout << "Doing the powheg ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TTTo2L2Nu2B_7TeV-powheg-pythia6_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*root"));
 
       //cout << "Doing the powheg tauola ttbar sample" << endl; ch_ttbar->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/TT_TuneZ2_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
-      cout << "Doing the Fall11 MC@NLO ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix/skimmed*root"));
+      
+      cout << "Doing the Fall11 MC@NLO ttbar sample" << endl; ch_ttbar->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/skimmed*root"));
     } 
     else{
       //cout << "Doing the MadGraph ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
@@ -312,7 +313,7 @@ if(runttdil) {
       
       //cout << "Doing the powheg tauola ttbar sample" << endl; ch_ttbar->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/TT_TuneZ2_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
       
-      cout << "Doing the Fall11 MC@NLO ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix/merged*root");
+      cout << "Doing the Fall11 MC@NLO ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/merged*root");
     }
 
     baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
@@ -354,13 +355,12 @@ if(runttdil) {
   if(runttotr) {
     TChain  *ch_ttor= new TChain("Events");
     if(runskim){
-      cout << "Doing the Fall11 MC@NLO ttbar no-dileptons" << endl; ch_ttor->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix/skimmed*root"))
+      cout << "Doing the Fall11 MC@NLO ttbar no-dileptons" << endl; ch_ttor->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/skimmed*root"))
             
     }
     else{
       //cout << "Doing the MadGraph ttbar no-dileptons " << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
-      cout << "Doing the Fall11 MC@NLO ttbar no-dileptons" << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix/merged*root");
-      //note, this sample was made with the single lepton filter so a small fraction of ttor events that would have passed our dilepton selection will be missing. Currently re-running with the dilepton filter.
+      cout << "Doing the Fall11 MC@NLO ttbar no-dileptons" << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/merged*root");
     }
 
     baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*154./157.5, kttotr, false);
