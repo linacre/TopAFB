@@ -316,7 +316,11 @@ if(runttdil) {
       cout << "Doing the Fall11 MC@NLO ttbar sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/merged*root");
     }
 
-    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
+    //for samples with no negative weights
+    //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
+    //for mc@NLO
+    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*(154./157.5)*(190.41256/147.4), kttdil, false); //must mutliply by ratio of per-event xsec and PREP xsec to account for negative weights
+
     hist::color("ttdil", kGreen);
     //delete ch_ttbar;
   }
@@ -355,15 +359,17 @@ if(runttdil) {
   if(runttotr) {
     TChain  *ch_ttor= new TChain("Events");
     if(runskim){
-      cout << "Doing the Fall11 MC@NLO ttbar no-dileptons" << endl; ch_ttor->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/skimmed*root"))
+      cout << "Doing the Fall11 MC@NLO ttbar no-dileptons" << endl; ch_ttor->Add(Form("%s/%s", cms2_skim_location.c_str(),"TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/skimmed*root"));
             
     }
     else{
       //cout << "Doing the MadGraph ttbar no-dileptons " << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TTJets_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
       cout << "Doing the Fall11 MC@NLO ttbar no-dileptons" << endl; ch_ttor->Add("/nfs-7/userdata/cms2/TT_TuneZ2_7TeV-mcatnlo_Fall11-PU_S6_START42_V14B-v1/V04-02-29_fix_dilepton/merged*root");
     }
-
-    baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*154./157.5, kttotr, false);
+    //for samples with no negative weights 
+    //baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*154./157.5, kttotr, false);
+    //for MC@NLO
+    baby->ScanChain(ch_ttor, v_Cuts,"ttotr", doFRestimation, lumiToNormalizeTo*(154./157.5)*(190.41256/147.4), kttotr, false); //must mutliply by ratio of per-event xsec and PREP xsec to account for negative weights
     hist::color("ttotr", kYellow);
     //delete ch_ttor;
   }
