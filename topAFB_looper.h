@@ -248,6 +248,15 @@ class topAFB_looper
 	TH2F *hmasslb_2d[4][4];
 	TH2F *habcd_2d[4][4];
 
+TH2F *httmasssm_2d[4][4];
+TH2F *htopmasssm_2d[4][4];
+TH2F *htop1pTsm_2d[4][4];
+TH2F *htop1etasm_2d[4][4];
+TH2F *htop1phism_2d[4][4];
+TH2F *htop2pTsm_2d[4][4];
+TH2F *htop2etasm_2d[4][4];
+TH2F *htop2phism_2d[4][4];
+
 
 	TH1F *hdRlbtruegenp[4][4];
 	TH1F *hdRlbfalsegenp[4][4];

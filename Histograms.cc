@@ -401,17 +401,50 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hMET[i][j]->Sumw2();
 
        
-      hmasslb_2d[i][j] = new TH2F(Form("%s_hmasslb2d_%s",prefix,suffix),  Form("%s_masslb2d_%s" ,prefix,suffix),500,0,500,500,0,500);
+      hmasslb_2d[i][j] = new TH2F(Form("%s_hmasslb2d_%s",prefix,suffix),  Form("%s_masslb2d_%s" ,prefix,suffix),100,0,500,100,0,500);
       hmasslb_2d[i][j]->GetXaxis()->SetTitle("M_{l2b2}(GeV/c^{2})");
       hmasslb_2d[i][j]->GetYaxis()->SetTitle("M_{l1b1}(GeV/c^{2})");
       hmasslb_2d[i][j]->Sumw2();
 
       
-      habcd_2d[i][j] = new TH2F(Form("%s_habcd2d_%s",prefix,suffix), Form("%s_habcd2d_%s" ,prefix,suffix),500,0,500,500,0,500);
+      habcd_2d[i][j] = new TH2F(Form("%s_habcd2d_%s",prefix,suffix), Form("%s_habcd2d_%s" ,prefix,suffix),100,0,500,100,0,500);
       habcd_2d[i][j]->GetXaxis()->SetTitle("M_{l2b2}(GeV/c^{2})");
       habcd_2d[i][j]->GetYaxis()->SetTitle("M_{l1b1}(GeV/c^{2})");
       habcd_2d[i][j]->Sumw2();
-	
+
+
+      httmasssm_2d[i][j] = new TH2F(Form("%s_httmasssm2d_%s",prefix,suffix), Form("%s_httmasssm2d_%s" ,prefix,suffix),100,0,1000,100,0,1000);
+      httmasssm_2d[i][j]->GetXaxis()->SetTitle("M_{ttbar,1}(GeV/c^{2})");
+      httmasssm_2d[i][j]->GetYaxis()->SetTitle("M_{ttbar,100}(GeV/c^{2})");
+      httmasssm_2d[i][j]->Sumw2();
+      htopmasssm_2d[i][j] = new TH2F(Form("%s_htopmasssm2d_%s",prefix,suffix), Form("%s_htopmasssm2d_%s" ,prefix,suffix),100,0,500,100,0,500);
+      htopmasssm_2d[i][j]->GetXaxis()->SetTitle("M_{t,1}(GeV/c^{2})");
+      htopmasssm_2d[i][j]->GetYaxis()->SetTitle("M_{t,100}(GeV/c^{2})");
+      htopmasssm_2d[i][j]->Sumw2();
+      htop1pTsm_2d[i][j] = new TH2F(Form("%s_htop1pTsm2d_%s",prefix,suffix), Form("%s_htop1pTsm2d_%s" ,prefix,suffix),100,0,500,100,0,500);
+      htop1pTsm_2d[i][j]->GetXaxis()->SetTitle("");
+      htop1pTsm_2d[i][j]->GetYaxis()->SetTitle("");
+      htop1pTsm_2d[i][j]->Sumw2();
+      //htop1etasm_2d[i][j] = new TH2F(Form("%s_htop1etasm2d_%s",prefix,suffix), Form("%s_htop1etasm2d_%s" ,prefix,suffix),100,-4,4,100,-4,4);
+      //htop1etasm_2d[i][j]->GetXaxis()->SetTitle("");
+      //htop1etasm_2d[i][j]->GetYaxis()->SetTitle("");
+      //htop1etasm_2d[i][j]->Sumw2();
+      //htop1phism_2d[i][j] = new TH2F(Form("%s_htop1phism2d_%s",prefix,suffix), Form("%s_htop1phism2d_%s" ,prefix,suffix),100,-3.141592653589793,3.141592653589793,100,-3.141592653589793,3.141592653589793);
+      //htop1phism_2d[i][j]->GetXaxis()->SetTitle("");
+      //htop1phism_2d[i][j]->GetYaxis()->SetTitle("");
+      //htop1phism_2d[i][j]->Sumw2();
+      htop2pTsm_2d[i][j] = new TH2F(Form("%s_htop2pTsm2d_%s",prefix,suffix), Form("%s_htop2pTsm2d_%s" ,prefix,suffix),100,0,500,100,0,500);
+      htop2pTsm_2d[i][j]->GetXaxis()->SetTitle("");
+      htop2pTsm_2d[i][j]->GetYaxis()->SetTitle("");
+      htop2pTsm_2d[i][j]->Sumw2();
+      //htop2etasm_2d[i][j] = new TH2F(Form("%s_htop2etasm2d_%s",prefix,suffix), Form("%s_htop2etasm2d_%s" ,prefix,suffix),100,-4,4,100,-4,4);
+      //htop2etasm_2d[i][j]->GetXaxis()->SetTitle("");
+      //htop2etasm_2d[i][j]->GetYaxis()->SetTitle("");
+      //htop2etasm_2d[i][j]->Sumw2();
+      //htop2phism_2d[i][j] = new TH2F(Form("%s_htop2phism2d_%s",prefix,suffix), Form("%s_htop2phism2d_%s" ,prefix,suffix),100,-3.141592653589793,3.141592653589793,100,-3.141592653589793,3.141592653589793);
+      //htop2phism_2d[i][j]->GetXaxis()->SetTitle("");
+      //htop2phism_2d[i][j]->GetYaxis()->SetTitle("");
+      //htop2phism_2d[i][j]->Sumw2();
 
       // generator level distributions
 
@@ -512,17 +545,17 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopptdrgenp_2d[i][j]->Sumw2();
     
         
-      hmasslbgenp_2d[i][j] = new TH2F(Form("%s_hmasslbgenp2d_%s",prefix,suffix), Form("%s_masslbgenp2d_%s" ,prefix,suffix),500,0,500,500,0,500);
+      hmasslbgenp_2d[i][j] = new TH2F(Form("%s_hmasslbgenp2d_%s",prefix,suffix), Form("%s_masslbgenp2d_%s" ,prefix,suffix),100,0,500,100,0,500);
       hmasslbgenp_2d[i][j]->GetXaxis()->SetTitle("Gen M_{l2b2}(GeV/c^{2})");
       hmasslbgenp_2d[i][j]->GetYaxis()->SetTitle("Gen M_{l1b1}(GeV/c^{2})");
       hmasslbgenp_2d[i][j]->Sumw2();
 
-      hmasslbgenmatch1_2d[i][j] = new TH2F(Form("%s_hmasslbgenmatch12d_%s",prefix,suffix), Form("%s_masslbgenmatch12d_%s" ,prefix,suffix),500,0,500,500,0,500);
+      hmasslbgenmatch1_2d[i][j] = new TH2F(Form("%s_hmasslbgenmatch12d_%s",prefix,suffix), Form("%s_masslbgenmatch12d_%s" ,prefix,suffix),100,0,500,100,0,500);
       hmasslbgenmatch1_2d[i][j]->GetXaxis()->SetTitle("Gen M_{l2b2}(GeV/c^{2})");
       hmasslbgenmatch1_2d[i][j]->GetYaxis()->SetTitle("Gen M_{l1b1}(GeV/c^{2})");
       hmasslbgenmatch1_2d[i][j]->Sumw2();
      
-      hmasslbgenmatch_2d[i][j] = new TH2F(Form("%s_hmasslbgenmatch2d_%s",prefix,suffix), Form("%s_masslbgenmatch2d_%s" ,prefix,suffix),500,0,500,500,0,500);
+      hmasslbgenmatch_2d[i][j] = new TH2F(Form("%s_hmasslbgenmatch2d_%s",prefix,suffix), Form("%s_masslbgenmatch2d_%s" ,prefix,suffix),100,0,500,100,0,500);
       hmasslbgenmatch_2d[i][j]->GetXaxis()->SetTitle("Gen M_{l2b2}(GeV/c^{2})");
       hmasslbgenmatch_2d[i][j]->GetYaxis()->SetTitle("Gen M_{l1b1}(GeV/c^{2})");
       hmasslbgenmatch_2d[i][j]->Sumw2();
