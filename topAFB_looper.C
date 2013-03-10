@@ -2085,66 +2085,73 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus, jet1,jet2;
 
   //first solve with no jet smearing for comparison (to check bias caused by jet smearing)
-  double m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4); 
-  double tt_mass_nojetsmear = (top1_p4+top2_p4).M();
-  
-  double top1_pt_nojetsmear =  top1_p4.Pt();
-  //double top1_eta_nojetsmear =  top1_p4.Eta();
-  //double top1_phi_nojetsmear =  top1_p4.Phi();
-  double top2_pt_nojetsmear =  top2_p4.Pt();
-  //double top2_eta_nojetsmear =  top2_p4.Eta();
-  //double top2_phi_nojetsmear =  top2_p4.Phi();
+  float m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4); 
+
+  float tt_mass_nojetsmear = -999.0;
+  if(m_top_nojetsmear >0) tt_mass_nojetsmear = (top1_p4+top2_p4).M();
+
+  float top1_pt_nojetsmear = -999.0;  
+  if(m_top_nojetsmear >0) top1_pt_nojetsmear =  top1_p4.Pt();
+  //float top1_eta_nojetsmear =  top1_p4.Eta();
+  //float top1_phi_nojetsmear =  top1_p4.Phi();
+  float top2_pt_nojetsmear = -999.0;
+  if(m_top_nojetsmear >0) top2_pt_nojetsmear =  top2_p4.Pt();
+  //float top2_eta_nojetsmear =  top2_p4.Eta();
+  //float top2_phi_nojetsmear =  top2_p4.Phi();
 
 
   //now repeat using jet smearing
 	m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4); 
 
 	tt_mass = -999.0;
-	tt_mass = (top1_p4+top2_p4).M();
+	if(m_top >0) tt_mass = (top1_p4+top2_p4).M();
 
-  double top1_pt =  top1_p4.Pt();
-  //double top1_eta =  top1_p4.Eta();
-  //double top1_phi =  top1_p4.Phi();
-  double top2_pt =  top2_p4.Pt();
-  //double top2_eta =  top2_p4.Eta();
-  //double top2_phi =  top2_p4.Phi();
+  float top1_pt = -999.0;
+  if(m_top >0) top1_pt =  top1_p4.Pt();
+  //float top1_eta =  top1_p4.Eta();
+  //float top1_phi =  top1_p4.Phi();
+  float top2_pt = -999.0;
+  if(m_top >0) top2_pt =  top2_p4.Pt();
+  //float top2_eta =  top2_p4.Eta();
+  //float top2_phi =  top2_p4.Phi();
 
   //cout<<m_top<<" "<<m_top_nojetsmear<<" "<<tt_mass<<" "<<tt_mass_nojetsmear<<endl;
 
 	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
 	
 	ttRapidity = -999.0;
-	ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
-	float ttRapidity2 = (top1_p4+top2_p4).Rapidity();
+	if(m_top >0) ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
+	float ttRapidity2 = -999.0;
+  if(m_top >0) ttRapidity2 = (top1_p4+top2_p4).Rapidity();
 	//if(m_top < 0) continue;
 	if((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
  	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
   	if(applyTopSystEta &&  (fabs(ttRapidity) < 2.0) ) continue;
 
 	top_rapiditydiff_cms = -999.0;
-	top_rapiditydiff_cms = (top1_p4.Rapidity() - top2_p4.Rapidity())*(top1_p4.Rapidity() + top2_p4.Rapidity());
+	if(m_top >0) top_rapiditydiff_cms = (top1_p4.Rapidity() - top2_p4.Rapidity())*(top1_p4.Rapidity() + top2_p4.Rapidity());
 	
 	top_pseudorapiditydiff_cms = -999.0;
-	top_pseudorapiditydiff_cms = abs(top1_p4.Eta()) - abs(top2_p4.Eta());
+	if(m_top >0) top_pseudorapiditydiff_cms = abs(top1_p4.Eta()) - abs(top2_p4.Eta());
 	
 	top_rapiditydiff_Marco = -999.0;
-	top_rapiditydiff_Marco = abs(top1_p4.Rapidity()) - abs(top2_p4.Rapidity());
+	if(m_top >0) top_rapiditydiff_Marco = abs(top1_p4.Rapidity()) - abs(top2_p4.Rapidity());
 	
 	float top_rapiditydiff2_cms = -999.0;
-	top_rapiditydiff2_cms = (top1_p4.Rapidity() - top2_p4.Rapidity());
+	if(m_top >0) top_rapiditydiff2_cms = (top1_p4.Rapidity() - top2_p4.Rapidity());
 	
 	float top_pseudorapiditydiff2_cms = -999.0;
-	top_pseudorapiditydiff2_cms = (top1_p4.Eta()) - (top2_p4.Eta());
+	if(m_top >0) top_pseudorapiditydiff2_cms = (top1_p4.Eta()) - (top2_p4.Eta());
 
 	
 
 	//cms = 0.5*(top1_p4+top2_p4);
 	cms = top1_p4+top2_p4;
-	top1_p4.Boost(-cms.BoostVector());
-	top2_p4.Boost(-cms.BoostVector());
+	if(m_top >0) top1_p4.Boost(-cms.BoostVector());
+	if(m_top >0) top2_p4.Boost(-cms.BoostVector());
 	
 	top_costheta_cms = -999.0;
-	top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
+	if(m_top >0) top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
 	
 	if( hyp_lt_id()[hypIdx] < 0 ) {
 	  lepPlus.SetXYZT(
@@ -2229,16 +2236,16 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float jet_cosalpha_cms =  jet1.Vect().Dot( jet2.Vect() )/(jet1.Vect().Mag()*jet2.Vect().Mag());
 
 	
-	lepPlus.Boost(-top1_p4.BoostVector());
-	lepMinus.Boost(-top2_p4.BoostVector());
+	if(m_top >0) lepPlus.Boost(-top1_p4.BoostVector());
+	if(m_top >0) lepMinus.Boost(-top2_p4.BoostVector());
 	
 	lepPlus_costheta_cms = -999.0;
-	lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
+	if(m_top >0) lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
 	lepMinus_costheta_cms = -999.0;
-	lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
+	if(m_top >0) lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
 	
 	top_spin_correlation = -999.0;
-	top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
+	if( lepPlus_costheta_cms > -998.0 && lepMinus_costheta_cms > -998.0 ) top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
 	//if we have gotten here, then all cuts have been passed
 
 	nSelectedEvents = nSelectedEvents + 1.0*weight;
