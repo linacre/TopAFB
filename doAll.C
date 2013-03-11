@@ -85,7 +85,7 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
   float kphoton15 = 1.;
 
     vector<TString> v_baseCuts;
-    // v_baseCuts.push_back("applyNoCuts");         // no cuts, set runskim=false too
+  //v_baseCuts.push_back("applyNoCuts");         // no cuts, set runskim=false too
   v_baseCuts.push_back("usePtGt2020");         // use leptons with pt > 20
   //v_baseCuts.push_back("applyTriggers");       // apply triggers
   v_baseCuts.push_back("hypDisamb");           // do hyp. disambiguation
@@ -334,8 +334,11 @@ if(runttdil) {
    //    hist::color("ttdil_m166", kGreen);
    //   cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-4/userdata/cms2/TTjets_TuneZ2_matchingup_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
    // cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-4/userdata/cms2/TTjets_TuneZ2_matchingdown_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*root");
-   cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/hadoop/cms/store/group/snt/papers2011/Fall11MC/TTjets_TuneZ2_scaleup_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1/V04-02-29/merged*root");
+   //cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/hadoop/cms/store/group/snt/papers2011/Fall11MC/TTjets_TuneZ2_scaleup_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1/V04-02-29/merged*root");
    //cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-6/userdata/cms2/TTjets_TuneZ2_scaledown_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v2/V04-02-29/merged*root");
+
+   cout << "Doing the scale down mc@nlo ttbar sys sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/FastSim_mcatnlo-private-SC-fac-0.5-ren-0.5_LHE2EDM_v1_RWTH_0614_fhohle-TT_mcatnlo_private_fac-0.5-ren-0.5_withSC_FastSim_coherent_Summer11FullSim_FastSimJetFixTest_AOD_0616-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged*root");
+   //cout << "Doing the scale up mc@nlo ttbar sys sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/FastSim_mcatnlo-private-SC-fac-2-ren-2_LHE2EDM_v1_RWTH_0614_fhohle-TT_mcatnlo_private_fac-2-ren-2_withSC_FastSim_coherent_Summer11FullSim_FastSimJetFixTest_AOD_0616-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged*root");
    baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
    hist::color("ttdil", kGreen);
     
@@ -450,7 +453,7 @@ if(runttdil) {
       ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
       ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WZJetsTo3LNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
       ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
-      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
+      ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/SingleLepton/skimmed*.root"));
       ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"ZZJetsTo4L_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
       /*
       ch_vv->Add(Form("%s/%s", cms2_skim_location.c_str(),"WWTo2L2Nu_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
