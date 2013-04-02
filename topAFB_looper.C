@@ -831,8 +831,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       double weight = 1.0;
       float lepPlus_costheta_cms , lep_azimuthal_asymmetry , lep_azimuthal_asymmetry_2 , lep_charge_asymmetry , lep_pseudorap_diff , top_costheta_cms;
       float lepMinus_costheta_cms;
-      float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity , tt_mass , massllbb;
+      float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity , tt_mass , tt_mass_nojetsmear , tt_pT , tt_pT_nojetsmear, massllbb;
       float m_top = -999.0;
+      float m_top_nojetsmear = -999.0;
       double mass_ltb, mass_llb;      
       
       float ndavtxweight = vtxweight(isData,true);
@@ -2082,38 +2083,19 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	
 	//float m_top; 
-	TLorentzVector top1_p4, top2_p4, cms, lepPlus,lepMinus, jet1,jet2;
+	TLorentzVector top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4, cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
 
   //first solve with no jet smearing for comparison (to check bias caused by jet smearing)
-  float m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4,top2_p4); 
-
-  float tt_mass_nojetsmear = -999.0;
-  if(m_top_nojetsmear >0) tt_mass_nojetsmear = (top1_p4+top2_p4).M();
-
-  float top1_pt_nojetsmear = -999.0;  
-  if(m_top_nojetsmear >0) top1_pt_nojetsmear =  top1_p4.Pt();
-  //float top1_eta_nojetsmear =  top1_p4.Eta();
-  //float top1_phi_nojetsmear =  top1_p4.Phi();
-  float top2_pt_nojetsmear = -999.0;
-  if(m_top_nojetsmear >0) top2_pt_nojetsmear =  top2_p4.Pt();
-  //float top2_eta_nojetsmear =  top2_p4.Eta();
-  //float top2_phi_nojetsmear =  top2_p4.Phi();
-
+  m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4,top2_nojetsmear_p4); 
+  if( m_top_nojetsmear >0 && (fabs(m_top_nojetsmear-top1_nojetsmear_p4.M()) > 0.5 || fabs(m_top_nojetsmear-top2_nojetsmear_p4.M()) > 0.5) ) cout<<"*** mass solution mismatch (no smearing) *** "<<m_top_nojetsmear<<" "<<top1_nojetsmear_p4.M()<<" "<<top2_nojetsmear_p4.M()<<endl; 
+  tt_mass_nojetsmear = -999.0;
+  if(m_top_nojetsmear >0) tt_mass_nojetsmear = (top1_nojetsmear_p4+top2_nojetsmear_p4).M();
 
   //now repeat using jet smearing
-	m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4); 
-
-	tt_mass = -999.0;
-	if(m_top >0) tt_mass = (top1_p4+top2_p4).M();
-
-  float top1_pt = -999.0;
-  if(m_top >0) top1_pt =  top1_p4.Pt();
-  //float top1_eta =  top1_p4.Eta();
-  //float top1_phi =  top1_p4.Phi();
-  float top2_pt = -999.0;
-  if(m_top >0) top2_pt =  top2_p4.Pt();
-  //float top2_eta =  top2_p4.Eta();
-  //float top2_phi =  top2_p4.Phi();
+  m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4); 
+  if( m_top >0 && (fabs(m_top-top1_p4.M()) > 0.5 || fabs(m_top-top2_p4.M()) > 0.5) ) cout<<"*** mass solution mismatch *** "<<m_top<<" "<<top1_p4.M()<<" "<<top2_p4.M()<<endl;
+  tt_mass = -999.0;
+  if(m_top >0) tt_mass = (top1_p4+top2_p4).M();
 
   //cout<<m_top<<" "<<m_top_nojetsmear<<" "<<tt_mass<<" "<<tt_mass_nojetsmear<<endl;
 
@@ -2122,7 +2104,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	ttRapidity = -999.0;
 	if(m_top >0) ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
 	float ttRapidity2 = -999.0;
-  if(m_top >0) ttRapidity2 = (top1_p4+top2_p4).Rapidity();
+	if(m_top >0) ttRapidity2 = (top1_p4+top2_p4).Rapidity();
 	//if(m_top < 0) continue;
 	if((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
  	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
@@ -2143,12 +2125,70 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float top_pseudorapiditydiff2_cms = -999.0;
 	if(m_top >0) top_pseudorapiditydiff2_cms = (top1_p4.Eta()) - (top2_p4.Eta());
 
-	
 
-	//cms = 0.5*(top1_p4+top2_p4);
-	cms = top1_p4+top2_p4;
-	if(m_top >0) top1_p4.Boost(-cms.BoostVector());
-	if(m_top >0) top2_p4.Boost(-cms.BoostVector());
+
+  //ttbar solution in lab frame for bias check
+  float top1_pt_lab_nojetsmear = -999.0;
+  float top2_pt_lab_nojetsmear = -999.0;
+  if(m_top_nojetsmear >0) {
+    top1_pt_lab_nojetsmear =  top1_nojetsmear_p4.Pt();
+    top2_pt_lab_nojetsmear =  top2_nojetsmear_p4.Pt();
+  }	
+ 
+  cms_nojetsmear = top1_nojetsmear_p4+top2_nojetsmear_p4;
+  tt_pT_nojetsmear = -999.0;
+  if(m_top_nojetsmear >0) tt_pT_nojetsmear = cms_nojetsmear.Pt();
+  if(m_top_nojetsmear >0) top1_nojetsmear_p4.Boost(-cms_nojetsmear.BoostVector());
+  if(m_top_nojetsmear >0) top2_nojetsmear_p4.Boost(-cms_nojetsmear.BoostVector());
+
+  //ttbar solution in CM frame for bias check
+  float top1_pt_nojetsmear = -999.0;
+  float top2_pt_nojetsmear = -999.0;
+  //float top1_eta_nojetsmear = -999.0;
+  //float top1_phi_nojetsmear = -999.0;
+  //float top2_eta_nojetsmear = -999.0;
+  //float top2_phi_nojetsmear = -999.0;
+  if(m_top_nojetsmear >0) {
+    top1_pt_nojetsmear =  top1_nojetsmear_p4.Pt();
+    top2_pt_nojetsmear =  top2_nojetsmear_p4.Pt();
+    //top1_eta_nojetsmear =  top1_nojetsmear_p4.Eta();
+    //top1_phi_nojetsmear =  top1_nojetsmear_p4.Phi();
+    //top2_eta_nojetsmear =  top2_nojetsmear_p4.Eta();
+    //top2_phi_nojetsmear =  top2_nojetsmear_p4.Phi();
+  }
+
+
+  //ttbar solution in lab frame for bias check
+  float top1_pt_lab = -999.0;
+  float top2_pt_lab = -999.0;
+  if(m_top >0) {
+    top1_pt_lab =  top1_p4.Pt();
+    top2_pt_lab =  top2_p4.Pt();
+  }	
+
+  cms = top1_p4+top2_p4;
+  tt_pT = -999.0;
+  if(m_top >0) tt_pT = cms.Pt();
+  if(m_top >0) top1_p4.Boost(-cms.BoostVector());
+  if(m_top >0) top2_p4.Boost(-cms.BoostVector());
+
+  //ttbar solution in CM frame for bias check
+  float top1_pt = -999.0;
+  float top2_pt = -999.0;
+  //float top1_eta = -999.0;
+  //float top1_phi = -999.0;
+  //float top2_eta = -999.0;
+  //float top2_phi = -999.0;
+  if(m_top >0) {
+    top1_pt =  top1_p4.Pt();
+    top2_pt =  top2_p4.Pt();
+    //top1_eta =  top1_p4.Eta();
+    //top1_phi =  top1_p4.Phi();
+    //top2_eta =  top2_p4.Eta();
+    //top2_phi =  top2_p4.Phi();
+  }
+
+
 	
 	top_costheta_cms = -999.0;
 	if(m_top >0) top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
@@ -2245,7 +2285,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	if(m_top >0) lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
 	
 	top_spin_correlation = -999.0;
-	if( lepPlus_costheta_cms > -998.0 && lepMinus_costheta_cms > -998.0 ) top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
+	if(m_top >0) top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
 	//if we have gotten here, then all cuts have been passed
 
 	nSelectedEvents = nSelectedEvents + 1.0*weight;
@@ -2326,6 +2366,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	hnVtx[3]                          ->Fill(ndavtx,               weight);
 
 	fillHistos( httMass, tt_mass ,  weight, myType, jetBin);
+	fillHistos( httMass_nojetsmear, tt_mass_nojetsmear ,  weight, myType, jetBin);
+	fillHistos( httpT, tt_pT ,  weight, myType, jetBin);
+	fillHistos( httpT_nojetsmear, tt_pT_nojetsmear ,  weight, myType, jetBin);
 	fillHistos( hlepChargeAsym, lep_charge_asymmetry ,  weight, myType, jetBin);
 	fillHistos( hlepAzimAsym, lep_azimuthal_asymmetry ,  weight, myType, jetBin);
 	fillHistos( hlepAzimAsym2, lep_azimuthal_asymmetry_2 ,  weight, myType, jetBin);
@@ -2351,7 +2394,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
          fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin);
          fillHistos( hlepEta, ll_p4.Eta()  ,  weight, myType, jetBin);
 	fillHistos( hMET, p_met.first  ,  weight, myType, jetBin);
-	fillHistos( htopMass, m_top ,  weight, myType, jetBin);	
+	fillHistos( htopMass, m_top ,  weight, myType, jetBin);
+	fillHistos( htopMass_nojetsmear, m_top_nojetsmear ,  weight, myType, jetBin);
 	fillHistos( hlepRapDiff,  lep_pseudorap_diff, weight, myType, jetBin);
 	fillHistos( hlepAngleBetween,  lep_cosalpha, weight, myType, jetBin);
 	fillHistos( hjetAzimAsym,  jet_azimuthal_asymmetry, weight, myType, jetBin);
@@ -2419,6 +2463,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
     fillHistos( httmasssm_2d,  tt_mass_nojetsmear , tt_mass,    weight, myType, jetBin);
     fillHistos( htopmasssm_2d,  m_top_nojetsmear  , m_top,    weight, myType, jetBin);
 
+    fillHistos( htop1pTlabsm_2d,   top1_pt_lab_nojetsmear  , top1_pt_lab,     weight, myType, jetBin);
+    fillHistos( htop2pTlabsm_2d,   top2_pt_lab_nojetsmear  , top2_pt_lab,     weight, myType, jetBin);
+
     fillHistos( htop1pTsm_2d,   top1_pt_nojetsmear  , top1_pt,     weight, myType, jetBin);
     //fillHistos( htop1etasm_2d,  top1_eta_nojetsmear , top1_eta,    weight, myType, jetBin);
     //fillHistos( htop1phism_2d,  top1_phi_nojetsmear , top1_phi,    weight, myType, jetBin);
@@ -2436,6 +2483,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float dr_ltjet_gen = -999.0;
 	float dr_lljet_gen = -999.0;
 	float tt_mass_gen;
+	float tt_pT_gen;
 	float ttRapidity_gen;
 	float top_costheta_cms_gen;
 	float lep_charge_asymmetry_gen;
@@ -2528,7 +2576,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	    }
 	  }
 	  massllbb_gen = (lepPlus_gen+bPlus_gen+lepMinus_gen+bMinus_gen).M();
-	
+
+	  float m_topminus_gen = topminus_genp_p4.M();
+	  float m_topplus_gen = topplus_genp_p4.M();
+
 	  tt_mass_gen = (topplus_genp_p4 + topminus_genp_p4).M();
 	  ttRapidity_gen = topplus_genp_p4.Rapidity() + topminus_genp_p4.Rapidity();
 	  //ttRapidity_gen = topplus_genp_p4.Eta() + topminus_genp_p4.Eta();
@@ -2538,8 +2589,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  top_rapiditydiff_Marco_gen = abs(topplus_genp_p4.Rapidity()) - abs(topminus_genp_p4.Rapidity());
 	
 
-	  //cms_gen = 0.5*(topplus_genp_p4+topminus_genp_p4);
 	  cms_gen = topplus_genp_p4+topminus_genp_p4;
+	  tt_pT_gen = cms_gen.Pt();
 	  topplus_genp_p4.Boost(-cms_gen.BoostVector());
 	  topminus_genp_p4.Boost(-cms_gen.BoostVector());
 	  top_costheta_cms_gen = topplus_genp_p4.Vect().Dot(cms_gen.Vect())/(topplus_genp_p4.Vect().Mag()*cms_gen.Vect().Mag());
@@ -2561,11 +2612,34 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  
 	  if(!applyNoCuts){
 	  float tt_mass_pull = (tt_mass - tt_mass_gen)/tt_mass_gen;
-	  
+	  float tt_mass_pull_nojetsmear = (tt_mass_nojetsmear - tt_mass_gen)/tt_mass_gen;
+	  float tt_mass_diff = (tt_mass - tt_mass_gen);
+	  float tt_mass_diff_nojetsmear = (tt_mass_nojetsmear - tt_mass_gen);
+
+	  float top_mass_diff_plus = (m_top - m_topplus_gen);
+	  float top_mass_diff_minus = (m_top - m_topminus_gen);
+	  float top_mass_nojetsmear_diff_plus = (m_top_nojetsmear - m_topplus_gen);
+	  float top_mass_nojetsmear_diff_minus = (m_top_nojetsmear - m_topminus_gen);
+
+
 	  fillHistos( httMass_pull, tt_mass_pull,  weight, myType, jetBin);
+	  fillHistos( httMass_nojetsmear_pull, tt_mass_pull_nojetsmear,  weight, myType, jetBin);
+	  fillHistos( httMass_diff, tt_mass_diff,  weight, myType, jetBin);
+	  fillHistos( httMass_nojetsmear_diff, tt_mass_diff_nojetsmear,  weight, myType, jetBin);
 	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
+	  fillHistos( httMass_nojetsmear_2d, tt_mass_gen ,tt_mass_nojetsmear,  weight, myType, jetBin);
+    fillHistos( httpT_2d, tt_pT_gen ,tt_pT,  weight, myType, jetBin);
+    fillHistos( httpT_nojetsmear_2d, tt_pT_gen ,tt_pT_nojetsmear,  weight, myType, jetBin);
+
+	  fillHistos( htopMass_diff_plus, top_mass_diff_plus,  weight, myType, jetBin);
+	  fillHistos( htopMass_diff_minus, top_mass_diff_minus,  weight, myType, jetBin);
+	  fillHistos( htopMass_nojetsmear_diff_plus, top_mass_nojetsmear_diff_plus,  weight, myType, jetBin);
+	  fillHistos( htopMass_nojetsmear_diff_minus, top_mass_nojetsmear_diff_minus,  weight, myType, jetBin);
 	  }
+	  fillHistos( htopMass_plus_gen, m_topplus_gen ,  weight, myType, jetBin);
+	  fillHistos( htopMass_minus_gen, m_topminus_gen ,  weight, myType, jetBin);
 	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin);
+    fillHistos( httpT_gen, tt_pT_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym_gen, lep_azimuthal_asymmetry_gen ,  weight, myType, jetBin);
 	  fillHistos( hlepAzimAsym2_gen, acos(lep_azimuthal_asymmetry_gen) ,  weight, myType, jetBin);
@@ -2859,9 +2933,9 @@ void topAFB_looper::fillOverFlow(TH2F *h2, float xvalue, float yvalue, float wei
 
 void topAFB_looper::fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx)
 {
-  fillUnderOverFlow(h1[myType][nJetsIdx], value, weight);      
+  //fillUnderOverFlow(h1[myType][nJetsIdx], value, weight);      
   fillUnderOverFlow(h1[myType][3],        value, weight);      
-  fillUnderOverFlow(h1[3][nJetsIdx],      value, weight);      
+  //fillUnderOverFlow(h1[3][nJetsIdx],      value, weight);      
   fillUnderOverFlow(h1[3][3],             value, weight);      
 }
 
@@ -2869,9 +2943,9 @@ void topAFB_looper::fillHistos(TH1F *h1[4][4],float value, float weight, int myT
 
 void topAFB_looper::fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx)
 {
-  fillUnderOverFlow(h2[myType][nJetsIdx], xvalue, yvalue, weight);      
+  //fillUnderOverFlow(h2[myType][nJetsIdx], xvalue, yvalue, weight);      
   fillUnderOverFlow(h2[myType][3],        xvalue, yvalue, weight);      
-  fillUnderOverFlow(h2[3][nJetsIdx],      xvalue, yvalue, weight);      
+  //fillUnderOverFlow(h2[3][nJetsIdx],      xvalue, yvalue, weight);      
   fillUnderOverFlow(h2[3][3],             xvalue, yvalue, weight);      
 }
 
@@ -2879,9 +2953,9 @@ void topAFB_looper::fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float 
 
 void topAFB_looper::fillHistos(TProfile *h2[4][4],float xvalue, float yvalue, int myType, int nJetsIdx)
 {
-  h2[myType][nJetsIdx] -> Fill(xvalue, yvalue);      
+  //h2[myType][nJetsIdx] -> Fill(xvalue, yvalue);      
   h2[myType][3]        -> Fill(xvalue, yvalue);      
-  h2[3][nJetsIdx]      -> Fill(xvalue, yvalue);      
+  //h2[3][nJetsIdx]      -> Fill(xvalue, yvalue);      
   h2[3][3]             -> Fill(xvalue, yvalue);      
 }
 

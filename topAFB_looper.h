@@ -159,12 +159,26 @@ class topAFB_looper
 	//Top Mass Plots
 	TH1F *httRapidity[4][4];
 	TH1F *httRapidity2[4][4];     
-	TH1F *httMass[4][4]; 
 	TH1F *hllbbMass[4][4];
 	TH1F *hllbbMass_gen[4][4];
+	TH1F *httpT[4][4]; 
+	TH1F *httMass[4][4]; 
 	TH1F *httMass_pull[4][4]; 
-	TH1F *httMass_gen[4][4];                                                                                                                                            
+	TH1F *httMass_diff[4][4];
+	TH1F *htopMass_diff_plus[4][4];
+	TH1F *htopMass_diff_minus[4][4];                                                                                                                                           
 	TH1F *htopMass[4][4];
+	TH1F *httpT_nojetsmear[4][4]; 
+	TH1F *httMass_nojetsmear[4][4]; 
+	TH1F *httMass_nojetsmear_pull[4][4]; 
+	TH1F *httMass_nojetsmear_diff[4][4];                                                                                                                                            
+	TH1F *htopMass_nojetsmear_diff_plus[4][4];
+	TH1F *htopMass_nojetsmear_diff_minus[4][4];   
+	TH1F *htopMass_nojetsmear[4][4];
+	TH1F *httpT_gen[4][4]; 
+	TH1F *httMass_gen[4][4]; 
+	TH1F *htopMass_plus_gen[4][4]; 
+	TH1F *htopMass_minus_gen[4][4]; 
 	TH1F *hmassllb[4][4];
 	TH1F *hmassltb[4][4];
 	TH1F *hmassllb1Dmasscut[4][4];
@@ -243,19 +257,26 @@ class topAFB_looper
 	TH2F *hlepAzimAsym_2d[4][4];
 	TH2F *htopSpinCorr_2d[4][4];
 	TH2F *httMass_2d[4][4];
+	TH2F *httMass_nojetsmear_2d[4][4];
+	TH2F *httpT_2d[4][4];
+	TH2F *httpT_nojetsmear_2d[4][4];
 
 	
 	TH2F *hmasslb_2d[4][4];
 	TH2F *habcd_2d[4][4];
 
-TH2F *httmasssm_2d[4][4];
-TH2F *htopmasssm_2d[4][4];
-TH2F *htop1pTsm_2d[4][4];
-TH2F *htop1etasm_2d[4][4];
-TH2F *htop1phism_2d[4][4];
-TH2F *htop2pTsm_2d[4][4];
-TH2F *htop2etasm_2d[4][4];
-TH2F *htop2phism_2d[4][4];
+	TH2F *httmasssm_2d[4][4];
+	TH2F *htopmasssm_2d[4][4];
+
+	TH2F *htop1pTlabsm_2d[4][4];
+	TH2F *htop2pTlabsm_2d[4][4];
+
+	TH2F *htop1pTsm_2d[4][4];
+	TH2F *htop1etasm_2d[4][4];
+	TH2F *htop1phism_2d[4][4];
+	TH2F *htop2pTsm_2d[4][4];
+	TH2F *htop2etasm_2d[4][4];
+	TH2F *htop2phism_2d[4][4];
 
 
 	TH1F *hdRlbtruegenp[4][4];
