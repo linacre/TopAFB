@@ -2083,47 +2083,61 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	
 	//float m_top; 
-	TLorentzVector top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4, cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
+	vector <float> AMWTweight, AMWTweight_nojetsmear;
+	vector <TLorentzVector> top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4;
+	TLorentzVector cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
 
   //first solve with no jet smearing for comparison (to check bias caused by jet smearing)
-  m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4,top2_nojetsmear_p4); 
-  if( m_top_nojetsmear >0 && (fabs(m_top_nojetsmear-top1_nojetsmear_p4.M()) > 0.5 || fabs(m_top_nojetsmear-top2_nojetsmear_p4.M()) > 0.5) ) cout<<"*** mass solution mismatch (no smearing) *** "<<m_top_nojetsmear<<" "<<top1_nojetsmear_p4.M()<<" "<<top2_nojetsmear_p4.M()<<endl; 
+  m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4,top2_nojetsmear_p4,AMWTweight_nojetsmear); 
+  if( m_top_nojetsmear >0 && (fabs(m_top_nojetsmear-top1_nojetsmear_p4[0].M()) > 0.5 || fabs(m_top_nojetsmear-top2_nojetsmear_p4[0].M()) > 0.5) ) cout<<"*** mass solution mismatch (no smearing) *** "<<m_top_nojetsmear<<" "<<top1_nojetsmear_p4[0].M()<<" "<<top2_nojetsmear_p4[0].M()<<endl; 
   tt_mass_nojetsmear = -999.0;
-  if(m_top_nojetsmear >0) tt_mass_nojetsmear = (top1_nojetsmear_p4+top2_nojetsmear_p4).M();
+  if(m_top_nojetsmear >0) tt_mass_nojetsmear = (top1_nojetsmear_p4[0]+top2_nojetsmear_p4[0]).M();
+
+  //cout<<AMWTweight_nojetsmear.size()<<endl;
 
   //now repeat using jet smearing
-  m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4); 
-  if( m_top >0 && (fabs(m_top-top1_p4.M()) > 0.5 || fabs(m_top-top2_p4.M()) > 0.5) ) cout<<"*** mass solution mismatch *** "<<m_top<<" "<<top1_p4.M()<<" "<<top2_p4.M()<<endl;
+  m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4,AMWTweight); 
+  int imaxweight = -999;
+  float maxweight = -999;
+  for (int ia = 0; ia < AMWTweight.size(); ++ia)
+  {
+    if(AMWTweight[ia] > maxweight) {maxweight = AMWTweight[ia]; imaxweight=ia;}
+  }
+  if(AMWTweight.size()<100 && AMWTweight.size()>0) cout<<"maxweight: "<<maxweight<<" i: "<<imaxweight<<" size: "<<AMWTweight.size()<<endl;
+  //cout << "got to line: " << __LINE__ <<endl;
+
+
+  if( m_top >0 && (fabs(m_top-top1_p4[imaxweight].M()) > 0.5 || fabs(m_top-top2_p4[imaxweight].M()) > 0.5) ) cout<<"*** mass solution mismatch *** "<<m_top<<" "<<top1_p4[imaxweight].M()<<" "<<top2_p4[imaxweight].M()<<endl;
   tt_mass = -999.0;
-  if(m_top >0) tt_mass = (top1_p4+top2_p4).M();
+  if(m_top >0) tt_mass = (top1_p4[imaxweight]+top2_p4[imaxweight]).M();
 
   //cout<<m_top<<" "<<m_top_nojetsmear<<" "<<tt_mass<<" "<<tt_mass_nojetsmear<<endl;
 
-	//float ttRapidity = top1_p4.Eta()+top2_p4.Eta();
+	//float ttRapidity = top1_p4[imaxweight].Eta()+top2_p4[imaxweight].Eta();
 	
 	ttRapidity = -999.0;
-	if(m_top >0) ttRapidity = top1_p4.Rapidity()+top2_p4.Rapidity();
+	if(m_top >0) ttRapidity = top1_p4[imaxweight].Rapidity()+top2_p4[imaxweight].Rapidity();
 	float ttRapidity2 = -999.0;
-	if(m_top >0) ttRapidity2 = (top1_p4+top2_p4).Rapidity();
+	if(m_top >0) ttRapidity2 = (top1_p4[imaxweight]+top2_p4[imaxweight]).Rapidity();
 	//if(m_top < 0) continue;
 	if((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
  	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
   	if(applyTopSystEta &&  (fabs(ttRapidity) < 2.0) ) continue;
 
 	top_rapiditydiff_cms = -999.0;
-	if(m_top >0) top_rapiditydiff_cms = (top1_p4.Rapidity() - top2_p4.Rapidity())*(top1_p4.Rapidity() + top2_p4.Rapidity());
+	if(m_top >0) top_rapiditydiff_cms = (top1_p4[imaxweight].Rapidity() - top2_p4[imaxweight].Rapidity())*(top1_p4[imaxweight].Rapidity() + top2_p4[imaxweight].Rapidity());
 	
 	top_pseudorapiditydiff_cms = -999.0;
-	if(m_top >0) top_pseudorapiditydiff_cms = abs(top1_p4.Eta()) - abs(top2_p4.Eta());
+	if(m_top >0) top_pseudorapiditydiff_cms = abs(top1_p4[imaxweight].Eta()) - abs(top2_p4[imaxweight].Eta());
 	
 	top_rapiditydiff_Marco = -999.0;
-	if(m_top >0) top_rapiditydiff_Marco = abs(top1_p4.Rapidity()) - abs(top2_p4.Rapidity());
+	if(m_top >0) top_rapiditydiff_Marco = abs(top1_p4[imaxweight].Rapidity()) - abs(top2_p4[imaxweight].Rapidity());
 	
 	float top_rapiditydiff2_cms = -999.0;
-	if(m_top >0) top_rapiditydiff2_cms = (top1_p4.Rapidity() - top2_p4.Rapidity());
+	if(m_top >0) top_rapiditydiff2_cms = (top1_p4[imaxweight].Rapidity() - top2_p4[imaxweight].Rapidity());
 	
 	float top_pseudorapiditydiff2_cms = -999.0;
-	if(m_top >0) top_pseudorapiditydiff2_cms = (top1_p4.Eta()) - (top2_p4.Eta());
+	if(m_top >0) top_pseudorapiditydiff2_cms = (top1_p4[imaxweight].Eta()) - (top2_p4[imaxweight].Eta());
 
 
 
@@ -2131,15 +2145,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   float top1_pt_lab_nojetsmear = -999.0;
   float top2_pt_lab_nojetsmear = -999.0;
   if(m_top_nojetsmear >0) {
-    top1_pt_lab_nojetsmear =  top1_nojetsmear_p4.Pt();
-    top2_pt_lab_nojetsmear =  top2_nojetsmear_p4.Pt();
+    top1_pt_lab_nojetsmear =  top1_nojetsmear_p4[0].Pt();
+    top2_pt_lab_nojetsmear =  top2_nojetsmear_p4[0].Pt();
   }	
  
-  cms_nojetsmear = top1_nojetsmear_p4+top2_nojetsmear_p4;
+  if(m_top_nojetsmear >0) cms_nojetsmear = top1_nojetsmear_p4[0]+top2_nojetsmear_p4[0];
   tt_pT_nojetsmear = -999.0;
   if(m_top_nojetsmear >0) tt_pT_nojetsmear = cms_nojetsmear.Pt();
-  if(m_top_nojetsmear >0) top1_nojetsmear_p4.Boost(-cms_nojetsmear.BoostVector());
-  if(m_top_nojetsmear >0) top2_nojetsmear_p4.Boost(-cms_nojetsmear.BoostVector());
+  if(m_top_nojetsmear >0) top1_nojetsmear_p4[0].Boost(-cms_nojetsmear.BoostVector());
+  if(m_top_nojetsmear >0) top2_nojetsmear_p4[0].Boost(-cms_nojetsmear.BoostVector());
 
   //ttbar solution in CM frame for bias check
   float top1_pt_nojetsmear = -999.0;
@@ -2149,12 +2163,12 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   //float top2_eta_nojetsmear = -999.0;
   //float top2_phi_nojetsmear = -999.0;
   if(m_top_nojetsmear >0) {
-    top1_pt_nojetsmear =  top1_nojetsmear_p4.Pt();
-    top2_pt_nojetsmear =  top2_nojetsmear_p4.Pt();
-    //top1_eta_nojetsmear =  top1_nojetsmear_p4.Eta();
-    //top1_phi_nojetsmear =  top1_nojetsmear_p4.Phi();
-    //top2_eta_nojetsmear =  top2_nojetsmear_p4.Eta();
-    //top2_phi_nojetsmear =  top2_nojetsmear_p4.Phi();
+    top1_pt_nojetsmear =  top1_nojetsmear_p4[0].Pt();
+    top2_pt_nojetsmear =  top2_nojetsmear_p4[0].Pt();
+    //top1_eta_nojetsmear =  top1_nojetsmear_p4[0].Eta();
+    //top1_phi_nojetsmear =  top1_nojetsmear_p4[0].Phi();
+    //top2_eta_nojetsmear =  top2_nojetsmear_p4[0].Eta();
+    //top2_phi_nojetsmear =  top2_nojetsmear_p4[0].Phi();
   }
 
 
@@ -2162,15 +2176,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   float top1_pt_lab = -999.0;
   float top2_pt_lab = -999.0;
   if(m_top >0) {
-    top1_pt_lab =  top1_p4.Pt();
-    top2_pt_lab =  top2_p4.Pt();
+    top1_pt_lab =  top1_p4[imaxweight].Pt();
+    top2_pt_lab =  top2_p4[imaxweight].Pt();
   }	
 
-  cms = top1_p4+top2_p4;
+  if(m_top >0) cms = top1_p4[imaxweight]+top2_p4[imaxweight];
   tt_pT = -999.0;
   if(m_top >0) tt_pT = cms.Pt();
-  if(m_top >0) top1_p4.Boost(-cms.BoostVector());
-  if(m_top >0) top2_p4.Boost(-cms.BoostVector());
+  if(m_top >0) top1_p4[imaxweight].Boost(-cms.BoostVector());
+  if(m_top >0) top2_p4[imaxweight].Boost(-cms.BoostVector());
 
   //ttbar solution in CM frame for bias check
   float top1_pt = -999.0;
@@ -2180,18 +2194,18 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   //float top2_eta = -999.0;
   //float top2_phi = -999.0;
   if(m_top >0) {
-    top1_pt =  top1_p4.Pt();
-    top2_pt =  top2_p4.Pt();
-    //top1_eta =  top1_p4.Eta();
-    //top1_phi =  top1_p4.Phi();
-    //top2_eta =  top2_p4.Eta();
-    //top2_phi =  top2_p4.Phi();
+    top1_pt =  top1_p4[imaxweight].Pt();
+    top2_pt =  top2_p4[imaxweight].Pt();
+    //top1_eta =  top1_p4[imaxweight].Eta();
+    //top1_phi =  top1_p4[imaxweight].Phi();
+    //top2_eta =  top2_p4[imaxweight].Eta();
+    //top2_phi =  top2_p4[imaxweight].Phi();
   }
 
 
 	
 	top_costheta_cms = -999.0;
-	if(m_top >0) top_costheta_cms = top1_p4.Vect().Dot(cms.Vect())/(top1_p4.Vect().Mag()*cms.Vect().Mag());
+	if(m_top >0) top_costheta_cms = top1_p4[imaxweight].Vect().Dot(cms.Vect())/(top1_p4[imaxweight].Vect().Mag()*cms.Vect().Mag());
 	
 	if( hyp_lt_id()[hypIdx] < 0 ) {
 	  lepPlus.SetXYZT(
@@ -2276,13 +2290,13 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float jet_cosalpha_cms =  jet1.Vect().Dot( jet2.Vect() )/(jet1.Vect().Mag()*jet2.Vect().Mag());
 
 	
-	if(m_top >0) lepPlus.Boost(-top1_p4.BoostVector());
-	if(m_top >0) lepMinus.Boost(-top2_p4.BoostVector());
+	if(m_top >0) lepPlus.Boost(-top1_p4[imaxweight].BoostVector());
+	if(m_top >0) lepMinus.Boost(-top2_p4[imaxweight].BoostVector());
 	
 	lepPlus_costheta_cms = -999.0;
-	if(m_top >0) lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4.Vect())/(lepPlus.Vect().Mag()*top1_p4.Vect().Mag());
+	if(m_top >0) lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4[imaxweight].Vect())/(lepPlus.Vect().Mag()*top1_p4[imaxweight].Vect().Mag());
 	lepMinus_costheta_cms = -999.0;
-	if(m_top >0) lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4.Vect())/(lepMinus.Vect().Mag()*top2_p4.Vect().Mag());
+	if(m_top >0) lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4[imaxweight].Vect())/(lepMinus.Vect().Mag()*top2_p4[imaxweight].Vect().Mag());
 	
 	top_spin_correlation = -999.0;
 	if(m_top >0) top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
