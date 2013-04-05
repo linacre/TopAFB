@@ -2,7 +2,7 @@
 #include <fstream>
 using namespace std;
 #include "CommonFunctions.C"
-#include " TH1F.h"
+#include " TH1D.h"
 void calculateA( TCut baseline, const char* var, bool isGen, float& event_total, float& event_plus, float& event_minus, float& event_corr,  float& asymm, float& asymm_err ){
 
   const char* temp = Form("(%s*%s_gen) >0", var, var);
@@ -20,13 +20,13 @@ void calculateA( TCut baseline, const char* var, bool isGen, float& event_total,
     minusSign = Form("%s_gen <0", var) && baseline;
   }
  
-  TH1F* hlepChargeA = new TH1F("lepChargeA", "lepChargeA", 4, -10, 10);
+  TH1D* hlepChargeA = new TH1D("lepChargeA", "lepChargeA", 4, -10, 10);
   hlepChargeA->Sumw2();
-  TH1F* hlepChargeA_plus = new TH1F("lepChargeA_plus", "lepChargeA_plus", 4, -10, 10);
+  TH1D* hlepChargeA_plus = new TH1D("lepChargeA_plus", "lepChargeA_plus", 4, -10, 10);
   hlepChargeA_plus->Sumw2();  
-  TH1F* hlepChargeA_minus = new TH1F("lepChargeA_minus", "lepChargeA_minus", 4, -10, 10);
+  TH1D* hlepChargeA_minus = new TH1D("lepChargeA_minus", "lepChargeA_minus", 4, -10, 10);
   hlepChargeA_minus->Sumw2();
-  TH1F* hlepChargeA_corr = new TH1F("lepChargeA_corr", "lepChargeA_corr", 4, -10, 10);
+  TH1D* hlepChargeA_corr = new TH1D("lepChargeA_corr", "lepChargeA_corr", 4, -10, 10);
   hlepChargeA_corr->Sumw2();
 
   tree->Draw(Form("%s >> %s", var, "lepChargeA"),       baseline*"weight");
