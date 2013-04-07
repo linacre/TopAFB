@@ -9,8 +9,8 @@
 #include "TChain.h"
 #include "TDirectory.h"
 #include "TChainElement.h"
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TProfile.h"
 #include "TTreeCache.h"
 #include "Math/VectorUtil.h"
@@ -2877,7 +2877,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("ls",                    &ls_,                  "ls/I"                   );
     babyTree_->Branch("evt",                   &evt_,                 "evt/I"                  );
     babyTree_->Branch("t_mass",                &t_mass_,              "t_mass/F"               );
-    babyTree_->Branch("weight",                &weight_,              "weight/F"               );
+    babyTree_->Branch("weight",                &weight_,              "weight/D"               );
     babyTree_->Branch("Nsolns",                &Nsolns_,              "Nsolns/I"               );
     babyTree_->Branch("massltb",               &massltb_,             "massltb/F"              );
     babyTree_->Branch("massllb",               &massllb_,             "massllb/F"              );
@@ -2934,31 +2934,31 @@ void topAFB_looper::CloseBabyNtuple()
 }
 
 
-void topAFB_looper::fillUnderOverFlow(TH1F *h1, float value, float weight, int Nsolns)
+void topAFB_looper::fillUnderOverFlow(TH1D *h1, float value, double weight, int Nsolns)
 {
-  float min = h1->GetXaxis()->GetXmin();
-  float max = h1->GetXaxis()->GetXmax();
+  double min = h1->GetXaxis()->GetXmin();
+  double max = h1->GetXaxis()->GetXmax();
 
   if (value >= max) value = h1->GetBinCenter(h1->GetNbinsX());
   if (value < min) value = h1->GetBinCenter(1);
 
   int bin_number = h1->FindBin(value);
-  float orig_content = h1->GetBinContent(bin_number);
-  float orig_error = h1->GetBinError(bin_number);
+  double orig_content = h1->GetBinContent(bin_number);
+  double orig_error = h1->GetBinError(bin_number);
 
   //h1->Fill(value, weight);
   h1->SetBinContent( bin_number, orig_content+weight );
-  h1->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*float(Nsolns) ) );
+  h1->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*double(Nsolns) ) );
 }
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, float weight, int Nsolns)
+void topAFB_looper::fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, double weight, int Nsolns)
 {
-  float maxx = h2->GetXaxis()->GetXmax();
-  float minx = h2->GetXaxis()->GetXmin();
-  float maxy = h2->GetYaxis()->GetXmax();
-  float miny = h2->GetYaxis()->GetXmin();
+  double maxx = h2->GetXaxis()->GetXmax();
+  double minx = h2->GetXaxis()->GetXmin();
+  double maxy = h2->GetYaxis()->GetXmax();
+  double miny = h2->GetYaxis()->GetXmin();
 
   if (xvalue >= maxx) xvalue = h2->GetXaxis()->GetBinCenter(h2->GetNbinsX());
   if (xvalue < minx) xvalue = h2->GetXaxis()->GetBinCenter(1);
@@ -2966,18 +2966,18 @@ void topAFB_looper::fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, floa
   if (yvalue < miny) yvalue = h2->GetYaxis()->GetBinCenter(1);
 
   int bin_number = h2->FindBin(xvalue,yvalue);
-  float orig_content = h2->GetBinContent(bin_number);
-  float orig_error = h2->GetBinError(bin_number);
+  double orig_content = h2->GetBinContent(bin_number);
+  double orig_error = h2->GetBinError(bin_number);
 
   //h2->Fill(xvalue, yvalue, weight);
   h2->SetBinContent( bin_number, orig_content+weight );
-  h2->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*float(Nsolns) ) );
+  h2->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*double(Nsolns) ) );
 }
 
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillOverFlow(TH1F *h1, float value, float weight)
+void topAFB_looper::fillOverFlow(TH1D *h1, float value, float weight)
 {
   float max = h1->GetXaxis()->GetXmax();
   if (value > max) value = h1->GetBinCenter(h1->GetNbinsX());
@@ -2986,7 +2986,7 @@ void topAFB_looper::fillOverFlow(TH1F *h1, float value, float weight)
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillOverFlow(TH2F *h2, float xvalue, float yvalue, float weight)
+void topAFB_looper::fillOverFlow(TH2D *h2, float xvalue, float yvalue, float weight)
 {
   float maxx = h2->GetXaxis()->GetXmax();
   float maxy = h2->GetYaxis()->GetXmax();
@@ -2999,7 +2999,7 @@ void topAFB_looper::fillOverFlow(TH2F *h2, float xvalue, float yvalue, float wei
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx, int Nsolns)
+void topAFB_looper::fillHistos(TH1D *h1[4][4],float value, double weight, int myType, int nJetsIdx, int Nsolns)
 {
   //fillUnderOverFlow(h1[myType][nJetsIdx], value, weight, Nsolns);      
   fillUnderOverFlow(h1[myType][3],        value, weight, Nsolns);      
@@ -3009,7 +3009,7 @@ void topAFB_looper::fillHistos(TH1F *h1[4][4],float value, float weight, int myT
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx, int Nsolns)
+void topAFB_looper::fillHistos(TH2D *h2[4][4],float xvalue, float yvalue, double weight, int myType, int nJetsIdx, int Nsolns)
 {
   //fillUnderOverFlow(h2[myType][nJetsIdx], xvalue, yvalue, weight, Nsolns);      
   fillUnderOverFlow(h2[myType][3],        xvalue, yvalue, weight, Nsolns);      

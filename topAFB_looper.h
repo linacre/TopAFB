@@ -33,13 +33,13 @@ class topAFB_looper
 	bool passbTagging(const unsigned int jet_idx, const string jetAlgo, const string bTagDiscriminator) ;
 	double getFRWeight(const int hypIdx, SimpleFakeRate *mufr, SimpleFakeRate *elfr, FREnum frmode, bool isData);
 	double getBFRWeight(const int hypIdx, 	vector<LorentzVector> & v_goodNonBtagJets_p4,vector<LorentzVector> & v_goodBtagJets_p4, bool isData);
-	void fillUnderOverFlow(TH1F *h1, float value, float weight = 1., int Nsolns=1);
-	void fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, float weight = 1., int Nsolns=1);
+	void fillUnderOverFlow(TH1D *h1, float value, double weight = 1., int Nsolns=1);
+	void fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, double weight = 1., int Nsolns=1);
 	//void fillUnderOverFlow(TProfile *h2, float xvalue, float yvalue);
-	void fillOverFlow(TH1F *h1, float value, float weight = 1.);
-	void fillOverFlow(TH2F *h2, float xvalue, float yvalue, float weight = 1.);
-	void fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx, int Nsolns=1);
-	void fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx, int Nsolns=1);
+	void fillOverFlow(TH1D *h1, float value, float weight = 1.);
+	void fillOverFlow(TH2D *h2, float xvalue, float yvalue, float weight = 1.);
+	void fillHistos(TH1D *h1[4][4],float value, double weight, int myType, int nJetsIdx, int Nsolns=1);
+	void fillHistos(TH2D *h2[4][4],float xvalue, float yvalue, double weight, int myType, int nJetsIdx, int Nsolns=1);
 	void fillHistos(TProfile *h2[4][4],float xvalue, float yvalue,  int myType, int nJetsIdx);
 	
 	int antimatch4vector(const LorentzVector &lvec, 
@@ -119,7 +119,7 @@ class topAFB_looper
         Int_t   evt_;
 	Int_t ndavtx_;
 	float   t_mass_;
-	float weight_;
+	double weight_;
 	Int_t Nsolns_;
 	float massltb_;
 	float massllb_;
@@ -154,174 +154,174 @@ class topAFB_looper
 	float massllbb_gen_;
 	//	float llbbRapidityQuark_gen_;
 	//	float llbbRapidityGluon_gen_;
-	TH1F* hnJet[4][4];                   // Njet distributions                                                                                                          
-	TH1F* hnBtagJet[4][4];                   // NBTagjet distributions  
-	TH1F* hnVtx[4][4];
-	TH1F* hNsolns[4][4];          
+	TH1D* hnJet[4][4];                   // Njet distributions                                                                                                          
+	TH1D* hnBtagJet[4][4];                   // NBTagjet distributions  
+	TH1D* hnVtx[4][4];
+	TH1D* hNsolns[4][4];          
 	//Top Mass Plots
-	TH1F *httRapidity[4][4];
-	TH1F *httRapidity2[4][4];     
-	TH1F *hllbbMass[4][4];
-	TH1F *hllbbMass_gen[4][4];
-	TH1F *httpT[4][4]; 
-	TH1F *httMass[4][4]; 
-	TH1F *httMass_pull[4][4]; 
-	TH1F *httMass_diff[4][4];
-	TH1F *htopMass_diff_plus[4][4];
-	TH1F *htopMass_diff_minus[4][4];                                                                                                                                           
-	TH1F *htopMass[4][4];
-	TH1F *httpT_nojetsmear[4][4]; 
-	TH1F *httMass_nojetsmear[4][4]; 
-	TH1F *httMass_nojetsmear_pull[4][4]; 
-	TH1F *httMass_nojetsmear_diff[4][4];                                                                                                                                            
-	TH1F *htopMass_nojetsmear_diff_plus[4][4];
-	TH1F *htopMass_nojetsmear_diff_minus[4][4];   
-	TH1F *htopMass_nojetsmear[4][4];
-	TH1F *httpT_gen[4][4]; 
-	TH1F *httMass_gen[4][4]; 
-	TH1F *htopMass_plus_gen[4][4]; 
-	TH1F *htopMass_minus_gen[4][4]; 
-	TH1F *hmassllb[4][4];
-	TH1F *hmassltb[4][4];
-	TH1F *hmassllb1Dmasscut[4][4];
-	TH1F *hmassltb1Dmasscut[4][4];
-	TH1F *htheSumJetPt[4][4];
-	TH1F *htheSumBtagJetPt[4][4];
-	TH1F *hthefirstJetPt[4][4];
-	TH1F *hthesecondJetPt[4][4];
-	TH1F *htheleadinglepPt[4][4];
-	TH1F *hthesecondlepPt[4][4];
-	TH1F *hthesumlepPt[4][4];
-        TH1F *hlepEta[4][4];
-	TH1F *hjetPt[4][4];
-	TH1F *hjetEta[4][4];
-	TH1F *hMET[4][4];
-	TH1F *htheSumLepPt[4][4];
-	TH1F *htopCosTheta[4][4];
-	TH1F *hpseudorapiditydiff[4][4];
-	TH1F *hrapiditydiff[4][4];
-	TH1F *hlepCosTheta[4][4];
-	TH1F *hlepChargeAsym[4][4];
-	TH1F *hlepAzimAsym[4][4];
-	TH1F *hlepAzimAsym2[4][4];
-	TH1F *htopSpinCorr[4][4];
-	TH1F *htopCosTheta_gen[4][4];
-	TH1F *hlepCosTheta_gen[4][4];
-	TH1F *hlepChargeAsym_gen[4][4];
-	TH1F *hlepAzimAsym_gen[4][4];
-	TH1F *hlepAzimAsym2_gen[4][4];
-	TH1F *htopSpinCorr_gen[4][4];
+	TH1D *httRapidity[4][4];
+	TH1D *httRapidity2[4][4];     
+	TH1D *hllbbMass[4][4];
+	TH1D *hllbbMass_gen[4][4];
+	TH1D *httpT[4][4]; 
+	TH1D *httMass[4][4]; 
+	TH1D *httMass_pull[4][4]; 
+	TH1D *httMass_diff[4][4];
+	TH1D *htopMass_diff_plus[4][4];
+	TH1D *htopMass_diff_minus[4][4];                                                                                                                                           
+	TH1D *htopMass[4][4];
+	TH1D *httpT_nojetsmear[4][4]; 
+	TH1D *httMass_nojetsmear[4][4]; 
+	TH1D *httMass_nojetsmear_pull[4][4]; 
+	TH1D *httMass_nojetsmear_diff[4][4];                                                                                                                                            
+	TH1D *htopMass_nojetsmear_diff_plus[4][4];
+	TH1D *htopMass_nojetsmear_diff_minus[4][4];   
+	TH1D *htopMass_nojetsmear[4][4];
+	TH1D *httpT_gen[4][4]; 
+	TH1D *httMass_gen[4][4]; 
+	TH1D *htopMass_plus_gen[4][4]; 
+	TH1D *htopMass_minus_gen[4][4]; 
+	TH1D *hmassllb[4][4];
+	TH1D *hmassltb[4][4];
+	TH1D *hmassllb1Dmasscut[4][4];
+	TH1D *hmassltb1Dmasscut[4][4];
+	TH1D *htheSumJetPt[4][4];
+	TH1D *htheSumBtagJetPt[4][4];
+	TH1D *hthefirstJetPt[4][4];
+	TH1D *hthesecondJetPt[4][4];
+	TH1D *htheleadinglepPt[4][4];
+	TH1D *hthesecondlepPt[4][4];
+	TH1D *hthesumlepPt[4][4];
+        TH1D *hlepEta[4][4];
+	TH1D *hjetPt[4][4];
+	TH1D *hjetEta[4][4];
+	TH1D *hMET[4][4];
+	TH1D *htheSumLepPt[4][4];
+	TH1D *htopCosTheta[4][4];
+	TH1D *hpseudorapiditydiff[4][4];
+	TH1D *hrapiditydiff[4][4];
+	TH1D *hlepCosTheta[4][4];
+	TH1D *hlepChargeAsym[4][4];
+	TH1D *hlepAzimAsym[4][4];
+	TH1D *hlepAzimAsym2[4][4];
+	TH1D *htopSpinCorr[4][4];
+	TH1D *htopCosTheta_gen[4][4];
+	TH1D *hlepCosTheta_gen[4][4];
+	TH1D *hlepChargeAsym_gen[4][4];
+	TH1D *hlepAzimAsym_gen[4][4];
+	TH1D *hlepAzimAsym2_gen[4][4];
+	TH1D *htopSpinCorr_gen[4][4];
 	
-	TH1F *hlepRapDiff[4][4];
-	TH1F *hlepAngleBetween[4][4];
-	TH1F *hlepAngleBetweenCMS[4][4];
-	TH1F *hpseudorapiditydiff2[4][4];
-	TH1F *hrapiditydiff2[4][4];
-	TH1F *hlepPlusCosTheta[4][4];
-	TH1F *hlepMinusCosTheta[4][4];
-	TH1F *hjetAzimAsym[4][4];
-	TH1F *hjetRapDiff[4][4];
-	TH1F *hjetAngleBetween[4][4];
-	TH1F *hjetAngleBetweenCMS[4][4];
-	TH1F *hlepPhi[4][4];
-	TH1F *hlepPlusPhi[4][4];
-	TH1F *hlepMinusPhi[4][4];
-	TH1F *hjetPhi[4][4];
-	TH1F *hlepPlusEta[4][4];
-	TH1F *hlepMinusEta[4][4];
-	TH1F *hlepPlusPt[4][4];
-	TH1F *hlepMinusPt[4][4];
+	TH1D *hlepRapDiff[4][4];
+	TH1D *hlepAngleBetween[4][4];
+	TH1D *hlepAngleBetweenCMS[4][4];
+	TH1D *hpseudorapiditydiff2[4][4];
+	TH1D *hrapiditydiff2[4][4];
+	TH1D *hlepPlusCosTheta[4][4];
+	TH1D *hlepMinusCosTheta[4][4];
+	TH1D *hjetAzimAsym[4][4];
+	TH1D *hjetRapDiff[4][4];
+	TH1D *hjetAngleBetween[4][4];
+	TH1D *hjetAngleBetweenCMS[4][4];
+	TH1D *hlepPhi[4][4];
+	TH1D *hlepPlusPhi[4][4];
+	TH1D *hlepMinusPhi[4][4];
+	TH1D *hjetPhi[4][4];
+	TH1D *hlepPlusEta[4][4];
+	TH1D *hlepMinusEta[4][4];
+	TH1D *hlepPlusPt[4][4];
+	TH1D *hlepMinusPt[4][4];
 	
-	TH1F *hlepPt[4][4];
-	TH1F *hrapiditydiffMarco[4][4];
+	TH1D *hlepPt[4][4];
+	TH1D *hrapiditydiffMarco[4][4];
 	
-	TH1F *hlepPlusCosTheta_gen[4][4];
-	TH1F *hlepMinusCosTheta_gen[4][4];
-	TH1F *hpseudorapiditydiff_gen[4][4];
-	TH1F *hrapiditydiff_gen[4][4];
-	TH1F *hrapiditydiffMarco_gen[4][4];
+	TH1D *hlepPlusCosTheta_gen[4][4];
+	TH1D *hlepMinusCosTheta_gen[4][4];
+	TH1D *hpseudorapiditydiff_gen[4][4];
+	TH1D *hrapiditydiff_gen[4][4];
+	TH1D *hrapiditydiffMarco_gen[4][4];
 
-	TH2F *hlepChargeAsym_gen2d[4][4];
-	TH2F *hlepAzimAsym_gen2d[4][4];
-	TH2F *hlepAzimAsym2_gen2d[4][4];
-	TH2F *htopSpinCorr_gen2d[4][4];
-	TH2F *htopCosTheta_gen2d[4][4];
-	TH2F *hlepCosTheta_gen2d[4][4];
-	TH2F *hlepPlusCosTheta_gen2d[4][4];
-	TH2F *hlepMinusCosTheta_gen2d[4][4];
-	TH2F *hpseudorapiditydiff_gen2d[4][4];
-	TH2F *hrapiditydiff_gen2d[4][4];
-	TH2F *hrapiditydiffMarco_gen2d[4][4];	
+	TH2D *hlepChargeAsym_gen2d[4][4];
+	TH2D *hlepAzimAsym_gen2d[4][4];
+	TH2D *hlepAzimAsym2_gen2d[4][4];
+	TH2D *htopSpinCorr_gen2d[4][4];
+	TH2D *htopCosTheta_gen2d[4][4];
+	TH2D *hlepCosTheta_gen2d[4][4];
+	TH2D *hlepPlusCosTheta_gen2d[4][4];
+	TH2D *hlepMinusCosTheta_gen2d[4][4];
+	TH2D *hpseudorapiditydiff_gen2d[4][4];
+	TH2D *hrapiditydiff_gen2d[4][4];
+	TH2D *hrapiditydiffMarco_gen2d[4][4];	
 	
-	TH2F *htopCosTheta_2d[4][4];
-	TH2F *hlepCosTheta_2d[4][4];
-	TH2F *hlepChargeAsym_2d[4][4];
-	TH2F *hlepAzimAsym_2d[4][4];
-	TH2F *htopSpinCorr_2d[4][4];
-	TH2F *httMass_2d[4][4];
-	TH2F *httMass_nojetsmear_2d[4][4];
-	TH2F *httpT_2d[4][4];
-	TH2F *httpT_nojetsmear_2d[4][4];
+	TH2D *htopCosTheta_2d[4][4];
+	TH2D *hlepCosTheta_2d[4][4];
+	TH2D *hlepChargeAsym_2d[4][4];
+	TH2D *hlepAzimAsym_2d[4][4];
+	TH2D *htopSpinCorr_2d[4][4];
+	TH2D *httMass_2d[4][4];
+	TH2D *httMass_nojetsmear_2d[4][4];
+	TH2D *httpT_2d[4][4];
+	TH2D *httpT_nojetsmear_2d[4][4];
 
 	
-	TH2F *hmasslb_2d[4][4];
-	TH2F *habcd_2d[4][4];
+	TH2D *hmasslb_2d[4][4];
+	TH2D *habcd_2d[4][4];
 
-	TH2F *httmasssm_2d[4][4];
-	TH2F *htopmasssm_2d[4][4];
+	TH2D *httmasssm_2d[4][4];
+	TH2D *htopmasssm_2d[4][4];
 
-	TH2F *htop1pTlabsm_2d[4][4];
-	TH2F *htop2pTlabsm_2d[4][4];
+	TH2D *htop1pTlabsm_2d[4][4];
+	TH2D *htop2pTlabsm_2d[4][4];
 
-	TH2F *htop1pTsm_2d[4][4];
-	TH2F *htop1etasm_2d[4][4];
-	TH2F *htop1phism_2d[4][4];
-	TH2F *htop2pTsm_2d[4][4];
-	TH2F *htop2etasm_2d[4][4];
-	TH2F *htop2phism_2d[4][4];
+	TH2D *htop1pTsm_2d[4][4];
+	TH2D *htop1etasm_2d[4][4];
+	TH2D *htop1phism_2d[4][4];
+	TH2D *htop2pTsm_2d[4][4];
+	TH2D *htop2etasm_2d[4][4];
+	TH2D *htop2phism_2d[4][4];
 
 
-	TH1F *hdRlbtruegenp[4][4];
-	TH1F *hdRlbfalsegenp[4][4];
-	TH1F *hdRlbratiogenp[4][4];
-	TH1F *htopptgenp[4][4];
+	TH1D *hdRlbtruegenp[4][4];
+	TH1D *hdRlbfalsegenp[4][4];
+	TH1D *hdRlbratiogenp[4][4];
+	TH1D *htopptgenp[4][4];
 	
-	TH1F *htopMassgenp[4][4];
-	TH1F *htheSumBtagJetPtgenp[4][4];
-	TH1F *hthefirstBtagJetPtgenp[4][4];
-	TH1F *hthesecondBtagJetPtgenp[4][4];
-	TH1F *htheleadinglepPtgenp[4][4];
-	TH1F *hthesecondlepPtgenp[4][4];
-	TH1F *htheSumLepPtgenp[4][4];
-	TH1F *htheleadingNuPtgenp[4][4];
-	TH1F *hthesecondNuPtgenp[4][4];
-	TH1F *hMETgenp[4][4];
-	TH1F *htheSumLBPtgenp[4][4];
-	TH1F *htheSumLBNPtgenp[4][4];
-	TH1F *httMassGluongenp[4][4];
-	TH1F *httMassQuarkgenp[4][4];
-	TH1F *httRapidityGluongenp[4][4];
-	TH1F *httRapidityQuarkgenp[4][4];
-	TH1F *hllbbRapidityGluongenp[4][4];
-	TH1F *hllbbRapidityQuarkgenp[4][4];
+	TH1D *htopMassgenp[4][4];
+	TH1D *htheSumBtagJetPtgenp[4][4];
+	TH1D *hthefirstBtagJetPtgenp[4][4];
+	TH1D *hthesecondBtagJetPtgenp[4][4];
+	TH1D *htheleadinglepPtgenp[4][4];
+	TH1D *hthesecondlepPtgenp[4][4];
+	TH1D *htheSumLepPtgenp[4][4];
+	TH1D *htheleadingNuPtgenp[4][4];
+	TH1D *hthesecondNuPtgenp[4][4];
+	TH1D *hMETgenp[4][4];
+	TH1D *htheSumLBPtgenp[4][4];
+	TH1D *htheSumLBNPtgenp[4][4];
+	TH1D *httMassGluongenp[4][4];
+	TH1D *httMassQuarkgenp[4][4];
+	TH1D *httRapidityGluongenp[4][4];
+	TH1D *httRapidityQuarkgenp[4][4];
+	TH1D *hllbbRapidityGluongenp[4][4];
+	TH1D *hllbbRapidityQuarkgenp[4][4];
 	
 
-	TH2F *hmasslbgenp_2d[4][4];
-	TH2F *hmasslbgenmatch1_2d[4][4];
-	TH2F *hmasslbgenmatch_2d[4][4];
-	TH2F *htopptdrgenp_2d[4][4];
+	TH2D *hmasslbgenp_2d[4][4];
+	TH2D *hmasslbgenmatch1_2d[4][4];
+	TH2D *hmasslbgenmatch_2d[4][4];
+	TH2D *htopptdrgenp_2d[4][4];
 	
-	TH1F *hlepPlusCosThetaTau_gen[4][4];
-	TH1F *hlepMinusCosThetaTau_gen[4][4];
+	TH1D *hlepPlusCosThetaTau_gen[4][4];
+	TH1D *hlepMinusCosThetaTau_gen[4][4];
 	
-	TH1F *hlepPlusxTau_gen[4][4];
-	TH1F *hlepMinusxTau_gen[4][4];
+	TH1D *hlepPlusxTau_gen[4][4];
+	TH1D *hlepMinusxTau_gen[4][4];
 
 	// For the DY Estimation
-	TH1F* hmetInDYEst[4][4];         // MET in Z window for the DY Estimation
-	TH1F* hmetOutDYEst[4][4];        // MET outside Z window for the DY Estimation
-	TH1F* hdilMassWithMetDYEst[4][4];// Dilepton mass with MET requirement for DY estimation
-	TH1F* hdilMassNoMetDYEst[4][4];  // Dilepton mass without MET requirement for DY estimation
+	TH1D* hmetInDYEst[4][4];         // MET in Z window for the DY Estimation
+	TH1D* hmetOutDYEst[4][4];        // MET outside Z window for the DY Estimation
+	TH1D* hdilMassWithMetDYEst[4][4];// Dilepton mass with MET requirement for DY estimation
+	TH1D* hdilMassNoMetDYEst[4][4];  // Dilepton mass without MET requirement for DY estimation
 
  private:
 	Int_t   ngoodlep_;
