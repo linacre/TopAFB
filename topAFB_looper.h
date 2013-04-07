@@ -33,13 +33,13 @@ class topAFB_looper
 	bool passbTagging(const unsigned int jet_idx, const string jetAlgo, const string bTagDiscriminator) ;
 	double getFRWeight(const int hypIdx, SimpleFakeRate *mufr, SimpleFakeRate *elfr, FREnum frmode, bool isData);
 	double getBFRWeight(const int hypIdx, 	vector<LorentzVector> & v_goodNonBtagJets_p4,vector<LorentzVector> & v_goodBtagJets_p4, bool isData);
-	void fillUnderOverFlow(TH1F *h1, float value, float weight = 1.);
-	void fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, float weight = 1.);
+	void fillUnderOverFlow(TH1F *h1, float value, float weight = 1., int Nsolns=1);
+	void fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, float weight = 1., int Nsolns=1);
 	//void fillUnderOverFlow(TProfile *h2, float xvalue, float yvalue);
 	void fillOverFlow(TH1F *h1, float value, float weight = 1.);
 	void fillOverFlow(TH2F *h2, float xvalue, float yvalue, float weight = 1.);
-	void fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx);
-	void fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx);
+	void fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx, int Nsolns=1);
+	void fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx, int Nsolns=1);
 	void fillHistos(TProfile *h2[4][4],float xvalue, float yvalue,  int myType, int nJetsIdx);
 	
 	int antimatch4vector(const LorentzVector &lvec, 
@@ -120,6 +120,7 @@ class topAFB_looper
 	Int_t ndavtx_;
 	float   t_mass_;
 	float weight_;
+	Int_t Nsolns_;
 	float massltb_;
 	float massllb_;
 	float dr_ltjet_gen_;
@@ -153,9 +154,10 @@ class topAFB_looper
 	float massllbb_gen_;
 	//	float llbbRapidityQuark_gen_;
 	//	float llbbRapidityGluon_gen_;
-	TH1F* hnJet[4];                   // Njet distributions                                                                                                          
-	TH1F* hnBtagJet[4];                   // NBTagjet distributions  
-	TH1F* hnVtx[4];          
+	TH1F* hnJet[4][4];                   // Njet distributions                                                                                                          
+	TH1F* hnBtagJet[4][4];                   // NBTagjet distributions  
+	TH1F* hnVtx[4][4];
+	TH1F* hNsolns[4][4];          
 	//Top Mass Plots
 	TH1F *httRapidity[4][4];
 	TH1F *httRapidity2[4][4];     

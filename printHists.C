@@ -32,13 +32,13 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
  
 
   bool haveVVsamples = false;
-  if(gROOT->FindObjectAny("ww_hnBtagJet_ee") != NULL || 
-     gROOT->FindObjectAny("zz_hnBtagJet_ee") != NULL || 
-     gROOT->FindObjectAny("wz_hnBtagJet_ee") != NULL)
+  if(gROOT->FindObjectAny("ww_hnBtagJet_allj_ee") != NULL || 
+     gROOT->FindObjectAny("zz_hnBtagJet_allj_ee") != NULL || 
+     gROOT->FindObjectAny("wz_hnBtagJet_allj_ee") != NULL)
     haveVVsamples = true;
 
   bool haveData = false;
-  if(gROOT->FindObjectAny("data_hnBtagJet_ee") != NULL)
+  if(gROOT->FindObjectAny("data_hnBtagJet_allj_ee") != NULL)
     haveData = true;
 
 
@@ -119,9 +119,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
 	if(!(v_prefixes.at(i).Contains("DY")))
 	  continue;
 
-	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
-	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
-	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
+	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_ee");
+	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_mm");
+	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_em");
 	
 	n_ee = n_ee + GetEntries(hee, lowBin, highBin);
 	n_mm = n_mm + GetEntries(hmm, lowBin, highBin);
@@ -160,9 +160,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
       
 	if(!(v_prefixes.at(i).Contains("WW") || v_prefixes.at(i).Contains("WZ") || v_prefixes.at(i).Contains("ZZ")))
 	  continue;
-	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
-	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
-	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
+	TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_ee");
+	TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_mm");
+	TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_em");
 
 
 	n_ee = n_ee + GetEntries(hee, lowBin, highBin);
@@ -206,9 +206,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
 	cout << beginL << Form("%9s ",v_prefixes.at(i).Data()) <<  colSep;
       else
 	cout << beginL << " *" << v_prefixes.at(i) << "* " << colSep;
-      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
-      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
-      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
+      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_ee");
+      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_mm");
+      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_em");
       
       n_ee =  GetEntries(hee, lowBin, highBin);
       n_mm =  GetEntries(hmm, lowBin, highBin);
@@ -260,9 +260,9 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
       if(v_prefixes.at(i).Contains("axigluon"))
         continue;
      
-      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_ee");
-      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_mm");
-      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_em");
+      TH1F *hee = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_ee");
+      TH1F *hmm = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_mm");
+      TH1F *hem = (TH1F*)gDirectory->Get(v_prefixes.at(i) + "_hnBtagJet_allj_em");
      
       n_ee = n_ee + GetEntries(hee, lowBin, highBin);
       n_mm = n_mm + GetEntries(hmm, lowBin, highBin);
@@ -291,7 +291,7 @@ void printNJets( bool latex=false, const char* formatS = "%6.1f", const char* si
       else
 	cout << beginL << " *Data* " << colSep;
       for(unsigned int i = 0 ; i < 4; i++) {
-	TString name = "data_hnBtagJet_" + TString(suffix[i]);
+	TString name = "data_hnBtagJet_allj_" + TString(suffix[i]);
 	TH1F *h = (TH1F*)gDirectory->Get(name.Data());
 	float n = 0;
 	float nE = 0;

@@ -55,6 +55,7 @@ void AfbUnfoldExample()
   int nVars =9;
 
   Float_t observable, observable_gen, weight, ttmass, ttRapidity, tmass;
+  Int_t Nsolns;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
 
@@ -116,6 +117,7 @@ void AfbUnfoldExample()
 
   ch_data->SetBranchAddress(observablename,    &observable);
   ch_data->SetBranchAddress("weight",&weight);
+  ch_data->SetBranchAddress("Nsolns",&Nsolns);
   ch_data->SetBranchAddress("tt_mass",&ttmass);
   ch_data->SetBranchAddress("ttRapidity",&ttRapidity);
   ch_data->SetBranchAddress("t_mass",&tmass);
@@ -124,15 +126,17 @@ void AfbUnfoldExample()
   for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
     ch_data->GetEntry(i);
     if ( (Region=="Signal") && (ttmass>450) )  
-      hData->Fill(observable,weight);
+      fillUnderOverFlow(hData, observable, weight, Nsolns);
+      //hData->Fill(observable,weight);
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
-      hData->Fill(observable,    weight);    
+      fillUnderOverFlow(hData, observable, weight, Nsolns);    
     if ( (Region=="") && (iVar<2) ) 
-      hData->Fill(observable,    weight);   
+      fillUnderOverFlow(hData, observable, weight, Nsolns);   
   }
 
   ch_bkg->SetBranchAddress(observablename,    &observable);
   ch_bkg->SetBranchAddress("weight",&weight);
+  ch_bkg->SetBranchAddress("Nsolns",&Nsolns);
   ch_bkg->SetBranchAddress("tt_mass",&ttmass);
   ch_bkg->SetBranchAddress("ttRapidity",&ttRapidity);
   ch_bkg->SetBranchAddress("t_mass",&tmass);
@@ -140,16 +144,17 @@ void AfbUnfoldExample()
   for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
     ch_bkg->GetEntry(i);
     if ( (Region=="Signal") && (ttmass>450) )  
-      hBkg->Fill(observable    ,weight);
+      fillUnderOverFlow(hBkg, observable, weight, Nsolns);
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
-      hBkg->Fill(observable,    weight);    
+      fillUnderOverFlow(hBkg, observable, weight, Nsolns);
     if ( (Region=="") && (iVar<2) ) 
-      hBkg->Fill(observable,    weight);   
+      fillUnderOverFlow(hBkg, observable, weight, Nsolns);
   }
 
   ch_top->SetBranchAddress(observablename,    &observable);
   ch_top->SetBranchAddress(observablename+"_gen",&observable_gen);
   ch_top->SetBranchAddress("weight",&weight);
+  ch_top->SetBranchAddress("Nsolns",&Nsolns);
   ch_top->SetBranchAddress("tt_mass",&ttmass);
   ch_top->SetBranchAddress("ttRapidity",&ttRapidity);
   ch_top->SetBranchAddress("t_mass",&tmass);
@@ -158,18 +163,18 @@ void AfbUnfoldExample()
     ch_top->GetEntry(i);
     if ( (Region=="Signal") && (ttmass>450) ) {
       response.Fill (observable, observable_gen, weight);
-      hTop->Fill(observable, weight);    
-      hTop_gen->Fill(observable_gen, weight);    
+      fillUnderOverFlow(hTop, observable, weight, Nsolns);
+      fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
     }
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
       response.Fill (observable, observable_gen, weight);
-      hTop->Fill(observable, weight);    
-      hTop_gen->Fill(observable_gen, weight);    
+      fillUnderOverFlow(hTop, observable, weight, Nsolns);
+      fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
     }
     if ( (Region=="") && (iVar<2) ) {
       response.Fill (observable, observable_gen, weight);
-      hTop->Fill(observable, weight);    
-      hTop_gen->Fill(observable_gen, weight);    
+      fillUnderOverFlow(hTop, observable, weight, Nsolns);
+      fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
     }
   }
 

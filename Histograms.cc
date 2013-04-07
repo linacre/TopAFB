@@ -29,22 +29,26 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
   
   //the plots not differ by number of jets
   for (int i=0; i<4; i++) {
-    
-    hnJet[i] = new TH1F(Form("%s_hnJet_%s",prefix,suffixall[i]),Form("%s_nJet_%s",prefix,suffixall[i]),10,0,10);	
-    hnJet[i]->GetXaxis()->SetTitle("Number of jets");
-    hnJet[i]->Sumw2();
-
-    hnBtagJet[i] = new TH1F(Form("%s_hnBtagJet_%s",prefix,suffixall[i]),Form("%s_nBtagJet_%s",prefix,suffixall[i]),6,0,6);	
-    hnBtagJet[i]->GetXaxis()->SetTitle("Number of b tagged jets");
-    hnBtagJet[i]->Sumw2();
-
-    hnVtx[i] = new TH1F(Form("%s_hnVtx_%s",prefix,suffixall[i]),Form("%s_nVtx_%s",prefix,suffixall[i]),18,0,18);	
-    hnVtx[i]->GetXaxis()->SetTitle("Number of vertices");
-    hnVtx[i]->Sumw2();
 
     for (int j = 3; j < 4; j++) {
       char suffix[7];
       sprintf(suffix, "%s_%s", njetCh[j], suffixall[i]);
+
+      hnJet[i][j] = new TH1F(Form("%s_hnJet_%s",prefix,suffix),Form("%s_nJet_%s",prefix,suffix),10,0,10);	
+      hnJet[i][j]->GetXaxis()->SetTitle("Number of jets");
+      hnJet[i][j]->Sumw2();
+
+      hnBtagJet[i][j] = new TH1F(Form("%s_hnBtagJet_%s",prefix,suffix),Form("%s_nBtagJet_%s",prefix,suffix),6,0,6);	
+      hnBtagJet[i][j]->GetXaxis()->SetTitle("Number of b tagged jets");
+      hnBtagJet[i][j]->Sumw2();
+
+      hnVtx[i][j] = new TH1F(Form("%s_hnVtx_%s",prefix,suffix),Form("%s_nVtx_%s",prefix,suffix),18,0.,18.);	
+      hnVtx[i][j]->GetXaxis()->SetTitle("Number of vertices");
+      hnVtx[i][j]->Sumw2();
+
+      hNsolns[i][j] = new TH1F(Form("%s_hNsolns_%s",prefix,suffix),Form("%s_Nsolns_%s",prefix,suffix),101,0.,101.);
+      hNsolns[i][j]->GetXaxis()->SetTitle("Jet smearing solution multiplicity");
+      hNsolns[i][j]->Sumw2();
       
       hlepChargeAsym_2d[i][j] = new TH2F(Form("%s_hlepChargeAsym2d_%s",prefix,suffix),Form("%s_lepChargeAsym2d_%s",prefix,suffix),80,-4,4, 80,-4,4);
       hlepChargeAsym_2d[i][j]->GetXaxis()->SetTitle("Charge_Asymmetry_lep_gen");

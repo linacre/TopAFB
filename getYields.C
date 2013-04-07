@@ -11,14 +11,14 @@ void getYields(TString FName="results/hist_usePtGt2020_applyTriggers_hypDisamb_u
 
     
     
-  hist::loadHist(FName.Data(),0,"*_hnBtagJet_*");
+  hist::loadHist(FName.Data(),0,"*_hnBtagJet_allj_*");
     //    hist::loadHist(mcFName.Data(),0,"*_htcmet_allj_*");
     //hist::loadHist(mcFName.Data(),0,"*hdilMass_allj_*");
     //hist::loadHist(mcFName.Data(),0,"*bTagtk*_allj_*");    
     //hist::scale("*_*", scaleMC);
     // TH1F* ttdil= (TH1F*)gFile->Get("ttdil_hnJets");
     //cout << ttdil->Integral()<<endl;
-    hist::loadHist(FName.Data(),0,"data_hnBtagJet_*");
+    hist::loadHist(FName.Data(),0,"data_hnBtagJet_allj_*");
     //hist::loadHist(dataFName.Data(),0,"data_htcmet_allj_*");
     //hist::loadHist(dataFName.Data(),0,"data_*hdilMass_allj_*");
     //hist::loadHist(dataFName.Data(),0,"data_*bTagtk*_allj_*");
@@ -41,7 +41,7 @@ void getYields(TString FName="results/hist_usePtGt2020_applyTriggers_hypDisamb_u
     
    
     
-    printNJets(latex, formatS,"ttprime", true,true,combineJetBins, false,true); 
+    printNJets(latex, formatS,"ttprime", false,false,combineJetBins, false,true); 
     //browseStacks( true, false , "ttdil", dataFName, 4, 7, true, false, 3, false, 0, true);
     //browseStacks( true, false , "DYeemm", dataFName, 4, 27, true, false, 3, false, 0, true);
     hist::deleteHistos();

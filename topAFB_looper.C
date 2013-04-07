@@ -835,6 +835,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       float m_top = -999.0;
       float m_top_nojetsmear = -999.0;
       double mass_ltb, mass_llb;      
+
+	  vector <float> AMWTweight, AMWTweight_nojetsmear;
+	  vector <TLorentzVector> top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4;
+	  TLorentzVector cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
+	  int Nsolns = -999;
       
       float ndavtxweight = vtxweight(isData,true);
 
@@ -1070,7 +1075,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	for (size_t v = 0; v < cms2.davtxs_position().size(); ++v){
 	  if(isGoodDAVertex(v)) ++ndavtx;
 	}
-	hnVtx[3]->Fill(ndavtx, ndavtxweight);
+	hnVtx[3][3]->Fill(ndavtx, ndavtxweight);
 	nEvents_noCuts_novtxweight += 1; 	
 	if(isData) nEvents_noCuts += 1.;
 	else  nEvents_noCuts += ndavtxweight;
@@ -1285,9 +1290,22 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
       if(applyNoCuts) goodHyps_size = 1;
       
       for(unsigned int i = 0; i < goodHyps_size; i++) {
-      	
+    
+    unsigned int hypIdx = 999;
+    vector<LorentzVector>  v_goodJets_cand_p4;
+    vector<unsigned int> v_goodJets;
+    int nBtagJets = -1;
+ 	LorentzVector lt_p4;
+ 	LorentzVector ll_p4;
+ 	pair<float, float> p_met; //met and met phi
+ 	float thefirstJet_pt = -999;
+	float thesecondJet_pt = -999;
+	float theSumBtagJetPt = -999;
+	int i_ltbjet =-1;
+	int i_llbjet=-1;
+
        if(!applyNoCuts){
-	unsigned int hypIdx = v_goodHyps[i];
+	hypIdx = v_goodHyps[i];
       	weight = weight*v_weights[i];
 	int type = hyp_type()[hypIdx];
 	if( !isData ){
@@ -1303,8 +1321,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  weight = weight*trigger_weight;
 	}
 		
- 	LorentzVector lt_p4  = hyp_lt_p4()[hypIdx];
- 	LorentzVector ll_p4  = hyp_ll_p4()[hypIdx];
+ 	lt_p4  = hyp_lt_p4()[hypIdx];
+ 	ll_p4  = hyp_ll_p4()[hypIdx];
  	int id_lt = hyp_lt_id()[hypIdx]; 
  	int id_ll = hyp_ll_id()[hypIdx];
  	int idx_lt = hyp_lt_index()[hypIdx];
@@ -1340,7 +1358,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 //         }//fill vtx using Z events
 
 	//get the jets passing cuts 
-	vector<unsigned int> v_goodJets;
+	//vector<unsigned int> v_goodJets;
 	vector<unsigned int> v_goodJetsNoEtaCut;
 	vector<LorentzVector> v_jetP4s;
 	float dmetx  = 0.0;
@@ -1422,7 +1440,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
 	///b-tagging 
 
-	int nBtagJets = 0; 
+	nBtagJets = 0; 
 	vector<unsigned int> v_goodBtagJets;
 	vector<unsigned int> v_goodNonBtagJets;
 	TString btag_algo, btag_algo_name ;
@@ -1491,7 +1509,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	if(usetcMET    ) metAlgo  = "tcMET";
 	if(usetcMET35X ) metAlgo  = "tcMET35X";
 	if(usepfMET    ) metAlgo  = "pfMET"; 
-	pair<float, float> p_met; //met and met phi
+	//pair<float, float> p_met; //met and met phi
 	if(usetcMET || usepfMET || usetcMET35X) {
 	  p_met = getMet(metAlgo, hypIdx);
 
@@ -1668,7 +1686,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	
 
 
-	float theSumBtagJetPt = 0.;
+	theSumBtagJetPt = 0.;
 	for(unsigned int ijet = 0; ijet < v_goodBtagJets_p4.size(); ijet++) {
           theSumBtagJetPt += v_goodBtagJets_p4.at(ijet).Pt();
 	}
@@ -2001,7 +2019,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	
 
 	//make the list of jets which will be comined with leptons
-	vector<LorentzVector>  v_goodJets_cand_p4;
+	//vector<LorentzVector>  v_goodJets_cand_p4;
 	vector<LorentzVector> v_goodJets_p4_tmp;	
        
 	v_goodJets_p4_tmp = v_goodJets_p4; 
@@ -2040,15 +2058,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	
 	npreSelectedEvents++;
 
-	int i_ltbjet =-1;
-	int i_llbjet=-1;
+	i_ltbjet =-1;
+	i_llbjet=-1;
 	//	vector<LorentzVector>  v_goodJets_cand_p4_tmp;
 	//	v_goodJets_cand_p4_tmp = v_goodJets_cand_p4;
 	double dr_ltb, dr_llb;
 	//double mass_ltb, mass_llb;
 	double mass_ltbs, mass_llbs;
-	float thefirstJet_pt = -999;
-	float thesecondJet_pt = -999;
+	thefirstJet_pt = -999;
+	thesecondJet_pt = -999;
 	double m_1, m_2, m_3, m_4;
 	double mass_lb_min, mass_lb_min_otherpair;
 
@@ -2083,9 +2101,9 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	}
 	
 	//float m_top; 
-	vector <float> AMWTweight, AMWTweight_nojetsmear;
-	vector <TLorentzVector> top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4;
-	TLorentzVector cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
+	//vector <float> AMWTweight, AMWTweight_nojetsmear;
+	//vector <TLorentzVector> top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4;
+	//TLorentzVector cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
 
   //first solve with no jet smearing for comparison (to check bias caused by jet smearing)
   m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4,top2_nojetsmear_p4,AMWTweight_nojetsmear); 
@@ -2096,48 +2114,61 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   //cout<<AMWTweight_nojetsmear.size()<<endl;
 
   //now repeat using jet smearing
-  m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4,AMWTweight); 
+  m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4,AMWTweight);
+  Nsolns = AMWTweight.size();
   int imaxweight = -999;
   float maxweight = -999;
-  for (int ia = 0; ia < AMWTweight.size(); ++ia)
+  for (int ia = 0; ia < Nsolns; ++ia)
   {
     if(AMWTweight[ia] > maxweight) {maxweight = AMWTweight[ia]; imaxweight=ia;}
   }
-  if(AMWTweight.size()<100 && AMWTweight.size()>0) cout<<"maxweight: "<<maxweight<<" i: "<<imaxweight<<" size: "<<AMWTweight.size()<<endl;
+  //if(Nsolns<100 && Nsolns>0) cout<<"maxweight: "<<maxweight<<" i: "<<imaxweight<<" size: "<<Nsolns<<endl;
   //cout << "got to line: " << __LINE__ <<endl;
 
+  if(Nsolns<1) Nsolns = 1;
+  weight = weight/double(Nsolns);
 
-  if( m_top >0 && (fabs(m_top-top1_p4[imaxweight].M()) > 0.5 || fabs(m_top-top2_p4[imaxweight].M()) > 0.5) ) cout<<"*** mass solution mismatch *** "<<m_top<<" "<<top1_p4[imaxweight].M()<<" "<<top2_p4[imaxweight].M()<<endl;
+
+  }//!applynocuts
+
+  if(applyNoCuts) Nsolns = 1;
+
+  for (int i_smear = 0; i_smear < Nsolns; ++i_smear)
+  {
+
+  if(!applyNoCuts){
+
+  if( m_top >0 && (fabs(m_top-top1_p4[i_smear].M()) > 0.5 || fabs(m_top-top2_p4[i_smear].M()) > 0.5) ) cout<<"*** mass solution mismatch *** "<<m_top<<" "<<top1_p4[i_smear].M()<<" "<<top2_p4[i_smear].M()<<endl;
   tt_mass = -999.0;
-  if(m_top >0) tt_mass = (top1_p4[imaxweight]+top2_p4[imaxweight]).M();
+  if(m_top >0) tt_mass = (top1_p4[i_smear]+top2_p4[i_smear]).M();
 
   //cout<<m_top<<" "<<m_top_nojetsmear<<" "<<tt_mass<<" "<<tt_mass_nojetsmear<<endl;
 
-	//float ttRapidity = top1_p4[imaxweight].Eta()+top2_p4[imaxweight].Eta();
+	//float ttRapidity = top1_p4[i_smear].Eta()+top2_p4[i_smear].Eta();
 	
 	ttRapidity = -999.0;
-	if(m_top >0) ttRapidity = top1_p4[imaxweight].Rapidity()+top2_p4[imaxweight].Rapidity();
+	if(m_top >0) ttRapidity = top1_p4[i_smear].Rapidity()+top2_p4[i_smear].Rapidity();
 	float ttRapidity2 = -999.0;
-	if(m_top >0) ttRapidity2 = (top1_p4[imaxweight]+top2_p4[imaxweight]).Rapidity();
+	if(m_top >0) ttRapidity2 = (top1_p4[i_smear]+top2_p4[i_smear]).Rapidity();
 	//if(m_top < 0) continue;
 	if((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
  	if(applyLeptonJetInvMassCut450 && (tt_mass<450 )) continue;
   	if(applyTopSystEta &&  (fabs(ttRapidity) < 2.0) ) continue;
 
 	top_rapiditydiff_cms = -999.0;
-	if(m_top >0) top_rapiditydiff_cms = (top1_p4[imaxweight].Rapidity() - top2_p4[imaxweight].Rapidity())*(top1_p4[imaxweight].Rapidity() + top2_p4[imaxweight].Rapidity());
+	if(m_top >0) top_rapiditydiff_cms = (top1_p4[i_smear].Rapidity() - top2_p4[i_smear].Rapidity())*(top1_p4[i_smear].Rapidity() + top2_p4[i_smear].Rapidity());
 	
 	top_pseudorapiditydiff_cms = -999.0;
-	if(m_top >0) top_pseudorapiditydiff_cms = abs(top1_p4[imaxweight].Eta()) - abs(top2_p4[imaxweight].Eta());
+	if(m_top >0) top_pseudorapiditydiff_cms = abs(top1_p4[i_smear].Eta()) - abs(top2_p4[i_smear].Eta());
 	
 	top_rapiditydiff_Marco = -999.0;
-	if(m_top >0) top_rapiditydiff_Marco = abs(top1_p4[imaxweight].Rapidity()) - abs(top2_p4[imaxweight].Rapidity());
+	if(m_top >0) top_rapiditydiff_Marco = abs(top1_p4[i_smear].Rapidity()) - abs(top2_p4[i_smear].Rapidity());
 	
 	float top_rapiditydiff2_cms = -999.0;
-	if(m_top >0) top_rapiditydiff2_cms = (top1_p4[imaxweight].Rapidity() - top2_p4[imaxweight].Rapidity());
+	if(m_top >0) top_rapiditydiff2_cms = (top1_p4[i_smear].Rapidity() - top2_p4[i_smear].Rapidity());
 	
 	float top_pseudorapiditydiff2_cms = -999.0;
-	if(m_top >0) top_pseudorapiditydiff2_cms = (top1_p4[imaxweight].Eta()) - (top2_p4[imaxweight].Eta());
+	if(m_top >0) top_pseudorapiditydiff2_cms = (top1_p4[i_smear].Eta()) - (top2_p4[i_smear].Eta());
 
 
 
@@ -2176,15 +2207,15 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   float top1_pt_lab = -999.0;
   float top2_pt_lab = -999.0;
   if(m_top >0) {
-    top1_pt_lab =  top1_p4[imaxweight].Pt();
-    top2_pt_lab =  top2_p4[imaxweight].Pt();
+    top1_pt_lab =  top1_p4[i_smear].Pt();
+    top2_pt_lab =  top2_p4[i_smear].Pt();
   }	
 
-  if(m_top >0) cms = top1_p4[imaxweight]+top2_p4[imaxweight];
+  if(m_top >0) cms = top1_p4[i_smear]+top2_p4[i_smear];
   tt_pT = -999.0;
   if(m_top >0) tt_pT = cms.Pt();
-  if(m_top >0) top1_p4[imaxweight].Boost(-cms.BoostVector());
-  if(m_top >0) top2_p4[imaxweight].Boost(-cms.BoostVector());
+  if(m_top >0) top1_p4[i_smear].Boost(-cms.BoostVector());
+  if(m_top >0) top2_p4[i_smear].Boost(-cms.BoostVector());
 
   //ttbar solution in CM frame for bias check
   float top1_pt = -999.0;
@@ -2194,18 +2225,18 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   //float top2_eta = -999.0;
   //float top2_phi = -999.0;
   if(m_top >0) {
-    top1_pt =  top1_p4[imaxweight].Pt();
-    top2_pt =  top2_p4[imaxweight].Pt();
-    //top1_eta =  top1_p4[imaxweight].Eta();
-    //top1_phi =  top1_p4[imaxweight].Phi();
-    //top2_eta =  top2_p4[imaxweight].Eta();
-    //top2_phi =  top2_p4[imaxweight].Phi();
+    top1_pt =  top1_p4[i_smear].Pt();
+    top2_pt =  top2_p4[i_smear].Pt();
+    //top1_eta =  top1_p4[i_smear].Eta();
+    //top1_phi =  top1_p4[i_smear].Phi();
+    //top2_eta =  top2_p4[i_smear].Eta();
+    //top2_phi =  top2_p4[i_smear].Phi();
   }
 
 
 	
 	top_costheta_cms = -999.0;
-	if(m_top >0) top_costheta_cms = top1_p4[imaxweight].Vect().Dot(cms.Vect())/(top1_p4[imaxweight].Vect().Mag()*cms.Vect().Mag());
+	if(m_top >0) top_costheta_cms = top1_p4[i_smear].Vect().Dot(cms.Vect())/(top1_p4[i_smear].Vect().Mag()*cms.Vect().Mag());
 	
 	if( hyp_lt_id()[hypIdx] < 0 ) {
 	  lepPlus.SetXYZT(
@@ -2290,13 +2321,13 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	float jet_cosalpha_cms =  jet1.Vect().Dot( jet2.Vect() )/(jet1.Vect().Mag()*jet2.Vect().Mag());
 
 	
-	if(m_top >0) lepPlus.Boost(-top1_p4[imaxweight].BoostVector());
-	if(m_top >0) lepMinus.Boost(-top2_p4[imaxweight].BoostVector());
+	if(m_top >0) lepPlus.Boost(-top1_p4[i_smear].BoostVector());
+	if(m_top >0) lepMinus.Boost(-top2_p4[i_smear].BoostVector());
 	
 	lepPlus_costheta_cms = -999.0;
-	if(m_top >0) lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4[imaxweight].Vect())/(lepPlus.Vect().Mag()*top1_p4[imaxweight].Vect().Mag());
+	if(m_top >0) lepPlus_costheta_cms = lepPlus.Vect().Dot(top1_p4[i_smear].Vect())/(lepPlus.Vect().Mag()*top1_p4[i_smear].Vect().Mag());
 	lepMinus_costheta_cms = -999.0;
-	if(m_top >0) lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4[imaxweight].Vect())/(lepMinus.Vect().Mag()*top2_p4[imaxweight].Vect().Mag());
+	if(m_top >0) lepMinus_costheta_cms = lepMinus.Vect().Dot(top2_p4[i_smear].Vect())/(lepMinus.Vect().Mag()*top2_p4[i_smear].Vect().Mag());
 	
 	top_spin_correlation = -999.0;
 	if(m_top >0) top_spin_correlation = lepPlus_costheta_cms*lepMinus_costheta_cms;
@@ -2371,62 +2402,68 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
           continue;
         }
 	
-	hnJet[myType]                     ->Fill(nJets,               weight);
-	hnJet[3]                          ->Fill(nJets,               weight);
-	hnBtagJet[myType]                 ->Fill(nBtagJets,            weight);
-	hnBtagJet[3]                      ->Fill(nBtagJets,            weight);
+	//hnJet[myType]                     ->Fill(nJets,               weight);
+	//hnJet[3]                          ->Fill(nJets,               weight);
+	//hnBtagJet[myType]                 ->Fill(nBtagJets,            weight);
+	//hnBtagJet[3]                      ->Fill(nBtagJets,            weight);
 
-	hnVtx[myType]                     ->Fill(ndavtx,               weight);
-	hnVtx[3]                          ->Fill(ndavtx,               weight);
+	//hnVtx[myType]                     ->Fill(ndavtx,               weight);
+	//hnVtx[3]                          ->Fill(ndavtx,               weight);
 
-	fillHistos( httMass, tt_mass ,  weight, myType, jetBin);
-	fillHistos( httMass_nojetsmear, tt_mass_nojetsmear ,  weight, myType, jetBin);
-	fillHistos( httpT, tt_pT ,  weight, myType, jetBin);
-	fillHistos( httpT_nojetsmear, tt_pT_nojetsmear ,  weight, myType, jetBin);
-	fillHistos( hlepChargeAsym, lep_charge_asymmetry ,  weight, myType, jetBin);
-	fillHistos( hlepAzimAsym, lep_azimuthal_asymmetry ,  weight, myType, jetBin);
-	fillHistos( hlepAzimAsym2, lep_azimuthal_asymmetry_2 ,  weight, myType, jetBin);
+
+	fillHistos( hnJet, nJets,  weight, myType, jetBin, Nsolns);
+	fillHistos( hnBtagJet, nBtagJets,  weight, myType, jetBin, Nsolns);
+	fillHistos( hnVtx, ndavtx,  weight, myType, jetBin, Nsolns);
+	fillHistos( hNsolns, Nsolns,  weight, myType, jetBin, Nsolns);
+
+	fillHistos( httMass, tt_mass ,  weight, myType, jetBin, Nsolns);
+	fillHistos( httMass_nojetsmear, tt_mass_nojetsmear ,  weight, myType, jetBin, Nsolns);
+	fillHistos( httpT, tt_pT ,  weight, myType, jetBin, Nsolns);
+	fillHistos( httpT_nojetsmear, tt_pT_nojetsmear ,  weight, myType, jetBin, Nsolns);
+	fillHistos( hlepChargeAsym, lep_charge_asymmetry ,  weight, myType, jetBin, Nsolns);
+	fillHistos( hlepAzimAsym, lep_azimuthal_asymmetry ,  weight, myType, jetBin, Nsolns);
+	fillHistos( hlepAzimAsym2, lep_azimuthal_asymmetry_2 ,  weight, myType, jetBin, Nsolns);
 	if(m_top >0){
-	  fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin);
-	  fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin);
-	  fillHistos( hpseudorapiditydiff, top_pseudorapiditydiff_cms ,  weight, myType, jetBin);
-	  fillHistos( hrapiditydiff, top_rapiditydiff_cms ,  weight, myType, jetBin);
-	  fillHistos( hrapiditydiffMarco, top_rapiditydiff_Marco ,  weight, myType, jetBin);
-	  fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin);
-	  fillHistos( hlepCosTheta, lepMinus_costheta_cms  ,  weight, myType, jetBin);
-	  fillHistos( hlepPlusCosTheta,  lepPlus_costheta_cms, weight, myType, jetBin);
-	  fillHistos( hlepMinusCosTheta,  lepMinus_costheta_cms, weight, myType, jetBin);
-	  fillHistos( httRapidity, ttRapidity ,  weight, myType, jetBin);
-	  fillHistos( httRapidity2, ttRapidity2 ,  weight, myType, jetBin);
-	  fillHistos( hlepAngleBetweenCMS,  lep_cosalpha_cms, weight, myType, jetBin);
-	  fillHistos( hjetAngleBetweenCMS,  jet_cosalpha_cms, weight, myType, jetBin);
-	  fillHistos( hpseudorapiditydiff2,  top_pseudorapiditydiff2_cms, weight, myType, jetBin);
-	  fillHistos( hrapiditydiff2,  top_rapiditydiff2_cms, weight, myType, jetBin);
+	  fillHistos( htopSpinCorr, top_spin_correlation  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopCosTheta, top_costheta_cms   ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hpseudorapiditydiff, top_pseudorapiditydiff_cms ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hrapiditydiff, top_rapiditydiff_cms ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hrapiditydiffMarco, top_rapiditydiff_Marco ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepCosTheta, lepPlus_costheta_cms  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepCosTheta, lepMinus_costheta_cms  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepPlusCosTheta,  lepPlus_costheta_cms, weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepMinusCosTheta,  lepMinus_costheta_cms, weight, myType, jetBin, Nsolns);
+	  fillHistos( httRapidity, ttRapidity ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( httRapidity2, ttRapidity2 ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepAngleBetweenCMS,  lep_cosalpha_cms, weight, myType, jetBin, Nsolns);
+	  fillHistos( hjetAngleBetweenCMS,  jet_cosalpha_cms, weight, myType, jetBin, Nsolns);
+	  fillHistos( hpseudorapiditydiff2,  top_pseudorapiditydiff2_cms, weight, myType, jetBin, Nsolns);
+	  fillHistos( hrapiditydiff2,  top_rapiditydiff2_cms, weight, myType, jetBin, Nsolns);
 	}
-	fillHistos( htheleadinglepPt, lt_p4.Pt()  ,  weight, myType, jetBin);
-         fillHistos( hthesecondlepPt, ll_p4.Pt()  ,  weight, myType, jetBin);
-         fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin);
-         fillHistos( hlepEta, ll_p4.Eta()  ,  weight, myType, jetBin);
-	fillHistos( hMET, p_met.first  ,  weight, myType, jetBin);
-	fillHistos( htopMass, m_top ,  weight, myType, jetBin);
-	fillHistos( htopMass_nojetsmear, m_top_nojetsmear ,  weight, myType, jetBin);
-	fillHistos( hlepRapDiff,  lep_pseudorap_diff, weight, myType, jetBin);
-	fillHistos( hlepAngleBetween,  lep_cosalpha, weight, myType, jetBin);
-	fillHistos( hjetAzimAsym,  jet_azimuthal_asymmetry, weight, myType, jetBin);
-	fillHistos( hjetRapDiff,  jet_pseudorap_diff, weight, myType, jetBin);
-	fillHistos( hjetAngleBetween,  jet_cosalpha, weight, myType, jetBin);
-	fillHistos( hlepPhi,  lepPlus_phi, weight, myType, jetBin);
-	fillHistos( hlepPhi,  lepMinus_phi, weight, myType, jetBin);
-	fillHistos( hlepPlusPhi,  lepPlus_phi, weight, myType, jetBin);
-	fillHistos( hlepMinusPhi,  lepMinus_phi, weight, myType, jetBin);
-	fillHistos( hjetPhi,  jet1_phi, weight, myType, jetBin);
-	fillHistos( hjetPhi,  jet2_phi, weight, myType, jetBin);
-	fillHistos( hlepPlusEta,  lepPlus_Eta, weight, myType, jetBin);
-	fillHistos( hlepMinusEta,  lepMinus_Eta, weight, myType, jetBin);
-	fillHistos( hlepPlusPt,  lepPlus_Pt, weight, myType, jetBin);
-	fillHistos( hlepMinusPt,  lepMinus_Pt, weight, myType, jetBin);
-	fillHistos( hlepPt,  lepPlus_Pt, weight, myType, jetBin);
-	fillHistos( hlepPt,  lepMinus_Pt, weight, myType, jetBin);
+	fillHistos( htheleadinglepPt, lt_p4.Pt()  ,  weight, myType, jetBin, Nsolns);
+         fillHistos( hthesecondlepPt, ll_p4.Pt()  ,  weight, myType, jetBin, Nsolns);
+         fillHistos( hlepEta, lt_p4.Eta()  ,  weight, myType, jetBin, Nsolns);
+         fillHistos( hlepEta, ll_p4.Eta()  ,  weight, myType, jetBin, Nsolns);
+	fillHistos( hMET, p_met.first  ,  weight, myType, jetBin, Nsolns);
+	fillHistos( htopMass, m_top ,  weight, myType, jetBin, Nsolns);
+	fillHistos( htopMass_nojetsmear, m_top_nojetsmear ,  weight, myType, jetBin, Nsolns);
+	fillHistos( hlepRapDiff,  lep_pseudorap_diff, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepAngleBetween,  lep_cosalpha, weight, myType, jetBin, Nsolns);
+	fillHistos( hjetAzimAsym,  jet_azimuthal_asymmetry, weight, myType, jetBin, Nsolns);
+	fillHistos( hjetRapDiff,  jet_pseudorap_diff, weight, myType, jetBin, Nsolns);
+	fillHistos( hjetAngleBetween,  jet_cosalpha, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepPhi,  lepPlus_phi, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepPhi,  lepMinus_phi, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepPlusPhi,  lepPlus_phi, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepMinusPhi,  lepMinus_phi, weight, myType, jetBin, Nsolns);
+	fillHistos( hjetPhi,  jet1_phi, weight, myType, jetBin, Nsolns);
+	fillHistos( hjetPhi,  jet2_phi, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepPlusEta,  lepPlus_Eta, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepMinusEta,  lepMinus_Eta, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepPlusPt,  lepPlus_Pt, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepMinusPt,  lepMinus_Pt, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepPt,  lepPlus_Pt, weight, myType, jetBin, Nsolns);
+	fillHistos( hlepPt,  lepMinus_Pt, weight, myType, jetBin, Nsolns);
 	
 	
 	if(v_goodJets_cand_p4.size() > 1){
@@ -2434,62 +2471,62 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  // DYEst histos
 	  // fill the mass histograms
 	  double DYEst_mass = hyp_p4()[hypIdx].mass();
-	  fillHistos( hdilMassNoMetDYEst , DYEst_mass ,  weight, myType, jetBin);
+	  fillHistos( hdilMassNoMetDYEst , DYEst_mass ,  weight, myType, jetBin, Nsolns);
 	  if ( p_met.first >= 30.  )
-	  	fillHistos( hdilMassWithMetDYEst  , DYEst_mass ,  weight, myType, jetBin);
+	  	fillHistos( hdilMassWithMetDYEst  , DYEst_mass ,  weight, myType, jetBin, Nsolns);
 	  // fill the met histograms for "in" and "out" regions
 	  if (inZmassWindow(DYEst_mass) ) {
-	  	fillHistos( hmetInDYEst  , p_met.first ,  weight, myType, jetBin); 
+	  	fillHistos( hmetInDYEst  , p_met.first ,  weight, myType, jetBin), Nsolns; 
 	  }
 	  else {
-	  	fillHistos( hmetOutDYEst  , p_met.first ,  weight, myType, jetBin);
+	  	fillHistos( hmetOutDYEst  , p_met.first ,  weight, myType, jetBin, Nsolns);
 	  }
 	  
 	
-	  fillHistos( hmassltb,  mass_ltb ,  weight, myType, jetBin);  
-	  fillHistos( hmassllb,  mass_llb ,  weight, myType, jetBin); 
-	  if(mass_llb> 170) fillHistos( hmassltb1Dmasscut,  mass_ltb ,  weight, myType, jetBin);
-	  if(mass_ltb > 170) fillHistos( hmassllb1Dmasscut,  mass_llb ,  weight, myType, jetBin);
+	  fillHistos( hmassltb,  mass_ltb ,  weight, myType, jetBin), Nsolns;  
+	  fillHistos( hmassllb,  mass_llb ,  weight, myType, jetBin, Nsolns); 
+	  if(mass_llb> 170) fillHistos( hmassltb1Dmasscut,  mass_ltb ,  weight, myType, jetBin, Nsolns);
+	  if(mass_ltb > 170) fillHistos( hmassllb1Dmasscut,  mass_llb ,  weight, myType, jetBin, Nsolns);
 	  //randomly pick up mass_lb
 	  int evtnumber = evt_event();
 	  int evt_rad = rand()%2;
 	  //cout <<"random number " <<evt_rad <<endl;
     
 	  if(evt_rad ==1){
-	  fillHistos( hmasslb_2d,  mass_ltb , mass_llb,    weight, myType, jetBin);
+	  fillHistos( hmasslb_2d,  mass_ltb , mass_llb,    weight, myType, jetBin, Nsolns);
 	  }
 	  else {//if(evt_rad ==0){
-	   fillHistos( hmasslb_2d,  mass_llb , mass_ltb,    weight, myType, jetBin);
+	   fillHistos( hmasslb_2d,  mass_llb , mass_ltb,    weight, myType, jetBin, Nsolns);
 	  }
     
 
-	  fillHistos( htheSumJetPt,      thefirstJet_pt+thesecondJet_pt ,  weight, myType, jetBin);
-	  fillHistos( htheSumLepPt,    lt_p4.Pt()+ ll_p4.Pt()   ,  weight, myType, jetBin);
-	  fillHistos( htheSumBtagJetPt,  theSumBtagJetPt ,    weight, myType, jetBin);
-	  fillHistos( hthefirstJetPt,    thefirstJet_pt  ,    weight, myType, jetBin);
-	  fillHistos( hthesecondJetPt,   thesecondJet_pt  ,   weight, myType, jetBin);
-	  fillHistos( hjetPt,  thefirstJet_pt ,  weight, myType, jetBin);
-	  fillHistos( hjetPt,  thesecondJet_pt ,  weight, myType, jetBin);
-	  fillHistos( hjetEta, v_goodJets_cand_p4.at(i_ltbjet).Eta()  ,  weight, myType, jetBin);
-	  fillHistos( hjetEta, v_goodJets_cand_p4.at(i_llbjet).Eta()  ,  weight, myType, jetBin);
+	  fillHistos( htheSumJetPt,      thefirstJet_pt+thesecondJet_pt ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htheSumLepPt,    lt_p4.Pt()+ ll_p4.Pt()   ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htheSumBtagJetPt,  theSumBtagJetPt ,    weight, myType, jetBin, Nsolns);
+	  fillHistos( hthefirstJetPt,    thefirstJet_pt  ,    weight, myType, jetBin, Nsolns);
+	  fillHistos( hthesecondJetPt,   thesecondJet_pt  ,   weight, myType, jetBin, Nsolns);
+	  fillHistos( hjetPt,  thefirstJet_pt ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hjetPt,  thesecondJet_pt ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hjetEta, v_goodJets_cand_p4.at(i_ltbjet).Eta()  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hjetEta, v_goodJets_cand_p4.at(i_llbjet).Eta()  ,  weight, myType, jetBin, Nsolns);
 
 	  
-    fillHistos( httmasssm_2d,  tt_mass_nojetsmear , tt_mass,    weight, myType, jetBin);
-    fillHistos( htopmasssm_2d,  m_top_nojetsmear  , m_top,    weight, myType, jetBin);
+    fillHistos( httmasssm_2d,  tt_mass_nojetsmear , tt_mass,    weight, myType, jetBin, Nsolns);
+    fillHistos( htopmasssm_2d,  m_top_nojetsmear  , m_top,    weight, myType, jetBin, Nsolns);
 
-    fillHistos( htop1pTlabsm_2d,   top1_pt_lab_nojetsmear  , top1_pt_lab,     weight, myType, jetBin);
-    fillHistos( htop2pTlabsm_2d,   top2_pt_lab_nojetsmear  , top2_pt_lab,     weight, myType, jetBin);
+    fillHistos( htop1pTlabsm_2d,   top1_pt_lab_nojetsmear  , top1_pt_lab,     weight, myType, jetBin, Nsolns);
+    fillHistos( htop2pTlabsm_2d,   top2_pt_lab_nojetsmear  , top2_pt_lab,     weight, myType, jetBin, Nsolns);
 
-    fillHistos( htop1pTsm_2d,   top1_pt_nojetsmear  , top1_pt,     weight, myType, jetBin);
-    //fillHistos( htop1etasm_2d,  top1_eta_nojetsmear , top1_eta,    weight, myType, jetBin);
-    //fillHistos( htop1phism_2d,  top1_phi_nojetsmear , top1_phi,    weight, myType, jetBin);
+    fillHistos( htop1pTsm_2d,   top1_pt_nojetsmear  , top1_pt,     weight, myType, jetBin, Nsolns);
+    //fillHistos( htop1etasm_2d,  top1_eta_nojetsmear , top1_eta,    weight, myType, jetBin, Nsolns);
+    //fillHistos( htop1phism_2d,  top1_phi_nojetsmear , top1_phi,    weight, myType, jetBin, Nsolns);
 
-    fillHistos( htop2pTsm_2d,   top2_pt_nojetsmear  , top2_pt,     weight, myType, jetBin);
-    //fillHistos( htop2etasm_2d,  top2_eta_nojetsmear , top2_eta,    weight, myType, jetBin);
-    //fillHistos( htop2phism_2d,  top2_phi_nojetsmear , top2_phi,    weight, myType, jetBin);
+    fillHistos( htop2pTsm_2d,   top2_pt_nojetsmear  , top2_pt,     weight, myType, jetBin, Nsolns);
+    //fillHistos( htop2etasm_2d,  top2_eta_nojetsmear , top2_eta,    weight, myType, jetBin, Nsolns);
+    //fillHistos( htop2phism_2d,  top2_phi_nojetsmear , top2_phi,    weight, myType, jetBin, Nsolns);
 
 	  //none weighted histograms
-	  fillHistos( habcd_2d,  mass_ltb  , mass_llb,    1, myType, jetBin);
+	  fillHistos( habcd_2d,  mass_ltb  , mass_llb,    1, myType, jetBin, Nsolns);
 
 	}
 	}//!applyNoCuts
@@ -2636,76 +2673,76 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  float top_mass_nojetsmear_diff_minus = (m_top_nojetsmear - m_topminus_gen);
 
 
-	  fillHistos( httMass_pull, tt_mass_pull,  weight, myType, jetBin);
-	  fillHistos( httMass_nojetsmear_pull, tt_mass_pull_nojetsmear,  weight, myType, jetBin);
-	  fillHistos( httMass_diff, tt_mass_diff,  weight, myType, jetBin);
-	  fillHistos( httMass_nojetsmear_diff, tt_mass_diff_nojetsmear,  weight, myType, jetBin);
-	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin);
-	  fillHistos( httMass_nojetsmear_2d, tt_mass_gen ,tt_mass_nojetsmear,  weight, myType, jetBin);
-    fillHistos( httpT_2d, tt_pT_gen ,tt_pT,  weight, myType, jetBin);
-    fillHistos( httpT_nojetsmear_2d, tt_pT_gen ,tt_pT_nojetsmear,  weight, myType, jetBin);
+	  fillHistos( httMass_pull, tt_mass_pull,  weight, myType, jetBin, Nsolns);
+	  fillHistos( httMass_nojetsmear_pull, tt_mass_pull_nojetsmear,  weight, myType, jetBin, Nsolns);
+	  fillHistos( httMass_diff, tt_mass_diff,  weight, myType, jetBin, Nsolns);
+	  fillHistos( httMass_nojetsmear_diff, tt_mass_diff_nojetsmear,  weight, myType, jetBin, Nsolns);
+	  fillHistos( httMass_2d, tt_mass_gen ,tt_mass,  weight, myType, jetBin, Nsolns);
+	  fillHistos( httMass_nojetsmear_2d, tt_mass_gen ,tt_mass_nojetsmear,  weight, myType, jetBin, Nsolns);
+    fillHistos( httpT_2d, tt_pT_gen ,tt_pT,  weight, myType, jetBin, Nsolns);
+    fillHistos( httpT_nojetsmear_2d, tt_pT_gen ,tt_pT_nojetsmear,  weight, myType, jetBin, Nsolns);
 
-	  fillHistos( htopMass_diff_plus, top_mass_diff_plus,  weight, myType, jetBin);
-	  fillHistos( htopMass_diff_minus, top_mass_diff_minus,  weight, myType, jetBin);
-	  fillHistos( htopMass_nojetsmear_diff_plus, top_mass_nojetsmear_diff_plus,  weight, myType, jetBin);
-	  fillHistos( htopMass_nojetsmear_diff_minus, top_mass_nojetsmear_diff_minus,  weight, myType, jetBin);
+	  fillHistos( htopMass_diff_plus, top_mass_diff_plus,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopMass_diff_minus, top_mass_diff_minus,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopMass_nojetsmear_diff_plus, top_mass_nojetsmear_diff_plus,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopMass_nojetsmear_diff_minus, top_mass_nojetsmear_diff_minus,  weight, myType, jetBin, Nsolns);
 	  }
-	  fillHistos( htopMass_plus_gen, m_topplus_gen ,  weight, myType, jetBin);
-	  fillHistos( htopMass_minus_gen, m_topminus_gen ,  weight, myType, jetBin);
-	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin);
-    fillHistos( httpT_gen, tt_pT_gen ,  weight, myType, jetBin);
-	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin);
-	  fillHistos( hlepAzimAsym_gen, lep_azimuthal_asymmetry_gen ,  weight, myType, jetBin);
-	  fillHistos( hlepAzimAsym2_gen, acos(lep_azimuthal_asymmetry_gen) ,  weight, myType, jetBin);
+	  fillHistos( htopMass_plus_gen, m_topplus_gen ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopMass_minus_gen, m_topminus_gen ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( httMass_gen, tt_mass_gen ,  weight, myType, jetBin, Nsolns);
+    fillHistos( httpT_gen, tt_pT_gen ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepChargeAsym_gen, lep_charge_asymmetry_gen ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepAzimAsym_gen, lep_azimuthal_asymmetry_gen ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepAzimAsym2_gen, acos(lep_azimuthal_asymmetry_gen) ,  weight, myType, jetBin, Nsolns);
 	  if(m_top >0 || applyNoCuts){
-	  fillHistos( htopSpinCorr_gen, top_spin_correlation_gen  ,  weight, myType, jetBin);
-	  fillHistos( htopCosTheta_gen, top_costheta_cms_gen   ,  weight, myType, jetBin);
-	  fillHistos( hlepCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);
-	  fillHistos( hlepCosTheta_gen, lepMinus_costheta_cms_gen  ,  weight, myType, jetBin);
-	  fillHistos( hlepPlusCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin);
-	  fillHistos( hlepMinusCosTheta_gen, lepMinus_costheta_cms_gen  ,  weight, myType, jetBin);
-	  fillHistos( hpseudorapiditydiff_gen, top_pseudorapiditydiff_cms_gen ,  weight, myType, jetBin);
-	  fillHistos( hrapiditydiff_gen, top_rapiditydiff_cms_gen ,  weight, myType, jetBin);
-	  fillHistos( hrapiditydiffMarco_gen, top_rapiditydiff_Marco_gen ,  weight, myType, jetBin);
+	  fillHistos( htopSpinCorr_gen, top_spin_correlation_gen  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopCosTheta_gen, top_costheta_cms_gen   ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepCosTheta_gen, lepMinus_costheta_cms_gen  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepPlusCosTheta_gen, lepPlus_costheta_cms_gen  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepMinusCosTheta_gen, lepMinus_costheta_cms_gen  ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hpseudorapiditydiff_gen, top_pseudorapiditydiff_cms_gen ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hrapiditydiff_gen, top_rapiditydiff_cms_gen ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hrapiditydiffMarco_gen, top_rapiditydiff_Marco_gen ,  weight, myType, jetBin, Nsolns);
 	  }
 	  
 	  
 	  
-	  fillHistos( hlepChargeAsym_gen2d, lep_charge_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hlepAzimAsym_gen2d, lep_azimuthal_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hlepAzimAsym2_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( hlepChargeAsym_gen2d, lep_charge_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepAzimAsym_gen2d, lep_azimuthal_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepAzimAsym2_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
 	  if(m_top >0 || applyNoCuts){
-	  fillHistos( htopSpinCorr_gen2d, top_spin_correlation_gen  ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( htopCosTheta_gen2d, top_costheta_cms_gen   ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hlepCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hlepCosTheta_gen2d, lepMinus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hlepPlusCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hlepMinusCosTheta_gen2d, lepMinus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hpseudorapiditydiff_gen2d, top_pseudorapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hrapiditydiff_gen2d, top_rapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin);
-	  fillHistos( hrapiditydiffMarco_gen2d, top_rapiditydiff_Marco_gen ,  tt_mass_gen, weight, myType, jetBin);
+	  fillHistos( htopSpinCorr_gen2d, top_spin_correlation_gen  ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( htopCosTheta_gen2d, top_costheta_cms_gen   ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepCosTheta_gen2d, lepMinus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepPlusCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepMinusCosTheta_gen2d, lepMinus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hpseudorapiditydiff_gen2d, top_pseudorapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hrapiditydiff_gen2d, top_rapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+	  fillHistos( hrapiditydiffMarco_gen2d, top_rapiditydiff_Marco_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
 	  }
 	  
 	  
 	  if(!applyNoCuts){
-	  fillHistos( hlepChargeAsym_2d, lep_charge_asymmetry_gen ,lep_charge_asymmetry,  weight, myType, jetBin);
-	  fillHistos( hlepAzimAsym_2d, lep_azimuthal_asymmetry_gen ,lep_azimuthal_asymmetry,  weight, myType, jetBin);
-	  fillHistos( htopSpinCorr_2d, top_spin_correlation_gen, top_spin_correlation ,  weight, myType, jetBin);
-	  fillHistos( htopCosTheta_2d, top_costheta_cms_gen, top_costheta_cms   ,  weight, myType, jetBin);
-	  fillHistos( hlepCosTheta_2d, lepPlus_costheta_cms_gen  , lepPlus_costheta_cms, weight, myType, jetBin);
+	  fillHistos( hlepChargeAsym_2d, lep_charge_asymmetry_gen ,lep_charge_asymmetry,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepAzimAsym_2d, lep_azimuthal_asymmetry_gen ,lep_azimuthal_asymmetry,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopSpinCorr_2d, top_spin_correlation_gen, top_spin_correlation ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( htopCosTheta_2d, top_costheta_cms_gen, top_costheta_cms   ,  weight, myType, jetBin, Nsolns);
+	  fillHistos( hlepCosTheta_2d, lepPlus_costheta_cms_gen  , lepPlus_costheta_cms, weight, myType, jetBin, Nsolns);
 	  }
 
 	  if (from_gluon==true){
-	    fillHistos( httMassGluongenp, tt_mass_gen  ,  weight, myType, jetBin);
-	    fillHistos( httRapidityGluongenp, ttRapidity_gen  ,  weight, myType, jetBin);
+	    fillHistos( httMassGluongenp, tt_mass_gen  ,  weight, myType, jetBin, Nsolns);
+	    fillHistos( httRapidityGluongenp, ttRapidity_gen  ,  weight, myType, jetBin, Nsolns);
 	    llbbRapidityGluon_gen=  (lepPlus_gen+bPlus_gen).Rapidity()+(lepMinus_gen+bMinus_gen).Rapidity();
-	    fillHistos( hllbbRapidityGluongenp, llbbRapidityGluon_gen  ,  weight, myType, jetBin);
+	    fillHistos( hllbbRapidityGluongenp, llbbRapidityGluon_gen  ,  weight, myType, jetBin, Nsolns);
 	  }
 	  else{
-	    fillHistos( httMassQuarkgenp, tt_mass_gen  ,  weight, myType, jetBin);
-	    fillHistos( httRapidityQuarkgenp, ttRapidity_gen  ,  weight, myType, jetBin);
+	    fillHistos( httMassQuarkgenp, tt_mass_gen  ,  weight, myType, jetBin, Nsolns);
+	    fillHistos( httRapidityQuarkgenp, ttRapidity_gen  ,  weight, myType, jetBin, Nsolns);
 	    llbbRapidityQuark_gen=  (lepPlus_gen+bPlus_gen).Rapidity()+(lepMinus_gen+bMinus_gen).Rapidity();
-	    fillHistos( hllbbRapidityQuarkgenp,  llbbRapidityQuark_gen ,  weight, myType, jetBin);
+	    fillHistos( hllbbRapidityQuarkgenp,  llbbRapidityQuark_gen ,  weight, myType, jetBin, Nsolns);
 	  }
 	    
 	}//only for mc
@@ -2717,6 +2754,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  ls_ = cms2.evt_lumiBlock();
 	  evt_ = cms2.evt_event(); 
 	  weight_ = weight;
+	  Nsolns_ = Nsolns;
 	  massltb_ = mass_ltb;
 	  massllb_ = mass_llb;
 	  dr_ltjet_gen_ = dr_ltjet_gen ;
@@ -2756,6 +2794,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	
 	}
 
+} //jet smearing loop
+
       }//good hypothesis loop
       
     } // closes loop over events    
@@ -2785,6 +2825,7 @@ void topAFB_looper::InitBabyNtuple ()
   evt_ = -1;
   t_mass_ = -999;
   weight_ = 1;
+  Nsolns_ = -1;
   massltb_ = -999;
   massllb_ = -999;
   dr_ltjet_gen_ = -999.0;
@@ -2837,6 +2878,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("evt",                   &evt_,                 "evt/I"                  );
     babyTree_->Branch("t_mass",                &t_mass_,              "t_mass/F"               );
     babyTree_->Branch("weight",                &weight_,              "weight/F"               );
+    babyTree_->Branch("Nsolns",                &Nsolns_,              "Nsolns/I"               );
     babyTree_->Branch("massltb",               &massltb_,             "massltb/F"              );
     babyTree_->Branch("massllb",               &massllb_,             "massllb/F"              );
     babyTree_->Branch("dr_ltjet_gen",          &dr_ltjet_gen_,        "dr_ltjet_gen/F"         );
@@ -2845,7 +2887,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("tt_mass",               &tt_mass_,             "tt_mass/F"              );
     babyTree_->Branch("ttRapidity",            &ttRapidity_,          "ttRapidity/F"           );
     babyTree_->Branch("lep_charge_asymmetry",  &lep_charge_asymmetry_,"lep_charge_asymmetry/F" );
-    babyTree_->Branch("lep_pseudorap_diff",  & lep_pseudorap_diff_,"lep_pseudorap_diff/F" );    
+    babyTree_->Branch("lep_pseudorap_diff",    &lep_pseudorap_diff_,  "lep_pseudorap_diff/F"   );    
     babyTree_->Branch("lep_azimuthal_asymmetry",&lep_azimuthal_asymmetry_,  "lep_azimuthal_asymmetry/F"   );
     babyTree_->Branch("lep_azimuthal_asymmetry2",&lep_azimuthal_asymmetry2_,  "lep_azimuthal_asymmetry2/F"   );
     babyTree_->Branch("top_spin_correlation",  &top_spin_correlation_,"top_spin_correlation/F" );
@@ -2892,32 +2934,44 @@ void topAFB_looper::CloseBabyNtuple()
 }
 
 
-void topAFB_looper::fillUnderOverFlow(TH1F *h1, float value, float weight)
+void topAFB_looper::fillUnderOverFlow(TH1F *h1, float value, float weight, int Nsolns)
 {
   float min = h1->GetXaxis()->GetXmin();
   float max = h1->GetXaxis()->GetXmax();
 
-  if (value > max) value = h1->GetBinCenter(h1->GetNbinsX());
+  if (value >= max) value = h1->GetBinCenter(h1->GetNbinsX());
   if (value < min) value = h1->GetBinCenter(1);
 
-  h1->Fill(value, weight);
+  int bin_number = h1->FindBin(value);
+  float orig_content = h1->GetBinContent(bin_number);
+  float orig_error = h1->GetBinError(bin_number);
+
+  //h1->Fill(value, weight);
+  h1->SetBinContent( bin_number, orig_content+weight );
+  h1->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*float(Nsolns) ) );
 }
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, float weight)
+void topAFB_looper::fillUnderOverFlow(TH2F *h2, float xvalue, float yvalue, float weight, int Nsolns)
 {
   float maxx = h2->GetXaxis()->GetXmax();
   float minx = h2->GetXaxis()->GetXmin();
   float maxy = h2->GetYaxis()->GetXmax();
   float miny = h2->GetYaxis()->GetXmin();
 
-  if (xvalue > maxx) xvalue = h2->GetXaxis()->GetBinCenter(h2->GetNbinsX());
+  if (xvalue >= maxx) xvalue = h2->GetXaxis()->GetBinCenter(h2->GetNbinsX());
   if (xvalue < minx) xvalue = h2->GetXaxis()->GetBinCenter(1);
-  if (yvalue > maxy) yvalue = h2->GetYaxis()->GetBinCenter(h2->GetNbinsY());
+  if (yvalue >= maxy) yvalue = h2->GetYaxis()->GetBinCenter(h2->GetNbinsY());
   if (yvalue < miny) yvalue = h2->GetYaxis()->GetBinCenter(1);
 
-  h2->Fill(xvalue, yvalue, weight);
+  int bin_number = h2->FindBin(xvalue,yvalue);
+  float orig_content = h2->GetBinContent(bin_number);
+  float orig_error = h2->GetBinError(bin_number);
+
+  //h2->Fill(xvalue, yvalue, weight);
+  h2->SetBinContent( bin_number, orig_content+weight );
+  h2->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*float(Nsolns) ) );
 }
 
 
@@ -2945,22 +2999,22 @@ void topAFB_looper::fillOverFlow(TH2F *h2, float xvalue, float yvalue, float wei
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx)
+void topAFB_looper::fillHistos(TH1F *h1[4][4],float value, float weight, int myType, int nJetsIdx, int Nsolns)
 {
-  //fillUnderOverFlow(h1[myType][nJetsIdx], value, weight);      
-  fillUnderOverFlow(h1[myType][3],        value, weight);      
-  //fillUnderOverFlow(h1[3][nJetsIdx],      value, weight);      
-  fillUnderOverFlow(h1[3][3],             value, weight);      
+  //fillUnderOverFlow(h1[myType][nJetsIdx], value, weight, Nsolns);      
+  fillUnderOverFlow(h1[myType][3],        value, weight, Nsolns);      
+  //fillUnderOverFlow(h1[3][nJetsIdx],      value, weight, Nsolns);      
+  fillUnderOverFlow(h1[3][3],             value, weight, Nsolns);      
 }
 
 //--------------------------------------------------------------------
 
-void topAFB_looper::fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx)
+void topAFB_looper::fillHistos(TH2F *h2[4][4],float xvalue, float yvalue, float weight, int myType, int nJetsIdx, int Nsolns)
 {
-  //fillUnderOverFlow(h2[myType][nJetsIdx], xvalue, yvalue, weight);      
-  fillUnderOverFlow(h2[myType][3],        xvalue, yvalue, weight);      
-  //fillUnderOverFlow(h2[3][nJetsIdx],      xvalue, yvalue, weight);      
-  fillUnderOverFlow(h2[3][3],             xvalue, yvalue, weight);      
+  //fillUnderOverFlow(h2[myType][nJetsIdx], xvalue, yvalue, weight, Nsolns);      
+  fillUnderOverFlow(h2[myType][3],        xvalue, yvalue, weight, Nsolns);      
+  //fillUnderOverFlow(h2[3][nJetsIdx],      xvalue, yvalue, weight, Nsolns);      
+  fillUnderOverFlow(h2[3][3],             xvalue, yvalue, weight, Nsolns);      
 }
 
 //--------------------------------------------------------------------
