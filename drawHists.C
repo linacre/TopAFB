@@ -40,6 +40,7 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   hist::loadHist(FName.Data(),0,"*hnJet*");
   hist::loadHist(FName.Data(),0,"*hnVtx*");
   hist::loadHist(FName.Data(),0,"*hnBtagJet*");
+  hist::loadHist(FName.Data(),0,"*hNsolns*");
 
   //hist::loadHist(FName.Data(),0,"*hlepPt_allj*");
   hist::loadHist(FName.Data(),0,"*hlepPlusPt_allj*");
