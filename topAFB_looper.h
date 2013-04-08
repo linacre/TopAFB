@@ -157,7 +157,11 @@ class topAFB_looper
 	TH1D* hnJet[4][4];                   // Njet distributions                                                                                                          
 	TH1D* hnBtagJet[4][4];                   // NBTagjet distributions  
 	TH1D* hnVtx[4][4];
-	TH1D* hNsolns[4][4];          
+	TH1D* hNsolns[4][4];
+	TH1D* hmaxAMWTweight[4][4];
+	TH1D* haveAMWTweight[4][4];
+	TH1D* hsumAMWTweight[4][4];
+	TH1D* hAMWTweight_nojetsmear[4][4];          
 	//Top Mass Plots
 	TH1D *httRapidity[4][4];
 	TH1D *httRapidity2[4][4];     

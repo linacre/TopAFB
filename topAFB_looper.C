@@ -840,6 +840,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  vector <TLorentzVector> top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4;
 	  TLorentzVector cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
 	  int Nsolns = -999;
+	  int imaxAMWTweight = -999;
+	  float maxAMWTweight = -999;
+	  double sumAMWTweight = -999;
+	  float aveAMWTweight = -999;
       
       float ndavtxweight = vtxweight(isData,true);
 
@@ -2116,17 +2120,20 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   //now repeat using jet smearing
   m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4,AMWTweight);
   Nsolns = AMWTweight.size();
-  int imaxweight = -999;
-  float maxweight = -999;
+  imaxAMWTweight = -999;
+  maxAMWTweight = -999;
+  sumAMWTweight = 0.;
   for (int ia = 0; ia < Nsolns; ++ia)
   {
-    if(AMWTweight[ia] > maxweight) {maxweight = AMWTweight[ia]; imaxweight=ia;}
+  	sumAMWTweight += AMWTweight[ia];
+    if(AMWTweight[ia] > maxAMWTweight) {maxAMWTweight = AMWTweight[ia]; imaxAMWTweight=ia;}
   }
-  //if(Nsolns<100 && Nsolns>0) cout<<"maxweight: "<<maxweight<<" i: "<<imaxweight<<" size: "<<Nsolns<<endl;
+  //if(Nsolns<100 && Nsolns>0) cout<<"maxAMWTweight: "<<maxAMWTweight<<" i: "<<imaxAMWTweight<<" size: "<<Nsolns<<endl;
   //cout << "got to line: " << __LINE__ <<endl;
 
   if(Nsolns<1) Nsolns = 1;
   weight = weight/double(Nsolns);
+  aveAMWTweight = sumAMWTweight/double(Nsolns);
 
 
   }//!applynocuts
@@ -2415,6 +2422,10 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	fillHistos( hnBtagJet, nBtagJets,  weight, myType, jetBin, Nsolns);
 	fillHistos( hnVtx, ndavtx,  weight, myType, jetBin, Nsolns);
 	fillHistos( hNsolns, Nsolns,  weight, myType, jetBin, Nsolns);
+	fillHistos( hmaxAMWTweight, maxAMWTweight,  weight, myType, jetBin, Nsolns);
+	fillHistos( hsumAMWTweight, sumAMWTweight,  weight, myType, jetBin, Nsolns);
+	fillHistos( haveAMWTweight, aveAMWTweight,  weight, myType, jetBin, Nsolns);
+	fillHistos( hAMWTweight_nojetsmear, (m_top_nojetsmear > 0 ? AMWTweight_nojetsmear[0]:-999 ),  weight, myType, jetBin, Nsolns);
 
 	fillHistos( httMass, tt_mass ,  weight, myType, jetBin, Nsolns);
 	fillHistos( httMass_nojetsmear, tt_mass_nojetsmear ,  weight, myType, jetBin, Nsolns);

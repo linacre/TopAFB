@@ -49,6 +49,24 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hNsolns[i][j] = new TH1D(Form("%s_hNsolns_%s",prefix,suffix),Form("%s_Nsolns_%s",prefix,suffix),101,0.,101.);
       hNsolns[i][j]->GetXaxis()->SetTitle("Jet smearing solution multiplicity");
       hNsolns[i][j]->Sumw2();
+
+      hmaxAMWTweight[i][j] = new TH1D(Form("%s_hmaxAMWTweight_%s",prefix,suffix),Form("%s_maxAMWTweight_%s",prefix,suffix),101,-0.005,0.5);
+      hmaxAMWTweight[i][j]->GetXaxis()->SetTitle("Maximum AMWT weight");
+      hmaxAMWTweight[i][j]->Sumw2();
+
+      haveAMWTweight[i][j] = new TH1D(Form("%s_haveAMWTweight_%s",prefix,suffix),Form("%s_aveAMWTweight_%s",prefix,suffix),101,-0.005,0.5);
+      haveAMWTweight[i][j]->GetXaxis()->SetTitle("Average AMWT weight");
+      haveAMWTweight[i][j]->Sumw2();
+
+      hsumAMWTweight[i][j] = new TH1D(Form("%s_hsumAMWTweight_%s",prefix,suffix),Form("%s_sumAMWTweight_%s",prefix,suffix),101,-0.2,20.);
+      hsumAMWTweight[i][j]->GetXaxis()->SetTitle("Sum of AMWT weights");
+      hsumAMWTweight[i][j]->Sumw2();
+
+      hAMWTweight_nojetsmear[i][j] = new TH1D(Form("%s_hAMWTweight_nojetsmear_%s",prefix,suffix),Form("%s_AMWTweight_nojetsmear_%s",prefix,suffix),101,-0.005,0.5);
+      hAMWTweight_nojetsmear[i][j]->GetXaxis()->SetTitle("AMWT weight (no jet smearing)");
+      hAMWTweight_nojetsmear[i][j]->Sumw2();
+
+
       
       hlepChargeAsym_2d[i][j] = new TH2D(Form("%s_hlepChargeAsym2d_%s",prefix,suffix),Form("%s_lepChargeAsym2d_%s",prefix,suffix),80,-4,4, 80,-4,4);
       hlepChargeAsym_2d[i][j]->GetXaxis()->SetTitle("Charge_Asymmetry_lep_gen");
