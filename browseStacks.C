@@ -73,8 +73,6 @@ void browseStacks(vector<TString> v_samples, vector<Color_t> v_colors,
   }
   
   // Now loop over histograms, and make stacks
-  TCanvas *c = new TCanvas();  
-  if(!allhypOnly) c->Divide(2,2);  
   vector<string> v_channel;
   v_channel.push_back("ee");
   v_channel.push_back("mm");
@@ -83,6 +81,9 @@ void browseStacks(vector<TString> v_samples, vector<Color_t> v_colors,
 
   TLine *l; //for drawing the diffs
   for (int i=0; i<myNames->GetEntries(); i++) {//histos loop
+
+  	TCanvas *c = new TCanvas();
+  	if(!allhypOnly) c->Divide(2,2);  
 
     vector<TH1D*> v_diffs;
     
@@ -182,7 +183,8 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	  }
 	}
      
-	if(plot.Contains("_0j") || plot.Contains("_1j") || plot.Contains("_2j")|| plot.Contains("_allj") ) htemp->Rebin(rebin);
+	//if(plot.Contains("_0j") || plot.Contains("_1j") || plot.Contains("_2j")|| plot.Contains("_allj") ) htemp->Rebin(rebin);
+	if( htemp->GetNbinsX() % rebin == 0 && (plot.Contains("_0j") || plot.Contains("_1j") || plot.Contains("_2j")|| plot.Contains("_allj")) ) htemp->Rebin(rebin);
 	//don't add the data histogram to the stack
 	if(v_samples.at(i_prefix) == "data") {
 	  hdata = htemp;	  
