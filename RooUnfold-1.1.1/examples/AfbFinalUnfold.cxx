@@ -54,7 +54,8 @@ void AfbUnfoldExample()
   int kterm=3; 
   int nVars =9;
 
-  Float_t observable, observable_gen, weight, ttmass, ttRapidity, tmass;
+  Float_t observable, observable_gen, ttmass, ttRapidity, tmass;
+  Double_t weight;
   Int_t Nsolns;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {

@@ -492,7 +492,7 @@ void Initialize2DBinning(int iVar){
 }
 
 
-void fillUnderOverFlow(TH1D *h1, float value, float weight, int Nsolns)
+void fillUnderOverFlow(TH1D *h1, float value, double weight, int Nsolns)
 {
   double min = h1->GetXaxis()->GetXmin();
   double max = h1->GetXaxis()->GetXmax();
@@ -511,7 +511,7 @@ void fillUnderOverFlow(TH1D *h1, float value, float weight, int Nsolns)
 
 //--------------------------------------------------------------------
 
-void fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, float weight, int Nsolns)
+void fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, double weight, int Nsolns)
 {
   double maxx = h2->GetXaxis()->GetXmax();
   double minx = h2->GetXaxis()->GetXmin();
