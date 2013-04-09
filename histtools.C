@@ -423,7 +423,7 @@ namespace hist {
 #include "TH1.h"
 
   // Method by pointer
-  TH1F* eff(TH1F* h1, TH1F* h2, const char* name){
+  TH1D* eff(TH1D* h1, TH1D* h2, const char* name){
 
     // first, verify that all histograms have same binning
     // nx is the number of visible bins
@@ -435,7 +435,7 @@ namespace hist {
     }
 
     // get the new histogram
-    TH1F* temp = (TH1F*) h1->Clone(name);
+    TH1D* temp = (TH1D*) h1->Clone(name);
     temp->SetTitle(name);
     temp->Reset();
     temp->Sumw2();
@@ -449,7 +449,7 @@ namespace hist {
 
 
   // Method by name
-  TH1F* eff(const char* name1, const char* name2, const char* name){
+  TH1D* eff(const char* name1, const char* name2, const char* name){
 
     // Get a list of object and their iterator
     TList* list = gDirectory->GetList() ;
@@ -457,14 +457,14 @@ namespace hist {
 
     // Loop over objects, set the pointers
     TObject* obj;
-    TH1F* h1=0;
-    TH1F* h2=0;
+    TH1D* h1=0;
+    TH1D* h2=0;
     TString str1 = Form("%s",name1);
     TString str2 = Form("%s",name2);
     while(obj=iter->Next()) {
       TString objName = obj->GetName();
-      if (objName == str1) h1 = (TH1F*) obj;
-      if (objName == str2) h2 = (TH1F*) obj;
+      if (objName == str1) h1 = (TH1D*) obj;
+      if (objName == str2) h2 = (TH1D*) obj;
     }
 
     // quit if not found
@@ -478,7 +478,7 @@ namespace hist {
     }
 
     // Call the method by pointer
-    TH1F* temp = eff(h1, h2, name);
+    TH1D* temp = eff(h1, h2, name);
     return temp;
   }
   // Input:  4 histogram
@@ -491,7 +491,7 @@ namespace hist {
 #include "TH1.h"
 
 
-  TH1F* eff_bg(TH1F* h1, TH1F* h2, TH1F* h3, TH1F* h4, const char* name){
+  TH1D* eff_bg(TH1D* h1, TH1D* h2, TH1D* h3, TH1D* h4, const char* name){
 
     // first, verify that all histograms have same binning
     // nx is the number of visible bins
@@ -512,7 +512,7 @@ namespace hist {
     }
 
     // get the new histogram
-    TH1F* temp = (TH1F*) h1->Clone(name);
+    TH1D* temp = (TH1D*) h1->Clone(name);
     temp->SetTitle(name);
     temp->Reset();
     temp->Sumw2();
@@ -698,12 +698,12 @@ void combineHists(const std::vector<TString> v_prfxsToCombine, const TString out
 	h->Add(htemp);
       }
     } else if(obj->InheritsFrom(TH1::Class())) {
-      TH1F *h = dynamic_cast<TH1F*>(obj->Clone());
+      TH1D *h = dynamic_cast<TH1D*>(obj->Clone());
       h->SetName((outPrefix+name).Data());
       h->SetTitle((outPrefix+name).Data());
       for(unsigned int j = 1; j < v_prfxsToCombine.size(); j++) {
-	TH1F *htemp = dynamic_cast<TH1F*>(gDirectory->Get((v_prfxsToCombine.at(j) + name).Data()));
-	//cout << "TH1F: " << v_prfxsToCombine.at(j) + name << endl;
+	TH1D *htemp = dynamic_cast<TH1D*>(gDirectory->Get((v_prfxsToCombine.at(j) + name).Data()));
+	//cout << "TH1D: " << v_prfxsToCombine.at(j) + name << endl;
 	if(htemp == NULL)
 	  cout << "htemp is NULL" << endl;
 	h->Add(htemp);

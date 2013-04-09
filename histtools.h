@@ -37,10 +37,10 @@ namespace hist {
 
    void yaxis(const char* patORpfx, const char* title);
 
-   TH1F* eff(TH1F* h1, TH1F* h2, const char* name="eff");
-   TH1F* eff(const char* name1, const char* name2, const char* name="eff");
+   TH1D* eff(TH1D* h1, TH1D* h2, const char* name="eff");
+   TH1D* eff(const char* name1, const char* name2, const char* name="eff");
 
-   TH1F* eff_bg(TH1F* h1, TH1F* h2, TH1F* h3, TH1F* h4, const char* name="eff");
+   TH1D* eff_bg(TH1D* h1, TH1D* h2, TH1D* h3, TH1D* h4, const char* name="eff");
 
    void deleteHistos();
 

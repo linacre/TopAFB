@@ -37,10 +37,14 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   if(pat!="default") hist::loadHist(FName.Data(),0,pat.Data());
   else {
 
-  hist::loadHist(FName.Data(),0,"*hnJet*");
-  hist::loadHist(FName.Data(),0,"*hnVtx*");
-  hist::loadHist(FName.Data(),0,"*hnBtagJet*");
-  hist::loadHist(FName.Data(),0,"*hNsolns*");
+  hist::loadHist(FName.Data(),0,"*hnJet_allj*");
+  hist::loadHist(FName.Data(),0,"*hnVtx_allj*");
+  hist::loadHist(FName.Data(),0,"*hnBtagJet_allj*");
+  hist::loadHist(FName.Data(),0,"*hNsolns_allj*");
+  hist::loadHist(FName.Data(),0,"*hmaxAMWTweight_allj*");
+  hist::loadHist(FName.Data(),0,"*hsumAMWTweight_allj*");
+  hist::loadHist(FName.Data(),0,"*haveAMWTweight_allj*");
+  //hist::loadHist(FName.Data(),0,"*hAMWTweight_nojetsmear_allj*");
 
   //hist::loadHist(FName.Data(),0,"*hlepPt_allj*");
   hist::loadHist(FName.Data(),0,"*hlepPlusPt_allj*");

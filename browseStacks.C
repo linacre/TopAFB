@@ -32,10 +32,10 @@ using namespace std;
 //
 
 
-double GetMinimum(const vector<TH1F*> &v_hists);
-TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, bool drawLogY, TString histName);
-TPaveText *getPaveText(const vector<TH1F*> &v_hists, int i_channel, float lumi, bool drawFullErrors); //call this after makeLegend please
-TH1F* getDiffHist(TH1F* h1, TH1F* h2);
+double GetMinimum(const vector<TH1D*> &v_hists);
+TLegend* makeLegend(const vector<TH1D*> &v_hists, vector<TString> v_legEntries, bool drawLogY, TString histName);
+TPaveText *getPaveText(const vector<TH1D*> &v_hists, int i_channel, float lumi, bool drawFullErrors); //call this after makeLegend please
+TH1D* getDiffHist(TH1D* h1, TH1D* h2);
 
 
 
@@ -84,15 +84,15 @@ void browseStacks(vector<TString> v_samples, vector<Color_t> v_colors,
   TLine *l; //for drawing the diffs
   for (int i=0; i<myNames->GetEntries(); i++) {//histos loop
 
-    vector<TH1F*> v_diffs;
+    vector<TH1D*> v_diffs;
     
     int first_channel_canvas = 0;
     if(allhypOnly) first_channel_canvas = 3;
 
     for (int i_channel=first_channel_canvas; i_channel<4; i_channel++) {//loop over the channels
-      vector<TH1F*> v_hists;
-      TH1F *hdata = NULL;
-      TH1F *hwprime = NULL;
+      vector<TH1D*> v_hists;
+      TH1D *hdata = NULL;
+      TH1D *hwprime = NULL;
             
       for(unsigned int i_prefix = 0; i_prefix < v_samples.size(); i_prefix++) {
 	
@@ -101,7 +101,7 @@ void browseStacks(vector<TString> v_samples, vector<Color_t> v_colors,
 	if(!obj->InheritsFrom(TH1::Class())) 
 	  continue;
 	
-	TH1F *htemp = dynamic_cast<TH1F*>(obj);
+	TH1D *htemp = dynamic_cast<TH1D*>(obj);
 
 	htemp->SetFillColor(v_colors.at(i_prefix));
 	htemp->SetLineColor(kBlack);
@@ -221,7 +221,7 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
       
       
       //set the minimum, before we pass the vector of hists to the legend function
-      for(vector<TH1F*>::iterator it = v_hists.begin(); it != v_hists.end(); it++) 
+      for(vector<TH1D*>::iterator it = v_hists.begin(); it != v_hists.end(); it++) 
 	(*it)->SetMinimum(min);
 	
 
@@ -231,14 +231,14 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 
       } //else {
 	float max = 0;
-	for(vector<TH1F*>::iterator it = v_hists.begin(); it != v_hists.end(); it++) {
+	for(vector<TH1D*>::iterator it = v_hists.begin(); it != v_hists.end(); it++) {
 	  if((*it)->GetMaximum() > max)
 	    max = (*it)->GetMaximum();
 	}
 		
 	
 
-	for(vector<TH1F*>::iterator it = v_hists.begin(); it != v_hists.end(); it++) {
+	for(vector<TH1D*>::iterator it = v_hists.begin(); it != v_hists.end(); it++) {
 	  //if(drawLogY && i_channel != 2 )
 	  if(drawLogY)
 	    (*it)->SetMaximum(50*max);
@@ -270,12 +270,12 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	p2->cd();
 	int tempnbins = hdata->GetNbinsX();
 	TString s_hname = "diff_";
-	TH1F *h_diff = new TH1F((s_hname +  myNames->At(i)->GetName() + "_" + v_channel.at(i_channel)).Data(), "", tempnbins,
+	TH1D *h_diff = new TH1D((s_hname +  myNames->At(i)->GetName() + "_" + v_channel.at(i_channel)).Data(), "", tempnbins,
 				hdata->GetXaxis()->GetBinLowEdge(1),
 				hdata->GetXaxis()->GetBinUpEdge(tempnbins));
 	l = new TLine(hdata->GetXaxis()->GetBinLowEdge(1), 0.0, 
 		      hdata->GetXaxis()->GetBinUpEdge(tempnbins), 0.0);
-	h_diff->TH1F::Sumw2();	
+	h_diff->TH1D::Sumw2();	
 	for(int tempbin = 1; tempbin < hdata->GetNbinsX()+1; tempbin++) {
 	  double mc = (v_hists.at(v_hists.size()-2))->GetBinContent(tempbin);	  
 	  double data = hdata->GetBinContent(tempbin);
@@ -310,7 +310,7 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
       }
       
       //now we gotta draw, in reverse order
-      for(vector<TH1F*>::reverse_iterator it = v_hists.rbegin(); it != v_hists.rend(); it++) {
+      for(vector<TH1D*>::reverse_iterator it = v_hists.rbegin(); it != v_hists.rend(); it++) {
 	
 	//do not draw if the histogram is empty...1e-6 should be good enough
 	if(drawLogY && (*it)->GetMaximum() < 1e-6)
@@ -366,14 +366,14 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
       //now get the top histogram (sum of all) and draw the errors
       if(drawFullErrors) {
 
-	TH1F *h_sumBackGrounds = NULL;
-	for(vector<TH1F*>::reverse_iterator it = v_hists.rbegin(); it != v_hists.rend(); it++) {
+	TH1D *h_sumBackGrounds = NULL;
+	for(vector<TH1D*>::reverse_iterator it = v_hists.rbegin(); it != v_hists.rend(); it++) {
 	  if(TString((*it)->GetName()).Contains("data"))
 	    continue;
 	  if(TString((*it)->GetName()).Contains("ttdil"))
 	    continue;
 	  if(h_sumBackGrounds == NULL)
-	    h_sumBackGrounds = (TH1F*)((*it)->Clone());
+	    h_sumBackGrounds = (TH1D*)((*it)->Clone());
 	}
 	
 
@@ -467,7 +467,7 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 
 
 
-double GetMinimum(const vector<TH1F*> &v_hists) {
+double GetMinimum(const vector<TH1D*> &v_hists) {
 
   /*
   TH1* h = NULL; //get the first non-empty histogram 
@@ -491,7 +491,7 @@ double GetMinimum(const vector<TH1F*> &v_hists) {
   }
   
   //the histogram thats drawn last
-  TH1F *h = v_hists.at(0);
+  TH1D *h = v_hists.at(0);
   float min = 99999999;
   for(int i = 1; i < h->GetNbinsX()+1; i++) {
     
@@ -506,22 +506,22 @@ double GetMinimum(const vector<TH1F*> &v_hists) {
       
   
 
-TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, bool drawLogY, TString histName) {
+TLegend* makeLegend(const vector<TH1D*> &v_hists, vector<TString> v_legEntries, bool drawLogY, TString histName) {
 
   //Prefer to draw the Legend on the right half of the 
   //canvas, so only look at the right half
   int nbins = v_hists.at(0)->GetNbinsX();
-  TH1F *hdata = NULL;
-  TH1F *hmax = NULL;
+  TH1D *hdata = NULL;
+  TH1D *hmax = NULL;
 
-  for(vector<TH1F*>::const_reverse_iterator rit = v_hists.rbegin(); rit != v_hists.rend(); rit++) {
+  for(vector<TH1D*>::const_reverse_iterator rit = v_hists.rbegin(); rit != v_hists.rend(); rit++) {
     if(TString((*rit)->GetName()).Contains("data")) {
       hdata = *rit;
       break;
     }
   }
 
-  for(vector<TH1F*>::const_reverse_iterator rit = v_hists.rbegin(); rit != v_hists.rend(); rit++) {
+  for(vector<TH1D*>::const_reverse_iterator rit = v_hists.rbegin(); rit != v_hists.rend(); rit++) {
     if(TString((*rit)->GetName()).Contains("data")) 
       continue;
     hmax = *rit;
@@ -602,7 +602,7 @@ TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, 
 	 << " of entries in the hists vector. Returning a null TLegend. " << endl;
     return NULL;
   }
-  vector<TH1F*>::const_reverse_iterator ritH  = v_hists.rbegin();
+  vector<TH1D*>::const_reverse_iterator ritH  = v_hists.rbegin();
   vector<TString>::const_reverse_iterator ritE  = v_legEntries.rbegin();
   for(; ritH != v_hists.rend(); ritH++, ritE++) {
     if(*ritE == "Data")
@@ -623,7 +623,7 @@ TLegend* makeLegend(const vector<TH1F*> &v_hists, vector<TString> v_legEntries, 
 
 
 
-TPaveText *getPaveText(const vector<TH1F*> &v_hists, int i_channel, float lumi, bool drawFullErrors) {
+TPaveText *getPaveText(const vector<TH1D*> &v_hists, int i_channel, float lumi, bool drawFullErrors) {
 
   if(v_hists.size() == 0)
     return NULL;
@@ -676,9 +676,9 @@ TPaveText *getPaveText(const vector<TH1F*> &v_hists, int i_channel, float lumi, 
 }
 
 
-TH1F* getDiffHist(TH1F* h1, TH1F* h2){
+TH1D* getDiffHist(TH1D* h1, TH1D* h2){
   
-  TH1F* hout = (TH1F*) h1->Clone(Form("%s_clonediff",h1->GetName()));
+  TH1D* hout = (TH1D*) h1->Clone(Form("%s_clonediff",h1->GetName()));
   
   for(int ibin = 1 ; ibin <= h1->GetNbinsX() ; ibin++){
   

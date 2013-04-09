@@ -1,5 +1,5 @@
-#include "TH1F.h"
-#include "TH2F.h"
+#include "TH1D.h"
+#include "TH2D.h"
 #include "TString.h"
 #include "TCanvas.h"
 #include <iostream>
@@ -16,15 +16,15 @@
 
 using namespace std;
 
-TH1F* hnumerator;
-TH1F* hdenominator;
-TH1F* hacceptance;
-TH2F* hnumerator2d;
-TH2F* hdenominator2d;
-//TH2F* hacceptance2d;
-TH2F* hnumerator2drebinned;
-TH2F* hdenominator2drebinned;
-TH2F* hacceptance2drebinned;
+TH1D* hnumerator;
+TH1D* hdenominator;
+TH1D* hacceptance;
+TH2D* hnumerator2d;
+TH2D* hdenominator2d;
+//TH2D* hacceptance2d;
+TH2D* hnumerator2drebinned;
+TH2D* hdenominator2drebinned;
+TH2D* hacceptance2drebinned;
 
 
 void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TString FName1 = "results/hist_usePtGt2020_hypDisamb_usepfMET_usepfJets_useOS_vetoHypMassLt12_requireBTag_sortJetCandidatesbyPt_generalLeptonVeto_createBabyNtuples_applylepIDCuts_applylepIsoCuts_vetoZmass_veto2Jets_vetoMET.root", TString FName2 = "results/hist_noCuts.root"){
@@ -32,13 +32,13 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
 
   std::cout << "Opening " << FName1.Data() << "\n";
   TFile *f_1         = TFile::Open(FName1.Data());  
-  hnumerator = (TH1F*)f_1->Get(Form("ttdil_h%sGen_allj_all", histname.Data())); 
-  hnumerator2d = (TH2F*)f_1->Get(Form("ttdil_h%sGen2d_allj_all", histname.Data())); 
+  hnumerator = (TH1D*)f_1->Get(Form("ttdil_h%sGen_allj_all", histname.Data())); 
+  hnumerator2d = (TH2D*)f_1->Get(Form("ttdil_h%sGen2d_allj_all", histname.Data())); 
     
   std::cout << "Opening " << FName2.Data() << "\n";  
   TFile *f_2         = TFile::Open(FName2.Data());  
-  hdenominator = (TH1F*)f_2->Get(Form("ttdil_h%sGen_allj_all", histname.Data()));
-  hdenominator2d = (TH2F*)f_2->Get(Form("ttdil_h%sGen2d_allj_all", histname.Data())); 
+  hdenominator = (TH1D*)f_2->Get(Form("ttdil_h%sGen_allj_all", histname.Data()));
+  hdenominator2d = (TH2D*)f_2->Get(Form("ttdil_h%sGen2d_allj_all", histname.Data())); 
   
   std::cout << "Opened " << Form("ttdil_h%sGen_allj_all", histname.Data()) << " and "<< Form("ttdil_h%sGen2d_allj_all", histname.Data()) <<"\n";
   
@@ -53,10 +53,10 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   
   if(histname.Contains("lepChargeAsym") ||  histname.Contains("rapiditydiff")) {
 
-  	hnumerator = (TH1F*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins1);
-  	hdenominator = (TH1F*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins1);
+  	hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins1);
+  	hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins1);
 
-  	hnumerator2drebinned = new TH2F(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins1forMtt,3, binsMtt);
+  	hnumerator2drebinned = new TH2D(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins1forMtt,3, binsMtt);
   	TAxis *xaxis = hnumerator2d->GetXaxis();
   	TAxis *yaxis = hnumerator2d->GetYaxis();
   	for (int j=1;j<=yaxis->GetNbins();j++) {
@@ -65,7 +65,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   		}
   	}
   	
-  	hdenominator2drebinned = new TH2F(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins1forMtt,3, binsMtt);
+  	hdenominator2drebinned = new TH2D(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins1forMtt,3, binsMtt);
   	TAxis *xaxisd = hdenominator2d->GetXaxis();
   	TAxis *yaxisd = hdenominator2d->GetYaxis();
   	for (int j=1;j<=yaxisd->GetNbins();j++) {
@@ -78,10 +78,10 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   
   else  if(histname.Contains("lepAzimAsym2") ) {
 
-  	hnumerator = (TH1F*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins3);
-  	hdenominator = (TH1F*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins3);
+  	hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins3);
+  	hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins3);
 
-  	hnumerator2drebinned = new TH2F(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
+  	hnumerator2drebinned = new TH2D(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
   	TAxis *xaxis = hnumerator2d->GetXaxis();
   	TAxis *yaxis = hnumerator2d->GetYaxis();
   	for (int j=1;j<=yaxis->GetNbins();j++) {
@@ -90,7 +90,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   		}
   	}
   	
-  	hdenominator2drebinned = new TH2F(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
+  	hdenominator2drebinned = new TH2D(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
   	TAxis *xaxisd = hdenominator2d->GetXaxis();
   	TAxis *yaxisd = hdenominator2d->GetYaxis();
   	for (int j=1;j<=yaxisd->GetNbins();j++) {
@@ -103,10 +103,10 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   
   else {
   	
-  	hnumerator = (TH1F*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins2);
-  	hdenominator = (TH1F*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins2);
+  	hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins2);
+  	hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins2);
   	
-    	hnumerator2drebinned = new TH2F(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins2forMtt,3, binsMtt);
+    	hnumerator2drebinned = new TH2D(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins2forMtt,3, binsMtt);
   	TAxis *xaxis = hnumerator2d->GetXaxis();
   	TAxis *yaxis = hnumerator2d->GetYaxis();
   	for (int j=1;j<=yaxis->GetNbins();j++) {
@@ -115,7 +115,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   		}
   	}
   	
-  	hdenominator2drebinned = new TH2F(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins2forMtt,3, binsMtt);
+  	hdenominator2drebinned = new TH2D(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins2forMtt,3, binsMtt);
   	TAxis *xaxisd = hdenominator2d->GetXaxis();
   	TAxis *yaxisd = hdenominator2d->GetYaxis();
   	for (int j=1;j<=yaxisd->GetNbins();j++) {
@@ -131,17 +131,17 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   
   TFile *output = new TFile(Form("%s.root", accepthistname.Data()), "RECREATE");  
   
-  hacceptance =  (TH1F*) hnumerator->Clone(accepthistname.Data());
+  hacceptance =  (TH1D*) hnumerator->Clone(accepthistname.Data());
   hacceptance->SetTitle(accepthistname.Data());
   hacceptance->Reset();
   hacceptance->Divide(hnumerator,hdenominator,1., 1.);
   
-  //hacceptance2d =  (TH2F*) hnumerator2d->Clone( Form("%s_mtt_notrebinned", accepthistname.Data()) );
+  //hacceptance2d =  (TH2D*) hnumerator2d->Clone( Form("%s_mtt_notrebinned", accepthistname.Data()) );
   //hacceptance2d->Reset();
   //hacceptance2d->SetTitle(Form("%s_mtt_notrebinned", accepthistname.Data()));
   //hacceptance2d->Divide(hnumerator2d,hdenominator2d,1., 1.);
   
-  hacceptance2drebinned =  (TH2F*) hnumerator2drebinned->Clone( Form("%s_mtt", accepthistname.Data()) );
+  hacceptance2drebinned =  (TH2D*) hnumerator2drebinned->Clone( Form("%s_mtt", accepthistname.Data()) );
   hacceptance2drebinned->Reset();
   hacceptance2drebinned->SetTitle(Form("%s_mtt", accepthistname.Data()));
   hacceptance2drebinned->Divide(hnumerator2drebinned,hdenominator2drebinned,1., 1.);
