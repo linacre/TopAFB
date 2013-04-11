@@ -46,25 +46,25 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hnVtx[i][j]->GetXaxis()->SetTitle("Number of vertices");
       hnVtx[i][j]->Sumw2();
 
-      hNsolns[i][j] = new TH1D(Form("%s_hNsolns_%s",prefix,suffix),Form("%s_Nsolns_%s",prefix,suffix),101,0.,101.);
+      hNsolns[i][j] = new TH1D(Form("%s_hNsolns_%s",prefix,suffix),Form("%s_Nsolns_%s",prefix,suffix),120,-19,101);
       hNsolns[i][j]->GetXaxis()->SetTitle("Jet smearing solution multiplicity");
       hNsolns[i][j]->Sumw2();
 
-      hmaxAMWTweight[i][j] = new TH1D(Form("%s_hmaxAMWTweight_%s",prefix,suffix),Form("%s_maxAMWTweight_%s",prefix,suffix),101,-0.005,0.5);
+      hmaxAMWTweight[i][j] = new TH1D(Form("%s_hmaxAMWTweight_%s",prefix,suffix),Form("%s_maxAMWTweight_%s",prefix,suffix),120,-0.4,2.0);
       hmaxAMWTweight[i][j]->GetXaxis()->SetTitle("Maximum AMWT weight");
       hmaxAMWTweight[i][j]->Sumw2();
 
-      haveAMWTweight[i][j] = new TH1D(Form("%s_haveAMWTweight_%s",prefix,suffix),Form("%s_aveAMWTweight_%s",prefix,suffix),101,-0.005,0.5);
+      haveAMWTweight[i][j] = new TH1D(Form("%s_haveAMWTweight_%s",prefix,suffix),Form("%s_aveAMWTweight_%s",prefix,suffix),120,-0.4,2.0);
       haveAMWTweight[i][j]->GetXaxis()->SetTitle("Average AMWT weight");
       haveAMWTweight[i][j]->Sumw2();
 
-      hsumAMWTweight[i][j] = new TH1D(Form("%s_hsumAMWTweight_%s",prefix,suffix),Form("%s_sumAMWTweight_%s",prefix,suffix),101,-0.2,20.);
+      hsumAMWTweight[i][j] = new TH1D(Form("%s_hsumAMWTweight_%s",prefix,suffix),Form("%s_sumAMWTweight_%s",prefix,suffix),120,-20.,100.);
       hsumAMWTweight[i][j]->GetXaxis()->SetTitle("Sum of AMWT weights");
       hsumAMWTweight[i][j]->Sumw2();
 
-      hAMWTweight_nojetsmear[i][j] = new TH1D(Form("%s_hAMWTweight_nojetsmear_%s",prefix,suffix),Form("%s_AMWTweight_nojetsmear_%s",prefix,suffix),101,-0.005,0.5);
-      hAMWTweight_nojetsmear[i][j]->GetXaxis()->SetTitle("AMWT weight (no jet smearing)");
-      hAMWTweight_nojetsmear[i][j]->Sumw2();
+      hAMWTweightnojetsmear[i][j] = new TH1D(Form("%s_hAMWTweightnojetsmear_%s",prefix,suffix),Form("%s_AMWTweightnojetsmear_%s",prefix,suffix),120,-0.4,2.0);
+      hAMWTweightnojetsmear[i][j]->GetXaxis()->SetTitle("AMWT weight (no jet smearing)");
+      hAMWTweightnojetsmear[i][j]->Sumw2();
 
 
       

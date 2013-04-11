@@ -161,7 +161,7 @@ class topAFB_looper
 	TH1D* hmaxAMWTweight[4][4];
 	TH1D* haveAMWTweight[4][4];
 	TH1D* hsumAMWTweight[4][4];
-	TH1D* hAMWTweight_nojetsmear[4][4];          
+	TH1D* hAMWTweightnojetsmear[4][4];          
 	//Top Mass Plots
 	TH1D *httRapidity[4][4];
 	TH1D *httRapidity2[4][4];     

@@ -2421,11 +2421,11 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	fillHistos( hnJet, nJets,  weight, myType, jetBin, Nsolns);
 	fillHistos( hnBtagJet, nBtagJets,  weight, myType, jetBin, Nsolns);
 	fillHistos( hnVtx, ndavtx,  weight, myType, jetBin, Nsolns);
-	fillHistos( hNsolns, Nsolns,  weight, myType, jetBin, Nsolns);
-	fillHistos( hmaxAMWTweight, maxAMWTweight,  weight, myType, jetBin, Nsolns);
-	fillHistos( hsumAMWTweight, sumAMWTweight,  weight, myType, jetBin, Nsolns);
-	fillHistos( haveAMWTweight, aveAMWTweight,  weight, myType, jetBin, Nsolns);
-	fillHistos( hAMWTweight_nojetsmear, (m_top_nojetsmear > 0 ? AMWTweight_nojetsmear[0]:-999 ),  weight, myType, jetBin, Nsolns);
+	fillHistos( hNsolns, (AMWTweight.size() > 0 ? AMWTweight.size():-999 ),  weight, myType, jetBin, Nsolns);
+	fillHistos( hmaxAMWTweight, ( maxAMWTweight > 0 ? maxAMWTweight:-999 ),  weight, myType, jetBin, Nsolns);
+	fillHistos( hsumAMWTweight, ( sumAMWTweight > 0 ? sumAMWTweight:-999 ),  weight, myType, jetBin, Nsolns);
+	fillHistos( haveAMWTweight, ( aveAMWTweight > 0 ? aveAMWTweight:-999 ),  weight, myType, jetBin, Nsolns);
+	fillHistos( hAMWTweightnojetsmear, (m_top_nojetsmear > 0 ? AMWTweight_nojetsmear[0]:-999 ),  weight, myType, jetBin, Nsolns);
 
 	fillHistos( httMass, tt_mass ,  weight, myType, jetBin, Nsolns);
 	fillHistos( httMass_nojetsmear, tt_mass_nojetsmear ,  weight, myType, jetBin, Nsolns);
