@@ -173,6 +173,9 @@ class topAFB_looper
 	TH1D *httMass_diff[4][4];
 	TH1D *htopMass_diff_plus[4][4];
 	TH1D *htopMass_diff_minus[4][4];                                                                                                                                           
+	TH1D *htopPCM_diff_plus[4][4];
+	TH1D *htopPCM_diff_minus[4][4];    
+
 	TH1D *htopMass[4][4];
 	TH1D *httpT_nojetsmear[4][4]; 
 	TH1D *httMass_nojetsmear[4][4]; 
@@ -257,6 +260,19 @@ class topAFB_looper
 	TH2D *hrapiditydiff_gen2d[4][4];
 	TH2D *hrapiditydiffMarco_gen2d[4][4];	
 	
+	TH1D *hlepChargeAsymGenDiff[4][4];
+	TH1D *hlepAzimAsymGenDiff[4][4];
+	TH1D *hlepAzimAsym2GenDiff[4][4];
+	TH1D *htopSpinCorrGenDiff[4][4];
+	TH1D *htopCosThetaGenDiff[4][4];
+	TH1D *hlepCosThetaGenDiff[4][4];
+	TH1D *hlepPlusCosThetaGenDiff[4][4];
+	TH1D *hlepMinusCosThetaGenDiff[4][4];
+	TH1D *hpseudorapiditydiffGenDiff[4][4];
+	TH1D *hrapiditydiffGenDiff[4][4];
+	TH1D *hrapiditydiffMarcoGenDiff[4][4];
+
+
 	TH2D *htopCosTheta_2d[4][4];
 	TH2D *hlepCosTheta_2d[4][4];
 	TH2D *hlepChargeAsym_2d[4][4];
@@ -266,7 +282,8 @@ class topAFB_looper
 	TH2D *httMass_nojetsmear_2d[4][4];
 	TH2D *httpT_2d[4][4];
 	TH2D *httpT_nojetsmear_2d[4][4];
-
+	TH2D *htopP_2d[4][4];
+	TH2D *htopP_nojetsmear_2d[4][4];
 	
 	TH2D *hmasslb_2d[4][4];
 	TH2D *habcd_2d[4][4];
@@ -274,8 +291,8 @@ class topAFB_looper
 	TH2D *httmasssm_2d[4][4];
 	TH2D *htopmasssm_2d[4][4];
 
-	TH2D *htop1pTlabsm_2d[4][4];
-	TH2D *htop2pTlabsm_2d[4][4];
+	TH2D *htop1pCMsm_2d[4][4];
+	TH2D *htop2pCMsm_2d[4][4];
 
 	TH2D *htop1pTsm_2d[4][4];
 	TH2D *htop1etasm_2d[4][4];
