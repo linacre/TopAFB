@@ -2111,7 +2111,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	//TLorentzVector cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
 
   //first solve with no jet smearing for comparison (to check bias caused by jet smearing)
-  m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4,top2_nojetsmear_p4,AMWTweight_nojetsmear); 
+  m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4,top2_nojetsmear_p4,AMWTweight_nojetsmear,172); 
   if( m_top_nojetsmear >0 && (fabs(m_top_nojetsmear-top1_nojetsmear_p4[0].M()) > 0.5 || fabs(m_top_nojetsmear-top2_nojetsmear_p4[0].M()) > 0.5) ) cout<<"*** mass solution mismatch (no smearing) *** "<<m_top_nojetsmear<<" "<<top1_nojetsmear_p4[0].M()<<" "<<top2_nojetsmear_p4[0].M()<<endl; 
   tt_mass_nojetsmear = -999.0;
   if(m_top_nojetsmear >0) tt_mass_nojetsmear = (top1_nojetsmear_p4[0]+top2_nojetsmear_p4[0]).M();
@@ -2119,7 +2119,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   //cout<<AMWTweight_nojetsmear.size()<<endl;
 
   //now repeat using jet smearing
-  m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4,AMWTweight);
+  m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4,top2_p4,AMWTweight,172);
   
   Nsolns = AMWTweight.size();
   imaxAMWTweight = -999;
@@ -2147,8 +2147,8 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   {
 
   if(!applyNoCuts){
-
   if(useOnlyMaxWsoln) i_smear = ( imaxAMWTweight > 0 ? imaxAMWTweight : 0 );
+
   if( m_top >0 && (fabs(m_top-top1_p4[i_smear].M()) > 0.5 || fabs(m_top-top2_p4[i_smear].M()) > 0.5) ) cout<<"*** mass solution mismatch *** "<<m_top<<" "<<top1_p4[i_smear].M()<<" "<<top2_p4[i_smear].M()<<endl;
   tt_mass = -999.0;
   if(m_top >0) tt_mass = (top1_p4[i_smear]+top2_p4[i_smear]).M();
