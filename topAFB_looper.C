@@ -844,6 +844,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 	  float maxAMWTweight = -999;
 	  double sumAMWTweight = -999;
 	  float aveAMWTweight = -999;
+	  bool useOnlyMaxWsoln = false;
       
       float ndavtxweight = vtxweight(isData,true);
 
@@ -2133,6 +2134,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
   //cout << "got to line: " << __LINE__ <<endl;
 
   if(Nsolns<1) Nsolns = 1;
+  if(useOnlyMaxWsoln) Nsolns = 1;
   weight = weight/double(Nsolns);
   aveAMWTweight = sumAMWTweight/double(Nsolns);
 
@@ -2146,6 +2148,7 @@ void topAFB_looper::ScanChain(TChain* chain, vector<TString> v_Cuts, string pref
 
   if(!applyNoCuts){
 
+  if(useOnlyMaxWsoln) i_smear = ( imaxAMWTweight > 0 ? imaxAMWTweight : 0 );
   if( m_top >0 && (fabs(m_top-top1_p4[i_smear].M()) > 0.5 || fabs(m_top-top2_p4[i_smear].M()) > 0.5) ) cout<<"*** mass solution mismatch *** "<<m_top<<" "<<top1_p4[i_smear].M()<<" "<<top2_p4[i_smear].M()<<endl;
   tt_mass = -999.0;
   if(m_top >0) tt_mass = (top1_p4[i_smear]+top2_p4[i_smear]).M();
