@@ -37,7 +37,7 @@ std::string formatFloat(double x, const char* formatS) {
 
 const Double_t _ttMassCut=450.0;
 const Double_t _topScalingFactor=8988.5/8255.4;
-
+//const Double_t _topScalingFactor=9097.0/9344.0;
 
 int lineWidth=3;
 
@@ -183,10 +183,10 @@ cout.precision(2);
   //   Top Polarization
     case 3:
       {
-	//observablename="lep_costheta_cms";
-	observablename="lepMinus_costheta_cms";
-	//xaxislabel="cos(#theta_{l}^{+})";
-	xaxislabel="cos(#theta_{l}^{-})";
+	observablename="lep_costheta_cms";
+	//observablename="lepMinus_costheta_cms";
+	xaxislabel="cos(#theta_{l}^{+})";
+	//xaxislabel="cos(#theta_{l}^{-})";
       xbins[0]=-1.0; xbins[1]=-0.6; xbins[2]=-0.3; xbins[3]=0.0; xbins[4]=0.3; xbins[5]=0.6; xbins[6]=1.0;
       //xbins[0]=-1.0; xbins[1]=-0.95; xbins[2]=-0.90; xbins[3]=-0.85; xbins[4]=-0.80; xbins[5]=-0.75; xbins[6]=-0.70 ; xbins[7]=-0.65; xbins[8]=-0.60; xbins[9]=-0.55; xbins[10]=-0.50; xbins[11]=-0.45; xbins[12]=-0.40 ; xbins[13]=-0.35 ; xbins[14]=-0.30 ;xbins[15]=-0.25; xbins[16]=-0.20; xbins[17]=-0.15; xbins[18]=-0.10; xbins[19]=-0.05; xbins[20]=0.00; xbins[21]=0.05 ; xbins[22]=0.10; xbins[23]=0.15; xbins[24]=0.20; xbins[25]=0.25; xbins[26]=0.30; xbins[27]=0.35 ; xbins[28]=0.40 ; xbins[29]=0.45;  xbins[30]=0.50; xbins[31]=0.55 ; xbins[32]=0.60; xbins[33]=0.65; xbins[34]=0.70; xbins[35]=0.75; xbins[36]=0.80 ; xbins[37]=0.85; xbins[38]=0.90 ; xbins[39]=0.95; xbins[40]=1.00 ;
       xmin=-1.0;
@@ -271,21 +271,21 @@ cout.precision(2);
     baseline = "1";
 
   TChain *ch_data = new TChain("tree");
-  ch_data->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/data.root");
+  ch_data->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/data.root");
   ch_data->Draw(Form("%s >> %s", var, "Data"),     baseline*"weight");
 
   TChain *ch_top = new TChain("tree");
-  ch_top->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/ttdil.root");
+  ch_top->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/ttdil.root");
   ch_top->Draw(Form("%s >> %s", var, "Top"), baseline*"weight");
 
   TChain *ch_bkg = new TChain("tree");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/ttotr.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/wjets.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/DYee.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/DYmm.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/DYtautau.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/tw.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/VV.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/ttotr.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/wjets.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/DYee.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/DYmm.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/DYtautau.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/tw.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/VV.root");
   ch_bkg->Draw(Form("%s >> %s", var, "Background"),       baseline*"weight");
   
   hTop->Scale(_topScalingFactor);
