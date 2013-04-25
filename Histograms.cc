@@ -34,7 +34,7 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       char suffix[7];
       sprintf(suffix, "%s_%s", njetCh[j], suffixall[i]);
 
-      hnJet[i][j] = new TH1D(Form("%s_hnJet_%s",prefix,suffix),Form("%s_nJet_%s",prefix,suffix),10,0,10);	
+      hnJet[i][j] = new TH1D(Form("%s_hnJet_%s",prefix,suffix),Form("%s_nJet_%s",prefix,suffix),9,0,9);	
       hnJet[i][j]->GetXaxis()->SetTitle("Number of jets");
       hnJet[i][j]->Sumw2();
 
@@ -42,7 +42,7 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hnBtagJet[i][j]->GetXaxis()->SetTitle("Number of b tagged jets");
       hnBtagJet[i][j]->Sumw2();
 
-      hnVtx[i][j] = new TH1D(Form("%s_hnVtx_%s",prefix,suffix),Form("%s_nVtx_%s",prefix,suffix),18,0.,18.);	
+      hnVtx[i][j] = new TH1D(Form("%s_hnVtx_%s",prefix,suffix),Form("%s_nVtx_%s",prefix,suffix),21,0.,21.);	
       hnVtx[i][j]->GetXaxis()->SetTitle("Number of vertices");
       hnVtx[i][j]->Sumw2();
 
@@ -557,7 +557,7 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hjetEta[i][j]->Sumw2();
       
      
-      hMET[i][j] = new TH1D(Form("%s_hMET_%s",prefix,suffix),Form("%s_MET_%s",prefix,suffix),60,0.,360.);
+      hMET[i][j] = new TH1D(Form("%s_hMET_%s",prefix,suffix),Form("%s_MET_%s",prefix,suffix),100,0.,400.);
       hMET[i][j]->GetXaxis()->SetTitle("E_{T}^{miss} (GeV)");
       hMET[i][j]->Sumw2();
 
