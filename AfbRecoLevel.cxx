@@ -36,8 +36,8 @@ std::string formatFloat(double x, const char* formatS) {
 //==============================================================================
 
 const Double_t _ttMassCut=450.0;
-const Double_t _topScalingFactor=8988.5/8255.4;
-//const Double_t _topScalingFactor=9097.0/9344.0;
+//const Double_t _topScalingFactor=8988.5/8255.4;
+const Double_t _topScalingFactor=9097.0/9344.0;
 
 int lineWidth=3;
 
@@ -271,21 +271,21 @@ cout.precision(2);
     baseline = "1";
 
   TChain *ch_data = new TChain("tree");
-  ch_data->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/data.root");
+  ch_data->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/data.root");
   ch_data->Draw(Form("%s >> %s", var, "Data"),     baseline*"weight");
 
   TChain *ch_top = new TChain("tree");
-  ch_top->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/ttdil.root");
+  ch_top->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/ttdil.root");
   ch_top->Draw(Form("%s >> %s", var, "Top"), baseline*"weight");
 
   TChain *ch_bkg = new TChain("tree");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/ttotr.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/wjets.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/DYee.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/DYmm.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/DYtautau.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/tw.root");
-  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default/VV.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/ttotr.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/wjets.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/DYee.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/DYmm.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/DYtautau.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/tw.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples_paper/default/VV.root");
   ch_bkg->Draw(Form("%s >> %s", var, "Background"),       baseline*"weight");
   
   hTop->Scale(_topScalingFactor);
