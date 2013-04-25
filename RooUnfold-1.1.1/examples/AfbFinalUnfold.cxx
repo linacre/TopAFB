@@ -18,9 +18,12 @@
 #include "TPaveText.h"
 #include "TLatex.h"
 
+#include "TUnfold.h"
+
 #include "src/RooUnfoldResponse.h"
 #include "src/RooUnfoldBayes.h"
 #include "src/RooUnfoldSvd.h"
+#include "src/RooUnfoldTUnfold.h"
 
 #include "tdrstyle.C"
 
@@ -31,6 +34,15 @@ using std::endl;
 //==============================================================================
 // Global definitions
 //==============================================================================
+
+ // 0=SVD, 1=TUnfold via RooUnfold, 2=TUnfold
+  int unfoldingType=0;
+
+  TString Region="";
+  Int_t kterm=3; 
+  Double_t tau=1E-4;
+  Int_t nVars =9;
+  Int_t includeSys = 1;
 
 
 void AfbUnfoldExample()
@@ -48,11 +60,6 @@ void AfbUnfoldExample()
 
   TRandom3* random = new TRandom3();                                                                                                        
   random->SetSeed(5);
-
-  TString Region="";
- 
-  int kterm=3; 
-  int nVars =9;
 
   Float_t observable, observable_gen, ttmass, ttRapidity, tmass;
   Double_t weight;
@@ -76,6 +83,9 @@ void AfbUnfoldExample()
 
   TH1D* hTrue= new TH1D ("true", "Truth",    nbins1D, xbins1D);
   TH1D* hMeas= new TH1D ("meas", "Measured", nbins1D, xbins1D);
+
+  TH2D* hTrue_vs_Meas= new TH2D ("true_vs_meas", "True vs Measured", nbins1D, xbins1D, nbins1D, xbins1D);
+
   TH1D* hData_bkgSub;
 
   hData->Sumw2();
@@ -179,21 +189,66 @@ void AfbUnfoldExample()
     }
   }
 
- 
+  hTrue_vs_Meas = (TH2D*) response.Hresponse()->Clone(); 
+
   hData_bkgSub= (TH1D*) hData->Clone();
   hData_bkgSub->Add(hBkg,-1.0);
  
-  RooUnfoldSvd unfold (&response, hData_bkgSub, kterm); 
-  unfold.Setup(&response,hData_bkgSub);                                                                                                         
-  hData_unfolded = (TH1D*) unfold.Hreco();  
-  m_unfoldE = unfold.Ereco(); 
+  if (unfoldingType==0)
+    {
+      RooUnfoldSvd unfold_svd (&response, hData_bkgSub, kterm); 
+      unfold_svd.Setup(&response, hData_bkgSub);
+      //      unfold_svd.IncludeSystematics(includeSys);
+      hData_unfolded = (TH1D*) unfold_svd.Hreco();  
+      m_unfoldE = unfold_svd.Ereco(); 
+    }
+  else 
+    if (unfoldingType==1)
+      {
+	RooUnfoldTUnfold unfold_rooTUnfold (&response, hData_bkgSub, TUnfold::kRegModeCurvature); 
+	unfold_rooTUnfold.Setup(&response, hData_bkgSub);
+	unfold_rooTUnfold.FixTau(tau);
+	//	unfold_rooTUnfold.IncludeSystematics(includeSys);
+	hData_unfolded = (TH1D*) unfold_rooTUnfold.Hreco();  
+	m_unfoldE = unfold_rooTUnfold.Ereco(); 
+      }
+  else
+    if (unfoldingType==2)
+      {
+	TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);  
+	unfold_TUnfold.SetInput(hTop);
+	//Double_t biasScale=1.0;
+	unfold_TUnfold.SetBias(hTop_gen);
+	unfold_TUnfold.DoUnfold(tau);
+	unfold_TUnfold.GetOutput(hData_unfolded);  
 
-  TCanvas* c_d = new TCanvas("c_d","c_d",500,500); 
-  TH1D* dvec=unfold.Impl()->GetD();
-  dvec->Draw();
-  c_d->SetLogy();
-  c_d->SaveAs("D_"+observablename+Region+".pdf");
+	
+	TH2D* ematrix=unfold_TUnfold.GetEmatrix("ematrix","error matrix",0,0);
+	for (Int_t cmi= 0; cmi<nbins1D; cmi++) {
+	  for (Int_t cmj= 0; cmj<nbins1D; cmj++) {
+	    m_unfoldE(cmi,cmj)= ematrix->GetBinContent(cmi+1,cmj+1);
+	  }
+	}    
+      }
+    else cout<<"Unfolding TYPE not Specified"<<"\n";
 
+
+  if (unfoldingType==0){
+    TCanvas* c_d = new TCanvas("c_d","c_d",500,500); 
+    TH1D* dvec=unfold_svd.Impl()->GetD();
+    dvec->Draw();
+    c_d->SetLogy();
+    c_d->SaveAs("D_"+observablename+Region+".pdf");
+  }
+
+  TCanvas* c_resp = new TCanvas("c_resp","c_resp");
+  TH2D* hResp=(TH2D*) response.Hresponse();
+  gStyle->SetPalette(1);
+  hResp->GetXaxis()->SetTitle(xaxislabel+"_{gen}");
+  hResp->GetYaxis()->SetTitle(xaxislabel);
+  hResp->Draw("COLZ");
+  c_resp->SaveAs("Response_"+observablename+Region+".pdf");
+    
   TFile *file = new TFile("../acceptance/mcnlo/accept_"+acceptanceName+".root");
   TH1D *acceptM = (TH1D*) file->Get("accept_"+acceptanceName);
   acceptM->Scale(1.0/acceptM->Integral());
