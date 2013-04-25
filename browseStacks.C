@@ -281,11 +281,13 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	for(int tempbin = 1; tempbin < hdata->GetNbinsX()+1; tempbin++) {
 	  double mc = (v_hists.at(v_hists.size()-2))->GetBinContent(tempbin);	  
 	  double data = hdata->GetBinContent(tempbin);
-	  float diff = mc - data;
-	  float err2 = data*data/pow(mc, 3) + data/pow(mc,2);
+	  double mcerr = (v_hists.at(v_hists.size()-2))->GetBinError(tempbin);
+	  double dataerr = hdata->GetBinError(tempbin);
+	  float diff = data - mc;
+	  float err2 = pow(mcerr*data/mc/mc,2) + pow(dataerr/mc,2);
 	  if(mc < 1e-6) 
 	    continue;
-	  h_diff->SetBinContent(tempbin, (mc-data)/mc);
+	  h_diff->SetBinContent(tempbin, (data-mc)/mc);
 	  h_diff->SetBinError(tempbin, sqrt(err2));		    
 	  h_diff->GetXaxis()->SetBinLabel(tempbin, hdata->GetXaxis()->GetBinLabel(tempbin));
 	}
@@ -294,7 +296,7 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	h_diff->GetXaxis()->SetTitle("");
 	h_diff->GetXaxis()->SetLabelSize(0.);
 		
-	h_diff->GetYaxis()->SetTitle("(MC - Data)/MC");
+	h_diff->GetYaxis()->SetTitle("(Data - MC)/MC");
 	h_diff->GetYaxis()->SetTitleFont(hdata->GetYaxis()->GetTitleFont());
 	h_diff->GetYaxis()->SetTitleOffset(0.5);
 	h_diff->GetYaxis()->SetTitleSize(0.1);
@@ -304,6 +306,10 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	h_diff->SetMarkerSize(0.8);
 		  
 	h_diff->Draw("Pe");
+
+	h_diff->SetMinimum(-0.5);
+	h_diff->SetMaximum(0.5);
+
 	h_diff->Draw("Pesames");
 	l->Draw();
 	c->Modified();
