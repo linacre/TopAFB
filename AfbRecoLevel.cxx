@@ -18,14 +18,26 @@ using std::endl;
 #include "TColor.h"
 #include "THStack.h"
 #include "TCut.h"
+#include "TText.h"
+#include "TPaveText.h"
+#include "tdrStyle.C"
 
+std::string formatFloat(double x, const char* formatS) {
+  std::string xS = Form(Form("%s", formatS),x);
+  double xB = atof(xS.c_str());
+  if (x>0 && xB==0){
+    xS = Form(" %6.1g",x);
+  }
+  return xS;
+}
 
 //==============================================================================
 // Global definitions
 //==============================================================================
 
 const Double_t _ttMassCut=450.0;
-const Double_t _topScalingFactor=8977.0/8191.0;
+const Double_t _topScalingFactor=8988.5/8255.4;
+
 
 int lineWidth=3;
 
@@ -101,12 +113,23 @@ void GetCorrectedAfb(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float
 
 void AfbRecoLevel(TString Region="")
 {
-
+  //setTDRStyle();
 gStyle->SetOptFit();
 gStyle->SetOptStat(0);
 gStyle->SetOptTitle(0);
 cout.precision(2);
-
+//gStyle->SetLabelSize(0.04,"xyz");
+// gStyle->SetTitleSize(0.045,"xyz");
+ gStyle->SetTitleColor(1, "XYZ");
+ gStyle->SetTitleFont(42, "XYZ");
+ gStyle->SetTitleSize(0.06, "X");
+ gStyle->SetTitleSize(0.06, "Y");
+  // tdrStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
+  // tdrStyle->SetTitleYSize(Float_t size = 0.02);
+  gStyle->SetTitleXOffset(0.9);
+  
+  gStyle->SetTitleOffset( 0.1,"Y");
+  
   TString observablename;
   TString xaxislabel;
 
@@ -114,9 +137,10 @@ cout.precision(2);
   float xmax= 1.0;
 
   const int nbins=6;
+  //const int nbins=40;
   double xbins[nbins+1];
 
-  int nVars =7;
+  int nVars =9;
 
   Float_t observable, observable_gen, weight, ttmass, ttRapidity, tmass;
 
@@ -150,6 +174,7 @@ cout.precision(2);
       observablename="top_costheta_cms";
       xaxislabel="cos(#theta_{top})";
       xbins[0]=-1.0; xbins[1]=-0.6; xbins[2]=-0.3; xbins[3]=0.0; xbins[4]=0.3; xbins[5]=0.6; xbins[6]=1.0;
+     
       xmin=-1.0;
       xmax= 1.0;
       break;
@@ -158,9 +183,12 @@ cout.precision(2);
   //   Top Polarization
     case 3:
       {
-      observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta_{l,n})";
+	//observablename="lep_costheta_cms";
+	observablename="lepMinus_costheta_cms";
+	//xaxislabel="cos(#theta_{l}^{+})";
+	xaxislabel="cos(#theta_{l}^{-})";
       xbins[0]=-1.0; xbins[1]=-0.6; xbins[2]=-0.3; xbins[3]=0.0; xbins[4]=0.3; xbins[5]=0.6; xbins[6]=1.0;
+      //xbins[0]=-1.0; xbins[1]=-0.95; xbins[2]=-0.90; xbins[3]=-0.85; xbins[4]=-0.80; xbins[5]=-0.75; xbins[6]=-0.70 ; xbins[7]=-0.65; xbins[8]=-0.60; xbins[9]=-0.55; xbins[10]=-0.50; xbins[11]=-0.45; xbins[12]=-0.40 ; xbins[13]=-0.35 ; xbins[14]=-0.30 ;xbins[15]=-0.25; xbins[16]=-0.20; xbins[17]=-0.15; xbins[18]=-0.10; xbins[19]=-0.05; xbins[20]=0.00; xbins[21]=0.05 ; xbins[22]=0.10; xbins[23]=0.15; xbins[24]=0.20; xbins[25]=0.25; xbins[26]=0.30; xbins[27]=0.35 ; xbins[28]=0.40 ; xbins[29]=0.45;  xbins[30]=0.50; xbins[31]=0.55 ; xbins[32]=0.60; xbins[33]=0.65; xbins[34]=0.70; xbins[35]=0.75; xbins[36]=0.80 ; xbins[37]=0.85; xbins[38]=0.90 ; xbins[39]=0.95; xbins[40]=1.00 ;
       xmin=-1.0;
       xmax= 1.0;
       break;
@@ -195,6 +223,24 @@ cout.precision(2);
       xmax= 6.0;
       break;
       }
+    case 7:
+      {
+	observablename="top_rapidtiydiff_Marco";
+	xaxislabel="|y_{top}|-|y_{tbar}|";
+	xbins[0]=-6.0; xbins[1]=-2.0; xbins[2]=-1.0; xbins[3]=0.0; xbins[4]=1.0; xbins[5]=2.0; xbins[6]=6.0;
+	xmin=-6.0;
+	xmax= 6.0;
+	break;
+      }
+    case 8:
+      {
+      observablename="lep_azimuthal_asymmetry2";
+      xaxislabel="#Delta#phi_{l+l-}";
+      xbins[0]=0.0; xbins[1]=0.52; xbins[2]=1.04; xbins[3]=1.56; xbins[4]=2.08; xbins[5]=2.6; xbins[6]=3.14;
+      xmin=0.0;
+      xmax=3.14;
+      break;
+      }
     default:
       {
       cout<<"Set the variable switch";
@@ -215,6 +261,8 @@ cout.precision(2);
 
   const char* var=observablename;
   TCut baseline = "1";
+  if  (Region=="Signal2")  
+    baseline = "t_mass > 0 && tt_mass >450 && ((ttRapidity > 2.0)||(ttRapidity < -2.0))";
   if  (Region=="Signal")  
     baseline = "t_mass > 0 && tt_mass >450";
   if ( (Region=="") && (iVar>=2) ) 
@@ -223,21 +271,21 @@ cout.precision(2);
     baseline = "1";
 
   TChain *ch_data = new TChain("tree");
-  ch_data->Add("../data.root");
+  ch_data->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/data.root");
   ch_data->Draw(Form("%s >> %s", var, "Data"),     baseline*"weight");
 
   TChain *ch_top = new TChain("tree");
-  ch_top->Add("../ttdil_powheg.root");
+  ch_top->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/ttdil.root");
   ch_top->Draw(Form("%s >> %s", var, "Top"), baseline*"weight");
 
   TChain *ch_bkg = new TChain("tree");
-  ch_bkg->Add("../ttotr.root");
-  ch_bkg->Add("../wjets.root");
-  ch_bkg->Add("../DYee.root");
-  ch_bkg->Add("../DYmm.root");
-  ch_bkg->Add("../DYtautau.root");
-  ch_bkg->Add("../tw.root");
-  ch_bkg->Add("../VV.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/ttotr.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/wjets.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/DYee.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/DYmm.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/DYtautau.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/tw.root");
+  ch_bkg->Add("/nfs-6/userdata/yanjuntu/babyntuples/default_scan165to181_1GeV/VV.root");
   ch_bkg->Draw(Form("%s >> %s", var, "Background"),       baseline*"weight");
   
   hTop->Scale(_topScalingFactor);
@@ -248,11 +296,12 @@ cout.precision(2);
   // ============== Print the assymetry =============================
   cout<<"========= Variable:"<<observablename <<" ===================\n";
   Float_t Afb, AfbErr;
+  const char* formatS = "%6.3f";
 
   GetAfb(hData, Afb, AfbErr);
-  cout<<" Data: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  cout<<" Data: "<< formatFloat(Afb,formatS) <<" +/-  "<< formatFloat(AfbErr,formatS)<<"\n";
   GetAfb(hTop_bkgAdd, Afb, AfbErr);
-  cout<<" True Top: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  cout<<" True Top: "<<formatFloat(Afb,formatS) <<" +/-  "<< formatFloat(AfbErr,formatS)<<"\n";
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
 
@@ -266,6 +315,19 @@ cout.precision(2);
   hBkg->SetLineColor(kYellow);
   hBkg->SetFillColor(kYellow);
   
+  for (Int_t i= 1; i<=nbins; i++) {
+     hData->SetBinContent(i, hData->GetBinContent(i)/hData->GetBinWidth(i) );
+     hData->SetBinError(i, hData->GetBinError(i)/hData->GetBinWidth(i) );
+     hTop->SetBinContent(i, hTop->GetBinContent(i)/hTop->GetBinWidth(i) );
+     hTop->SetBinError(i, hTop->GetBinError(i)/hTop->GetBinWidth(i) );
+     hBkg->SetBinContent(i, hBkg->GetBinContent(i)/hBkg->GetBinWidth(i) );
+     hBkg->SetBinError(i, hBkg->GetBinError(i)/hBkg->GetBinWidth(i) );
+  }
+  
+  // TH1D* hTotal_MC=(TH1D*)hTop->Clone();
+//   hTotal_MC->Add(hBkg);
+//   double KS3 = hTotal_MC->KolmogorovTest(hData,"UO");
+//   std::cout <<"K-S powheg "<<KS3<< std::endl;
 
   THStack *hs = new THStack("hs","Stacked Top+BG");
 
@@ -276,20 +338,49 @@ cout.precision(2);
   hs->SetMaximum( 2.0* hs->GetMaximum());
   hs->Draw("hist");
   hs->GetXaxis()->SetTitle(xaxislabel);
-  hs->GetYaxis()->SetTitleOffset(1.3);
-  hs->GetYaxis()->SetTitle("Events");
+  hs->GetYaxis()->SetTitleOffset(1.4);
+  hs->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
 
   hData->Draw("E same");
 
   TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");
+  leg1->SetFillStyle(0);
   leg1->SetEntrySeparation(100);  
   leg1->SetBorderSize(0);                                                                                 
   leg1->SetTextSize(0.03);
   leg1->AddEntry(hData, "Data");
-  leg1->AddEntry(hTop,  "t-tbar");                                                               
+  leg1->AddEntry(hTop,  "t#bar{t} (dileptonic)");                                                               
   leg1->AddEntry(hBkg,  "Background");                                                               
   leg1->Draw();                
-  c_test->SaveAs("finalplot_"+observablename+Region+".png");
+
+  TPaveText *pt1 = new TPaveText(0.19, 0.82, 0.42, 0.86, "brNDC");
+  pt1->SetName("pt1name");
+  pt1->SetBorderSize(0);
+  pt1->SetFillStyle(0);
+
+  TText *blah;
+  blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at #sqrt{s}=7 TeV");
+  blah->SetTextSize(0.035);
+  blah->SetTextAlign(11);
+
+  TPaveText *pt2 = new TPaveText(0.20, 0.70, 0.40, 0.75, "brNDC");
+  pt2->SetName("pt2name");
+  pt2->SetBorderSize(0);
+  pt2->SetFillStyle(0);
+  
+ //  TText *blah2;
+
+//   TString KS3_temp = formatFloat(KS3,"%6.2f");
+//   KS3_temp.ReplaceAll(" " , "" );
+//   KS3_temp = TString("   K-S: ") +  KS3_temp;
+//   blah2 = pt2->AddText(KS3_temp.Data());
+//   blah2->SetTextSize(0.032);
+//   blah2->SetTextAlign(11);
+//   blah2->SetTextColor(kGreen+3);
+
+  pt1->Draw();
+  // pt2->Draw();
+  c_test->SaveAs("finalplot_"+observablename+Region+".pdf");
 
   delete hData;
   delete hBkg;
