@@ -196,13 +196,19 @@ void AfbUnfoldExample()
     ch_top->GetEntry(i);
     /* //for some reason it runs extremely slowly with this uncommented
     if ( (Region=="Signal") && (ttmass>450) ) {
-      response.Fill (observable, observable_gen, weight);
+      //response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hTop, observable, weight, Nsolns);
       fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hMeas, observable, weight, Nsolns);
+      fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
       if( combineLepMinus ) {
-	      response.Fill (observableMinus, observableMinus_gen, weight);
+	      //response.Fill (observableMinus, observableMinus_gen, weight);
 	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
 	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
 	  }
     }
     */ 
