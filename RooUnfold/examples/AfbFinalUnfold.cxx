@@ -97,6 +97,7 @@ void AfbUnfoldExample()
   hData_unfolded->Sumw2();
   hTrue->Sumw2();
   hMeas->Sumw2();
+  hTrue_vs_Meas->Sumw2();
   hData_unfolded_arccos->Sumw2();
   hTop_gen_arccos->Sumw2();
   
@@ -104,8 +105,6 @@ void AfbUnfoldExample()
   TMatrixD m_unfoldE (nbins1D,nbins1D);
   TMatrixD m_correctE(nbins1D,nbins1D);
 
-  RooUnfoldResponse response (hMeas, hTrue);
-  
 
   //  Now test with data and with BKG subtraction
 
@@ -208,23 +207,35 @@ void AfbUnfoldExample()
     }
     */ 
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
-      response.Fill (observable, observable_gen, weight);
+      //response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hTop, observable, weight, Nsolns);
       fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hMeas, observable, weight, Nsolns);
+      fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
       if( combineLepMinus ) {
-	      response.Fill (observableMinus, observableMinus_gen, weight);
+	      //response.Fill (observableMinus, observableMinus_gen, weight);
 	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
 	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
 	  }
     }
     if ( (Region=="") && (iVar<2) ) {
-      response.Fill (observable, observable_gen, weight);
+      //response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hTop, observable, weight, Nsolns);
       fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hMeas, observable, weight, Nsolns);
+      fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
       if( combineLepMinus ) {
-	      response.Fill (observableMinus, observableMinus_gen, weight);
+	      //response.Fill (observableMinus, observableMinus_gen, weight);
 	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
 	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
 	  }
     }
 
@@ -232,7 +243,8 @@ void AfbUnfoldExample()
 
   }
 
-  hTrue_vs_Meas = (TH2D*) response.Hresponse()->Clone(); 
+  RooUnfoldResponse response (hMeas, hTrue, hTrue_vs_Meas);
+  //hTrue_vs_Meas = (TH2D*) response.Hresponse()->Clone(); 
 
   hData_bkgSub= (TH1D*) hData->Clone();
   hData_bkgSub->Add(hBkg,-1.0);
