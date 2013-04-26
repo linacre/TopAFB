@@ -41,7 +41,7 @@ using std::endl;
   TString Region="";
   Int_t kterm=3; 
   Double_t tau=1E-4;
-  Int_t nVars =9;
+  Int_t nVars =10;
   Int_t includeSys = 1;
 
 
@@ -62,12 +62,14 @@ void AfbUnfoldExample()
   random->SetSeed(5);
 
   Float_t observable, observable_gen, ttmass, ttRapidity, tmass;
+  Float_t observableMinus, observableMinus_gen; 
   Double_t weight;
   Int_t Nsolns;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
 
     Initialize1DBinning(iVar);
+  bool combineLepMinus = iVar == 9 ? true : false;
 
   TH1D* hData= new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1D, xbins1D);
   TH1D* hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
@@ -127,6 +129,7 @@ void AfbUnfoldExample()
   ch_bkg->Add(path+"VV.root");
 
   ch_data->SetBranchAddress(observablename,    &observable);
+  if( combineLepMinus ) ch_data->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
   ch_data->SetBranchAddress("weight",&weight);
   ch_data->SetBranchAddress("Nsolns",&Nsolns);
   ch_data->SetBranchAddress("tt_mass",&ttmass);
@@ -138,14 +141,23 @@ void AfbUnfoldExample()
     ch_data->GetEntry(i);
     if ( (Region=="Signal") && (ttmass>450) )  
       fillUnderOverFlow(hData, observable, weight, Nsolns);
-      //hData->Fill(observable,weight);
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
       fillUnderOverFlow(hData, observable, weight, Nsolns);    
     if ( (Region=="") && (iVar<2) ) 
-      fillUnderOverFlow(hData, observable, weight, Nsolns);   
+      fillUnderOverFlow(hData, observable, weight, Nsolns);  
+
+    if (combineLepMinus) {
+	    if ( (Region=="Signal") && (ttmass>450) )  
+	      fillUnderOverFlow(hData, observableMinus, weight, Nsolns);
+	    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+	      fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
+	    if ( (Region=="") && (iVar<2) ) 
+	      fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
+	} 
   }
 
   ch_bkg->SetBranchAddress(observablename,    &observable);
+  if( combineLepMinus ) ch_bkg->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
   ch_bkg->SetBranchAddress("weight",&weight);
   ch_bkg->SetBranchAddress("Nsolns",&Nsolns);
   ch_bkg->SetBranchAddress("tt_mass",&ttmass);
@@ -160,10 +172,21 @@ void AfbUnfoldExample()
       fillUnderOverFlow(hBkg, observable, weight, Nsolns);
     if ( (Region=="") && (iVar<2) ) 
       fillUnderOverFlow(hBkg, observable, weight, Nsolns);
+
+    if (combineLepMinus) {
+	    if ( (Region=="Signal") && (ttmass>450) )  
+	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
+	    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
+	    if ( (Region=="") && (iVar<2) ) 
+	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
+	}
   }
 
   ch_top->SetBranchAddress(observablename,    &observable);
   ch_top->SetBranchAddress(observablename+"_gen",&observable_gen);
+  if( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
+  if( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms_gen",    &observableMinus_gen);
   ch_top->SetBranchAddress("weight",&weight);
   ch_top->SetBranchAddress("Nsolns",&Nsolns);
   ch_top->SetBranchAddress("tt_mass",&ttmass);
@@ -172,21 +195,41 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
     ch_top->GetEntry(i);
+    /* //for some reason it runs extremely slowly with this uncommented
     if ( (Region=="Signal") && (ttmass>450) ) {
       response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hTop, observable, weight, Nsolns);
       fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      response.Fill (observableMinus, observableMinus_gen, weight);
+	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
+	  }
     }
+    */ 
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
       response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hTop, observable, weight, Nsolns);
       fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      response.Fill (observableMinus, observableMinus_gen, weight);
+	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
+	  }
     }
     if ( (Region=="") && (iVar<2) ) {
       response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hTop, observable, weight, Nsolns);
       fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      response.Fill (observableMinus, observableMinus_gen, weight);
+	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
+	  }
     }
+
+    //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
+
   }
 
   hTrue_vs_Meas = (TH2D*) response.Hresponse()->Clone(); 

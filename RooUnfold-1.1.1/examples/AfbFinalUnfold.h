@@ -392,6 +392,17 @@ xaxislabel="cos(#theta^{+}_{l})";
       xmax= 1.0;
       break;
       }
+        //   Top Polarization combining positively and negatively charged leptons
+    case 9:
+      {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{*}_{l})";
+      acceptanceName="lepCosTheta";
+      xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+      xmin=-1.0;
+      xmax= 1.0;
+      break;
+      }
     default:
       {
       cout<<"Set the variable switch";
