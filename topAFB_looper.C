@@ -2991,7 +2991,7 @@ void topAFB_looper::fillUnderOverFlow(TH1D *h1, float value, double weight, int 
   double max = h1->GetXaxis()->GetXmax();
 
   if (value >= max) value = h1->GetBinCenter(h1->GetNbinsX());
-  if (value < min) value = h1->GetBinCenter(1);
+  if (value <= min) value = h1->GetBinCenter(1);
 
   int bin_number = h1->FindBin(value);
   double orig_content = h1->GetBinContent(bin_number);
@@ -3012,9 +3012,9 @@ void topAFB_looper::fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, doub
   double miny = h2->GetYaxis()->GetXmin();
 
   if (xvalue >= maxx) xvalue = h2->GetXaxis()->GetBinCenter(h2->GetNbinsX());
-  if (xvalue < minx) xvalue = h2->GetXaxis()->GetBinCenter(1);
+  if (xvalue <= minx) xvalue = h2->GetXaxis()->GetBinCenter(1);
   if (yvalue >= maxy) yvalue = h2->GetYaxis()->GetBinCenter(h2->GetNbinsY());
-  if (yvalue < miny) yvalue = h2->GetYaxis()->GetBinCenter(1);
+  if (yvalue <= miny) yvalue = h2->GetYaxis()->GetBinCenter(1);
 
   int bin_number = h2->FindBin(xvalue,yvalue);
   double orig_content = h2->GetBinContent(bin_number);
