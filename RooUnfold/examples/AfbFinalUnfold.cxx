@@ -73,15 +73,13 @@ void AfbUnfoldExample()
 
   TH1D* hData= new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1D, xbins1D);
   TH1D* hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
-  TH1D* hTop = new TH1D ("Top",  "Top",    nbins1D, xbins1D);
-  TH1D* hTop_gen = new TH1D ("Top Gen",  "Top Gen",    nbins1D, xbins1D);
   TH1D* hData_unfolded= new TH1D ("Data_Unfold", "Data with background subtracted and unfolded", nbins1D, xbins1D);
   
   double xbins1D_arccos[nbins1D+1];
   //xbins1D_arccos[0]=acos(-1.0); xbins1D_arccos[1]=acos(-0.6); xbins1D_arccos[2]=acos(-0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(0.3); xbins1D_arccos[5]=acos(0.6); xbins1D_arccos[6]=acos(1.0);
   xbins1D_arccos[0]=acos(1.0); xbins1D_arccos[1]=acos(0.6); xbins1D_arccos[2]=acos(0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(-0.3); xbins1D_arccos[5]=acos(-0.6); xbins1D_arccos[6]=acos(-1.0);
   TH1D* hData_unfolded_arccos= new TH1D ("Data_Unfold_arccos", "Data with background subtracted and unfolded arccos", nbins1D, xbins1D_arccos);
-  TH1D* hTop_gen_arccos = new TH1D ("Top Gen arccos",  "Top Gen arccos",    nbins1D, xbins1D_arccos);
+  TH1D* hTrue_arccos = new TH1D ("Top Gen arccos",  "Top Gen arccos",    nbins1D, xbins1D_arccos);
 
   TH1D* hTrue= new TH1D ("true", "Truth",    nbins1D, xbins1D);
   TH1D* hMeas= new TH1D ("meas", "Measured", nbins1D, xbins1D);
@@ -92,14 +90,12 @@ void AfbUnfoldExample()
 
   hData->Sumw2();
   hBkg->Sumw2();
-  hTop->Sumw2();
-  hTop_gen->Sumw2();
   hData_unfolded->Sumw2();
   hTrue->Sumw2();
   hMeas->Sumw2();
   hTrue_vs_Meas->Sumw2();
   hData_unfolded_arccos->Sumw2();
-  hTop_gen_arccos->Sumw2();
+  hTrue_arccos->Sumw2();
   
 
   TMatrixD m_unfoldE (nbins1D,nbins1D);
@@ -197,15 +193,11 @@ void AfbUnfoldExample()
     /* //for some reason it runs extremely slowly with this uncommented
     if ( (Region=="Signal") && (ttmass>450) ) {
       //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hTop, observable, weight, Nsolns);
-      fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
       fillUnderOverFlow(hMeas, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
       fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
       if( combineLepMinus ) {
 	      //response.Fill (observableMinus, observableMinus_gen, weight);
-	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
-	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
 	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
 	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
 	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
@@ -214,15 +206,11 @@ void AfbUnfoldExample()
     */ 
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
       //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hTop, observable, weight, Nsolns);
-      fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
       fillUnderOverFlow(hMeas, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
       fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
       if( combineLepMinus ) {
 	      //response.Fill (observableMinus, observableMinus_gen, weight);
-	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
-	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
 	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
 	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
 	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
@@ -230,15 +218,11 @@ void AfbUnfoldExample()
     }
     if ( (Region=="") && (iVar<2) ) {
       //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hTop, observable, weight, Nsolns);
-      fillUnderOverFlow(hTop_gen, observable_gen, weight, Nsolns);
       fillUnderOverFlow(hMeas, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
       fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
       if( combineLepMinus ) {
 	      //response.Fill (observableMinus, observableMinus_gen, weight);
-	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
-	      fillUnderOverFlow(hTop_gen, observableMinus_gen, weight, Nsolns);
 	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
 	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
 	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
@@ -277,9 +261,9 @@ void AfbUnfoldExample()
     if (unfoldingType==2)
       {
 	TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);  
-	unfold_TUnfold.SetInput(hTop);
+	unfold_TUnfold.SetInput(hMeas);
 	//Double_t biasScale=1.0;
-	unfold_TUnfold.SetBias(hTop_gen);
+	unfold_TUnfold.SetBias(hTrue);
 	unfold_TUnfold.DoUnfold(tau);
 	unfold_TUnfold.GetOutput(hData_unfolded);  
 
@@ -327,11 +311,11 @@ void AfbUnfoldExample()
     }
 
     if (acceptM->GetBinContent(i)!=0) {
-      hTop_gen->SetBinContent(i, hTop_gen->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
-      hTop_gen->SetBinError  (i, hTop_gen->GetBinError(i)  *1.0/acceptM->GetBinContent(i));
+      hTrue->SetBinContent(i, hTrue->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
+      hTrue->SetBinError  (i, hTrue->GetBinError(i)  *1.0/acceptM->GetBinContent(i));
       
-      hTop_gen_arccos->SetBinContent(nbins1D +1 - i, hTop_gen->GetBinContent(i) );
-      hTop_gen_arccos->SetBinError  (nbins1D +1 - i, hTop_gen->GetBinError(i) );
+      hTrue_arccos->SetBinContent(nbins1D +1 - i, hTrue->GetBinContent(i) );
+      hTrue_arccos->SetBinError  (nbins1D +1 - i, hTrue->GetBinError(i) );
     }  
   } 
 
@@ -355,7 +339,7 @@ void AfbUnfoldExample()
   GetAfb(hData, Afb, AfbErr);
   cout<<" Data: "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
-  GetAfb(hTop_gen, Afb, AfbErr);
+  GetAfb(hTrue, Afb, AfbErr);
   cout<<" True Top: "<< Afb <<" +/-  "<< AfbErr<<"\n";
   
   GetAfb(denominatorM, Afb, AfbErr);
@@ -379,11 +363,11 @@ void AfbUnfoldExample()
 
   //scale to total xsec with option "width",  so that differential xsec is plotted
   //hData_unfolded->Scale(xsection/hData_unfolded->Integral(),"width");
-  //hTop_gen->Scale(xsection/hTop_gen->Integral(),"width");
+  //hTrue->Scale(xsection/hTrue->Integral(),"width");
   hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
-  hTop_gen->Scale(1./hTop_gen->Integral(),"width");
+  hTrue->Scale(1./hTrue->Integral(),"width");
   hData_unfolded_arccos->Scale(1./hData_unfolded_arccos->Integral(),"width");
-  hTop_gen_arccos->Scale(1./hTop_gen_arccos->Integral(),"width");
+  hTrue_arccos->Scale(1./hTrue_arccos->Integral(),"width");
   
   if(observablename=="lep_azimuthal_asymmetry") for(int i=1;i<nbins1D+1;i++){ cout<<i<<" bin = "<<hData_unfolded_arccos->GetBinContent(i)<<" +/- "<<hData_unfolded_arccos->GetBinError(i)<<endl; }
   else for(int i=1;i<nbins1D+1;i++){ cout<<i<<" bin = "<<hData_unfolded->GetBinContent(i)<<" +/- "<<hData_unfolded->GetBinError(i)<<endl; }
@@ -399,11 +383,11 @@ void AfbUnfoldExample()
   hData_unfolded_arccos->SetMarkerSize(1.5);
   hData_unfolded_arccos->Draw("E");
   hData_unfolded_arccos->SetLineWidth(lineWidth);
-  hTop_gen_arccos->SetLineWidth(lineWidth);
-  hTop_gen_arccos->SetLineColor(TColor::GetColorDark(kGreen));
-  hTop_gen_arccos->SetFillColor(TColor::GetColorDark(kGreen));
-  hTop_gen_arccos->SetFillStyle(3353);
-  hTop_gen_arccos->Draw("hist same");
+  hTrue_arccos->SetLineWidth(lineWidth);
+  hTrue_arccos->SetLineColor(TColor::GetColorDark(kGreen));
+  hTrue_arccos->SetFillColor(TColor::GetColorDark(kGreen));
+  hTrue_arccos->SetFillStyle(3353);
+  hTrue_arccos->Draw("hist same");
   hData_unfolded_arccos->Draw("E same");
   }
   else {
@@ -415,11 +399,11 @@ void AfbUnfoldExample()
   hData_unfolded->SetMarkerSize(1.5);
   hData_unfolded->Draw("E");
   hData_unfolded->SetLineWidth(lineWidth);
-  hTop_gen->SetLineWidth(lineWidth);
-  hTop_gen->SetLineColor(TColor::GetColorDark(kGreen));
-  hTop_gen->SetFillColor(TColor::GetColorDark(kGreen));
-  hTop_gen->SetFillStyle(3353);
-  hTop_gen->Draw("hist same");
+  hTrue->SetLineWidth(lineWidth);
+  hTrue->SetLineColor(TColor::GetColorDark(kGreen));
+  hTrue->SetFillColor(TColor::GetColorDark(kGreen));
+  hTrue->SetFillStyle(3353);
+  hTrue->Draw("hist same");
   hData_unfolded->Draw("E same");
   }
 
@@ -431,11 +415,11 @@ void AfbUnfoldExample()
   leg1->SetTextSize(0.03);
   if(observablename=="lep_azimuthal_asymmetry") {
   	leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) Unfolded");  
-  	leg1->AddEntry(hTop_gen_arccos,    "SM parton level (mc@nlo)", "F"); 
+  	leg1->AddEntry(hTrue_arccos,    "SM parton level (mc@nlo)", "F"); 
   }
   else{
   	leg1->AddEntry(hData_unfolded, "( Data - BG ) Unfolded");  
-  	leg1->AddEntry(hTop_gen,    "SM parton level (mc@nlo)", "F");                                                               
+  	leg1->AddEntry(hTrue,    "SM parton level (mc@nlo)", "F");                                                               
   }
   leg1->Draw();
 
