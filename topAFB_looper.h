@@ -26,7 +26,7 @@ class topAFB_looper
         void FillBabyNtuple ();
         void CloseBabyNtuple ();
         void ScanChain (TChain*, vector<TString> , string, 
-			bool, float, float, bool, FREnum frmode = e_wjets);
+			bool, float, float, bool, FREnum frmode = e_wjets, double AMWTmass = 172.5);
 	void bookHistos(const char* sample, int nchannels, int nhistsets);
 	void FillHistograms(const unsigned int hypIdx, const vector<unsigned int> v_jets, const vector<unsigned int> v_jetsNoEtaCut,
 					 const pair<float, float> p_met, const float weight, const string prefix) ;

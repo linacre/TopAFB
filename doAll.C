@@ -337,9 +337,20 @@ if(runttdil) {
    //cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/hadoop/cms/store/group/snt/papers2011/Fall11MC/TTjets_TuneZ2_scaleup_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v1/V04-02-29/merged*root");
    //cout << "Doing the MadGraph ttbar sys sample" << endl; ch_ttbar->Add("/nfs-6/userdata/cms2/TTjets_TuneZ2_scaledown_7TeV-madgraph-tauola_Fall11-PU_S6_START42_V14B-v2/V04-02-29/merged*root");
 
-   cout << "Doing the scale down mc@nlo ttbar sys sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/FastSim_mcatnlo-private-SC-fac-0.5-ren-0.5_LHE2EDM_v1_RWTH_0614_fhohle-TT_mcatnlo_private_fac-0.5-ren-0.5_withSC_FastSim_coherent_Summer11FullSim_FastSimJetFixTest_AOD_0616-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged*root");
-   //cout << "Doing the scale up mc@nlo ttbar sys sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/FastSim_mcatnlo-private-SC-fac-2-ren-2_LHE2EDM_v1_RWTH_0614_fhohle-TT_mcatnlo_private_fac-2-ren-2_withSC_FastSim_coherent_Summer11FullSim_FastSimJetFixTest_AOD_0616-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged*root");
-   baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
+   //cout << "Doing the scale down mc@nlo ttbar sys FastSim sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/FastSim_mcatnlo-private-SC-fac-0.5-ren-0.5_LHE2EDM_v1_RWTH_0614_fhohle-TT_mcatnlo_private_fac-0.5-ren-0.5_withSC_FastSim_coherent_Summer11FullSim_FastSimJetFixTest_AOD_0616-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged*root");
+   //cout << "Doing the scale up mc@nlo ttbar sys FastSim sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/FastSim_mcatnlo-private-SC-fac-2-ren-2_LHE2EDM_v1_RWTH_0614_fhohle-TT_mcatnlo_private_fac-2-ren-2_withSC_FastSim_coherent_Summer11FullSim_FastSimJetFixTest_AOD_0616-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged*root");
+
+   cout << "Doing the mass down mc@nlo ttbar sys FastSim sample" << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TT-7TeV_MCatNLO_private_Mtop167.5_withSC_LHE_0827_fhohle-TTbar_MCatNLO_private_Mtop167.5_withSC_herwig_FastSim_coherent_Summer11FullSim_AOD_DESY_0827-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged_ntuple*root");
+   //cout << "Doing the mass up mc@nlo ttbar sys FastSim sample"   << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TT-7TeV_MCatNLO_private_Mtop177.5_withSC_LHE_0827_fhohle-TTbar_MCatNLO_private_Mtop177.5_withSC_herwig_FastSim_coherent_Summer11FullSim_AOD_DESY_0827-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged_ntuple*root");
+   //cout << "Doing the nominal mc@nlo ttbar sys FastSim sample"   << endl; ch_ttbar->Add("/nfs-7/userdata/cms2/TT-7TeV_MCatNLO-5217-SC_LHE_0822_fhohle-TTbar_mcatnlo-5217_herwig_FastSim_coherent_Summer11FullSim_AOD_DESY_0822-98893edf89c918d9b6d63453d739e0c0/VB04-02-29_Fastsim/merged_ntuple*root");
+
+
+   //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*154./157.5, kttdil, false);
+   
+   //for mc@NLO
+   //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*(154./157.5)*(190.41256/147.4), kttdil, false); //must mutliply by ratio of per-event xsec and PREP xsec to account for negative weights
+   baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*(154./157.5)*(190.41256/147.4), kttdil, false, 1, 167.5); //must mutliply by ratio of per-event xsec and PREP xsec to account for negative weights
+   //baby->ScanChain(ch_ttbar, v_Cuts, "ttdil",doFRestimation, lumiToNormalizeTo*(154./157.5)*(190.41256/147.4), kttdil, false, 1, 177.5); //must mutliply by ratio of per-event xsec and PREP xsec to account for negative weights
    hist::color("ttdil", kGreen);
     
  }

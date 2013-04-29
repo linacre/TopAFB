@@ -701,7 +701,7 @@ topAFB_looper::~topAFB_looper()
     delete d_llsol;
 }
 void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string prefix,
-                              bool doFRestimation, float lumi , float kFactor , bool verbose , FREnum frmode )
+                              bool doFRestimation, float lumi , float kFactor , bool verbose , FREnum frmode, double AMWTmass )
 {
 
 
@@ -2382,7 +2382,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     //TLorentzVector cms, cms_nojetsmear, lepPlus,lepMinus, jet1,jet2;
 
                     //first solve with no jet smearing for comparison (to check bias caused by jet smearing)
-                    m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4, top2_nojetsmear_p4, AMWTweight_nojetsmear, 172.5);
+                    m_top_nojetsmear = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_nojetsmear_p4, top2_nojetsmear_p4, AMWTweight_nojetsmear, AMWTmass);
                     if ( m_top_nojetsmear > 0 && (fabs(m_top_nojetsmear - top1_nojetsmear_p4[0].M()) > 0.5 || fabs(m_top_nojetsmear - top2_nojetsmear_p4[0].M()) > 0.5) ) cout << "*** mass solution mismatch (no smearing) *** " << m_top_nojetsmear << " " << top1_nojetsmear_p4[0].M() << " " << top2_nojetsmear_p4[0].M() << endl;
                     tt_mass_nojetsmear = -999.0;
                     if (m_top_nojetsmear > 0) tt_mass_nojetsmear = (top1_nojetsmear_p4[0] + top2_nojetsmear_p4[0]).M();
@@ -2390,7 +2390,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     //cout<<AMWTweight_nojetsmear.size()<<endl;
 
                     //now repeat using jet smearing
-                    m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4, top2_p4, AMWTweight, 172.5);
+                    m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4, top2_p4, AMWTweight, AMWTmass);
 
                     Nsolns = AMWTweight.size();
                     imaxAMWTweight = -999;
@@ -2839,7 +2839,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             //fillHistos( htop2phism_2d,  top2_phi_nojetsmear , top2_phi,    weight, myType, jetBin, Nsolns);
 
                             //none weighted histograms
-                            fillHistos( habcd_2d,  mass_ltb  , mass_llb,    1, myType, jetBin, Nsolns);
+                            //fillHistos( habcd_2d,  mass_ltb  , mass_llb,    1./double(Nsolns), myType, jetBin, Nsolns);
 
                         }
                     }//!applyNoCuts
