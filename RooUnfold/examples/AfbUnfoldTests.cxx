@@ -60,6 +60,7 @@ cout.precision(3);
 
   
   Initialize1DBinning(iVar);
+  bool combineLepMinus = iVar == 9 ? true : false;
 
   TH1D* hTrue_before= new TH1D ("trueBeforeScaling", "Truth",    nbins1D, xbins1D);
   TH1D* hMeas_before= new TH1D ("measBeforeScaling", "Measured", nbins1D, xbins1D);
@@ -82,6 +83,22 @@ cout.precision(3);
 
   TH2D* hTrue_vs_Meas= new TH2D ("true_vs_meas", "True vs Measured", nbins1D, xbins1D, nbins1D, xbins1D);  
 
+
+  hTrue_before->Sumw2();
+  hMeas_before->Sumw2();
+  hTrue_after->Sumw2();
+  hMeas_after->Sumw2();
+  hSmeared->Sumw2();
+  hUnfolded->Sumw2();
+  hTrue_test->Sumw2();
+  hMeas_test->Sumw2();
+  hUnfolded_test->Sumw2();  
+  hData->Sumw2();
+  hBkg->Sumw2();
+  hData_unfolded->Sumw2();
+  AfbPull->Sumw2();
+  hTrue_vs_Meas->Sumw2();
+
   TMatrixD m_unfoldE(nbins1D,nbins1D);
 
 
@@ -97,19 +114,20 @@ cout.precision(3);
   }       
 
 
-  RooUnfoldResponse response (hMeas_before, hTrue_before);
-
   TFile *file = new TFile("../ttdil.root");
   TTree *evtree = (TTree*) file->Get("tree");                                 
   Int_t entries = (Int_t)evtree->GetEntries();                                     
   cout<<"RESPONSE: Number of Entries: "<<entries<< endl; 
 
   Float_t observable, observable_gen, ttmass, ttRapidity, tmass;
+  Float_t observableMinus, observableMinus_gen; 
   Double_t weight;
   Int_t Nsolns;
 
   evtree->SetBranchAddress(observablename,    &observable);
   evtree->SetBranchAddress(observablename+"_gen",&observable_gen);
+  if( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
+  if( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms_gen",    &observableMinus_gen);
   evtree->SetBranchAddress("weight",&weight);
   evtree->SetBranchAddress("Nsolns",&Nsolns);
   evtree->SetBranchAddress("tt_mass",&ttmass);
@@ -140,35 +158,65 @@ cout.precision(3);
   
     for (Int_t i= 0; i<entries; i++) {
     evtree->GetEntry(i);
+    //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
 
     if ( (Region=="Signal") && (ttmass>450) ) {
-      response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      fillUnderOverFlow(hMeas_before, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_before, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+	  }
       if (TestType=="Linearity") weight=weight*(1.0+slope*observable_gen);
       fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      fillUnderOverFlow(hMeas_after, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_after, observableMinus_gen, weight, Nsolns);
+	  }
 
     }
     if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
-      response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      fillUnderOverFlow(hMeas_before, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_before, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+	  }
       if (TestType=="Linearity") weight=weight*(1.0+slope*observable_gen);
       fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      fillUnderOverFlow(hMeas_after, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_after, observableMinus_gen, weight, Nsolns);
+	  }
+
     }
     if ( (Region=="") && (iVar<2) ) {
-      response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      fillUnderOverFlow(hMeas_before, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_before, observableMinus_gen, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+	  }
       if (TestType=="Linearity") weight=weight*(1.0+slope*observable_gen);
       fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+	      fillUnderOverFlow(hMeas_after, observableMinus, weight, Nsolns);
+	      fillUnderOverFlow(hTrue_after, observableMinus_gen, weight, Nsolns);
+	  }
+
     }
     }
     
-    hTrue_vs_Meas = (TH2D*) response.Hresponse()->Clone();
+    RooUnfoldResponse response (hMeas_before, hTrue_before, hTrue_vs_Meas);
  
 
   TFile *accfile = new TFile("../acceptance/mcnlo/accept_"+acceptanceName+".root");
