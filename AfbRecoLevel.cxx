@@ -43,28 +43,11 @@ const Double_t _topScalingFactor=9097.0/9344.0;
 void AfbRecoLevel(TString Region="")
 {
 
-  setTDRStyle();
+  // setTDRStyle();
   gStyle->SetOptFit();
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
   cout.precision(3);
-
-//   //setTDRStyle();
-//   gStyle->SetOptFit();
-//   gStyle->SetOptStat(0);
-//   gStyle->SetOptTitle(0);
-//   cout.precision(2);
-// //gStyle->SetLabelSize(0.04,"xyz");
-// // gStyle->SetTitleSize(0.045,"xyz");
-//   gStyle->SetTitleColor(1, "XYZ");
-//   gStyle->SetTitleFont(42, "XYZ");
-//   gStyle->SetTitleSize(0.06, "X");
-//   gStyle->SetTitleSize(0.06, "Y");
-//   // tdrStyle->SetTitleXSize(Float_t size = 0.02); // Another way to set the size?
-//   // tdrStyle->SetTitleYSize(Float_t size = 0.02);
-//   gStyle->SetTitleXOffset(0.9);
-// 
-//   gStyle->SetTitleOffset( 0.1,"Y");
 
   TString observablename;
   TString xaxislabel;
@@ -84,15 +67,12 @@ void AfbRecoLevel(TString Region="")
     TH1D* hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
     TH1D* hTop = new TH1D ("Top",  "Top",    nbins1D, xbins1D);
 
-  //  Now test with data and with BKG subtraction
-
     hData->Sumw2();
     hTop->Sumw2();
     hBkg->Sumw2();
     
     TChain *ch_data = new TChain("tree");
     ch_data->Add("data.root");
-  // ch_data->Draw(Form("%s >> %s", var, "Data"),     baseline*"weight");
     ch_data->SetBranchAddress(observablename,    &observable);
     if( combineLepMinus ) ch_data->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
     ch_data->SetBranchAddress("weight",&weight);
@@ -122,7 +102,6 @@ void AfbRecoLevel(TString Region="")
 
     TChain *ch_top = new TChain("tree");
     ch_top->Add("ttdil.root");
-  // ch_top->Draw(Form("%s >> %s", var, "Top"), baseline*"weight");
     ch_top->SetBranchAddress(observablename,    &observable);
     if( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
     ch_top->SetBranchAddress("weight",&weight);
@@ -134,18 +113,14 @@ void AfbRecoLevel(TString Region="")
     for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
       ch_top->GetEntry(i);
       if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
-        //response.Fill (observable, observable_gen, weight);
         fillUnderOverFlow(hTop, observable, weight, Nsolns);
         if( combineLepMinus ) {
-  	      //response.Fill (observableMinus, observableMinus_gen, weight);
   	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
   	  }
       }
       if ( (Region=="") && (iVar<2) ) {
-        //response.Fill (observable, observable_gen, weight);
         fillUnderOverFlow(hTop, observable, weight, Nsolns);
         if( combineLepMinus ) {
-  	      //response.Fill (observableMinus, observableMinus_gen, weight);
   	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
   	  }
       }
@@ -159,7 +134,6 @@ void AfbRecoLevel(TString Region="")
     ch_bkg->Add("DYtautau.root");
     ch_bkg->Add("tw.root");
     ch_bkg->Add("VV.root");
-  // ch_bkg->Draw(Form("%s >> %s", var, "Background"),       baseline*"weight");
     ch_bkg->SetBranchAddress(observablename,    &observable);
     if( combineLepMinus ) ch_bkg->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
     ch_bkg->SetBranchAddress("weight",&weight);
@@ -216,13 +190,11 @@ void AfbRecoLevel(TString Region="")
 
     hData->SetMinimum(0.0);
     hData->SetMaximum( 2.0* hData->GetMaximum());
-    hData->SetMarkerSize(0.0);
     hData->GetXaxis()->SetTitle(xaxislabel);
     hData->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
     hData->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
     hData->GetYaxis()->SetTitleOffset(1.6);
-    hData->SetLineWidth(lineWidth+2);
-    hData->Draw("hist");
+    hData->SetLineWidth(lineWidth);
 
     hTop->SetLineWidth(lineWidth);
     hTop->SetMarkerSize(0.0);
@@ -238,9 +210,15 @@ void AfbRecoLevel(TString Region="")
     THStack *hs = new THStack("hs","Stacked Top+BG");
     hs->Add(hBkg);
     hs->Add(hTop);
-    hs->Draw("hist same");
+    hs->SetMinimum(0.0);
+    hs->SetMaximum( 2.0* hs->GetMaximum());
+    hs->Draw("hist");
+    hs->GetXaxis()->SetTitle(xaxislabel);
+    hs->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
+    hs->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
+    hs->GetYaxis()->SetTitleOffset(1.6);
 
-    hData->Draw("hist same");
+    hData->Draw("E same");
 
     TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");
     leg1->SetFillStyle(0);
