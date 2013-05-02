@@ -298,9 +298,9 @@ void Initialize1DBinning(int iVar){
       observablename="lep_charge_asymmetry";
       xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
       acceptanceName="lepChargeAsym";
-      xbins1D[0]=-4.0; xbins1D[1]=-0.8; xbins1D[2]=-0.4; xbins1D[3]=0.0; xbins1D[4]=0.4; xbins1D[5]=0.8; xbins1D[6]=4.0;
-      xmin=-4.0;
-      xmax= 4.0;
+      xbins1D[0]=-2.0; xbins1D[1]=-0.8; xbins1D[2]=-0.4; xbins1D[3]=0.0; xbins1D[4]=0.4; xbins1D[5]=0.8; xbins1D[6]=2.0;
+      xmin=-2.0;
+      xmax= 2.0;
       break;
       }
   //   Lepton Azimuthal Asymmetry
@@ -376,9 +376,9 @@ xaxislabel="cos(#theta^{+}_{l})";
       observablename="top_rapidtiydiff_Marco";
       xaxislabel="|y_{top}|-|y_{tbar}|";
       acceptanceName="rapiditydiffMarco";
-      xbins1D[0]=-4.0; xbins1D[1]=-0.7; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.7; xbins1D[6]=4.0;
-      xmin=-4.0;
-      xmax= 4.0;
+      xbins1D[0]=-2.0; xbins1D[1]=-0.7; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.7; xbins1D[6]=2.0;
+      xmin=-2.0;
+      xmax= 2.0;
       break;
       }
         //   Top Polarization using negatively charged leptons
