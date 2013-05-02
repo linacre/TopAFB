@@ -41,7 +41,7 @@ using std::endl;
   TString Region="";
   Int_t kterm=3; 
   Double_t tau=1E-4;
-  Int_t nVars =10;
+  Int_t nVars =11;
   Int_t includeSys = 1;
 
 
