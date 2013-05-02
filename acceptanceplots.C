@@ -43,20 +43,64 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   std::cout << "Opened " << Form("ttdil_h%sGen_allj_all", histname.Data()) << " and "<< Form("ttdil_h%sGen2d_allj_all", histname.Data()) <<"\n";
   
   Double_t pi = 3.141592653589793;
-  Double_t bins1[] =  { -4., -2., -1., 0., 1., 2., 4.}; 
-  Double_t bins2[] = {-1., -0.6, -0.3, 0., 0.3, 0.6, 1.}; 
-  Double_t bins3[] = {0., 4.*pi/20., 7.*pi/20., 10.*pi/20., 13.*pi/20., 16.*pi/20., pi}; 
+  Double_t bins_lepChargeAsym[] =  { -4., -0.8, -0.4, 0., 0.4, 0.8, 4.}; 
+  Double_t bins_lepAzimAsym[] = {-1., -0.8, -0.4, 0., 0.4, 0.8, 1.}; 
+  Double_t bins_lepAzimAsym2[] = {0., 4.*pi/20., 7.*pi/20., 10.*pi/20., 13.*pi/20., 16.*pi/20., pi}; 
+  Double_t bins_topCosTheta[] = {-1., -0.7, -0.4, 0., 0.4, 0.7, 1.}; 
+  Double_t bins_pseudorapiditydiff[] =  { -4., -1.0, -0.5, 0., 0.5, 1.0, 4.}; 
+  Double_t bins_rapiditydiff[] =  { -4., -0.8, -0.3, 0., 0.3, 0.8, 4.}; 
+  Double_t bins_rapiditydiffMarco[] =  { -4., -0.7, -0.3, 0., 0.3, 0.7, 4.}; 
+  Double_t bins_lepCosTheta[] = {-1., -0.6, -0.3, 0., 0.3, 0.6, 1.}; 
+  Double_t bins_topSpinCorr[] = {-1., -0.5, -0.2, 0., 0.2, 0.5, 1.}; 
+
+  Double_t bins_lepChargeAsym_forMtt[] =  { -4., 0., 4.};
+  Double_t bins_lepAzimAsym_forMtt[] = {-1., 0., 1.};
+  Double_t bins_lepAzimAsym2_forMtt[] = {0., pi/2., pi};
+  Double_t bins_topCosTheta_forMtt[] = {-1., 0., 1.};
+  Double_t bins_pseudorapiditydiff_forMtt[] =  { -4., 0., 4.};
+  Double_t bins_rapiditydiff_forMtt[] =  { -4., 0., 4.};
+  Double_t bins_rapiditydiffMarco_forMtt[] =  { -4., 0., 4.};
+  Double_t bins_lepCosTheta_forMtt[] = {-1., 0., 1.};
+  Double_t bins_topSpinCorr_forMtt[] = {-1., 0., 1.};
+
   Double_t binsMtt[] = {0., 450., 550.,1200.}; 
-  Double_t bins1forMtt[] = {-4., 0., 4.}; 
-  Double_t bins2forMtt[] = {-1., 0., 1.}; 
-  Double_t bins3forMtt[] = {-pi, 0., pi};
-  
-  if(histname.Contains("lepChargeAsym") ||  histname.Contains("rapiditydiff")) {
+  Double_t bins[7];
+  Double_t binsforMtt[3];
 
-  	hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins1);
-  	hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins1);
 
-  	hnumerator2drebinned = new TH2D(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins1forMtt,3, binsMtt);
+  if(histname == "lepChargeAsym") memcpy(bins,bins_lepChargeAsym,7*8);
+  if(histname == "lepAzimAsym") memcpy(bins,bins_lepAzimAsym,7*8);
+  if(histname == "lepAzimAsym2") memcpy(bins,bins_lepAzimAsym2,7*8);
+  if(histname == "topCosTheta") memcpy(bins,bins_topCosTheta,7*8);
+  if(histname == "pseudorapiditydiff") memcpy(bins,bins_pseudorapiditydiff,7*8);
+  if(histname == "rapiditydiff") memcpy(bins,bins_rapiditydiff,7*8);
+  if(histname == "rapiditydiffMarco") memcpy(bins,bins_rapiditydiffMarco,7*8);
+  if(histname == "lepCosTheta" || histname == "lepPlusCosTheta" || histname == "lepMinusCosTheta") memcpy(bins,bins_lepCosTheta,7*8);
+  if(histname == "topSpinCorr") memcpy(bins,bins_topSpinCorr,7*8);
+
+  if(histname == "lepChargeAsym") memcpy(binsforMtt,bins_lepChargeAsym_forMtt,3*8);
+  if(histname == "lepAzimAsym") memcpy(binsforMtt,bins_lepAzimAsym_forMtt,3*8);
+  if(histname == "lepAzimAsym2") memcpy(binsforMtt,bins_lepAzimAsym2_forMtt,3*8);
+  if(histname == "topCosTheta") memcpy(binsforMtt,bins_topCosTheta_forMtt,3*8);
+  if(histname == "pseudorapiditydiff") memcpy(binsforMtt,bins_pseudorapiditydiff_forMtt,3*8);
+  if(histname == "rapiditydiff") memcpy(binsforMtt,bins_rapiditydiff_forMtt,3*8);
+  if(histname == "rapiditydiffMarco") memcpy(binsforMtt,bins_rapiditydiffMarco_forMtt,3*8);
+  if(histname == "lepCosTheta" || histname == "lepPlusCosTheta" || histname == "lepMinusCosTheta") memcpy(binsforMtt,bins_lepCosTheta_forMtt,3*8);
+  if(histname == "topSpinCorr") memcpy(binsforMtt,bins_topSpinCorr_forMtt,3*8);
+
+
+//  for (int i = 0; i < 7; ++i)
+//  {
+//  	cout<<bins[i]<<endl;
+//  	if(i<3) cout<<"    "<<binsforMtt[i]<<endl;
+//  }
+
+
+  	
+  	hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins);
+  	hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins);
+  	
+    	hnumerator2drebinned = new TH2D(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,binsforMtt,3, binsMtt);
   	TAxis *xaxis = hnumerator2d->GetXaxis();
   	TAxis *yaxis = hnumerator2d->GetYaxis();
   	for (int j=1;j<=yaxis->GetNbins();j++) {
@@ -65,57 +109,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   		}
   	}
   	
-  	hdenominator2drebinned = new TH2D(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins1forMtt,3, binsMtt);
-  	TAxis *xaxisd = hdenominator2d->GetXaxis();
-  	TAxis *yaxisd = hdenominator2d->GetYaxis();
-  	for (int j=1;j<=yaxisd->GetNbins();j++) {
-  		for (int i=1;i<=xaxisd->GetNbins();i++) {
-  			hdenominator2drebinned->Fill(xaxisd->GetBinCenter(i),yaxisd->GetBinCenter(j), hdenominator2d->GetBinContent(i,j));
-  		}
-  	}
-  	
-  }
-  
-  else  if(histname.Contains("lepAzimAsym2") ) {
-
-  	hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins3);
-  	hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins3);
-
-  	hnumerator2drebinned = new TH2D(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
-  	TAxis *xaxis = hnumerator2d->GetXaxis();
-  	TAxis *yaxis = hnumerator2d->GetYaxis();
-  	for (int j=1;j<=yaxis->GetNbins();j++) {
-  		for (int i=1;i<=xaxis->GetNbins();i++) {
-  			hnumerator2drebinned->Fill(xaxis->GetBinCenter(i),yaxis->GetBinCenter(j), hnumerator2d->GetBinContent(i,j));
-  		}
-  	}
-  	
-  	hdenominator2drebinned = new TH2D(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins3forMtt,3, binsMtt);
-  	TAxis *xaxisd = hdenominator2d->GetXaxis();
-  	TAxis *yaxisd = hdenominator2d->GetYaxis();
-  	for (int j=1;j<=yaxisd->GetNbins();j++) {
-  		for (int i=1;i<=xaxisd->GetNbins();i++) {
-  			hdenominator2drebinned->Fill(xaxisd->GetBinCenter(i),yaxisd->GetBinCenter(j), hdenominator2d->GetBinContent(i,j));
-  		}
-  	}
-  	
-  }
-  
-  else {
-  	
-  	hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins2);
-  	hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins2);
-  	
-    	hnumerator2drebinned = new TH2D(Form("numerator_%s_mtt", histname.Data()),Form("numerator_%s_mtt", histname.Data()),2,bins2forMtt,3, binsMtt);
-  	TAxis *xaxis = hnumerator2d->GetXaxis();
-  	TAxis *yaxis = hnumerator2d->GetYaxis();
-  	for (int j=1;j<=yaxis->GetNbins();j++) {
-  		for (int i=1;i<=xaxis->GetNbins();i++) {
-  			hnumerator2drebinned->Fill(xaxis->GetBinCenter(i),yaxis->GetBinCenter(j), hnumerator2d->GetBinContent(i,j));
-  		}
-  	}
-  	
-  	hdenominator2drebinned = new TH2D(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,bins2forMtt,3, binsMtt);
+  	hdenominator2drebinned = new TH2D(Form("denominator_%s_mtt", histname.Data()),Form("denominator_%s_mtt", histname.Data()),2,binsforMtt,3, binsMtt);
   	TAxis *xaxisd = hdenominator2d->GetXaxis();
   	TAxis *yaxisd = hdenominator2d->GetYaxis();
   	for (int j=1;j<=yaxisd->GetNbins();j++) {
@@ -124,7 +118,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   		}
   	}
     	
-  }
+
   
   TString accepthistname = "accept_";
   accepthistname += histname;
@@ -174,6 +168,12 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
 
   if(histname.Contains("lepPlusCosTheta") ) {
   	hacceptance->GetXaxis()->SetTitle("cos(#theta^{+}_{l})");
+  }
+  if(histname.Contains("lepMinusCosTheta") ) {
+  	hacceptance->GetXaxis()->SetTitle("cos(#theta^{-}_{l})");
+  }
+  if(histname.Contains("lepChargeAsym") ) {
+  	hacceptance->GetXaxis()->SetTitle(" |#eta_{l^{+}}| - |#eta_{l^{-}}| ");
   }
 
   if(!drawnorm){
