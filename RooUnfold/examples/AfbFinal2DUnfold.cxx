@@ -32,6 +32,15 @@ using std::endl;
 
 const Double_t _topScalingFactor=8977.0/8191.0;
 
+ // 0=SVD, 1=TUnfold via RooUnfold, 2=TUnfold
+  int unfoldingType=0;
+
+  TString Region="";
+  Int_t kterm=3; 
+  Double_t tau=1E-4;
+  Int_t nVars =10;
+  Int_t includeSys = 1;
+
 
 void AfbUnfoldExample()
 {
@@ -48,16 +57,12 @@ void AfbUnfoldExample()
  myfile.open ("summary_2Dunfolding.txt");
  cout.rdbuf(myfile.rdbuf());
 
- TString Region="";
- double xsection = 154.0;
-
- int kterm=4;
- int nVars =7;
-
  Float_t observable, observable_gen, ttmass, ttmass_gen, ttRapidity, tmass;
  Double_t weight;
+ Int_t Nsolns;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
+
 
     Initialize2DBinning(iVar);
 
@@ -70,6 +75,9 @@ void AfbUnfoldExample()
 
   TH1D* hTrue= new TH1D ("true", "Truth",    nbins2D, xbins2D);
   TH1D* hMeas= new TH1D ("meas", "Measured", nbins2D, xbins2D);
+
+  TH2D* hTrue_vs_Meas= new TH2D ("true_vs_meas", "True vs Measured", nbins2D, xbins2D, nbins2D, xbins2D);
+  
   TH1D* hData_bkgSub;
 
   hData->Sumw2();
@@ -84,9 +92,7 @@ void AfbUnfoldExample()
   TMatrixD m_unfoldE(nbins2D,nbins2D);
   TMatrixD m_correctE(nbins2D,nbins2D);
 
-  RooUnfoldResponse response (hMeas, hTrue);
   
-
   //  Now test with data and with BKG subtraction
 
   TChain *ch_bkg = new TChain("tree");
@@ -110,31 +116,42 @@ void AfbUnfoldExample()
 
   ch_data->SetBranchAddress(observablename,    &observable);
   ch_data->SetBranchAddress("weight",&weight);
+  ch_data->SetBranchAddress("Nsolns",&Nsolns);
   ch_data->SetBranchAddress("tt_mass",&ttmass);
   ch_data->SetBranchAddress("ttRapidity",&ttRapidity);
   ch_data->SetBranchAddress("t_mass",&tmass);
 
   for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
     ch_data->GetEntry(i);
-    if (ttmass>0.0) hData->Fill(sign(observable)*ttmass,weight);
+    if ( (Region=="Signal") && (ttmass>450) )  
+      fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);
+    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+      fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);    
+    if ( (Region=="") && (iVar<2) ) 
+      fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);     
   }
 
   ch_bkg->SetBranchAddress(observablename,    &observable);
   ch_bkg->SetBranchAddress("weight",&weight);
+  ch_bkg->SetBranchAddress("Nsolns",&Nsolns);
   ch_bkg->SetBranchAddress("tt_mass",&ttmass);
   ch_bkg->SetBranchAddress("ttRapidity",&ttRapidity);
   ch_bkg->SetBranchAddress("t_mass",&tmass);
 
-
   for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
     ch_bkg->GetEntry(i);
-    if (ttmass>0.0) hBkg->Fill(sign(observable)*ttmass,weight);
-    }
-
+    if ( (Region=="Signal") && (ttmass>450) )  
+      fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
+    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+      fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
+    if ( (Region=="") && (iVar<2) ) 
+      fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
+  }
 
   ch_top->SetBranchAddress(observablename,    &observable);
   ch_top->SetBranchAddress(observablename+"_gen",&observable_gen);
   ch_top->SetBranchAddress("weight",&weight);
+  ch_top->SetBranchAddress("Nsolns",&Nsolns);
   ch_top->SetBranchAddress("tt_mass",&ttmass);
   ch_top->SetBranchAddress("tt_mass_gen",&ttmass_gen);
   ch_top->SetBranchAddress("ttRapidity",&ttRapidity);
@@ -142,25 +159,32 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
     ch_top->GetEntry(i);
-    if (ttmass>0.0) {
-      response.Fill (sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight);
-      hTop->Fill(sign(observable)*ttmass,weight);
-      hTop_gen->Fill(sign(observable_gen)*ttmass_gen,weight);
+    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
+      //response.Fill (observable, observable_gen, weight);
+      fillUnderOverFlow(hMeas, sign(observable)*ttmass, weight, Nsolns);
+      fillUnderOverFlow(hTrue, sign(observable_gen)*ttmass_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
+    }
+    if ( (Region=="") && (iVar<2) ) {
+      //response.Fill (observable, observable_gen, weight);
+      fillUnderOverFlow(hMeas, sign(observable)*ttmass, weight, Nsolns);
+      fillUnderOverFlow(hTrue, sign(observable_gen)*ttmass_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
     }
   }
   
-  hTop->Scale(_topScalingFactor);
+  RooUnfoldResponse response (hMeas, hTrue, hTrue_vs_Meas);
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
 
   hData->SetLineWidth(lineWidth+2);
   hTop->SetLineWidth(lineWidth);
 
-  hTop->SetLineColor(TColor::GetColorDark(kGreen));
-  hTop->SetFillColor(TColor::GetColorDark(kGreen));
+  hTrue->SetLineColor(TColor::GetColorDark(kGreen));
+  hTrue->SetFillColor(TColor::GetColorDark(kGreen));
 
   hTop->SetFillStyle(3353);
-  hTop_gen->SetFillStyle(3353);
+  hTrue->SetFillStyle(3353);
   hBkg->SetLineColor(kYellow);
   hBkg->SetFillColor(kYellow);
   
@@ -168,7 +192,7 @@ void AfbUnfoldExample()
   THStack *hs = new THStack("hs","Stacked Top+BG");
 
   hs->Add(hBkg);
-  hs->Add(hTop);
+  hs->Add(hTrue);
 
   hs->SetMinimum(0.0);
   hs->SetMaximum( 2.0* hs->GetMaximum());
@@ -195,16 +219,44 @@ void AfbUnfoldExample()
   hData_bkgSub= (TH1D*) hData->Clone();
   hData_bkgSub->Add(hBkg,-1.0);
  
-  RooUnfoldSvd unfold (&response, hData_bkgSub, kterm); 
-  unfold.Setup(&response,hData_bkgSub);                                                                                                         
-  hData_unfolded = (TH1D*) unfold.Hreco();  
-  m_unfoldE = unfold.Ereco(); 
-  TCanvas* c_d = new TCanvas("c_d","c_d",500,500);
-  TH1D* dvec=unfold.Impl()->GetD();
-  dvec->Draw();
-  c_d->SetLogy();
-  c_d->SaveAs("D_2d_"+observablename+Region+".pdf");
 
+  if (unfoldingType==0)
+    {
+      RooUnfoldSvd unfold_svd (&response, hData_bkgSub, kterm); 
+      unfold_svd.Setup(&response, hData_bkgSub);
+      unfold_svd.IncludeSystematics(includeSys);
+      hData_unfolded = (TH1D*) unfold_svd.Hreco();  
+      m_unfoldE = unfold_svd.Ereco(); 
+    }
+  else 
+    if (unfoldingType==1)
+      {
+	RooUnfoldTUnfold unfold_rooTUnfold (&response, hData_bkgSub, TUnfold::kRegModeCurvature); 
+	unfold_rooTUnfold.Setup(&response, hData_bkgSub);
+	unfold_rooTUnfold.FixTau(tau);
+	unfold_rooTUnfold.IncludeSystematics(includeSys);
+	hData_unfolded = (TH1D*) unfold_rooTUnfold.Hreco();  
+	m_unfoldE = unfold_rooTUnfold.Ereco(); 
+      }
+  else
+    if (unfoldingType==2)
+      {
+	TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);  
+	unfold_TUnfold.SetInput(hMeas);
+	//Double_t biasScale=1.0;
+	unfold_TUnfold.SetBias(hTrue);
+	unfold_TUnfold.DoUnfold(tau);
+	unfold_TUnfold.GetOutput(hData_unfolded);  
+
+	
+	TH2D* ematrix=unfold_TUnfold.GetEmatrix("ematrix","error matrix",0,0);
+	for (Int_t cmi= 0; cmi<nbins2D; cmi++) {
+	  for (Int_t cmj= 0; cmj<nbins2D; cmj++) {
+	    m_unfoldE(cmi,cmj)= ematrix->GetBinContent(cmi+1,cmj+1);
+	  }
+	}    
+      }
+    else cout<<"Unfolding TYPE not Specified"<<"\n";
 
 
 
@@ -259,20 +311,16 @@ void AfbUnfoldExample()
     }
 
     if (acceptM->GetBinContent(i)!=0) {
-      hTop_gen->SetBinContent(i, hTop_gen->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
-      hTop_gen->SetBinError  (i, hTop_gen->GetBinError(i)  *1.0/acceptM->GetBinContent(i));
+      hTrue->SetBinContent(i, hTrue->GetBinContent(i)*1.0/acceptM->GetBinContent(i));
+      hTrue->SetBinError  (i, hTrue->GetBinError(i)  *1.0/acceptM->GetBinContent(i));
     }
   }
   
 
-  double dataIntegral = hData_unfolded->Integral();
-  hData_unfolded->Scale(xsection/hData_unfolded->Integral());
-  hTop_gen->Scale(xsection/hTop_gen->Integral());
-  
-  for(int l=0;l<nbins2D;l++){
+    for(int l=0;l<nbins2D;l++){
       for(int j=0;j<nbins2D;j++){
 	double corr = 1.0 / ( acceptM->GetBinContent(l+1) * acceptM->GetBinContent(j+1) );
-	corr = corr * pow(xsection / dataIntegral,2) ;
+	//corr = corr * pow(xsection / dataIntegral,2) ;
 	m_correctE(l,j) = m_unfoldE(l,j)*corr;
       }
     }
@@ -286,7 +334,7 @@ void AfbUnfoldExample()
   GetAfb(hData, Afb, AfbErr);
   cout<<" Data: "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
-  GetAfb(hTop_gen, Afb, AfbErr);
+  GetAfb(hTrue, Afb, AfbErr);
   cout<<" True Top: "<< Afb <<" +/-  "<< AfbErr<<"\n";
     
   GetAfb(denomM, Afb, AfbErr);
@@ -303,6 +351,9 @@ void AfbUnfoldExample()
 
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+
+  //  hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
+  //  hTrue->Scale(1./hTrue->Integral(),"width");
   
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
   hData_unfolded->GetXaxis()->SetTitle("M_{t#bar t}");
@@ -313,10 +364,10 @@ void AfbUnfoldExample()
   hData_unfolded->SetMarkerSize(2.0);
   hData_unfolded->Draw("E");
   hData_unfolded->SetLineWidth(lineWidth);
-  hTop_gen->SetLineWidth(lineWidth);
-  hTop_gen->SetLineColor(TColor::GetColorDark(kGreen));
-  hTop_gen->SetFillColor(TColor::GetColorDark(kGreen));
-  hTop_gen->Draw("hist same");
+  hTrue->SetLineWidth(lineWidth);
+  hTrue->SetLineColor(TColor::GetColorDark(kGreen));
+  hTrue->SetFillColor(TColor::GetColorDark(kGreen));
+  hTrue->Draw("hist same");
   hData_unfolded->Draw("E same");
 
   leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");   
@@ -326,7 +377,7 @@ void AfbUnfoldExample()
   leg1->SetBorderSize(0);                                                                                                                  
   leg1->SetTextSize(0.03);                                                                              
   leg1->AddEntry(hData_unfolded, "( Data-BG ) Unfolded");                                                                                       
-  leg1->AddEntry(hTop_gen,    "mc@nlo parton", "F");                                                               
+  leg1->AddEntry(hTrue,    "mc@nlo parton", "F");                                                               
   leg1->Draw();                
 
   c_test->SaveAs("Mtt_2D_unfolded_"+observablename+Region+".pdf");
