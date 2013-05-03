@@ -342,7 +342,7 @@ void Initialize1DBinning(int iVar){
     case 4:
       {
       observablename="lep_costheta_cms";
-xaxislabel="cos(#theta^{+}_{l})";
+      xaxislabel="cos(#theta^{+}_{l})";
       acceptanceName="lepPlusCosTheta";
       xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
       xmin=-1.0;
@@ -424,85 +424,130 @@ xaxislabel="cos(#theta^{+}_{l})";
 
 
 
-
-
 void Initialize2DBinning(int iVar){
+
+
   switch (iVar)
     {
-   //   Top Charge Asymmetry
+      //   Lepton Charge Asymmetry
     case 0:
       {
+      observablename="lep_charge_asymmetry";
+      xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
+      acceptanceName="lepChargeAsym";
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+      }
+  //   Lepton Azimuthal Asymmetry
+    case 1:
+      {
+      observablename="lep_azimuthal_asymmetry";
+      xaxislabel="cos(#Delta#phi_{l+l-})";
+      acceptanceName="lepAzimAsym";
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+      }
+        //   Lepton Azimuthal Asymmetry 2
+    case 2:
+      {
+      observablename="lep_azimuthal_asymmetry2";
+      xaxislabel="#Delta#phi_{l+l-}";
+      acceptanceName="lepAzimAsym2";
+      Double_t pi = 3.141592653589793;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+      }
+  //   Top Charge Asymmetry
+    case 3:
+      {
       observablename="top_costheta_cms";
-      xaxislabel="A_{topFB}"; 
+      xaxislabel="cos(#theta_{top})";
       acceptanceName="topCosTheta";
-      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
 
   //   Top Polarization
-    case 1:
+    case 4:
       {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{+}_{l})";
+xaxislabel="cos(#theta^{+}_{l})";
       acceptanceName="lepPlusCosTheta";
-      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
   //   Top Spin Correlation
-    case 2:
+    case 5:
       {
       observablename="top_spin_correlation";
-      xaxislabel="A_{c1c2}";
+      xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
       acceptanceName="topSpinCorr";
-      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
  //   Top Asy I
-    case 3:
+    case 6:
       {
       observablename="top_pseudorapidtiydiff_cms";
-      xaxislabel="A_{I}";
+      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
       acceptanceName="pseudorapiditydiff";
-      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
-      //   Top Asy I
-    case 4:
+      //   Top Asy II
+    case 7:
       {
       observablename="top_rapidtiydiff_cms";
-      xaxislabel="A_{II}";
+      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
       acceptanceName="rapiditydiff";
-      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
-      // Top Asy Marco
-    case 5:
+      //   Top Asy III
+    case 8:
       {
       observablename="top_rapidtiydiff_Marco";
-      xaxislabel="A_{III}";
+      xaxislabel="|y_{top}|-|y_{tbar}|";
       acceptanceName="rapiditydiffMarco";
-      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
-  //   Top Polarization using negatively charged leptons
-    case 6:
+        //   Top Polarization using negatively charged leptons
+    case 9:
       {
       observablename="lepMinus_costheta_cms";
       xaxislabel="cos(#theta^{-}_{l})";
       acceptanceName="lepMinusCosTheta";
-      xbins2D[0]=-1500.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=1500.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+      }
+        //   Top Polarization combining positively and negatively charged leptons
+    case 10:
+      {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{*}_{l})";
+      acceptanceName="lepCosTheta";
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
@@ -513,6 +558,7 @@ void Initialize2DBinning(int iVar){
       }
     }
 }
+
 
 
 void fillUnderOverFlow(TH1D *h1, float value, double weight, int Nsolns)
