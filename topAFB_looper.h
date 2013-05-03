@@ -33,6 +33,7 @@ class topAFB_looper
 	bool passbTagging(const unsigned int jet_idx, const string jetAlgo, const string bTagDiscriminator) ;
 	double getFRWeight(const int hypIdx, SimpleFakeRate *mufr, SimpleFakeRate *elfr, FREnum frmode, bool isData);
 	double getBFRWeight(const int hypIdx, 	vector<LorentzVector> & v_goodNonBtagJets_p4,vector<LorentzVector> & v_goodBtagJets_p4, bool isData);
+	double TopPtWeight(double topPt);
 	void fillUnderOverFlow(TH1D *h1, float value, double weight = 1., int Nsolns=1);
 	void fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, double weight = 1., int Nsolns=1);
 	//void fillUnderOverFlow(TProfile *h2, float xvalue, float yvalue);

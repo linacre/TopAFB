@@ -2454,7 +2454,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     }
 
                     float pT_topplus_gen = topplus_genp_p4.Pt();
-                    float pT_topminus_gen = topminus_genp_p4.Pt();
                     if (hastop) weight = weight * TopPtWeight(pT_topplus_gen);
                 }
 
