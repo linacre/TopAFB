@@ -69,7 +69,7 @@ void AfbUnfoldExample()
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
 
     Initialize1DBinning(iVar);
-  bool combineLepMinus = iVar == 9 ? true : false;
+  bool combineLepMinus = acceptanceName=="lepCosTheta" ? true : false;
 
   TH1D* hData= new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1D, xbins1D);
   TH1D* hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
@@ -77,7 +77,7 @@ void AfbUnfoldExample()
   
   double xbins1D_arccos[nbins1D+1];
   //xbins1D_arccos[0]=acos(-1.0); xbins1D_arccos[1]=acos(-0.6); xbins1D_arccos[2]=acos(-0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(0.3); xbins1D_arccos[5]=acos(0.6); xbins1D_arccos[6]=acos(1.0);
-  xbins1D_arccos[0]=acos(1.0); xbins1D_arccos[1]=acos(0.6); xbins1D_arccos[2]=acos(0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(-0.3); xbins1D_arccos[5]=acos(-0.6); xbins1D_arccos[6]=acos(-1.0);
+  xbins1D_arccos[0]=acos(1.0); xbins1D_arccos[1]=acos(0.8); xbins1D_arccos[2]=acos(0.4); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(-0.4); xbins1D_arccos[5]=acos(-0.8); xbins1D_arccos[6]=acos(-1.0);
   TH1D* hData_unfolded_arccos= new TH1D ("Data_Unfold_arccos", "Data with background subtracted and unfolded arccos", nbins1D, xbins1D_arccos);
   TH1D* hTrue_arccos = new TH1D ("Top Gen arccos",  "Top Gen arccos",    nbins1D, xbins1D_arccos);
 
@@ -205,7 +205,7 @@ void AfbUnfoldExample()
 	  }
     }
     */ 
-    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
+    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) {
       //response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hMeas, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
@@ -217,7 +217,7 @@ void AfbUnfoldExample()
 	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
 	  }
     }
-    if ( (Region=="") && (iVar<2) ) {
+    if ( (Region=="") && (iVar<3) ) {
       //response.Fill (observable, observable_gen, weight);
       fillUnderOverFlow(hMeas, observable, weight, Nsolns);
       fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
@@ -284,7 +284,7 @@ void AfbUnfoldExample()
     TH1D* dvec=unfold_svd.Impl()->GetD();
     dvec->Draw();
     c_d->SetLogy();
-    c_d->SaveAs("D_"+observablename+Region+".pdf");
+    c_d->SaveAs("D_"+acceptanceName+Region+".pdf");
   }
 
   TCanvas* c_resp = new TCanvas("c_resp","c_resp");
@@ -293,7 +293,7 @@ void AfbUnfoldExample()
   hResp->GetXaxis()->SetTitle(xaxislabel+"_{gen}");
   hResp->GetYaxis()->SetTitle(xaxislabel);
   hResp->Draw("COLZ");
-  c_resp->SaveAs("Response_"+observablename+Region+".pdf");
+  c_resp->SaveAs("Response_"+acceptanceName+Region+".pdf");
     
   TFile *file = new TFile("../acceptance/mcnlo/accept_"+acceptanceName+".root");
   TH1D *acceptM = (TH1D*) file->Get("accept_"+acceptanceName);
@@ -333,7 +333,7 @@ void AfbUnfoldExample()
 
   //==================================================================
   // ============== Print the assymetry =============================
-  cout<<"========= Variable: "<<observablename <<"===================\n";
+  cout<<"========= Variable: "<<acceptanceName <<"===================\n";
   
   Float_t Afb, AfbErr;
 
@@ -435,7 +435,7 @@ void AfbUnfoldExample()
   blah->SetTextAlign(11);
   pt1->Draw();
 
-  c_test->SaveAs("finalplot_unfolded_"+observablename+Region+".pdf");
+  c_test->SaveAs("finalplot_unfolded_"+acceptanceName+Region+".pdf");
   }
 
   myfile.close();

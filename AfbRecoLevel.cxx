@@ -57,11 +57,11 @@ void AfbRecoLevel(TString Region="")
   Double_t weight;
   Int_t Nsolns;
 
-  int nVars =10;
+  int nVars =11;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
     Initialize1DBinning(iVar);
-    bool combineLepMinus = iVar == 9 ? true : false;
+    bool combineLepMinus = acceptanceName=="lepCosTheta" ? true : false;
 
     TH1D* hData= new TH1D ("Data", "Data",    nbins1D, xbins1D);
     TH1D* hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
@@ -112,13 +112,13 @@ void AfbRecoLevel(TString Region="")
 
     for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
       ch_top->GetEntry(i);
-      if ( (Region=="") && (iVar>=2) && (ttmass>0) ) {
+      if ( (Region=="") && (iVar>=3) && (ttmass>0) ) {
         fillUnderOverFlow(hTop, observable, weight, Nsolns);
         if( combineLepMinus ) {
   	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
   	  }
       }
-      if ( (Region=="") && (iVar<2) ) {
+      if ( (Region=="") && (iVar<3) ) {
         fillUnderOverFlow(hTop, observable, weight, Nsolns);
         if( combineLepMinus ) {
   	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
@@ -241,7 +241,7 @@ void AfbRecoLevel(TString Region="")
     blah->SetTextAlign(11);
 
     pt1->Draw();
-    c_test->SaveAs("finalplot_"+observablename+Region+".pdf");
+    c_test->SaveAs("finalplot_"+acceptanceName+Region+".pdf");
 
     delete hData;
     delete hBkg;

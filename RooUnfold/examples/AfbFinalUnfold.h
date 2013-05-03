@@ -314,8 +314,20 @@ void Initialize1DBinning(int iVar){
       xmax= 1.0;
       break;
       }
-  //   Top Charge Asymmetry
+        //   Lepton Azimuthal Asymmetry 2
     case 2:
+      {
+      observablename="lep_azimuthal_asymmetry2";
+      xaxislabel="#Delta#phi_{l+l-}";
+      acceptanceName="lepAzimAsym2";
+      Double_t pi = 3.141592653589793;
+      xbins1D[0]=0.0; xbins1D[1]=4.*pi/20.; xbins1D[2]=7.*pi/20.; xbins1D[3]=10.*pi/20.; xbins1D[4]=13.*pi/20.; xbins1D[5]=16.*pi/20.; xbins1D[6]=pi;
+      xmin=0.0;
+      xmax=pi;
+      break;
+      }
+  //   Top Charge Asymmetry
+    case 3:
       {
       observablename="top_costheta_cms";
       xaxislabel="cos(#theta_{top})";
@@ -327,7 +339,7 @@ void Initialize1DBinning(int iVar){
       }
 
   //   Top Polarization
-    case 3:
+    case 4:
       {
       observablename="lep_costheta_cms";
 xaxislabel="cos(#theta^{+}_{l})";
@@ -338,7 +350,7 @@ xaxislabel="cos(#theta^{+}_{l})";
       break;
       }
   //   Top Spin Correlation
-    case 4:
+    case 5:
       {
       observablename="top_spin_correlation";
       xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
@@ -349,7 +361,7 @@ xaxislabel="cos(#theta^{+}_{l})";
       break;
       }
  //   Top Asy I
-    case 5:
+    case 6:
       {
       observablename="top_pseudorapidtiydiff_cms";
       xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
@@ -360,7 +372,7 @@ xaxislabel="cos(#theta^{+}_{l})";
       break;
       }
       //   Top Asy II
-    case 6:
+    case 7:
       {
       observablename="top_rapidtiydiff_cms";
       xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
@@ -371,7 +383,7 @@ xaxislabel="cos(#theta^{+}_{l})";
       break;
       }
       //   Top Asy III
-    case 7:
+    case 8:
       {
       observablename="top_rapidtiydiff_Marco";
       xaxislabel="|y_{top}|-|y_{tbar}|";
@@ -382,7 +394,7 @@ xaxislabel="cos(#theta^{+}_{l})";
       break;
       }
         //   Top Polarization using negatively charged leptons
-    case 8:
+    case 9:
       {
       observablename="lepMinus_costheta_cms";
       xaxislabel="cos(#theta^{-}_{l})";
@@ -393,7 +405,7 @@ xaxislabel="cos(#theta^{+}_{l})";
       break;
       }
         //   Top Polarization combining positively and negatively charged leptons
-    case 9:
+    case 10:
       {
       observablename="lep_costheta_cms";
       xaxislabel="cos(#theta^{*}_{l})";
@@ -401,18 +413,6 @@ xaxislabel="cos(#theta^{+}_{l})";
       xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
       xmin=-1.0;
       xmax= 1.0;
-      break;
-      }
-        //   Lepton Azimuthal Asymmetry 2
-    case 10:
-      {
-      observablename="lep_azimuthal_asymmetry2";
-      xaxislabel="#Delta#phi_{l+l-}";
-      acceptanceName="lepAzimAsym2";
-      Double_t pi = 3.141592653589793;
-      xbins1D[0]=0.0; xbins1D[1]=4.*pi/20.; xbins1D[2]=7.*pi/20.; xbins1D[3]=10.*pi/20.; xbins1D[4]=13.*pi/20.; xbins1D[5]=16.*pi/20.; xbins1D[6]=pi;
-      xmin=0.0;
-      xmax=pi;
       break;
       }
     default:
