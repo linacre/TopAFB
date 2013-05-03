@@ -42,7 +42,7 @@ void getYields(TString FName="results/hist_usePtGt2020_applyTriggers_hypDisamb_u
     
    
     
-    printNJets(latex, formatS,"ttprime", false,true,combineJetBins, false,true); 
+    printNJets(latex, formatS,"ttprime", false,true,combineJetBins, false,false); 
     //browseStacks( true, false , "ttdil", dataFName, 4, 7, true, false, 3, false, 0, true);
     //browseStacks( true, false , "DYeemm", dataFName, 4, 27, true, false, 3, false, 0, true);
     hist::deleteHistos();
