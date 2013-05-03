@@ -85,17 +85,17 @@ void AfbRecoLevel(TString Region="")
       ch_data->GetEntry(i);
       if ( (Region=="Signal") && (ttmass>450) )  
         fillUnderOverFlow(hData, observable, weight, Nsolns);
-      if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+      if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
         fillUnderOverFlow(hData, observable, weight, Nsolns);    
-      if ( (Region=="") && (iVar<2) ) 
+      if ( (Region=="") && (iVar<3) ) 
         fillUnderOverFlow(hData, observable, weight, Nsolns);  
 
       if (combineLepMinus) {
         if ( (Region=="Signal") && (ttmass>450) )  
           fillUnderOverFlow(hData, observableMinus, weight, Nsolns);
-        if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+        if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
           fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
-        if ( (Region=="") && (iVar<2) ) 
+        if ( (Region=="") && (iVar<3) ) 
           fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
       } 
     }
@@ -146,17 +146,17 @@ void AfbRecoLevel(TString Region="")
       ch_bkg->GetEntry(i);
       if ( (Region=="Signal") && (ttmass>450) )  
         fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-      if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+      if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
         fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-      if ( (Region=="") && (iVar<2) ) 
+      if ( (Region=="") && (iVar<3) ) 
         fillUnderOverFlow(hBkg, observable, weight, Nsolns);
 
       if (combineLepMinus) {
   	    if ( (Region=="Signal") && (ttmass>450) )  
   	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-  	    if ( (Region=="") && (iVar>=2) && (ttmass>0) ) 
+  	    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
   	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-  	    if ( (Region=="") && (iVar<2) ) 
+  	    if ( (Region=="") && (iVar<3) ) 
   	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
   	}
     }
