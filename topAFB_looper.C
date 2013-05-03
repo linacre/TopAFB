@@ -51,6 +51,16 @@ using namespace tas;
 typedef vector<ROOT::Math::LorentzVector<ROOT::Math::PxPyPzE4D<float> > > VofP4;
 
 
+double topAFB_looper::TopPtWeight(double topPt)
+{
+    if ( topPt < 0 ) return 1;
+    if (topPt > 400) topPt = 400;
+
+    double result = (1.4 / 1000000.0) * topPt * topPt - (2.0 / 1000.0) * topPt + 1.2;
+
+    return result;
+}
+
 
 bool topAFB_looper::passbTagging(const unsigned int jet_idx, const string jetAlgo, const string bTagDiscriminator)
 {
@@ -943,11 +953,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             double sumAMWTweight = -999;
             float aveAMWTweight = -999;
             bool useOnlyMaxWsoln = false;
+            bool applyTopPtWeighting = false;
 
             float ndavtxweight = vtxweight(isData, true);
 
-            //ndavtxweight = 1.;  //no vtx weighting for fastsim samples
-            if (TString(prefix).Contains("wprime") || TString(prefix).Contains("axigluon")) ndavtxweight = 1.;
+            //if (prefix == "ttdil" || prefix == "ttotr") ndavtxweight = 1.;  //no vtx weighting for fastsim samples
 
             //get the channels correct
             int nels = 0;
@@ -2417,6 +2427,37 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                 }//!applynocuts
 
                 if (applyNoCuts) Nsolns = 1;
+
+
+                if (applyTopPtWeighting && (prefix == "ttdil" || prefix == "ttotr") )
+                {
+
+                    TLorentzVector topplus_genp_p4(0, 0, 0, 0);
+                    bool hastop = false;
+
+                    for (unsigned int i = 0; i < genps_p4().size(); i++)
+                    {
+                        if (genps_status()[i] == 3)
+                        {
+
+                            if (genps_id()[i] == 6 )
+                            {
+                                topplus_genp_p4.SetXYZT( genps_p4()[i].x(),
+                                                         genps_p4()[i].y(),
+                                                         genps_p4()[i].z(),
+                                                         genps_p4()[i].t()
+                                                       );
+                                hastop = true;
+                            }
+
+                        }
+                    }
+
+                    float pT_topplus_gen = topplus_genp_p4.Pt();
+                    float pT_topminus_gen = topminus_genp_p4.Pt();
+                    if (hastop) weight = weight * TopPtWeight(pT_topplus_gen);
+                }
+
 
                 for (int i_smear = 0; i_smear < Nsolns; ++i_smear)
                 {
