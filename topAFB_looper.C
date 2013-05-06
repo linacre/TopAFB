@@ -3089,12 +3089,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         }
 
 
-
-                        fillHistos( hlepChargeAsym_gen2d, lep_charge_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
-                        fillHistos( hlepAzimAsym_gen2d, lep_azimuthal_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
-                        fillHistos( hlepAzimAsym2_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
                         if (m_top > 0 || applyNoCuts)
                         {
+                            //2D unfolding requires ttbar solution even for the purely leptonic variables
+                            fillHistos( hlepChargeAsym_gen2d, lep_charge_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepAzimAsym_gen2d, lep_azimuthal_asymmetry_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepAzimAsym2_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
                             fillHistos( htopSpinCorr_gen2d, top_spin_correlation_gen  ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
                             fillHistos( htopCosTheta_gen2d, top_costheta_cms_gen   ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
                             fillHistos( hlepCosTheta_gen2d, lepPlus_costheta_cms_gen  ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
