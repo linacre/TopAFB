@@ -96,7 +96,7 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       
       
       hlepChargeAsym_gen[i][j] = new TH1D(Form("%s_hlepChargeAsymGen_%s",prefix,suffix),Form("%s_lepChargeAsymGen_%s",prefix,suffix),80,-4,4);
-      hlepChargeAsym_gen[i][j]->GetXaxis()->SetTitle("|y_{l^{+}}| - |y_{l^{-}}|");
+      hlepChargeAsym_gen[i][j]->GetXaxis()->SetTitle("|#eta_{l^{+}}| - |#eta_{l^{-}}|");
       hlepChargeAsym_gen[i][j]->Sumw2();
 
       hlepAzimAsym_gen[i][j] = new TH1D(Form("%s_hlepAzimAsymGen_%s",prefix,suffix),Form("%s_lepAzimAsymGen_%s",prefix,suffix),80,-1,1);
@@ -144,7 +144,7 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       
       //2d histos for asyms vs mass at gen level
       hlepChargeAsym_gen2d[i][j] = new TH2D(Form("%s_hlepChargeAsymGen2d_%s",prefix,suffix),Form("%s_lepChargeAsymGen2d_%s",prefix,suffix),80,-4,4,120,0.,1200.);
-      hlepChargeAsym_gen2d[i][j]->GetXaxis()->SetTitle("|y_{l^{+}}| - |y_{l^{-}}|");
+      hlepChargeAsym_gen2d[i][j]->GetXaxis()->SetTitle("|#eta_{l^{+}}| - |#eta_{l^{-}}|");
       hlepChargeAsym_gen2d[i][j]->GetYaxis()->SetTitle("M_{t#bar{t}} (GeV/c^{2})");
       hlepChargeAsym_gen2d[i][j]->Sumw2();
 
@@ -201,7 +201,7 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       
       //Reco-Gen hists for asyms
       hlepChargeAsymGenDiff[i][j] = new TH1D(Form("%s_hlepChargeAsymGenDiff_%s",prefix,suffix),Form("%s_lepChargeAsymGenDiff_%s",prefix,suffix),80,-4,4);
-      hlepChargeAsymGenDiff[i][j]->GetXaxis()->SetTitle("|y_{l^{+}}| - |y_{l^{-}}| (reco-gen)");
+      hlepChargeAsymGenDiff[i][j]->GetXaxis()->SetTitle("|#eta_{l^{+}}| - |#eta_{l^{-}}| (reco-gen)");
       hlepChargeAsymGenDiff[i][j]->Sumw2();
 
       hlepAzimAsymGenDiff[i][j] = new TH1D(Form("%s_hlepAzimAsymGenDiff_%s",prefix,suffix),Form("%s_lepAzimAsymGenDiff_%s",prefix,suffix),80,-2,2);
@@ -249,8 +249,8 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
 
       
  
-      hlepChargeAsym[i][j] = new TH1D(Form("%s_hlepChargeAsym_%s",prefix,suffix),Form("%s_lepChargeAsym_%s",prefix,suffix),100,-4,4);
-      hlepChargeAsym[i][j]->GetXaxis()->SetTitle(" |y_{l^{+}}| - |y_{l^{-}}| ");
+      hlepChargeAsym[i][j] = new TH1D(Form("%s_hlepChargeAsym_%s",prefix,suffix),Form("%s_lepChargeAsym_%s",prefix,suffix),80,-4,4);
+      hlepChargeAsym[i][j]->GetXaxis()->SetTitle(" |#eta_{l^{+}}| - |#eta_{l^{-}}| ");
       hlepChargeAsym[i][j]->Sumw2();
  
       hlepRapDiff[i][j] = new TH1D(Form("%s_hlepRapDiff_%s",prefix,suffix),Form("%s_lepRapDiff_%s",prefix,suffix),100,-4,4);
