@@ -30,7 +30,7 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-const Double_t _topScalingFactor=1.+(9824. - 10070.94)/9344.25; 
+const Double_t _topScalingFactor=1.+(9824. - 10070.94)/9344.25;  //needs to be changed from preselection ratio to ratio for events with a ttbar solution
 
  // 0=SVD, 1=TUnfold via RooUnfold, 2=TUnfold
   int unfoldingType=0;
@@ -125,8 +125,8 @@ void AfbUnfoldExample()
       fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);
     if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
       fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);    
-    if ( (Region=="") && (iVar<3) ) 
-      if(ttmass>0) fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);     
+    if ( (Region=="") && (iVar<3) && (ttmass>0) ) 
+      fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);     
   }
 
   ch_bkg->SetBranchAddress(observablename,    &observable);
@@ -143,8 +143,8 @@ void AfbUnfoldExample()
       fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
     if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
       fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
-    if ( (Region=="") && (iVar<3) ) 
-      if(ttmass>0) fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
+    if ( (Region=="") && (iVar<3) && (ttmass>0) ) 
+      fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
   }
 
   ch_top->SetBranchAddress(observablename,    &observable);
@@ -174,11 +174,11 @@ void AfbUnfoldExample()
       fillUnderOverFlow(hTrue, sign(observable_gen)*ttmass_gen, weight, Nsolns);
       fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
     }
-    if ( (Region=="") && (iVar<3) ) {
+    if ( (Region=="") && (iVar<3) && (ttmass>0) ) {
       //response.Fill (observable, observable_gen, weight);
-      if(ttmass>0) fillUnderOverFlow(hMeas, sign(observable)*ttmass, weight, Nsolns);
+      fillUnderOverFlow(hMeas, sign(observable)*ttmass, weight, Nsolns);
       fillUnderOverFlow(hTrue, sign(observable_gen)*ttmass_gen, weight, Nsolns);
-      if(ttmass>0) fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
+      fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
     }
   }
   
