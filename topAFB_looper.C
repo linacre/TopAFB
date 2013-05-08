@@ -832,7 +832,22 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
         isData = true;
     }
 
-
+    //---------------------------
+    // lepton energy systematic
+    // vary electron energy by +- 1 sigma (0.3%) for data
+    // set the booleans and rer
+    bool scaleLeptonEnergyUp = false;
+    bool scaleLeptonEnergyDown = false;
+    float leptonEnergyScaleFactor = 1.;
+    if ( isData ) {
+      if ( scaleLeptonEnergyUp ) {
+        leptonEnergyScaleFactor     = 1.003;
+      }
+      if ( scaleLeptonEnergyDown ) {
+        leptonEnergyScaleFactor     = 0.997;
+      }
+    }
+                    
     if (prefix == "ttdil" || prefix == "ttotr")
     {
         cout << "using Fall11 vertex weighting" << endl;
@@ -882,8 +897,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             elfr = new SimpleFakeRate("fr_os7June2011.root", "fr_el_OSGV3" );
         }
     }
-
-
 
     //--------------------------
     // File and Event Loop
@@ -1298,6 +1311,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     LorentzVector ll_p4  = hyp_ll_p4()[ihyp];
                     int id_lt = hyp_lt_id()[ihyp];
                     int id_ll = hyp_ll_id()[ihyp];
+
+                    // lepton energy scale systematic variation
+                    if(fabs(id_lt) == 11) lt_p4*=leptonEnergyScaleFactor;
+                    if(fabs(id_ll) == 11) ll_p4*=leptonEnergyScaleFactor;
+
                     int idx_lt = hyp_lt_index()[ihyp];
                     int idx_ll = hyp_ll_index()[ihyp];
                     // opposite charge
@@ -1496,6 +1514,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     ll_p4  = hyp_ll_p4()[hypIdx];
                     int id_lt = hyp_lt_id()[hypIdx];
                     int id_ll = hyp_ll_id()[hypIdx];
+
+                    // lepton energy scale systematic variation
+                    if(fabs(id_lt) == 11) lt_p4*=leptonEnergyScaleFactor;
+                    if(fabs(id_ll) == 11) ll_p4*=leptonEnergyScaleFactor;
+
                     int idx_lt = hyp_lt_index()[hypIdx];
                     int idx_ll = hyp_ll_index()[hypIdx];
                     // z mass window
@@ -2599,12 +2622,19 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 hyp_lt_p4()[hypIdx].t()
                             );
 
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_lt_id()[hypIdx]) == 11) lepPlus*=leptonEnergyScaleFactor;
+
                             lepMinus.SetXYZT(
                                 hyp_ll_p4()[hypIdx].x(),
                                 hyp_ll_p4()[hypIdx].y(),
                                 hyp_ll_p4()[hypIdx].z(),
                                 hyp_ll_p4()[hypIdx].t()
                             );
+
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_ll_id()[hypIdx]) == 11) lepMinus*=leptonEnergyScaleFactor;
+
                         }
                         else
                         {
@@ -2615,12 +2645,19 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 hyp_ll_p4()[hypIdx].t()
                             );
 
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_ll_id()[hypIdx]) == 11) lepPlus*=leptonEnergyScaleFactor;
+
                             lepMinus.SetXYZT(
                                 hyp_lt_p4()[hypIdx].x(),
                                 hyp_lt_p4()[hypIdx].y(),
                                 hyp_lt_p4()[hypIdx].z(),
                                 hyp_lt_p4()[hypIdx].t()
                             );
+
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_lt_id()[hypIdx]) == 11) lepMinus*=leptonEnergyScaleFactor;
+
                         }
 
 
@@ -2636,8 +2673,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             v_goodJets_cand_p4[1].y(),
                             v_goodJets_cand_p4[1].z(),
                             v_goodJets_cand_p4[1].t()
-                        );
-
+                        );                      
 
                         lep_charge_asymmetry = -999.0;
                         lep_charge_asymmetry = abs(lepPlus.Eta()) - abs(lepMinus.Eta());
@@ -3471,4 +3507,3 @@ int topAFB_looper::antimatch4vector(const LorentzVector &lvec,
     }
     return iret;
 }
-
