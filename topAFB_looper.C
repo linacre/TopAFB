@@ -56,7 +56,11 @@ double topAFB_looper::TopPtWeight(double topPt)
     if ( topPt < 0 ) return 1;
     if (topPt > 400) topPt = 400;
 
-    double result = (1.4 / 1000000.0) * topPt * topPt - (2.0 / 1000.0) * topPt + 1.2;
+    //double result = (1.4 / 1000000.0) * topPt * topPt - (2.0 / 1000.0) * topPt + 1.2; //old 7TeV fit (l+j and 2l combined)
+    double result = exp(0.199 - 0.00166 * topPt); //new 7TeV fit (l+j and 2l combined)
+    //note this fit is for data/madgraph, and we are using MC@NLO
+
+
 
     return result;
 }
@@ -953,7 +957,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             double sumAMWTweight = -999;
             float aveAMWTweight = -999;
             bool useOnlyMaxWsoln = false;
-            bool applyTopPtWeighting = false;
+            bool applyTopPtWeighting = true;
 
             float ndavtxweight = vtxweight(isData, true);
 
@@ -2432,8 +2436,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                 if (applyTopPtWeighting && (prefix == "ttdil" || prefix == "ttotr") )
                 {
 
-                    TLorentzVector topplus_genp_p4(0, 0, 0, 0);
+                    TLorentzVector topplus_genp_p4(0, 0, 0, 0), topminus_genp_p4(0, 0, 0, 0);
                     bool hastop = false;
+                    bool hastbar = false;
 
                     for (unsigned int i = 0; i < genps_p4().size(); i++)
                     {
@@ -2449,12 +2454,25 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                                        );
                                 hastop = true;
                             }
+                            else if (genps_id()[i] == -6 )
+                            {
+                                topminus_genp_p4.SetXYZT( genps_p4()[i].x(),
+                                                          genps_p4()[i].y(),
+                                                          genps_p4()[i].z(),
+                                                          genps_p4()[i].t()
+                                                        );
+                                hastbar = true;
+                            }
 
                         }
                     }
 
                     float pT_topplus_gen = topplus_genp_p4.Pt();
-                    if (hastop) weight = weight * TopPtWeight(pT_topplus_gen);
+                    float pT_topminus_gen = topminus_genp_p4.Pt();
+                    if (hastop && hastbar) weight = weight * sqrt( TopPtWeight(pT_topplus_gen) * TopPtWeight(pT_topminus_gen) );
+                    //if (hastop) cout << "pT weight top: " << TopPtWeight(pT_topplus_gen) << endl;
+                    //if (hastbar) cout << "pT weight tbar: " << TopPtWeight(pT_topminus_gen) << endl;
+
                 }
 
 
