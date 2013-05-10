@@ -1,15 +1,5 @@
 #!/bin/bash
 
-export execution_directory='/home/users/gutsche/software/TAS/AFB7TeV/CMSSW_5_3_2_patch4/src/Analysis_2012/TopAFB_lepton_energy_scale_down'
-
-echo "Changing to $execution_directory"
-cd $execution_directory
-
-echo "Setting up environment"
-source /code/osgcode/cmssoft/cmsset_default.sh CMSSW_1_6_12
-export SCRAM_ARCH=slc5_amd64_gcc462
-cmsenv
-
 echo "executing doAll.C"
 root -b -q doAll.C >& doAll.log
 
@@ -29,6 +19,7 @@ mv -f accept_*.* acceptance/mcnlo/
 
 echo "run 1D unfolding"
 cd RooUnfold
+make
 root -b -q macro_1DUnfolding.C >& macro_1DUnfolding.log
 
 echo "run 2D unfolding"
