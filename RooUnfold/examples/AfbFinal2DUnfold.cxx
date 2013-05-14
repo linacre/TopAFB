@@ -30,7 +30,7 @@ using std::endl;
 // Global definitions
 //==============================================================================
 
-const Double_t _topScalingFactor=1.+(9824. - 10070.94)/9344.25;  //needs to be changed from preselection ratio to ratio for events with a ttbar solution
+//const Double_t _topScalingFactor=1.+(9824. - 10070.94)/9344.25;  //needs to be changed from preselection ratio to ratio for events with a ttbar solution
 
  // 0=SVD, 1=TUnfold via RooUnfold, 2=TUnfold
   int unfoldingType=0;
@@ -203,7 +203,7 @@ void AfbUnfoldExample()
   THStack *hs = new THStack("hs","Stacked Top+BG");
 
   hs->Add(hBkg);
-  hs->Add(hTrue);
+  hs->Add(hMeas);
 
   hs->SetMinimum(0.0);
   hs->SetMaximum( 2.0* hs->GetMaximum());
@@ -380,36 +380,6 @@ void AfbUnfoldExample()
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
-  //  hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
-  //  hTrue->Scale(1./hTrue->Integral(),"width");
-  
-  TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
-  hData_unfolded->GetXaxis()->SetTitle("M_{t#bar t}");
-  hData_unfolded->GetYaxis()->SetTitle("d#sigma/dM_{t#bar t}");
-  hData_unfolded->SetMinimum(0.0);
-  hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
-  hData_unfolded->SetMarkerStyle(23);
-  hData_unfolded->SetMarkerSize(2.0);
-  hData_unfolded->Draw("E");
-  hData_unfolded->SetLineWidth(lineWidth);
-  hTrue->SetLineWidth(lineWidth);
-  hTrue->SetLineColor(TColor::GetColorDark(kGreen));
-  hTrue->SetFillColor(TColor::GetColorDark(kGreen));
-  hTrue->Draw("hist same");
-  hData_unfolded->Draw("E same");
-
-  leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");   
-  leg1->SetEntrySeparation(100);                                                                                                          
-  leg1->SetFillColor(0);                                                                                                                  
-  leg1->SetLineColor(0);                                                                                                                   
-  leg1->SetBorderSize(0);                                                                                                                  
-  leg1->SetTextSize(0.03);                                                                              
-  leg1->AddEntry(hData_unfolded, "( Data-BG ) Unfolded");                                                                                       
-  leg1->AddEntry(hTrue,    "mc@nlo parton level", "F");                                                               
-  leg1->Draw();                
-
-  c_test->SaveAs("Mtt_2D_unfolded_"+acceptanceName+Region+".pdf");
-
   vector<double> afb_m;
   vector<double> afb_merr;
   GetAvsY(hData_unfolded, m_correctE, afb_m, afb_merr);  
@@ -438,7 +408,7 @@ void AfbUnfoldExample()
   hTop_AfbVsMtt->SetMarkerColor(kGreen);
   hTop_AfbVsMtt->SetMarkerSize(0);
   hTop_AfbVsMtt->SetLineWidth( 2.0 );
-  hAfbVsMtt->GetYaxis()->SetTitle(""+xaxislabel);
+  hAfbVsMtt->GetYaxis()->SetTitle("A("+xaxislabel+")");
   hAfbVsMtt->GetYaxis()->SetTitleOffset(1.2);
   hAfbVsMtt->GetXaxis()->SetTitle("M_{t#bar t} (GeV/c^{2})");
   hTop_AfbVsMtt->Draw("E same");
@@ -455,6 +425,38 @@ void AfbUnfoldExample()
   
   
   c_test->SaveAs("AfbVsMtt_unfolded_"+acceptanceName+Region+".pdf");
+
+
+  hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
+  hTrue->Scale(1./hTrue->Integral(),"width");
+  
+  TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
+  hData_unfolded->GetXaxis()->SetTitle("M_{t#bar t}");
+  hData_unfolded->GetYaxis()->SetTitle("d#sigma/dM_{t#bar t}");
+  hData_unfolded->SetMinimum(0.0);
+  hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
+  hData_unfolded->SetMarkerStyle(23);
+  hData_unfolded->SetMarkerSize(2.0);
+  hData_unfolded->Draw("E");
+  hData_unfolded->SetLineWidth(lineWidth);
+  hTrue->SetLineWidth(lineWidth);
+  hTrue->SetLineColor(TColor::GetColorDark(kGreen));
+  hTrue->SetFillColor(TColor::GetColorDark(kGreen));
+  hTrue->Draw("hist same");
+  hData_unfolded->Draw("E same");
+
+  leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");   
+  leg1->SetEntrySeparation(100);                                                                                                          
+  leg1->SetFillColor(0);                                                                                                                  
+  leg1->SetLineColor(0);                                                                                                                   
+  leg1->SetBorderSize(0);                                                                                                                  
+  leg1->SetTextSize(0.03);                                                                              
+  leg1->AddEntry(hData_unfolded, "( Data-BG ) Unfolded");                                                                                       
+  leg1->AddEntry(hTrue,    "mc@nlo parton level", "F");                                                               
+  leg1->Draw();                
+
+  c_test->SaveAs("Mtt_2D_unfolded_"+acceptanceName+Region+".pdf");
+
 
   }
   myfile.close();
