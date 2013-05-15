@@ -184,7 +184,7 @@ void AfbUnfoldExample()
   
   RooUnfoldResponse response (hMeas, hTrue, hTrue_vs_Meas);
 
-  TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
+  TCanvas* c_mtt = new TCanvas("c_mtt","c_mtt",500,500); 
 
   hData->SetLineWidth(lineWidth+2);
 
@@ -224,7 +224,7 @@ void AfbUnfoldExample()
   leg1->AddEntry(hMeas,  "mc@nlo reco level", "F");                                                               
   leg1->AddEntry(hBkg,  "Background", "F");                                                               
   leg1->Draw();                
-  c_test->SaveAs("Mtt_"+acceptanceName+Region+".pdf");
+  c_mtt->SaveAs("Mtt_"+acceptanceName+Region+".pdf");
 
 
   hData_bkgSub= (TH1D*) hData->Clone();
@@ -384,6 +384,7 @@ void AfbUnfoldExample()
   vector<double> afb_merr;
   GetAvsY(hData_unfolded, m_correctE, afb_m, afb_merr);  
 
+  TCanvas* c_afb = new TCanvas("c_afb","c_afb",500,500); 
   xbins2D[0]=300.0; xbins2D[1]=450; xbins2D[2]=550.0; xbins2D[3]=800.0;
   TH1D* hAfbVsMtt = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, xbins2D);
   for (int nb=0; nb<3; nb++) {
@@ -424,13 +425,14 @@ void AfbUnfoldExample()
   leg1->Draw();           
   
   
-  c_test->SaveAs("AfbVsMtt_unfolded_"+acceptanceName+Region+".pdf");
+  c_afb->SaveAs("AfbVsMtt_unfolded_"+acceptanceName+Region+".pdf");
 
+
+  TCanvas* c_mttu = new TCanvas("c_mttu","c_mttu",500,500); 
 
   hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
   hTrue->Scale(1./hTrue->Integral(),"width");
   
-  TCanvas* c_test = new TCanvas("c_final_2","c_final_2",500,500); 
   hData_unfolded->GetXaxis()->SetTitle("M_{t#bar t}");
   hData_unfolded->GetYaxis()->SetTitle("d#sigma/dM_{t#bar t}");
   hData_unfolded->SetMinimum(0.0);
@@ -455,7 +457,7 @@ void AfbUnfoldExample()
   leg1->AddEntry(hTrue,    "mc@nlo parton level", "F");                                                               
   leg1->Draw();                
 
-  c_test->SaveAs("Mtt_2D_unfolded_"+acceptanceName+Region+".pdf");
+  c_mttu->SaveAs("Mtt_2D_unfolded_"+acceptanceName+Region+".pdf");
 
 
   }
