@@ -38,7 +38,7 @@ using std::endl;
   TString Region="";
   Int_t kterm=3;    //note we used 4 here for ICHEP
   Double_t tau=1E-4;
-  Int_t nVars =10;
+  Int_t nVars =11;
   Int_t includeSys = 1;
 
 
