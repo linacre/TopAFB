@@ -430,7 +430,7 @@ void AfbUnfoldExample()
   hData_unfolded->Scale(1./hData_unfolded->Integral(),"width");
   hTrue->Scale(1./hTrue->Integral(),"width");
   
-  TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
+  TCanvas* c_test = new TCanvas("c_final_2","c_final_2",500,500); 
   hData_unfolded->GetXaxis()->SetTitle("M_{t#bar t}");
   hData_unfolded->GetYaxis()->SetTitle("d#sigma/dM_{t#bar t}");
   hData_unfolded->SetMinimum(0.0);
