@@ -833,9 +833,16 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     }
 
     //---------------------------
+    // b tag efficiency systematics
+    // vary b tag scale factor by +- b tag scale factor error
+    // set one of the booleans to true
+    bool scaleBTAGSFup = false;
+    bool scaleBTAGSFdown = false;
+
+    //---------------------------
     // lepton energy systematic
     // vary electron energy by +- 1 sigma (0.3%) for data
-    // set the booleans and rer
+    // set one the booleans to true
     bool scaleLeptonEnergyUp = false;
     bool scaleLeptonEnergyDown = false;
     float leptonEnergyScaleFactor = 1.;
@@ -2179,14 +2186,46 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         int nMistags = 0;
                         int ncMistags = 0;
                         double btag_sf = 1.0;
+                        double ctag_sf = 1.0;
 
                         if (BTagAlgTCHE)
                         {
                             btag_sf = getBTagSF("TCHE", 3.3);
-                        }
+                            // ctag_sf equal to btag_sf but error is different
+                            // assumption true for CSV, implementing it here for code safety, needs to be checked if TCHE is used
+                            ctag_sf = btag_sf;
+                            // systematics, add or subtract one sigma error
+                            if ( scaleBTAGSFup ) {
+                              btag_sf += getBTagSF_Err("TCHE");
+                            } else if ( scaleBTAGSFdown ) {
+                              btag_sf -= getBTagSF_Err("TCHE");
+                            }
+                            // systematics, add or subsctract one sigma error
+                            // at the same time when btag sf is scaled
+                            if ( scaleBTAGSFup ) {
+                              ctag_sf += getCTagSF_Err("TCHE");
+                            } else if ( scaleBTAGSFdown ) {
+                              ctag_sf -= getCTagSF_Err("TCHE");
+                            }
+                          }
                         else
                         {
                             btag_sf = getBTagSF("CSV", 0.679);
+                            // ctag_sf equal to btag_sf but error is different
+                            ctag_sf = btag_sf;
+                            // systematics, add or subtract one sigma error
+                            if ( scaleBTAGSFup ) {
+                              btag_sf += getBTagSF_Err("CSV");
+                            } else if ( scaleBTAGSFdown ) {
+                              btag_sf -= getBTagSF_Err("CSV");
+                            }
+                            // systematics, add or subsctract one sigma error
+                            // at the same time when btag sf is scaled
+                            if ( scaleBTAGSFup ) {
+                              ctag_sf += getCTagSF_Err("CSV");
+                            } else if ( scaleBTAGSFdown ) {
+                              ctag_sf -= getCTagSF_Err("CSV");
+                            }
                         }
 
                         for (unsigned int j = 0; j < nBtagJets; j++)
@@ -2212,7 +2251,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             {
                                 //cout<<"nUnmatched, j, j_unmatched[j], i_matching_c "<<nUnmatchedBtagJets<<" "<<j<<" "<<j_unmatched[j]<<" "<<i_matching_c[j_unmatched[j]]<<endl;
                                 ncMistags++;
-                                weightcmistag *= btag_sf;
+                                weightcmistag *= ctag_sf;
                                 if ( j_unmatched[j] == -1) cout << "something went wrong filling v_goodBtagJets_unmatched_p4" << endl;
                             }
                             else
@@ -2293,7 +2332,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             }
                             //if(alreadymatchedc) cout<<"alreadymatchedc"<<endl;
                             if ( !(i_nonb_matching_b[i] == -1 || alreadymatched) ) weightbnottagged *= (1. - btageffdata) / (1. - btageffdata / btag_sf );
-                            if ( (i_nonb_matching_b[i] == -1 || alreadymatched) && !(i_nonb_matching_c[i] == -1 || alreadymatchedc) ) weightcnotmistagged *= (1. - ctageffdata) / (1. - ctageffdata / btag_sf );
+                            if ( (i_nonb_matching_b[i] == -1 || alreadymatched) && !(i_nonb_matching_c[i] == -1 || alreadymatchedc) ) weightcnotmistagged *= (1. - ctageffdata) / (1. - ctageffdata / ctag_sf );
                             if ( (i_nonb_matching_b[i] == -1 || alreadymatched) && (i_nonb_matching_c[i] == -1 || alreadymatchedc) ) weightnotmistagged *= (1. - bjetfrdata) / (1. - bjetfrdata / getMisTagSF( nonb_pt, nonb_eta  , btag_algo_name.Data()));
                         }
                         //if(nGenc>0) cout<<"weightb, weightbnottagged, weightcmistag, weightcnotmistagged, weightmistag, weightnotmistagged: "<<weightb<<" , "<<weightbnottagged <<" , "<<weightcmistag<<" , "<<weightcnotmistagged <<" , "<<weightmistag<<" , "<<weightnotmistagged <<endl;
