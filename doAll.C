@@ -396,7 +396,7 @@ if(runttdil) {
       ch_wjets->Add(Form("%s/%s", cms2_skim_location.c_str(),"WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29_singleLepton/skimmed*root")); 
     }
     else{
-      ch_wjets->Add("/hadoop/cms/store/user/imacneill/Summer11MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/DileptonHyp/merged*root"); 
+      ch_wjets->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29_singleLepton/merged*root"); 
     }
     baby->ScanChain(ch_wjets,v_Cuts, "wjets", doFRestimation, lumiToNormalizeTo, kWjets, false);
     hist::color("wjets", kViolet);
@@ -410,9 +410,9 @@ if(runttdil) {
       ch_dyee->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root")); 
     }
     else{
-      ch_dyee->Add("/nfs-3/userdata/cms2/DYToEE_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_dyee->Add("/nfs-7/userdata/cms2/DYToEE_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_dyee->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dyee->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYToEE_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dyee->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYToEE_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dyee->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
     }
     baby->ScanChain(ch_dyee, v_Cuts, "DYee",doFRestimation, lumiToNormalizeTo, kDYee, false);
     hist::color("DYee", kMagenta);
@@ -428,9 +428,9 @@ if(runttdil) {
       ch_dymm->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root")); 
     }
     else{
-      ch_dymm->Add("/nfs-3/userdata/cms2/DYToMuMu_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_dymm->Add("/nfs-3/userdata/cms2/DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_dymm->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+      ch_dymm->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYToMuMu_M-10To20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dymm->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYToMuMu_M-20_CT10_TuneZ2_7TeV-powheg-pythia_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dymm->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
     }
  
     baby->ScanChain(ch_dymm, v_Cuts, "DYmm",doFRestimation, lumiToNormalizeTo, kDYmm, false);
@@ -447,10 +447,10 @@ if(runttdil) {
       ch_dytt->Add(Form("%s/%s", cms2_skim_location.c_str(),"DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/skimmed*.root"));
     }
     else{
-      ch_dytt->Add("/nfs-3/userdata/cms2/DYToTauTau_M-10To20_TuneZ2_7TeV-pythia6-tauola_Summer11-PU_S3_START42_V11-v2/V04-02-29/merged*.root");
+      ch_dytt->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYToTauTau_M-10To20_TuneZ2_7TeV-pythia6-tauola_Summer11-PU_S3_START42_V11-v2/V04-02-29/merged*.root");
 
-      ch_dytt->Add("/nfs-7/userdata/cms2/DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_dytt->Add("/nfs-7/userdata/cms2/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dytt->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYToTauTau_M-20_CT10_TuneZ2_7TeV-powheg-pythia-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_dytt->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/DYJetsToLL_TuneZ2_M-50_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
     }
     baby->ScanChain(ch_dytt,v_Cuts, "DYtautau",doFRestimation, lumiToNormalizeTo, kDYtautau, false);
     hist::color("DYtautau", kBlack);
@@ -473,12 +473,12 @@ if(runttdil) {
       */
     }
     else{
-      ch_vv->Add("/nfs-7/userdata/cms2/WWJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
-      ch_vv->Add("/nfs-7/userdata/cms2/WZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
-      ch_vv->Add("/nfs-7/userdata/cms2/WZJetsTo3LNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
-      ch_vv->Add("/nfs-7/userdata/cms2/ZZJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
-      ch_vv->Add("/nfs-7/userdata/cms2/ZZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
-      ch_vv->Add("/nfs-7/userdata/cms2/ZZJetsTo4L_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+      ch_vv->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/WWJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
+      ch_vv->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/WZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
+      ch_vv->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/WZJetsTo3LNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");                                                     
+      ch_vv->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/ZZJetsTo2L2Nu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+      ch_vv->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/ZZJetsTo2L2Q_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
+      ch_vv->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/ZZJetsTo4L_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root"); 
      /*
       ch_vv->Add("/nfs-7/userdata/cms2/WWTo2L2Nu_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
       ch_vv->Add("/nfs-7/userdata/cms2/ZZ_TuneZ2_7TeV_pythia6_tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
@@ -508,12 +508,12 @@ if(runttdil) {
       */
     }
     else{
-      ch_tw->Add("/nfs-7/userdata/cms2/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1//V04-02-29/merged*.root");
-      ch_tw->Add("/nfs-7/userdata/cms2/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_tw->Add("/nfs-7/userdata/cms2/T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_tw->Add("/nfs-7/userdata/cms2/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_tw->Add("/nfs-7/userdata/cms2/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
-      ch_tw->Add("/nfs-7/userdata/cms2/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/T_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1//V04-02-29/merged*.root");
+      ch_tw->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/Tbar_TuneZ2_s-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/T_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/Tbar_TuneZ2_t-channel_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/T_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
+      ch_tw->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/Tbar_TuneZ2_tW-channel-DR_7TeV-powheg-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/merged*.root");
     
     }
     baby->ScanChain(ch_tw, v_Cuts, "tw", doFRestimation, lumiToNormalizeTo, ktW, false);
