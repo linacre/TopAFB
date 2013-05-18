@@ -41,7 +41,7 @@ using std::endl;
   TString Region="";
   Int_t kterm=3; 
   Double_t tau=1E-4;
-  Int_t nVars =11;
+  Int_t nVars =8;
   Int_t includeSys = 1;
 
 
@@ -57,6 +57,10 @@ void AfbUnfoldExample()
   ofstream myfile;
   myfile.open ("summary_1Dunfolding.txt");
   cout.rdbuf(myfile.rdbuf());
+  
+  // OGU 130516: add second output txt file with format easier to be pasted into google docs
+  ofstream second_output_file;
+  second_output_file.open("summary_1Dunfolding_formated.txt");
 
   TRandom3* random = new TRandom3();                                                                                                        
   random->SetSeed(5);
@@ -101,7 +105,6 @@ void AfbUnfoldExample()
   TMatrixD m_unfoldE (nbins1D,nbins1D);
   TMatrixD m_correctE(nbins1D,nbins1D);
 
-
   //  Now test with data and with BKG subtraction
 
   TChain *ch_bkg = new TChain("tree");
@@ -134,21 +137,35 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
     ch_data->GetEntry(i);
-    if ( (Region=="Signal") && (ttmass>450) )  
-      fillUnderOverFlow(hData, observable, weight, Nsolns);
-    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
-      fillUnderOverFlow(hData, observable, weight, Nsolns);    
-    if ( (Region=="") && (iVar<3) ) 
-      fillUnderOverFlow(hData, observable, weight, Nsolns);  
-
+    // if ( (Region=="Signal") && (ttmass>450) ) {
+    //   fillUnderOverFlow(hData, observable, weight, Nsolns);
+    // } else if (Region=="") {
+      if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+        // leptonic asymmetries don't need valid top mass solution
+        fillUnderOverFlow(hData, observable, weight, Nsolns);    
+      } else {
+        if ( ttmass > 0 ) {
+          // asymmetries with top properties are required to have a valid top mass solution
+          fillUnderOverFlow(hData, observable, weight, Nsolns);    
+        }
+      }
+    // }
     if (combineLepMinus) {
-	    if ( (Region=="Signal") && (ttmass>450) )  
-	      fillUnderOverFlow(hData, observableMinus, weight, Nsolns);
-	    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
-	      fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
-	    if ( (Region=="") && (iVar<3) ) 
-	      fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
-	} 
+      // combine plus and minus
+      // if ( (Region=="Signal") && (ttmass>450) ) {
+      //   fillUnderOverFlow(hData, observable, weight, Nsolns);
+      // } else if (Region=="") {
+        if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+          // leptonic asymmetries don't need valid top mass solution
+          fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
+        } else {
+          if ( ttmass > 0 ) {
+            // asymmetries with top properties are required to have a valid top mass solution
+            fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
+          }
+        }
+      // }
+    }    
   }
 
   ch_bkg->SetBranchAddress(observablename,    &observable);
@@ -161,21 +178,35 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
     ch_bkg->GetEntry(i);
-    if ( (Region=="Signal") && (ttmass>450) )  
-      fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
-      fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-    if ( (Region=="") && (iVar<3) ) 
-      fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-
+    // if ( (Region=="Signal") && (ttmass>450) ) {
+    //   fillUnderOverFlow(hBkg, observable, weight, Nsolns);
+    // } else if (Region=="") {
+      if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+        // leptonic asymmetries don't need valid top mass solution
+        fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
+      } else {
+        if ( ttmass > 0 ) {
+          // asymmetries with top properties are required to have a valid top mass solution
+          fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
+        }
+      }
+    // }
     if (combineLepMinus) {
-	    if ( (Region=="Signal") && (ttmass>450) )  
-	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-	    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
-	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-	    if ( (Region=="") && (iVar<3) ) 
-	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-	}
+      // combine plus and minus
+      // if ( (Region=="Signal") && (ttmass>450) ) {
+      //   fillUnderOverFlow(hBkg, observable, weight, Nsolns);
+      // } else if (Region=="") {
+        if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+          // leptonic asymmetries don't need valid top mass solution
+          fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+        } else {
+          if ( ttmass > 0 ) {
+            // asymmetries with top properties are required to have a valid top mass solution
+            fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+          }
+        }
+      // }
+    }    
   }
 
   ch_top->SetBranchAddress(observablename,    &observable);
@@ -191,47 +222,44 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
     ch_top->GetEntry(i);
-    /* //for some reason it runs extremely slowly with this uncommented
-    if ( (Region=="Signal") && (ttmass>450) ) {
-      //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hMeas, observable, weight, Nsolns);
-      fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
-      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-      if( combineLepMinus ) {
-	      //response.Fill (observableMinus, observableMinus_gen, weight);
-	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
-	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
-	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
-	  }
-    }
-    */ 
-    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) {
-      //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hMeas, observable, weight, Nsolns);
-      fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
-      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-      if( combineLepMinus ) {
-	      //response.Fill (observableMinus, observableMinus_gen, weight);
-	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
-	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
-	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
-	  }
-    }
-    if ( (Region=="") && (iVar<3) ) {
-      //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hMeas, observable, weight, Nsolns);
-      fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
-      fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-      if( combineLepMinus ) {
-	      //response.Fill (observableMinus, observableMinus_gen, weight);
-	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
-	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
-	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
-	  }
-    }
-
+    // if ( (Region=="Signal") && (ttmass>450) ) {
+    //   fillUnderOverFlow(hMeas, observable, weight, Nsolns);
+    //   fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
+    //   fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
+    //   if( combineLepMinus ) {
+    //        //response.Fill (observableMinus, observableMinus_gen, weight);
+    //        fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
+    //        fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
+    //        fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+    //      }
+    // } else if (Region=="") {
+      if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+        //response.Fill (observable, observable_gen, weight);
+        fillUnderOverFlow(hMeas, observable, weight, Nsolns);
+        fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
+        fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
+        if( combineLepMinus ) {
+  	      //response.Fill (observableMinus, observableMinus_gen, weight);
+  	      fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
+  	      fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
+  	      fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+  	    }
+  	  } else {
+        if ( ttmass > 0 ) {
+        //response.Fill (observable, observable_gen, weight);
+          fillUnderOverFlow(hMeas, observable, weight, Nsolns);
+          fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
+          fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
+          if( combineLepMinus ) {
+        //response.Fill (observableMinus, observableMinus_gen, weight);
+            fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
+            fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
+            fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+          }
+        }
+  	  }
+    // }
     //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
-
   }
 
   RooUnfoldResponse response (hMeas, hTrue, hTrue_vs_Meas);
@@ -343,12 +371,14 @@ void AfbUnfoldExample()
   GetAfb(hTrue, Afb, AfbErr);
   cout<<" True Top: "<< Afb <<" +/-  "<< AfbErr<<"\n";
   
-  GetAfb(denominatorM, Afb, AfbErr);
-  cout<<" True Top from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
-
   GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
   cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  second_output_file << acceptanceName << " " << observablename << " Unfolded: "<< Afb <<" +/-  "<< AfbErr<<endl;
   
+  GetAfb(denominatorM, Afb, AfbErr);
+  cout<<" True Top from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  second_output_file << acceptanceName << " " << observablename << " True_Top_from_acceptance_denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+
   //GetCorrectedAfb(hData_unfolded_arccos, m_correctE, Afb, AfbErr);
   //cout<<" Unfolded (from arccos histo): "<< Afb <<" +/-  "<< AfbErr<<"\n";
   
@@ -359,8 +389,7 @@ void AfbUnfoldExample()
 
   vector<double> afb_bins;
   vector<double> afb_bins;  
-  GetCorrectedAfbBinByBin(hData_unfolded, m_correctE, afb_bins, afb_bins);
-
+  GetCorrectedAfbBinByBin(hData_unfolded, m_correctE, afb_bins, afb_bins, second_output_file);
 
   //scale to total xsec with option "width",  so that differential xsec is plotted
   //hData_unfolded->Scale(xsection/hData_unfolded->Integral(),"width");
@@ -370,8 +399,19 @@ void AfbUnfoldExample()
   hData_unfolded_arccos->Scale(1./hData_unfolded_arccos->Integral(),"width");
   hTrue_arccos->Scale(1./hTrue_arccos->Integral(),"width");
   
-  if(observablename=="lep_azimuthal_asymmetry") for(int i=1;i<nbins1D+1;i++){ cout<<i<<" bin = "<<hData_unfolded_arccos->GetBinContent(i)<<" +/- "<<hData_unfolded_arccos->GetBinError(i)<<endl; }
-  else for(int i=1;i<nbins1D+1;i++){ cout<<i<<" bin = "<<hData_unfolded->GetBinContent(i)<<" +/- "<<hData_unfolded->GetBinError(i)<<endl; }
+  if (observablename=="lep_azimuthal_asymmetry") {
+    for (int i=1;i<nbins1D+1;i++) 
+    { 
+      cout<<i<<" bin = "<<hData_unfolded_arccos->GetBinContent(i)<<" +/- "<<hData_unfolded_arccos->GetBinError(i)<<endl; 
+      second_output_file << acceptanceName << " " << observablename << " bin" << i << ": " << hData_unfolded_arccos->GetBinContent(i) << " +/- " << hData_unfolded_arccos->GetBinError(i) << endl; 
+    }
+  } else {
+    for (int i=1;i<nbins1D+1;i++)
+    { 
+      cout<<i<<" bin = "<<hData_unfolded->GetBinContent(i)<<" +/- "<<hData_unfolded->GetBinError(i)<<endl; 
+      second_output_file << acceptanceName << " " << observablename << " bin" << i << ": " << hData_unfolded->GetBinContent(i) << " +/- " << hData_unfolded->GetBinError(i) << endl; 
+    }
+  }
 
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
@@ -439,6 +479,7 @@ void AfbUnfoldExample()
   }
 
   myfile.close();
+  second_output_file.close();
 }
 
 #ifndef __CINT__

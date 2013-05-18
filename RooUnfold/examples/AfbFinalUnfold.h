@@ -1,3 +1,4 @@
+#include <fstream>
 #include "TH1D.h"
 #include "TMatrixD.h"
 #include "TMath.h"
@@ -92,7 +93,7 @@ void GetAfbBinByBin(TH1D* h){
 }
 
 
-void GetAvsY(TH1* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr){
+void GetAvsY(TH1* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr, ofstream& second_output_file){
 
     myafb.clear();
     myerr.clear();
@@ -165,6 +166,7 @@ void GetAvsY(TH1* histogram, TMatrixD &covarianceM, vector<double> &myafb, vecto
       myerr.push_back(err[j]);
 
       cout<<j<<" AFB = "<<afb[j]<<" +/- "<<err[j]<<endl;
+      second_output_file << acceptanceName << " " << observablename << " AFB" << j << ": " << afb[j] << " +/- " << err[j] << endl;    	
     }
 }
 
@@ -214,7 +216,7 @@ void GetCorrectedAfb(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float
 
 
 
-void GetCorrectedAfbBinByBin(TH1D* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr){
+void GetCorrectedAfbBinByBin(TH1D* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr, ofstream& second_output_file){
 
     //Need to calculate AFB and Error for the fully corrected distribution, m_correctE(j,i)
         
@@ -274,6 +276,8 @@ void GetCorrectedAfbBinByBin(TH1D* histogram, TMatrixD &covarianceM, vector<doub
     	afberrbin[k] = sqrt(afberrbin[k]);
     	afbbin[k] = sum_alpha_n[k] / sum_n[k];
     	cout<<k<<" AFB = "<<afbbin[k]<<" +/- "<<afberrbin[k]<<endl;
+    	second_output_file << acceptanceName << " " << observablename << " AFB" << i << ": " << afbbin[k] << " +/- " << afberrbin[k] << endl;
+      
 	myafb.push_back(afbbin[k]);
 	myerr.push_back(afberrbin[k]);
     }
@@ -292,7 +296,7 @@ void Initialize1DBinning(int iVar){
 
   switch (iVar)
     {
-      //   Lepton Charge Asymmetry
+    //   Lepton Charge Asymmetry
     case 0:
       {
       observablename="lep_charge_asymmetry";
@@ -303,19 +307,8 @@ void Initialize1DBinning(int iVar){
       xmax= 2.0;
       break;
       }
-  //   Lepton Azimuthal Asymmetry
+    //   Lepton Azimuthal Asymmetry 2
     case 1:
-      {
-      observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
-      acceptanceName="lepAzimAsym";
-      xbins1D[0]=-1.0; xbins1D[1]=-0.8; xbins1D[2]=-0.4; xbins1D[3]=0.0; xbins1D[4]=0.4; xbins1D[5]=0.8; xbins1D[6]=1.0;
-      xmin=-1.0;
-      xmax= 1.0;
-      break;
-      }
-        //   Lepton Azimuthal Asymmetry 2
-    case 2:
       {
       observablename="lep_azimuthal_asymmetry2";
       xaxislabel="#Delta#phi_{l+l-}";
@@ -326,20 +319,8 @@ void Initialize1DBinning(int iVar){
       xmax=pi;
       break;
       }
-  //   Top Charge Asymmetry
-    case 3:
-      {
-      observablename="top_costheta_cms";
-      xaxislabel="cos(#theta_{top})";
-      acceptanceName="topCosTheta";
-      xbins1D[0]=-1.0; xbins1D[1]=-0.7; xbins1D[2]=-0.4; xbins1D[3]=0.0; xbins1D[4]=0.4; xbins1D[5]=0.7; xbins1D[6]=1.0;
-      xmin=-1.0;
-      xmax= 1.0;
-      break;
-      }
-
-  //   Top Polarization
-    case 4:
+    //   Top Polarization
+    case 2:
       {
       observablename="lep_costheta_cms";
       xaxislabel="cos(#theta^{+}_{l})";
@@ -349,7 +330,29 @@ void Initialize1DBinning(int iVar){
       xmax= 1.0;
       break;
       }
-  //   Top Spin Correlation
+    //   Top Polarization using negatively charged leptons
+    case 3:
+      {
+        observablename="lepMinus_costheta_cms";
+        xaxislabel="cos(#theta^{-}_{l})";
+        acceptanceName="lepMinusCosTheta";
+        xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+        xmin=-1.0;
+        xmax= 1.0;
+        break;
+      }
+    //   Top Polarization combining positively and negatively charged leptons
+    case 4:
+      {
+        observablename="lep_costheta_cms";
+        xaxislabel="cos(#theta^{*}_{l})";
+        acceptanceName="lepCosTheta";
+        xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+        xmin=-1.0;
+        xmax= 1.0;
+        break;
+      }
+    //   Top Spin Correlation
     case 5:
       {
       observablename="top_spin_correlation";
@@ -360,30 +363,8 @@ void Initialize1DBinning(int iVar){
       xmax= 1.0;
       break;
       }
- //   Top Asy I
+    //   Top Asy III
     case 6:
-      {
-      observablename="top_pseudorapidtiydiff_cms";
-      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
-      acceptanceName="pseudorapiditydiff";
-      xbins1D[0]=-4.0; xbins1D[1]=-1.0; xbins1D[2]=-0.5; xbins1D[3]=0.0; xbins1D[4]=0.5; xbins1D[5]=1.0; xbins1D[6]=4.0;
-      xmin=-4.0;
-      xmax= 4.0;
-      break;
-      }
-      //   Top Asy II
-    case 7:
-      {
-      observablename="top_rapidtiydiff_cms";
-      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
-      acceptanceName="rapiditydiff";
-      xbins1D[0]=-4.0; xbins1D[1]=-0.8; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.8; xbins1D[6]=4.0;
-      xmin=-4.0;
-      xmax= 4.0;
-      break;
-      }
-      //   Top Asy III
-    case 8:
       {
       observablename="top_rapidtiydiff_Marco";
       xaxislabel="|y_{top}|-|y_{tbar}|";
@@ -393,26 +374,48 @@ void Initialize1DBinning(int iVar){
       xmax= 2.0;
       break;
       }
-        //   Top Polarization using negatively charged leptons
-    case 9:
+    //   Top Charge Asymmetry
+    case 7:
       {
-      observablename="lepMinus_costheta_cms";
-      xaxislabel="cos(#theta^{-}_{l})";
-      acceptanceName="lepMinusCosTheta";
-      xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+      observablename="top_costheta_cms";
+      xaxislabel="cos(#theta_{top})";
+      acceptanceName="topCosTheta";
+      xbins1D[0]=-1.0; xbins1D[1]=-0.7; xbins1D[2]=-0.4; xbins1D[3]=0.0; xbins1D[4]=0.4; xbins1D[5]=0.7; xbins1D[6]=1.0;
       xmin=-1.0;
       xmax= 1.0;
       break;
       }
-        //   Top Polarization combining positively and negatively charged leptons
-    case 10:
+    //   Lepton Azimuthal Asymmetry
+    case 8:
       {
-      observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{*}_{l})";
-      acceptanceName="lepCosTheta";
-      xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+      observablename="lep_azimuthal_asymmetry";
+      xaxislabel="cos(#Delta#phi_{l+l-})";
+      acceptanceName="lepAzimAsym";
+      xbins1D[0]=-1.0; xbins1D[1]=-0.8; xbins1D[2]=-0.4; xbins1D[3]=0.0; xbins1D[4]=0.4; xbins1D[5]=0.8; xbins1D[6]=1.0;
       xmin=-1.0;
       xmax= 1.0;
+      break;
+      }
+    //   Top Asy I
+    case 9:
+      {
+      observablename="top_pseudorapidtiydiff_cms";
+      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
+      acceptanceName="pseudorapiditydiff";
+      xbins1D[0]=-4.0; xbins1D[1]=-1.0; xbins1D[2]=-0.5; xbins1D[3]=0.0; xbins1D[4]=0.5; xbins1D[5]=1.0; xbins1D[6]=4.0;
+      xmin=-4.0;
+      xmax= 4.0;
+      break;
+      }
+    //   Top Asy II
+    case 10:
+      {
+      observablename="top_rapidtiydiff_cms";
+      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
+      acceptanceName="rapiditydiff";
+      xbins1D[0]=-4.0; xbins1D[1]=-0.8; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.8; xbins1D[6]=4.0;
+      xmin=-4.0;
+      xmax= 4.0;
       break;
       }
     default:
@@ -429,7 +432,7 @@ void Initialize2DBinning(int iVar){
 
   switch (iVar)
     {
-      //   Lepton Charge Asymmetry
+    //   Lepton Charge Asymmetry
     case 0:
       {
       observablename="lep_charge_asymmetry";
@@ -440,19 +443,8 @@ void Initialize2DBinning(int iVar){
       xmax=xbins2D[6];
       break;
       }
-  //   Lepton Azimuthal Asymmetry
+    //   Lepton Azimuthal Asymmetry 2
     case 1:
-      {
-      observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
-      acceptanceName="lepAzimAsym";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
-      xmin=xbins2D[0];
-      xmax=xbins2D[6];
-      break;
-      }
-        //   Lepton Azimuthal Asymmetry 2
-    case 2:
       {
       observablename="lep_azimuthal_asymmetry2";
       xaxislabel="#Delta#phi_{l+l-}";
@@ -463,30 +455,40 @@ void Initialize2DBinning(int iVar){
       xmax=xbins2D[6];
       break;
       }
-  //   Top Charge Asymmetry
-    case 3:
-      {
-      observablename="top_costheta_cms";
-      xaxislabel="cos(#theta_{top})";
-      acceptanceName="topCosTheta";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
-      xmin=xbins2D[0];
-      xmax=xbins2D[6];
-      break;
-      }
-
-  //   Top Polarization
-    case 4:
+    //   Top Polarization
+    case 2:
       {
       observablename="lep_costheta_cms";
-xaxislabel="cos(#theta^{+}_{l})";
+      xaxislabel="cos(#theta^{+}_{l})";
       acceptanceName="lepPlusCosTheta";
       xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
-  //   Top Spin Correlation
+      //   Top Polarization using negatively charged leptons
+      case 3:
+      {
+        observablename="lepMinus_costheta_cms";
+        xaxislabel="cos(#theta^{-}_{l})";
+        acceptanceName="lepMinusCosTheta";
+        xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+        xmin=xbins2D[0];
+        xmax=xbins2D[6];
+        break;
+      }
+      //   Top Polarization combining positively and negatively charged leptons
+      case 4:
+      {
+        observablename="lep_costheta_cms";
+        xaxislabel="cos(#theta^{*}_{l})";
+        acceptanceName="lepCosTheta";
+        xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+        xmin=xbins2D[0];
+        xmax=xbins2D[6];
+        break;
+      }
+    //   Top Spin Correlation
     case 5:
       {
       observablename="top_spin_correlation";
@@ -497,30 +499,8 @@ xaxislabel="cos(#theta^{+}_{l})";
       xmax=xbins2D[6];
       break;
       }
- //   Top Asy I
+    //   Top Asy III
     case 6:
-      {
-      observablename="top_pseudorapidtiydiff_cms";
-      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
-      acceptanceName="pseudorapiditydiff";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
-      xmin=xbins2D[0];
-      xmax=xbins2D[6];
-      break;
-      }
-      //   Top Asy II
-    case 7:
-      {
-      observablename="top_rapidtiydiff_cms";
-      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
-      acceptanceName="rapiditydiff";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
-      xmin=xbins2D[0];
-      xmax=xbins2D[6];
-      break;
-      }
-      //   Top Asy III
-    case 8:
       {
       observablename="top_rapidtiydiff_Marco";
       xaxislabel="|y_{top}|-|y_{tbar}|";
@@ -530,23 +510,45 @@ xaxislabel="cos(#theta^{+}_{l})";
       xmax=xbins2D[6];
       break;
       }
-        //   Top Polarization using negatively charged leptons
-    case 9:
+    //   Top Charge Asymmetry
+    case 7:
       {
-      observablename="lepMinus_costheta_cms";
-      xaxislabel="cos(#theta^{-}_{l})";
-      acceptanceName="lepMinusCosTheta";
+      observablename="top_costheta_cms";
+      xaxislabel="cos(#theta_{top})";
+      acceptanceName="topCosTheta";
       xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
       }
-        //   Top Polarization combining positively and negatively charged leptons
+    //   Lepton Azimuthal Asymmetry
+    case 8:
+      {
+      observablename="lep_azimuthal_asymmetry";
+      xaxislabel="cos(#Delta#phi_{l+l-})";
+      acceptanceName="lepAzimAsym";
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+      }
+    //   Top Asy I
+    case 9:
+      {
+      observablename="top_pseudorapidtiydiff_cms";
+      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
+      acceptanceName="pseudorapiditydiff";
+      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+      }
+    //   Top Asy II
     case 10:
       {
-      observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{*}_{l})";
-      acceptanceName="lepCosTheta";
+      observablename="top_rapidtiydiff_cms";
+      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
+      acceptanceName="rapiditydiff";
       xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
@@ -558,8 +560,6 @@ xaxislabel="cos(#theta^{+}_{l})";
       }
     }
 }
-
-
 
 void fillUnderOverFlow(TH1D *h1, float value, double weight, int Nsolns)
 {

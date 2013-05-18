@@ -1,5 +1,5 @@
-
 #include <iostream>
+#include <fstream>
 #include "AfbFinalUnfold.h"
 
 #include "TRandom3.h"
@@ -38,7 +38,7 @@ using std::endl;
   TString Region="";
   Int_t kterm=3;    //note we used 4 here for ICHEP
   Double_t tau=1E-4;
-  Int_t nVars =11;
+  Int_t nVars =8;
   Int_t includeSys = 1;
 
 
@@ -57,15 +57,20 @@ void AfbUnfoldExample()
  myfile.open ("summary_2Dunfolding.txt");
  cout.rdbuf(myfile.rdbuf());
 
+  // OGU 130516: add second output txt file with format easier to be pasted into google docs
+  ofstream second_output_file;
+  second_output_file.open("summary_2Dunfolding_formated.txt");
+
  Float_t observable, observable_gen, ttmass, ttmass_gen, ttRapidity, tmass;
+ Float_t observableMinus, observableMinus_gen; 
  Double_t weight;
  Int_t Nsolns;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
 
 
-    Initialize2DBinning(iVar);
-
+  Initialize2DBinning(iVar);
+  bool combineLepMinus = acceptanceName=="lepCosTheta" ? true : false;
   TH1D* hData= new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins2D, xbins2D);
   TH1D* hBkg = new TH1D ("Background",  "Background",    nbins2D, xbins2D);
   TH1D* hData_unfolded= new TH1D ("Data_Unfold", "Data with background subtracted and unfolded", nbins2D, xbins2D);
@@ -112,6 +117,7 @@ void AfbUnfoldExample()
   ch_bkg->Add(path+"VV.root");
 
   ch_data->SetBranchAddress(observablename,    &observable);
+  if( combineLepMinus ) ch_data->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
   ch_data->SetBranchAddress("weight",&weight);
   ch_data->SetBranchAddress("Nsolns",&Nsolns);
   ch_data->SetBranchAddress("tt_mass",&ttmass);
@@ -120,16 +126,17 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
     ch_data->GetEntry(i);
-    if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-    if ( (Region=="Signal") && (ttmass>450) )  
-      fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);
-    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
+    if ( ttmass > 0 ) {
+      if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
       fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);    
-    if ( (Region=="") && (iVar<3) && (ttmass>0) ) 
-      fillUnderOverFlow(hData, sign(observable)*ttmass, weight, Nsolns);     
+      if (combineLepMinus) {
+        fillUnderOverFlow(hData, sign(observableMinus)*ttmass, weight, Nsolns);    
+      }    
+    }
   }
 
   ch_bkg->SetBranchAddress(observablename,    &observable);
+  if( combineLepMinus ) ch_bkg->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
   ch_bkg->SetBranchAddress("weight",&weight);
   ch_bkg->SetBranchAddress("Nsolns",&Nsolns);
   ch_bkg->SetBranchAddress("tt_mass",&ttmass);
@@ -139,17 +146,19 @@ void AfbUnfoldExample()
   for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
     ch_bkg->GetEntry(i);
     if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-    if ( (Region=="Signal") && (ttmass>450) )  
+    if ( ttmass > 0 ) {
       fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
-    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
-      fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
-    if ( (Region=="") && (iVar<3) && (ttmass>0) ) 
-      fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
+      if (combineLepMinus) {
+        fillUnderOverFlow(hBkg, sign(observableMinus)*ttmass, weight, Nsolns);
+      }
+    }
   }
 
   ch_top->SetBranchAddress(observablename,    &observable);
   ch_top->SetBranchAddress(observablename+"_gen",&observable_gen);
   if(observablename=="lep_azimuthal_asymmetry2") ch_top->SetBranchAddress("lep_azimuthal_asymmetry_gen2",&observable_gen);
+  if( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
+  if( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms_gen",    &observableMinus_gen);
   ch_top->SetBranchAddress("weight",&weight);
   ch_top->SetBranchAddress("Nsolns",&Nsolns);
   ch_top->SetBranchAddress("tt_mass",&ttmass);
@@ -162,23 +171,15 @@ void AfbUnfoldExample()
     ch_top->GetEntry(i);
     if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
     if(observablename=="lep_azimuthal_asymmetry2") observable_gen = -cos(observable_gen);
-    if ( (Region=="Signal") && (ttmass>450) ) {
-      //response.Fill (observable, observable_gen, weight);
+    if ( ttmass > 0 ) {
       fillUnderOverFlow(hMeas, sign(observable)*ttmass, weight, Nsolns);
       fillUnderOverFlow(hTrue, sign(observable_gen)*ttmass_gen, weight, Nsolns);
       fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
-    }
-    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) {
-      //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hMeas, sign(observable)*ttmass, weight, Nsolns);
-      fillUnderOverFlow(hTrue, sign(observable_gen)*ttmass_gen, weight, Nsolns);
-      fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
-    }
-    if ( (Region=="") && (iVar<3) && (ttmass>0) ) {
-      //response.Fill (observable, observable_gen, weight);
-      fillUnderOverFlow(hMeas, sign(observable)*ttmass, weight, Nsolns);
-      fillUnderOverFlow(hTrue, sign(observable_gen)*ttmass_gen, weight, Nsolns);
-      fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttmass, sign(observable_gen)*ttmass_gen, weight, Nsolns);
+      if( combineLepMinus ) {
+        fillUnderOverFlow(hMeas, sign(observableMinus)*ttmass, weight, Nsolns);
+        fillUnderOverFlow(hTrue, sign(observableMinus_gen)*ttmass_gen, weight, Nsolns);
+        fillUnderOverFlow(hTrue_vs_Meas, sign(observableMinus)*ttmass, sign(observableMinus_gen)*ttmass_gen, weight, Nsolns);
+      }
     }
   }
   
@@ -365,24 +366,29 @@ void AfbUnfoldExample()
   GetAfb(hTrue, Afb, AfbErr);
   cout<<" True Top: "<< Afb <<" +/-  "<< AfbErr<<"\n";
     
+  GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
+  cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+  second_output_file << acceptanceName << " " << observablename << " Unfolded: "<< Afb <<" +/-  "<< AfbErr<<endl;
+
   GetAfb(denomM, Afb, AfbErr);
   cout<<" True Top from acceptance denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
-    
+  second_output_file << acceptanceName << " " << observablename << " True_Top_from_acceptance_denominator: "<< Afb <<" +/-  "<< AfbErr<<"\n";
+
+  vector<double> afb_m;
+  vector<double> afb_merr;
+  GetAvsY(hData_unfolded, m_correctE, afb_m, afb_merr, second_output_file);  
+
   Float_t AfbG[3];
     
   GetAfb(denomM_0, AfbG[0], AfbErr);
   cout<<" True Top 0 from acceptance denominator: "<< AfbG[0] <<" +/-  "<< AfbErr<<"\n";
+  second_output_file << acceptanceName << " " << observablename << " True_Top_0_from_acceptance_denominator: "<< AfbG[0] <<" +/-  "<< AfbErr<<"\n";
   GetAfb(denomM_1, AfbG[1], AfbErr);
   cout<<" True Top 1 from acceptance denominator: "<< AfbG[1] <<" +/-  "<< AfbErr<<"\n";
+  second_output_file << acceptanceName << " " << observablename << " True_Top_1_from_acceptance_denominator: "<< AfbG[1] <<" +/-  "<< AfbErr<<"\n";
   GetAfb(denomM_2, AfbG[2], AfbErr);
   cout<<" True Top 2 from acceptance denominator: "<< AfbG[2] <<" +/-  "<< AfbErr<<"\n";
-
-  GetCorrectedAfb(hData_unfolded, m_correctE, Afb, AfbErr);
-  cout<<" Unfolded: "<< Afb <<" +/-  "<< AfbErr<<"\n";
-
-  vector<double> afb_m;
-  vector<double> afb_merr;
-  GetAvsY(hData_unfolded, m_correctE, afb_m, afb_merr);  
+  second_output_file << acceptanceName << " " << observablename << " True_Top_2_from_acceptance_denominator: "<< AfbG[2] <<" +/-  "<< AfbErr<<"\n";
 
   TCanvas* c_afb = new TCanvas("c_afb","c_afb",500,500); 
   xbins2D[0]=300.0; xbins2D[1]=450; xbins2D[2]=550.0; xbins2D[3]=800.0;
@@ -462,7 +468,7 @@ void AfbUnfoldExample()
 
   }
   myfile.close();
-
+  second_output_file.close();
 }
 
 #ifndef __CINT__
