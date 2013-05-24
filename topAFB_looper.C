@@ -1215,8 +1215,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                 }
                 else
                 {
-		  //weight = kFactor * evt_scale1fb() * lumi * ndavtxweight;
-		  weight = kFactor * evt_scale1fb() * lumi ;
+		  weight = kFactor * evt_scale1fb() * lumi * ndavtxweight;
+		  //weight = kFactor * evt_scale1fb() * lumi ;
                     //negative weights for MC@NLO
                     if (prefix == "ttdil" || prefix == "ttotr") weight = weight * fabs(genps_weight()) / genps_weight();
                     //tau decay cosTheta* weighting
