@@ -128,6 +128,8 @@ class topAFB_looper
 	float dr_lljet_gen_;
 	float tt_mass_ ;
 	float ttRapidity_ ;
+	float ttRapidity2_ ;
+	float ttPt_ ;
 	float lep_charge_asymmetry_ ;
 	float lep_pseudorap_diff_ ;
 	float lep_azimuthal_asymmetry_ ;

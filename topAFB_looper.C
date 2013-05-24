@@ -963,7 +963,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             double weight = 1.0;
             float lepPlus_costheta_cms , lep_azimuthal_asymmetry , lep_azimuthal_asymmetry_2 , lep_charge_asymmetry , lep_pseudorap_diff , top_costheta_cms;
             float lepMinus_costheta_cms;
-            float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity , tt_mass , tt_mass_nojetsmear , tt_pT , tt_pT_nojetsmear, massllbb;
+            float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity ,ttRapidity2, tt_mass , tt_mass_nojetsmear , tt_pT , tt_pT_nojetsmear, massllbb;
             float m_top = -999.0;
             float m_top_nojetsmear = -999.0;
             double mass_ltb, mass_llb;
@@ -1215,7 +1215,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                 }
                 else
                 {
-                    weight = kFactor * evt_scale1fb() * lumi * ndavtxweight;
+		  //weight = kFactor * evt_scale1fb() * lumi * ndavtxweight;
+		  weight = kFactor * evt_scale1fb() * lumi ;
                     //negative weights for MC@NLO
                     if (prefix == "ttdil" || prefix == "ttotr") weight = weight * fabs(genps_weight()) / genps_weight();
                     //tau decay cosTheta* weighting
@@ -2555,7 +2556,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         ttRapidity = -999.0;
                         if (m_top > 0) ttRapidity = top1_p4[i_smear].Rapidity() + top2_p4[i_smear].Rapidity();
-                        float ttRapidity2 = -999.0;
+                        ttRapidity2 = -999.0;
                         if (m_top > 0) ttRapidity2 = (top1_p4[i_smear] + top2_p4[i_smear]).Rapidity();
                         //if(m_top < 0) continue;
                         if ((applyLeptonJetInvMassCut450 || applyTopSystEta ) && m_top < 0) continue;
@@ -3262,7 +3263,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         tt_mass_ = tt_mass;
                         t_mass_  = m_top;
                         ttRapidity_ = ttRapidity;
-                        lep_charge_asymmetry_ = lep_charge_asymmetry;
+			ttRapidity2_ = ttRapidity2;
+                        ttPt_ = tt_pT;
+			lep_charge_asymmetry_ = lep_charge_asymmetry;
                         lep_pseudorap_diff_ =  lep_pseudorap_diff;
                         lep_azimuthal_asymmetry_ = lep_azimuthal_asymmetry;
                         lep_azimuthal_asymmetry2_ = lep_azimuthal_asymmetry_2;
@@ -3332,6 +3335,8 @@ void topAFB_looper::InitBabyNtuple ()
     ndavtx_ = -999;
     tt_mass_ = -999.0;
     ttRapidity_ = -999.0;
+    ttRapidity2_ = -999.0;
+    ttPt_ = -999.0;
     lep_charge_asymmetry_ = -999.0;
     lep_pseudorap_diff_ = -999.0;
     lep_azimuthal_asymmetry_ = -999.0;
@@ -3385,6 +3390,8 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("ndavtx",                &ndavtx_,              "ndavtx/I"               );
     babyTree_->Branch("tt_mass",               &tt_mass_,             "tt_mass/F"              );
     babyTree_->Branch("ttRapidity",            &ttRapidity_,          "ttRapidity/F"           );
+    babyTree_->Branch("ttRapidity2",            &ttRapidity2_,          "ttRapidity2/F"           );
+    babyTree_->Branch("ttPt",                   &ttPt_,          "ttPt/F"           );
     babyTree_->Branch("lep_charge_asymmetry",  &lep_charge_asymmetry_, "lep_charge_asymmetry/F" );
     babyTree_->Branch("lep_pseudorap_diff",    &lep_pseudorap_diff_,  "lep_pseudorap_diff/F"   );
     babyTree_->Branch("lep_azimuthal_asymmetry", &lep_azimuthal_asymmetry_,  "lep_azimuthal_asymmetry/F"   );
