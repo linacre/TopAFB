@@ -2983,6 +2983,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     float tt_mass_gen;
                     float tt_pT_gen;
                     float ttRapidity_gen;
+		    float ttRapidity2_gen;
                     float top_costheta_cms_gen;
                     float lep_charge_asymmetry_gen;
                     float lep_azimuthal_asymmetry_gen;
@@ -3093,6 +3094,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         tt_mass_gen = (topplus_genp_p4 + topminus_genp_p4).M();
                         ttRapidity_gen = topplus_genp_p4.Rapidity() + topminus_genp_p4.Rapidity();
+			ttRapidity2_gen = (topplus_genp_p4 + topminus_genp_p4).Rapidity();
                         //ttRapidity_gen = topplus_genp_p4.Eta() + topminus_genp_p4.Eta();
 
                         top_rapiditydiff_cms_gen = (topplus_genp_p4.Rapidity() - topminus_genp_p4.Rapidity()) * (topplus_genp_p4.Rapidity() + topminus_genp_p4.Rapidity());
@@ -3264,7 +3266,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         t_mass_  = m_top;
                         ttRapidity_ = ttRapidity;
 			ttRapidity2_ = ttRapidity2;
+			ttRapidity2_gen_ = ttRapidity2_gen;
                         ttPt_ = tt_pT;
+			ttPt_gen_ = tt_pT_gen;
 			lep_charge_asymmetry_ = lep_charge_asymmetry;
                         lep_pseudorap_diff_ =  lep_pseudorap_diff;
                         lep_azimuthal_asymmetry_ = lep_azimuthal_asymmetry;
@@ -3336,7 +3340,9 @@ void topAFB_looper::InitBabyNtuple ()
     tt_mass_ = -999.0;
     ttRapidity_ = -999.0;
     ttRapidity2_ = -999.0;
+    ttRapidity2_gen_ = -999.0;
     ttPt_ = -999.0;
+    ttPt_gen_ = -999.0;
     lep_charge_asymmetry_ = -999.0;
     lep_pseudorap_diff_ = -999.0;
     lep_azimuthal_asymmetry_ = -999.0;
@@ -3391,7 +3397,9 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("tt_mass",               &tt_mass_,             "tt_mass/F"              );
     babyTree_->Branch("ttRapidity",            &ttRapidity_,          "ttRapidity/F"           );
     babyTree_->Branch("ttRapidity2",            &ttRapidity2_,          "ttRapidity2/F"           );
+    babyTree_->Branch("ttRapidity2_gen",            &ttRapidity2_gen_,          "ttRapidity2_gen/F"           );
     babyTree_->Branch("ttPt",                   &ttPt_,          "ttPt/F"           );
+    babyTree_->Branch("ttPt_gen",                   &ttPt_gen_,          "ttPt_gen/F"           );
     babyTree_->Branch("lep_charge_asymmetry",  &lep_charge_asymmetry_, "lep_charge_asymmetry/F" );
     babyTree_->Branch("lep_pseudorap_diff",    &lep_pseudorap_diff_,  "lep_pseudorap_diff/F"   );
     babyTree_->Branch("lep_azimuthal_asymmetry", &lep_azimuthal_asymmetry_,  "lep_azimuthal_asymmetry/F"   );

@@ -143,6 +143,8 @@ class topAFB_looper
 	float lepMinus_costheta_cms_ ;
 	float tt_mass_gen_ ;
 	float ttRapidity_gen_ ;
+	float ttRapidity2_gen_ ;
+	float ttPt_gen_ ;
 	float lep_charge_asymmetry_gen_ ;
 	float lep_azimuthal_asymmetry_gen_ ;
 	float lep_azimuthal_asymmetry_gen2_ ;
