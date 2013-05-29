@@ -265,6 +265,32 @@ class topAFB_looper
 	TH2D *hrapiditydiff_gen2d[4][4];
 	TH2D *hrapiditydiffMarco_gen2d[4][4];	
 	
+	TH2D *hlepChargeAsym_ttpT_gen2d[4][4];
+	TH2D *hlepAzimAsym_ttpT_gen2d[4][4];
+	TH2D *hlepAzimAsym2_ttpT_gen2d[4][4];
+	TH2D *htopSpinCorr_ttpT_gen2d[4][4];
+	TH2D *htopCosTheta_ttpT_gen2d[4][4];
+	TH2D *hlepCosTheta_ttpT_gen2d[4][4];
+	TH2D *hlepPlusCosTheta_ttpT_gen2d[4][4];
+	TH2D *hlepMinusCosTheta_ttpT_gen2d[4][4];
+	TH2D *hpseudorapiditydiff_ttpT_gen2d[4][4];
+	TH2D *hrapiditydiff_ttpT_gen2d[4][4];
+	TH2D *hrapiditydiffMarco_ttpT_gen2d[4][4];	
+
+
+	TH2D *hlepChargeAsym_ttRapidity2_gen2d[4][4];
+	TH2D *hlepAzimAsym_ttRapidity2_gen2d[4][4];
+	TH2D *hlepAzimAsym2_ttRapidity2_gen2d[4][4];
+	TH2D *htopSpinCorr_ttRapidity2_gen2d[4][4];
+	TH2D *htopCosTheta_ttRapidity2_gen2d[4][4];
+	TH2D *hlepCosTheta_ttRapidity2_gen2d[4][4];
+	TH2D *hlepPlusCosTheta_ttRapidity2_gen2d[4][4];
+	TH2D *hlepMinusCosTheta_ttRapidity2_gen2d[4][4];
+	TH2D *hpseudorapiditydiff_ttRapidity2_gen2d[4][4];
+	TH2D *hrapiditydiff_ttRapidity2_gen2d[4][4];
+	TH2D *hrapiditydiffMarco_ttRapidity2_gen2d[4][4];
+	
+	
 	TH1D *hlepChargeAsymGenDiff[4][4];
 	TH1D *hlepAzimAsymGenDiff[4][4];
 	TH1D *hlepAzimAsym2GenDiff[4][4];

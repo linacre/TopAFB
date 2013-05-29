@@ -3200,6 +3200,32 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             fillHistos( hpseudorapiditydiff_gen2d, top_pseudorapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
                             fillHistos( hrapiditydiff_gen2d, top_rapiditydiff_cms_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
                             fillHistos( hrapiditydiffMarco_gen2d, top_rapiditydiff_Marco_gen ,  tt_mass_gen, weight, myType, jetBin, Nsolns);
+
+			    fillHistos( hlepChargeAsym_ttpT_gen2d, lep_charge_asymmetry_gen ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepAzimAsym_ttpT_gen2d, lep_azimuthal_asymmetry_gen ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepAzimAsym2_ttpT_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( htopSpinCorr_ttpT_gen2d, top_spin_correlation_gen  ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( htopCosTheta_ttpT_gen2d, top_costheta_cms_gen   ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepCosTheta_ttpT_gen2d, lepPlus_costheta_cms_gen  ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepCosTheta_ttpT_gen2d, lepMinus_costheta_cms_gen  ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepPlusCosTheta_ttpT_gen2d, lepPlus_costheta_cms_gen  ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepMinusCosTheta_ttpT_gen2d, lepMinus_costheta_cms_gen  ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hpseudorapiditydiff_ttpT_gen2d, top_pseudorapiditydiff_cms_gen ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hrapiditydiff_ttpT_gen2d, top_rapiditydiff_cms_gen ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+                            fillHistos( hrapiditydiffMarco_ttpT_gen2d, top_rapiditydiff_Marco_gen ,  tt_pT_gen, weight, myType, jetBin, Nsolns);
+
+			    fillHistos( hlepChargeAsym_ttRapidity2_gen2d, lep_charge_asymmetry_gen ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepAzimAsym_ttRapidity2_gen2d, lep_azimuthal_asymmetry_gen ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepAzimAsym2_ttRapidity2_gen2d, acos(lep_azimuthal_asymmetry_gen) ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( htopSpinCorr_ttRapidity2_gen2d, top_spin_correlation_gen  ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( htopCosTheta_ttRapidity2_gen2d, top_costheta_cms_gen   ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepCosTheta_ttRapidity2_gen2d, lepPlus_costheta_cms_gen  ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepCosTheta_ttRapidity2_gen2d, lepMinus_costheta_cms_gen  ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepPlusCosTheta_ttRapidity2_gen2d, lepPlus_costheta_cms_gen  ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hlepMinusCosTheta_ttRapidity2_gen2d, lepMinus_costheta_cms_gen  ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hpseudorapiditydiff_ttRapidity2_gen2d, top_pseudorapiditydiff_cms_gen ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hrapiditydiff_ttRapidity2_gen2d, top_rapiditydiff_cms_gen ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
+                            fillHistos( hrapiditydiffMarco_ttRapidity2_gen2d, top_rapiditydiff_Marco_gen ,  abs(ttRapidity2_gen), weight, myType, jetBin, Nsolns);
                         }
 
 
