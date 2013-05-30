@@ -45,7 +45,7 @@ class topAFB_looper
 	
 	int antimatch4vector(const LorentzVector &lvec, 
 					    const vector<LorentzVector> &vec);
-	double triggerEff(const int hypIdx);
+	double triggerEff(const int hypIdx, bool scaleTrigSFup = false, bool scaleTrigSFdown = false);
 	
     private:
         //

@@ -187,7 +187,7 @@ void setupJetCorrectors() {
 }
 */
 
-double topAFB_looper::triggerEff(const int hypIdx)
+double topAFB_looper::triggerEff(const int hypIdx, bool scaleTrigSFup, bool scaleTrigSFdown)
 {
     LorentzVector lt_p4  = hyp_lt_p4()[hypIdx];
     LorentzVector ll_p4  = hyp_ll_p4()[hypIdx];
@@ -279,7 +279,19 @@ double topAFB_looper::triggerEff(const int hypIdx)
             else if (ll_pt > 30.0) weight_ll = 0.8992;
         }
     }
-
+    
+    if ( scaleTrigSFup ) {
+      if (id_lt == 11) weight_lt*=1.02;
+      if (id_ll == 11) weight_ll*=1.02;
+      if (id_lt == 13) weight_lt*=0.98;
+      if (id_ll == 13) weight_ll*=0.98;
+    } else if ( scaleTrigSFdown )    {
+      if (id_lt == 11) weight_lt*=0.98;
+      if (id_ll == 11) weight_ll*=0.98;
+      if (id_lt == 13) weight_lt*=1.02;
+      if (id_ll == 13) weight_ll*=1.02;
+    }
+    
     weight = weight_lt * weight_ll;
     return weight;
 }
@@ -854,7 +866,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
         leptonEnergyScaleFactor     = 0.997;
       }
     }
-                    
+    
+    //----------------------------
+    // trigger efficiency systematics
+    // vary trigger efficiency for electrons and muons in opposite directions
+    // same direction does not make a difference as we normalize
+    // set one of the booleans true
+    bool scaleTrigSFup = false;
+    bool scaleTrigSFdown = false;
+    
     if (prefix == "ttdil" || prefix == "ttotr")
     {
         cout << "using Fall11 vertex weighting" << endl;
@@ -1514,7 +1534,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                           weight = weight*0.95;
                         }
                         */
-                        double trigger_weight = triggerEff(hypIdx);
+                        double trigger_weight = triggerEff(hypIdx,scaleTrigSFup,scaleTrigSFdown);
                         weight = weight * trigger_weight;
                     }
 
