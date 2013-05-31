@@ -187,6 +187,23 @@ void setupJetCorrectors() {
 }
 */
 
+
+double topAFB_looper::JERsf(double eta)
+{
+
+    eta = fabs(eta);
+    double SF = 1.;
+
+    if(eta<0.5) SF = 1.052;
+    else if(eta<1.1) SF = 1.057;
+    else if(eta<1.7) SF = 1.096;
+    else if(eta<2.3) SF = 1.134;
+    else SF = 1.288;
+
+    return SF;
+
+}
+
 double topAFB_looper::triggerEff(const int hypIdx, bool scaleTrigSFup, bool scaleTrigSFdown)
 {
     LorentzVector lt_p4  = hyp_lt_p4()[hypIdx];
@@ -700,6 +717,7 @@ topAFB_looper::topAFB_looper()
     vetoHypMassLt12            = false;
     scaleJESMETUp              = false;
     scaleJESMETDown            = false;
+    scaleJER                   = false;
     estimateQCD = false;
     estimateWJets = false;
     requireBTag                = false;
@@ -770,6 +788,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     vetoHypMassLt12               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt12"                  ) != v_Cuts.end();
     scaleJESMETUp = find(v_Cuts.begin(), v_Cuts.end(), "scaleJESMETUp"                    ) != v_Cuts.end();
     scaleJESMETDown = find(v_Cuts.begin(), v_Cuts.end(), "scaleJESMETDown"                  ) != v_Cuts.end();
+    scaleJER = find(v_Cuts.begin(), v_Cuts.end(), "scaleJER"                  ) != v_Cuts.end();
     estimateQCD    = find(v_Cuts.begin(), v_Cuts.end(), "estimateQCD") != v_Cuts.end();
     estimateWJets = find(v_Cuts.begin(), v_Cuts.end(), "estimateWJets") != v_Cuts.end();
     requireBTag                   = find(v_Cuts.begin(), v_Cuts.end(), "requireBTag"                      ) != v_Cuts.end();
@@ -1614,6 +1633,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             double unc = pfUncertainty->getUncertainty(true);
                             if ( scaleJESMETUp)globalJESRescale = 1 + unc;
                             if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJER && !isData ) {
+                                TRandom3 r3(  evt_event()*1000 + i  );
+                                double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
+                                double JER_smear = r3.Gaus(0,JER_smear_width);
+                                globalJESRescale = 1. + JER_smear/vjet.pt();
+                                if(globalJESRescale < 0.1 ) globalJESRescale = 0.1;
+                                if(globalJESRescale > 10. ) globalJESRescale = 10.;
+                                //cout<<JER_smear_width<<" "<<JER_smear<<" "<<globalJESRescale<<endl;
+                            }
                             v_jetP4s.push_back(pfjets_p4()[i] * pfjets_corL1FastL2L3()[i]*globalJESRescale);
 
                         }
@@ -1891,6 +1919,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             double unc = pfUncertainty->getUncertainty(true);
                             if ( scaleJESMETUp)globalJESRescale = 1 + unc;
                             if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJER && !isData ) {
+                                TRandom3 r3(  evt_event()*1000 + v_goodJets[i]  );
+                                double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
+                                double JER_smear = r3.Gaus(0,JER_smear_width);
+                                globalJESRescale = 1. + JER_smear/vjet.pt();
+                                if(globalJESRescale < 0.1 ) globalJESRescale = 0.1;
+                                if(globalJESRescale > 10. ) globalJESRescale = 10.;
+                                //cout<<JER_smear_width<<" "<<JER_smear<<" "<<globalJESRescale<<endl;
+                            }
                             v_goodJets_p4.push_back(pfjets_p4()[v_goodJets[i]]*pfjets_corL1FastL2L3()[v_goodJets[i]]*globalJESRescale);
                         }
                     }
@@ -1921,6 +1958,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             double unc = pfUncertainty->getUncertainty(true);
                             if ( scaleJESMETUp)globalJESRescale = 1 + unc;
                             if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJER && !isData ) {
+                                TRandom3 r3(  evt_event()*1000 + v_goodBtagJets[i]  );
+                                double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
+                                double JER_smear = r3.Gaus(0,JER_smear_width);
+                                globalJESRescale = 1. + JER_smear/vjet.pt();
+                                if(globalJESRescale < 0.1 ) globalJESRescale = 0.1;
+                                if(globalJESRescale > 10. ) globalJESRescale = 10.;
+                                //cout<<JER_smear_width<<" "<<JER_smear<<" "<<globalJESRescale<<endl;
+                            }
                             v_goodBtagJets_p4.push_back(pfjets_p4()[v_goodBtagJets[i]]*pfjets_corL1FastL2L3()[v_goodBtagJets[i]]*globalJESRescale);
                         }
                     }
@@ -1946,6 +1992,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             double unc = pfUncertainty->getUncertainty(true);
                             if ( scaleJESMETUp)globalJESRescale = 1 + unc;
                             if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJER && !isData ) {
+                                TRandom3 r3(  evt_event()*1000 + v_goodNonBtagJets[i]  );
+                                double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
+                                double JER_smear = r3.Gaus(0,JER_smear_width);
+                                globalJESRescale = 1. + JER_smear/vjet.pt();
+                                if(globalJESRescale < 0.1 ) globalJESRescale = 0.1;
+                                if(globalJESRescale > 10. ) globalJESRescale = 10.;
+                                //cout<<JER_smear_width<<" "<<JER_smear<<" "<<globalJESRescale<<endl;
+                            }
                             v_goodNonBtagJets_p4.push_back(pfjets_p4()[v_goodNonBtagJets[i]]*pfjets_corL1FastL2L3()[v_goodNonBtagJets[i]]*globalJESRescale);
                         }
                     }

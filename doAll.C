@@ -120,6 +120,7 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
   //v_baseCuts.push_back("usecaloJets");         // use caloJETs for jet counting
   //v_baseCuts.push_back("useSS");
   
+  //v_baseCuts.push_back("scaleJER");
   if(scaleJESMETUp)
     v_baseCuts.push_back("scaleJESMETUp");
   if(scaleJESMETDown) 
