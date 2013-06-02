@@ -1631,8 +1631,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             pfUncertainty->setJetEta(vjet.eta());
                             pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
                             double unc = pfUncertainty->getUncertainty(true);
-                            if ( scaleJESMETUp)globalJESRescale = 1 + unc;
-                            if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJESMETUp && isData )globalJESRescale = 1 + unc;
+                            if ( scaleJESMETDown && isData )globalJESRescale = 1 - unc;
                             if ( scaleJER && !isData ) {
                                 TRandom3 r3(  evt_event()*1000 + i  );
                                 double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
@@ -1793,7 +1793,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         }
 
                         //if we are scaling the MET
-                        if (scaleJESMETDown || scaleJESMETUp)
+                        if (isData && ( scaleJESMETDown || scaleJESMETUp ) )
                         {
                             float met = p_met.first;
                             float metPhi = p_met.second;
@@ -1822,12 +1822,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             //------------------------------------------------------------------------------
                             float metNewx;
                             float metNewy;
-                            if ( scaleJESMETUp)
+                            if ( scaleJESMETUp && isData )
                             {
                                 metNewx = metx - dmetx - 0.1 * unclustered_x;
                                 metNewy = mety - dmety - 0.1 * unclustered_y;
                             }
-                            if ( scaleJESMETDown)
+                            if ( scaleJESMETDown && isData )
                             {
                                 metNewx = metx + dmetx + 0.1 * unclustered_x;
                                 metNewy = mety + dmety + 0.1 * unclustered_y;
@@ -1917,8 +1917,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             pfUncertainty->setJetEta(vjet.eta());
                             pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
                             double unc = pfUncertainty->getUncertainty(true);
-                            if ( scaleJESMETUp)globalJESRescale = 1 + unc;
-                            if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJESMETUp && isData )globalJESRescale = 1 + unc;
+                            if ( scaleJESMETDown && isData )globalJESRescale = 1 - unc;
                             if ( scaleJER && !isData ) {
                                 TRandom3 r3(  evt_event()*1000 + v_goodJets[i]  );
                                 double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
@@ -1956,8 +1956,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             pfUncertainty->setJetEta(vjet.eta());
                             pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
                             double unc = pfUncertainty->getUncertainty(true);
-                            if ( scaleJESMETUp)globalJESRescale = 1 + unc;
-                            if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJESMETUp && isData )globalJESRescale = 1 + unc;
+                            if ( scaleJESMETDown && isData )globalJESRescale = 1 - unc;
                             if ( scaleJER && !isData ) {
                                 TRandom3 r3(  evt_event()*1000 + v_goodBtagJets[i]  );
                                 double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
@@ -1990,8 +1990,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             pfUncertainty->setJetEta(vjet.eta());
                             pfUncertainty->setJetPt(vjet.pt());   // here you must use the CORRECTED jet pt
                             double unc = pfUncertainty->getUncertainty(true);
-                            if ( scaleJESMETUp)globalJESRescale = 1 + unc;
-                            if ( scaleJESMETDown)globalJESRescale = 1 - unc;
+                            if ( scaleJESMETUp && isData )globalJESRescale = 1 + unc;
+                            if ( scaleJESMETDown && isData )globalJESRescale = 1 - unc;
                             if ( scaleJER && !isData ) {
                                 TRandom3 r3(  evt_event()*1000 + v_goodNonBtagJets[i]  );
                                 double JER_smear_width = sqrt( pow( JERsf(vjet.eta()) , 2 ) - 1. ) * unc;
