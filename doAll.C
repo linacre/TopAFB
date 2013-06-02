@@ -1,6 +1,5 @@
 void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bool runmc = true, bool requireBTag=true, bool require2BTag=false, bool usePF = true, 
-	   bool doFRestimation = false, bool scaleJESMETUp = false, 
-	   bool scaleJESMETDown = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = false, bool createBabyNtuples = true, bool doBFR = false)
+	   bool doFRestimation = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = false, bool createBabyNtuples = true, bool doBFR = false)
 {
   //gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_v5.28.00.so");
   // gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
@@ -120,11 +119,12 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
   //v_baseCuts.push_back("usecaloJets");         // use caloJETs for jet counting
   //v_baseCuts.push_back("useSS");
   
-  //v_baseCuts.push_back("scaleJER");
-  if(scaleJESMETUp)
-    v_baseCuts.push_back("scaleJESMETUp");
-  if(scaleJESMETDown) 
-    v_baseCuts.push_back("scaleJESMETDown");
+  // -----------
+  // top pt reweighting
+  // activate to reweight events according to top pt
+  //
+  // v_baseCuts.push_back("applyTopPtWeighting");
+  
   if(requireBTag && !doBFR)
     v_baseCuts.push_back("requireBTag");  
   if(require2BTag && !doBFR)
@@ -145,6 +145,21 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
     v_baseCuts.push_back("BTagAlgTCHE");
   if(createBabyNtuples)
     v_baseCuts.push_back("createBabyNtuples");
+
+  // systematics
+  // activate if needed
+  // v_baseCuts.push_back("scaleJER");
+  // v_baseCuts.push_back("scaleJESMETUp");
+  // v_baseCuts.push_back("scaleJESMETDown");
+  // v_baseCuts.push_back("scaleLeptonEnergyUp");
+  // v_baseCuts.push_back("scaleLeptonEnergyDown");
+  // v_baseCuts.push_back("scaleBTAGSFup");
+  // v_baseCuts.push_back("scaleBTAGSFdown");
+  // v_baseCuts.push_back("scaleTrigSFup");
+  // v_baseCuts.push_back("scaleTrigSFdown");
+  // v_baseCuts.push_back("noVertexReweighting");
+  // v_baseCuts.push_back("weighttaudecay");
+  
   vector<TString> v_Cuts = v_baseCuts;
   vector<TString> v_otherCuts;
   if(!doFRestimation) {

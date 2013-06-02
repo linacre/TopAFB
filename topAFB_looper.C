@@ -712,12 +712,21 @@ topAFB_looper::topAFB_looper()
     requireEcalEls = false;
     useOS = false;
     useSS = false;
+    applyTopPtWeighting = false;
     applyAlignmentCorrection   = false;
     vetoHypMassLt10            = false;
     vetoHypMassLt12            = false;
     scaleJESMETUp              = false;
     scaleJESMETDown            = false;
     scaleJER                   = false;
+    scaleLeptonEnergyUp = false;
+    scaleLeptonEnergyDown = false;
+    scaleBTAGSFup = false;
+    scaleBTAGSFdown = false;
+    scaleTrigSFup = false;
+    scaleTrigSFdown = false;
+    noVertexReweighting = false;
+    weighttaudecay = false;
     estimateQCD = false;
     estimateWJets = false;
     requireBTag                = false;
@@ -783,12 +792,21 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     requireEcalEls = find(v_Cuts.begin(), v_Cuts.end(), "requireEcalEls") != v_Cuts.end();
     useOS = find(v_Cuts.begin(), v_Cuts.end(), "useOS") != v_Cuts.end();
     useSS = find(v_Cuts.begin(), v_Cuts.end(), "useSS") != v_Cuts.end();
+    applyTopPtWeighting = find(v_Cuts.begin(), v_Cuts.end(), "applyTopPtWeighting" ) != v_Cuts.end();
     applyAlignmentCorrection = find(v_Cuts.begin(), v_Cuts.end(), "applyAlignmentCorrection" ) != v_Cuts.end();
     vetoHypMassLt10               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt10"                  ) != v_Cuts.end();
     vetoHypMassLt12               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt12"                  ) != v_Cuts.end();
     scaleJESMETUp = find(v_Cuts.begin(), v_Cuts.end(), "scaleJESMETUp"                    ) != v_Cuts.end();
     scaleJESMETDown = find(v_Cuts.begin(), v_Cuts.end(), "scaleJESMETDown"                  ) != v_Cuts.end();
     scaleJER = find(v_Cuts.begin(), v_Cuts.end(), "scaleJER"                  ) != v_Cuts.end();
+    scaleLeptonEnergyUp = find(v_Cuts.begin(), v_Cuts.end(), "scaleLeptonEnergyUp") != v_Cuts.end();
+    scaleLeptonEnergyDown = find(v_Cuts.begin(), v_Cuts.end(), "scaleLeptonEnergyDown") != v_Cuts.end();
+    scaleBTAGSFup = find(v_Cuts.begin(), v_Cuts.end(), "scaleBTAGSFup") != v_Cuts.end();
+    scaleBTAGSFdown = find(v_Cuts.begin(), v_Cuts.end(), "scaleBTAGSFdown") != v_Cuts.end();
+    scaleTrigSFup = find(v_Cuts.begin(), v_Cuts.end(), "scaleTrigSFup") != v_Cuts.end();
+    scaleTrigSFdown = find(v_Cuts.begin(), v_Cuts.end(), "scaleTrigSFdown") != v_Cuts.end();
+    noVertexReweighting = find(v_Cuts.begin(), v_Cuts.end(), "noVertexReweighting") != v_Cuts.end();
+    weighttaudecay = find(v_Cuts.begin(), v_Cuts.end(), "weighttaudecay") != v_Cuts.end();
     estimateQCD    = find(v_Cuts.begin(), v_Cuts.end(), "estimateQCD") != v_Cuts.end();
     estimateWJets = find(v_Cuts.begin(), v_Cuts.end(), "estimateWJets") != v_Cuts.end();
     requireBTag                   = find(v_Cuts.begin(), v_Cuts.end(), "requireBTag"                      ) != v_Cuts.end();
@@ -864,18 +882,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     }
 
     //---------------------------
-    // b tag efficiency systematics
-    // vary b tag scale factor by +- b tag scale factor error
-    // set one of the booleans to true
-    bool scaleBTAGSFup = false;
-    bool scaleBTAGSFdown = false;
-
-    //---------------------------
     // lepton energy systematic
     // vary electron energy by +- 1 sigma (0.3%) for data
-    // set one the booleans to true
-    bool scaleLeptonEnergyUp = false;
-    bool scaleLeptonEnergyDown = false;
     float leptonEnergyScaleFactor = 1.;
     if ( isData ) {
       if ( scaleLeptonEnergyUp ) {
@@ -885,26 +893,20 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
         leptonEnergyScaleFactor     = 0.997;
       }
     }
-    
-    //----------------------------
-    // trigger efficiency systematics
-    // vary trigger efficiency for electrons and muons in opposite directions
-    // same direction does not make a difference as we normalize
-    // set one of the booleans true
-    bool scaleTrigSFup = false;
-    bool scaleTrigSFdown = false;
-    
-    if (prefix == "ttdil" || prefix == "ttotr")
-    {
-        cout << "using Fall11 vertex weighting" << endl;
-        set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root", false);
+        
+    // pileup vertex reweighting, switch off with v_baseCuts.push_back("noVertexReweighting") in doAll.C
+    if ( !noVertexReweighting ) {
+      if ( prefix == "ttdil" || prefix == "ttotr" )
+      {
+          cout << "using Fall11 vertex weighting" << endl;
+          set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root", false);
+      }
+      else
+      {
+          cout << "using Summer11 vertex weighting" << endl;
+          set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root", false);
+      }
     }
-    else
-    {
-        cout << "using Summer11 vertex weighting" << endl;
-        set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root", false);
-    }
-
 
     //set_vtxreweight_rootfile("vtxreweight_Summer11MC_PUS4_4p7fb_Zselection.root",false);
     //set_vtxreweight_rootfile("vtxreweight_Fall11MC_PUS6_4p7fb_Zselection.root",false);
@@ -1016,7 +1018,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             double sumAMWTweight = -999;
             float aveAMWTweight = -999;
             bool useOnlyMaxWsoln = false;
-            bool applyTopPtWeighting = true;
 
             float ndavtxweight = vtxweight(isData, true);
 
@@ -1053,7 +1054,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
 
             //daughter lepton angle in tau rest frame to check if MC is correctly using the tau polarisation
-            bool weighttaudecay = false;
             double weight_taudecay = 1.;
             if (ntaus > 0)
             {
