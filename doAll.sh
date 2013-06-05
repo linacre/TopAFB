@@ -28,3 +28,9 @@ root -b -q macro_1DUnfolding.C >& macro_1DUnfolding.log
 
 echo "run 2D unfolding"
 root -b -q macro_2DUnfolding.C >& macro_2DUnfolding.log
+
+echo "run 2D unfolding ttpt"
+root -b -q macro_2DUnfolding_ttpt.C >& macro_2DUnfolding_ttpt.log
+
+echo "run 2D unfolding ttrapidity2"
+root -b -q macro_2DUnfolding_ttrapidity2.C >& macro_2DUnfolding_ttrapidity2.log

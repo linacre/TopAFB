@@ -61,7 +61,7 @@ void AfbUnfoldExample()
   ofstream second_output_file;
   second_output_file.open("summary_2Dunfolding_formated.txt");
 
- Float_t observable, observable_gen, ttmass, ttmass_gen, ttRapidity, tmass;
+ Float_t observable, observable_gen, ttmass, ttmass_gen;
  Float_t observableMinus, observableMinus_gen; 
  Double_t weight;
  Int_t Nsolns;
@@ -121,8 +121,6 @@ void AfbUnfoldExample()
   ch_data->SetBranchAddress("weight",&weight);
   ch_data->SetBranchAddress("Nsolns",&Nsolns);
   ch_data->SetBranchAddress("tt_mass",&ttmass);
-  ch_data->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_data->SetBranchAddress("t_mass",&tmass);
 
   for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
     ch_data->GetEntry(i);
@@ -140,8 +138,6 @@ void AfbUnfoldExample()
   ch_bkg->SetBranchAddress("weight",&weight);
   ch_bkg->SetBranchAddress("Nsolns",&Nsolns);
   ch_bkg->SetBranchAddress("tt_mass",&ttmass);
-  ch_bkg->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_bkg->SetBranchAddress("t_mass",&tmass);
 
   for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
     ch_bkg->GetEntry(i);
@@ -163,9 +159,6 @@ void AfbUnfoldExample()
   ch_top->SetBranchAddress("Nsolns",&Nsolns);
   ch_top->SetBranchAddress("tt_mass",&ttmass);
   ch_top->SetBranchAddress("tt_mass_gen",&ttmass_gen);
-  ch_top->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_top->SetBranchAddress("t_mass",&tmass);
-
 
   for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
     ch_top->GetEntry(i);

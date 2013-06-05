@@ -23,15 +23,15 @@ double xbins2D[nbins2D+1];
 
 Float_t sign(Float_t t) 
 {
-    if( t >= 0.0 )
-        return 1.0;
-    else
-        return -1.0;
+  if( t >= 0.0 )
+    return 1.0;
+  else
+    return -1.0;
 }
 
 
 void GetAfb(TH1D* h, Float_t &afb, Float_t  &afberr){
- 
+
   Int_t nbins = h->GetNbinsX();
   Float_t event_minus;
   Float_t event_plus;
@@ -44,20 +44,20 @@ void GetAfb(TH1D* h, Float_t &afb, Float_t  &afberr){
   //event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_minus_err,"");
   event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_plus_err,"");
   event_total = event_plus + event_minus;
-  
+
   //cout<<event_minus<<" "<<event_minus_err<<" "<<event_plus<<" "<<event_plus_err<<" "<<event_total<<endl;
 
   afb = (event_plus-event_minus)/(event_plus+event_minus);
   afberr   = sqrt(4*(event_plus*event_plus*event_minus_err*event_minus_err 
-		     + event_minus*event_minus*event_plus_err*event_plus_err)/
-		  (event_total*event_total*event_total*event_total));
+    + event_minus*event_minus*event_plus_err*event_plus_err)/
+    (event_total*event_total*event_total*event_total));
 
 }
 
 
 //void GetAfbBinByBin(TH1D* h, Float_t &afbbin, Float_t  &afberrbin){
 void GetAfbBinByBin(TH1D* h){
- 
+
   Int_t nbins = h->GetNbinsX();
   const int nbins2 = nbins/2 +1;
   Float_t event_minus[nbins2];
@@ -71,103 +71,103 @@ void GetAfbBinByBin(TH1D* h){
   Double_t event_plus_total = 0.;
   Double_t event_minus_total = 0.;
   Double_t event_total_total = 0.;
-  
+
   for(int i=0;i<nbins2;i++){
-  	//event_minus[i]  = h-> IntegralAndError(i, i, event_plus_err[i],"");
-  	event_minus[i]  = h-> IntegralAndError(i, i, event_minus_err[i],"");
-  	event_minus_total += event_minus[i];
-  	//event_plus[i]   = h-> IntegralAndError(nbins+1-i, nbins+1-i, event_minus_err[i],"");
-  	event_plus[i]   = h-> IntegralAndError(nbins+1-i, nbins+1-i, event_plus_err[i],"");
-  	event_plus_total += event_plus[i];
-  	event_total[i] = event_plus[i] + event_minus[i];
-  	event_total_total += event_total[i];
-  	
-  	//cout<<event_minus[i]<<" "<<event_minus_err[i]<<" "<<event_plus[i]<<" "<<event_plus_err[i]<<" "<<event_total[i]<<endl;
-  	
-  	afbbin[i] = (event_plus[i]-event_minus[i])/(event_plus[i]+event_minus[i]);
-  	afberrbin[i]   = sqrt(4*(event_plus[i]*event_plus[i]*event_minus_err[i]*event_minus_err[i] 
-		     + event_minus[i]*event_minus[i]*event_plus_err[i]*event_plus_err[i])/
-		  (event_total[i]*event_total[i]*event_total[i]*event_total[i]));
-	cout<<i<<" AFB = "<<afbbin[i]<<" +/- "<<afberrbin[i]<<endl;
+    //event_minus[i]  = h-> IntegralAndError(i, i, event_plus_err[i],"");
+    event_minus[i]  = h-> IntegralAndError(i, i, event_minus_err[i],"");
+    event_minus_total += event_minus[i];
+    //event_plus[i]   = h-> IntegralAndError(nbins+1-i, nbins+1-i, event_minus_err[i],"");
+    event_plus[i]   = h-> IntegralAndError(nbins+1-i, nbins+1-i, event_plus_err[i],"");
+    event_plus_total += event_plus[i];
+    event_total[i] = event_plus[i] + event_minus[i];
+    event_total_total += event_total[i];
+
+    //cout<<event_minus[i]<<" "<<event_minus_err[i]<<" "<<event_plus[i]<<" "<<event_plus_err[i]<<" "<<event_total[i]<<endl;
+
+    afbbin[i] = (event_plus[i]-event_minus[i])/(event_plus[i]+event_minus[i]);
+    afberrbin[i]   = sqrt(4*(event_plus[i]*event_plus[i]*event_minus_err[i]*event_minus_err[i] 
+      + event_minus[i]*event_minus[i]*event_plus_err[i]*event_plus_err[i])/
+      (event_total[i]*event_total[i]*event_total[i]*event_total[i]));
+    cout<<i<<" AFB = "<<afbbin[i]<<" +/- "<<afberrbin[i]<<endl;
   }
 }
 
 
 void GetAvsY(TH1* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr, ofstream& second_output_file){
 
-    myafb.clear();
-    myerr.clear();
+  myafb.clear();
+  myerr.clear();
 
     //Get info from histogram
-    int nbins = histogram->GetNbinsX();
-    double n[16];
-    for(int i=0;i<nbins;i++){
-      n[i] = histogram->GetBinContent(i+1);
-    }
+  int nbins = histogram->GetNbinsX();
+  double n[16];
+  for(int i=0;i<nbins;i++){
+    n[i] = histogram->GetBinContent(i+1);
+  }
 
     //Output
-    double afb[8], err[8];
+  double afb[8], err[8];
 
     //Setup Some Needed Vectors
-    double alpha[16], beta[16], dfdn[16];
+  double alpha[16], beta[16], dfdn[16];
 
     //Get Asymmetry for each Y bin
-    for(int j=0;j<nbins/2;j++){
+  for(int j=0;j<nbins/2;j++){
 
-      int forBin = nbins/2 + j;
-      int bacBin = nbins/2 - j - 1;
+    int forBin = nbins/2 + j;
+    int bacBin = nbins/2 - j - 1;
 
-      for(int i=0;i<nbins;i++){
-	if( i == forBin ){ 
-	  alpha[i] = 1; 
-	  beta[i] = 1;
-	}else if( i == bacBin ){ 
-	  alpha[i] = -1; 
-	  beta[i] = 1;
-	}else{
-	  alpha[i] = 0;
-	  beta[i] = 0;
-	}
+    for(int i=0;i<nbins;i++){
+      if( i == forBin ){ 
+        alpha[i] = 1; 
+        beta[i] = 1;
+      }else if( i == bacBin ){ 
+        alpha[i] = -1; 
+        beta[i] = 1;
+      }else{
+        alpha[i] = 0;
+        beta[i] = 0;
       }
-      
-      double sum = 0. , diff = 0.;
-      for(int i=0;i<nbins;i++){
-	sum += beta[i] * n[i];
-	diff += alpha[i] * n[i];
-      }
+    }
+
+    double sum = 0. , diff = 0.;
+    for(int i=0;i<nbins;i++){
+      sum += beta[i] * n[i];
+      diff += alpha[i] * n[i];
+    }
 
       //Calculate Everything
-      if(sum > 0){ 
+    if(sum > 0){ 
 
-	//Error Calculation
-	for(int i=0;i<nbins;i++){
-	  dfdn[i] = ( alpha[i] * sum - beta[i] * diff ) / pow(sum,2);
-	}
-
-	double afberr = 0.;
-	for(int i=0;i<nbins;i++){
-	  for(int k=0;k<nbins;k++){
-	    afberr += covarianceM(i,k) * dfdn[i] * dfdn[k];
-	    //if(i==k) cout<<"DAH: "<<n[i]<<" "<<k<<" "<<covarianceM(i,k)<<endl;
-	  }
-	}
-	afberr = sqrt(afberr);
-
-	err[j] = afberr;
-	afb[j] = diff / sum; 
-
-      }else{ 
-
-	afb[j] = 0.; 
-	err[j] = 0.;
-
+  //Error Calculation
+      for(int i=0;i<nbins;i++){
+        dfdn[i] = ( alpha[i] * sum - beta[i] * diff ) / pow(sum,2);
       }
-      myafb.push_back(afb[j]);
-      myerr.push_back(err[j]);
 
-      cout<<j<<" AFB = "<<afb[j]<<" +/- "<<err[j]<<endl;
-      second_output_file << acceptanceName << " " << observablename << " AFB" << j << ": " << afb[j] << " +/- " << err[j] << endl;    	
+      double afberr = 0.;
+      for(int i=0;i<nbins;i++){
+        for(int k=0;k<nbins;k++){
+          afberr += covarianceM(i,k) * dfdn[i] * dfdn[k];
+      //if(i==k) cout<<"DAH: "<<n[i]<<" "<<k<<" "<<covarianceM(i,k)<<endl;
+        }
+      }
+      afberr = sqrt(afberr);
+
+      err[j] = afberr;
+      afb[j] = diff / sum; 
+
+    }else{ 
+
+      afb[j] = 0.; 
+      err[j] = 0.;
+
     }
+    myafb.push_back(afb[j]);
+    myerr.push_back(err[j]);
+
+    cout<<j<<" AFB = "<<afb[j]<<" +/- "<<err[j]<<endl;
+    second_output_file << acceptanceName << " " << observablename << " AFB" << j << ": " << afb[j] << " +/- " << err[j] << endl;    	
+  }
 }
 
 void GetCorrectedAfb(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float_t  &afberr){
@@ -175,40 +175,40 @@ void GetCorrectedAfb(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float
     //Need to calculate AFB and Error for the fully corrected distribution, m_correctE(j,i)
 
     //Get histogram info
-    int nbins = histogram->GetNbinsX();
-    double n[16];
-    for(int i=0;i<nbins;i++){
-      n[i] = histogram->GetBinContent(i+1);
-    }
+  int nbins = histogram->GetNbinsX();
+  double n[16];
+  for(int i=0;i<nbins;i++){
+    n[i] = histogram->GetBinContent(i+1);
+  }
 
     //Setup Alpha Vector
-    double alpha[16], beta[16];
-    for(int i=0;i<nbins;i++) if(i < nbins/2 ){ alpha[i] = -1;}else{ alpha[i] = 1;}
+  double alpha[16], beta[16];
+  for(int i=0;i<nbins;i++) if(i < nbins/2 ){ alpha[i] = -1;}else{ alpha[i] = 1;}
 
     //Components of the error calculation
-    double sum_n = 0.;
-    double sum_alpha_n = 0.;
-    for(int i=0;i<nbins;i++){
-      sum_n += n[i];
-      sum_alpha_n += alpha[i] * n[i];
-    }
+  double sum_n = 0.;
+  double sum_alpha_n = 0.;
+  for(int i=0;i<nbins;i++){
+    sum_n += n[i];
+    sum_alpha_n += alpha[i] * n[i];
+  }
 
-    double dfdn[16];
-    for(int i=0;i<nbins;i++){
-      dfdn[i] = ( alpha[i] * sum_n - sum_alpha_n ) / pow(sum_n,2);
-    }
+  double dfdn[16];
+  for(int i=0;i<nbins;i++){
+    dfdn[i] = ( alpha[i] * sum_n - sum_alpha_n ) / pow(sum_n,2);
+  }
 
     //Error Calculation
-    afberr = 0.;
-    for(int i=0;i<nbins;i++){
-      for(int j=0;j<nbins;j++){
-	afberr += covarianceM(i,j) * dfdn[i] * dfdn[j];
-      }
+  afberr = 0.;
+  for(int i=0;i<nbins;i++){
+    for(int j=0;j<nbins;j++){
+      afberr += covarianceM(i,j) * dfdn[i] * dfdn[j];
     }
-    afberr = sqrt(afberr);
+  }
+  afberr = sqrt(afberr);
 
     //Calculate Afb
-    afb = sum_alpha_n / sum_n;
+  afb = sum_alpha_n / sum_n;
 
     //    cout<<"AFB = "<<afb<<" "<<afberr<<endl;
 }
@@ -219,69 +219,69 @@ void GetCorrectedAfb(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float
 void GetCorrectedAfbBinByBin(TH1D* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr, ofstream& second_output_file){
 
     //Need to calculate AFB and Error for the fully corrected distribution, m_correctE(j,i)
-        
-    myafb.clear();
-    myerr.clear();
+
+  myafb.clear();
+  myerr.clear();
 
     //Get histogram info
-    int nbins = histogram->GetNbinsX();
-    const int nbins2 = nbins/2;
+  int nbins = histogram->GetNbinsX();
+  const int nbins2 = nbins/2;
 
-    Double_t afbbin[nbins2];
-    Double_t afberrbin[nbins2];
-    
-    double n[16];
-    for(int i=0;i<nbins;i++){
-      n[i] = histogram->GetBinContent(i+1);
-    }
+  Double_t afbbin[nbins2];
+  Double_t afberrbin[nbins2];
+
+  double n[16];
+  for(int i=0;i<nbins;i++){
+    n[i] = histogram->GetBinContent(i+1);
+  }
 
     //Setup Alpha Vector
-    double alpha[16], beta[16];
-    for(int i=0;i<nbins;i++) if(i < nbins/2 ){ alpha[i] = -1;}else{ alpha[i] = 1;}
+  double alpha[16], beta[16];
+  for(int i=0;i<nbins;i++) if(i < nbins/2 ){ alpha[i] = -1;}else{ alpha[i] = 1;}
 
     //Components of the error calculation
-    double sum_n[nbins2];
-    double sum_alpha_n[nbins2];
-    double sum_n_total = 0.;
-    double sum_alpha_n_total = 0.;
-    
-    
-    for(int i=0;i<nbins2;i++){
-      sum_n[i] = n[i] + n[nbins-1-i];
-      sum_alpha_n[i] = alpha[i] * n[i] + alpha[nbins-1-i] * n[nbins-1-i];
-      sum_n_total += sum_n[i];
-      sum_alpha_n_total += sum_alpha_n[i];
-    }
+  double sum_n[nbins2];
+  double sum_alpha_n[nbins2];
+  double sum_n_total = 0.;
+  double sum_alpha_n_total = 0.;
 
-    double dfdn[16];
-    for(int i=0;i<nbins;i++){
-       int k = -999;
-       if (i < nbins2) k = i;
-       else k = nbins-1-i;
-      dfdn[i] = ( alpha[i] * sum_n[k] - sum_alpha_n[k] ) / pow(sum_n[k],2);
-    }
+
+  for(int i=0;i<nbins2;i++){
+    sum_n[i] = n[i] + n[nbins-1-i];
+    sum_alpha_n[i] = alpha[i] * n[i] + alpha[nbins-1-i] * n[nbins-1-i];
+    sum_n_total += sum_n[i];
+    sum_alpha_n_total += sum_alpha_n[i];
+  }
+
+  double dfdn[16];
+  for(int i=0;i<nbins;i++){
+    int k = -999;
+    if (i < nbins2) k = i;
+    else k = nbins-1-i;
+    dfdn[i] = ( alpha[i] * sum_n[k] - sum_alpha_n[k] ) / pow(sum_n[k],2);
+  }
 
     //Error Calculation
 
-    for(int k=0;k<nbins2;k++){
-    	afberrbin[k] = 0.;
-    	for(int i=0;i<nbins;i++){
-      		for(int j=0;j<nbins;j++){
-      			if( (i==k || i==nbins-1-k ) && (j==k || j==nbins-1-k ) ) {
-      				afberrbin[k] += covarianceM(i,j) * dfdn[i] * dfdn[j];
-      				//cout<<covarianceM(i,j)<<" "<<dfdn[i]<<" "<<dfdn[j]<<" "<<endl;
-      			}
-      		}
-    	}
-    	afberrbin[k] = sqrt(afberrbin[k]);
-    	afbbin[k] = sum_alpha_n[k] / sum_n[k];
-    	cout<<k<<" AFB = "<<afbbin[k]<<" +/- "<<afberrbin[k]<<endl;
-    	second_output_file << acceptanceName << " " << observablename << " AFB" << i << ": " << afbbin[k] << " +/- " << afberrbin[k] << endl;
-      
-	myafb.push_back(afbbin[k]);
-	myerr.push_back(afberrbin[k]);
+  for(int k=0;k<nbins2;k++){
+    afberrbin[k] = 0.;
+    for(int i=0;i<nbins;i++){
+      for(int j=0;j<nbins;j++){
+        if( (i==k || i==nbins-1-k ) && (j==k || j==nbins-1-k ) ) {
+          afberrbin[k] += covarianceM(i,j) * dfdn[i] * dfdn[j];
+              //cout<<covarianceM(i,j)<<" "<<dfdn[i]<<" "<<dfdn[j]<<" "<<endl;
+        }
+      }
     }
-    double afb = sum_alpha_n_total / sum_n_total;
+    afberrbin[k] = sqrt(afberrbin[k]);
+    afbbin[k] = sum_alpha_n[k] / sum_n[k];
+    cout<<k<<" AFB = "<<afbbin[k]<<" +/- "<<afberrbin[k]<<endl;
+    second_output_file << acceptanceName << " " << observablename << " AFB" << i << ": " << afbbin[k] << " +/- " << afberrbin[k] << endl;
+
+    myafb.push_back(afbbin[k]);
+    myerr.push_back(afberrbin[k]);
+  }
+  double afb = sum_alpha_n_total / sum_n_total;
     //cout<<"AFB = "<<afb<<endl;
 }
 
@@ -295,10 +295,10 @@ void Initialize1DBinning(int iVar){
 
 
   switch (iVar)
-    {
+  {
     //   Lepton Charge Asymmetry
     case 0:
-      {
+    {
       observablename="lep_charge_asymmetry";
       xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
       acceptanceName="lepChargeAsym";
@@ -306,10 +306,10 @@ void Initialize1DBinning(int iVar){
       xmin=-2.0;
       xmax= 2.0;
       break;
-      }
+    }
     //   Lepton Azimuthal Asymmetry 2
     case 1:
-      {
+    {
       observablename="lep_azimuthal_asymmetry2";
       xaxislabel="#Delta#phi_{l+l-}";
       acceptanceName="lepAzimAsym2";
@@ -318,10 +318,10 @@ void Initialize1DBinning(int iVar){
       xmin=0.0;
       xmax=pi;
       break;
-      }
+    }
     //   Top Polarization
     case 2:
-      {
+    {
       observablename="lep_costheta_cms";
       xaxislabel="cos(#theta^{+}_{l})";
       acceptanceName="lepPlusCosTheta";
@@ -329,32 +329,32 @@ void Initialize1DBinning(int iVar){
       xmin=-1.0;
       xmax= 1.0;
       break;
-      }
+    }
     //   Top Polarization using negatively charged leptons
     case 3:
-      {
-        observablename="lepMinus_costheta_cms";
-        xaxislabel="cos(#theta^{-}_{l})";
-        acceptanceName="lepMinusCosTheta";
-        xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
-        xmin=-1.0;
-        xmax= 1.0;
-        break;
-      }
+    {
+      observablename="lepMinus_costheta_cms";
+      xaxislabel="cos(#theta^{-}_{l})";
+      acceptanceName="lepMinusCosTheta";
+      xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+      xmin=-1.0;
+      xmax= 1.0;
+      break;
+    }
     //   Top Polarization combining positively and negatively charged leptons
     case 4:
-      {
-        observablename="lep_costheta_cms";
-        xaxislabel="cos(#theta^{*}_{l})";
-        acceptanceName="lepCosTheta";
-        xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
-        xmin=-1.0;
-        xmax= 1.0;
-        break;
-      }
+    {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{*}_{l})";
+      acceptanceName="lepCosTheta";
+      xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
+      xmin=-1.0;
+      xmax= 1.0;
+      break;
+    }
     //   Top Spin Correlation
     case 5:
-      {
+    {
       observablename="top_spin_correlation";
       xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
       acceptanceName="topSpinCorr";
@@ -362,10 +362,10 @@ void Initialize1DBinning(int iVar){
       xmin=-1.0;
       xmax= 1.0;
       break;
-      }
+    }
     //   Top Asy III
     case 6:
-      {
+    {
       observablename="top_rapidtiydiff_Marco";
       xaxislabel="|y_{top}|-|y_{tbar}|";
       acceptanceName="rapiditydiffMarco";
@@ -373,10 +373,10 @@ void Initialize1DBinning(int iVar){
       xmin=-2.0;
       xmax= 2.0;
       break;
-      }
+    }
     //   Top Charge Asymmetry
     case 7:
-      {
+    {
       observablename="top_costheta_cms";
       xaxislabel="cos(#theta_{top})";
       acceptanceName="topCosTheta";
@@ -384,10 +384,10 @@ void Initialize1DBinning(int iVar){
       xmin=-1.0;
       xmax= 1.0;
       break;
-      }
+    }
     //   Lepton Azimuthal Asymmetry
     case 8:
-      {
+    {
       observablename="lep_azimuthal_asymmetry";
       xaxislabel="cos(#Delta#phi_{l+l-})";
       acceptanceName="lepAzimAsym";
@@ -395,10 +395,10 @@ void Initialize1DBinning(int iVar){
       xmin=-1.0;
       xmax= 1.0;
       break;
-      }
+    }
     //   Top Asy I
     case 9:
-      {
+    {
       observablename="top_pseudorapidtiydiff_cms";
       xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
       acceptanceName="pseudorapiditydiff";
@@ -406,10 +406,10 @@ void Initialize1DBinning(int iVar){
       xmin=-4.0;
       xmax= 4.0;
       break;
-      }
+    }
     //   Top Asy II
     case 10:
-      {
+    {
       observablename="top_rapidtiydiff_cms";
       xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
       acceptanceName="rapiditydiff";
@@ -417,148 +417,414 @@ void Initialize1DBinning(int iVar){
       xmin=-4.0;
       xmax= 4.0;
       break;
-      }
-    default:
-      {
-      cout<<"Set the variable switch";
-      }
     }
+    default:
+    {
+      cout<<"Set the variable switch";
+    }
+  }
 }
-
-
 
 void Initialize2DBinning(int iVar){
 
 
   switch (iVar)
-    {
+  {
     //   Lepton Charge Asymmetry
     case 0:
-      {
+    {
       observablename="lep_charge_asymmetry";
       xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
       acceptanceName="lepChargeAsym";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
     //   Lepton Azimuthal Asymmetry 2
     case 1:
-      {
+    {
       observablename="lep_azimuthal_asymmetry2";
       xaxislabel="#Delta#phi_{l+l-}";
       acceptanceName="lepAzimAsym2";
       Double_t pi = 3.141592653589793;
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
     //   Top Polarization
     case 2:
-      {
+    {
       observablename="lep_costheta_cms";
       xaxislabel="cos(#theta^{+}_{l})";
       acceptanceName="lepPlusCosTheta";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
       //   Top Polarization using negatively charged leptons
-      case 3:
-      {
-        observablename="lepMinus_costheta_cms";
-        xaxislabel="cos(#theta^{-}_{l})";
-        acceptanceName="lepMinusCosTheta";
-        xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
-        xmin=xbins2D[0];
-        xmax=xbins2D[6];
-        break;
-      }
+    case 3:
+    {
+      observablename="lepMinus_costheta_cms";
+      xaxislabel="cos(#theta^{-}_{l})";
+      acceptanceName="lepMinusCosTheta";
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
       //   Top Polarization combining positively and negatively charged leptons
-      case 4:
-      {
-        observablename="lep_costheta_cms";
-        xaxislabel="cos(#theta^{*}_{l})";
-        acceptanceName="lepCosTheta";
-        xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
-        xmin=xbins2D[0];
-        xmax=xbins2D[6];
-        break;
-      }
+    case 4:
+    {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{*}_{l})";
+      acceptanceName="lepCosTheta";
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
     //   Top Spin Correlation
     case 5:
-      {
+    {
       observablename="top_spin_correlation";
       xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
       acceptanceName="topSpinCorr";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
     //   Top Asy III
     case 6:
-      {
+    {
       observablename="top_rapidtiydiff_Marco";
       xaxislabel="|y_{top}|-|y_{tbar}|";
       acceptanceName="rapiditydiffMarco";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
     //   Top Charge Asymmetry
     case 7:
-      {
+    {
       observablename="top_costheta_cms";
       xaxislabel="cos(#theta_{top})";
       acceptanceName="topCosTheta";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
     //   Lepton Azimuthal Asymmetry
     case 8:
-      {
+    {
       observablename="lep_azimuthal_asymmetry";
       xaxislabel="cos(#Delta#phi_{l+l-})";
       acceptanceName="lepAzimAsym";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
     //   Top Asy I
     case 9:
-      {
+    {
       observablename="top_pseudorapidtiydiff_cms";
       xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
       acceptanceName="pseudorapiditydiff";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
+    }
     //   Top Asy II
     case 10:
-      {
+    {
       observablename="top_rapidtiydiff_cms";
       xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
       acceptanceName="rapiditydiff";
-      xbins2D[0]=-800.0; xbins2D[1]=-550.0; xbins2D[2]=-450.0; xbins2D[3]=0.0; xbins2D[4]=450; xbins2D[5]=550.0; xbins2D[6]=800.0;
+      xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
       break;
-      }
-    default:
-      {
-      cout<<"Set the variable switch";
-      }
     }
+    default:
+    {
+      cout<<"Set the variable switch";
+    }
+  }
+}
+
+void Initialize2DBinningttpt(int iVar){
+
+
+  switch (iVar)
+  {
+    //   Lepton Charge Asymmetry
+    case 0:
+    {
+      observablename="lep_charge_asymmetry";
+      xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
+      acceptanceName="lepChargeAsym";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Lepton Azimuthal Asymmetry 2
+    case 1:
+    {
+      observablename="lep_azimuthal_asymmetry2";
+      xaxislabel="#Delta#phi_{l+l-}";
+      acceptanceName="lepAzimAsym2";
+      Double_t pi = 3.141592653589793;
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Polarization
+    case 2:
+    {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{+}_{l})";
+      acceptanceName="lepPlusCosTheta";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+      //   Top Polarization using negatively charged leptons
+    case 3:
+    {
+      observablename="lepMinus_costheta_cms";
+      xaxislabel="cos(#theta^{-}_{l})";
+      acceptanceName="lepMinusCosTheta";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+      //   Top Polarization combining positively and negatively charged leptons
+    case 4:
+    {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{*}_{l})";
+      acceptanceName="lepCosTheta";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Spin Correlation
+    case 5:
+    {
+      observablename="top_spin_correlation";
+      xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
+      acceptanceName="topSpinCorr";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Asy III
+    case 6:
+    {
+      observablename="top_rapidtiydiff_Marco";
+      xaxislabel="|y_{top}|-|y_{tbar}|";
+      acceptanceName="rapiditydiffMarco";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Charge Asymmetry
+    case 7:
+    {
+      observablename="top_costheta_cms";
+      xaxislabel="cos(#theta_{top})";
+      acceptanceName="topCosTheta";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Lepton Azimuthal Asymmetry
+    case 8:
+    {
+      observablename="lep_azimuthal_asymmetry";
+      xaxislabel="cos(#Delta#phi_{l+l-})";
+      acceptanceName="lepAzimAsym";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Asy I
+    case 9:
+    {
+      observablename="top_pseudorapidtiydiff_cms";
+      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
+      acceptanceName="pseudorapiditydiff";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Asy II
+    case 10:
+    {
+      observablename="top_rapidtiydiff_cms";
+      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
+      acceptanceName="rapiditydiff";
+      xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    default:
+    {
+      cout<<"Set the variable switch";
+    }
+  }
+}
+
+void Initialize2DBinningttrapidity2(int iVar){
+
+
+  switch (iVar)
+  {
+    //   Lepton Charge Asymmetry
+    case 0:
+    {
+      observablename="lep_charge_asymmetry";
+      xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
+      acceptanceName="lepChargeAsym";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Lepton Azimuthal Asymmetry 2
+    case 1:
+    {
+      observablename="lep_azimuthal_asymmetry2";
+      xaxislabel="#Delta#phi_{l+l-}";
+      acceptanceName="lepAzimAsym2";
+      Double_t pi = 3.141592653589793;
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Polarization
+    case 2:
+    {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{+}_{l})";
+      acceptanceName="lepPlusCosTheta";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+      //   Top Polarization using negatively charged leptons
+    case 3:
+    {
+      observablename="lepMinus_costheta_cms";
+      xaxislabel="cos(#theta^{-}_{l})";
+      acceptanceName="lepMinusCosTheta";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+      //   Top Polarization combining positively and negatively charged leptons
+    case 4:
+    {
+      observablename="lep_costheta_cms";
+      xaxislabel="cos(#theta^{*}_{l})";
+      acceptanceName="lepCosTheta";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Spin Correlation
+    case 5:
+    {
+      observablename="top_spin_correlation";
+      xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
+      acceptanceName="topSpinCorr";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Asy III
+    case 6:
+    {
+      observablename="top_rapidtiydiff_Marco";
+      xaxislabel="|y_{top}|-|y_{tbar}|";
+      acceptanceName="rapiditydiffMarco";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Charge Asymmetry
+    case 7:
+    {
+      observablename="top_costheta_cms";
+      xaxislabel="cos(#theta_{top})";
+      acceptanceName="topCosTheta";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Lepton Azimuthal Asymmetry
+    case 8:
+    {
+      observablename="lep_azimuthal_asymmetry";
+      xaxislabel="cos(#Delta#phi_{l+l-})";
+      acceptanceName="lepAzimAsym";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Asy I
+    case 9:
+    {
+      observablename="top_pseudorapidtiydiff_cms";
+      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
+      acceptanceName="pseudorapiditydiff";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    //   Top Asy II
+    case 10:
+    {
+      observablename="top_rapidtiydiff_cms";
+      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
+      acceptanceName="rapiditydiff";
+      xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
+      xmin=xbins2D[0];
+      xmax=xbins2D[6];
+      break;
+    }
+    default:
+    {
+      cout<<"Set the variable switch";
+    }
+  }
 }
 
 void fillUnderOverFlow(TH1D *h1, float value, double weight, int Nsolns)
