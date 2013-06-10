@@ -434,7 +434,7 @@ void Initialize2DBinning(int iVar){
     case 0:
     {
       observablename="lep_charge_asymmetry";
-      xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="lepChargeAsym";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -445,7 +445,7 @@ void Initialize2DBinning(int iVar){
     case 1:
     {
       observablename="lep_azimuthal_asymmetry2";
-      xaxislabel="#Delta#phi_{l+l-}";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="lepAzimAsym2";
       Double_t pi = 3.141592653589793;
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
@@ -457,7 +457,7 @@ void Initialize2DBinning(int iVar){
     case 2:
     {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{+}_{l})";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="lepPlusCosTheta";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -468,7 +468,7 @@ void Initialize2DBinning(int iVar){
     case 3:
     {
       observablename="lepMinus_costheta_cms";
-      xaxislabel="cos(#theta^{-}_{l})";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="lepMinusCosTheta";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -479,7 +479,7 @@ void Initialize2DBinning(int iVar){
     case 4:
     {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{*}_{l})";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="lepCosTheta";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -490,7 +490,7 @@ void Initialize2DBinning(int iVar){
     case 5:
     {
       observablename="top_spin_correlation";
-      xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="topSpinCorr";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -501,7 +501,7 @@ void Initialize2DBinning(int iVar){
     case 6:
     {
       observablename="top_rapidtiydiff_Marco";
-      xaxislabel="|y_{top}|-|y_{tbar}|";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="rapiditydiffMarco";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -512,7 +512,7 @@ void Initialize2DBinning(int iVar){
     case 7:
     {
       observablename="top_costheta_cms";
-      xaxislabel="cos(#theta_{top})";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="topCosTheta";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -523,7 +523,7 @@ void Initialize2DBinning(int iVar){
     case 8:
     {
       observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="lepAzimAsym";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -534,7 +534,7 @@ void Initialize2DBinning(int iVar){
     case 9:
     {
       observablename="top_pseudorapidtiydiff_cms";
-      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="pseudorapiditydiff";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -545,7 +545,7 @@ void Initialize2DBinning(int iVar){
     case 10:
     {
       observablename="top_rapidtiydiff_cms";
-      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
+      xaxislabel="M_{t#bar t}";
       acceptanceName="rapiditydiff";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
@@ -568,7 +568,7 @@ void Initialize2DBinningttpt(int iVar){
     case 0:
     {
       observablename="lep_charge_asymmetry";
-      xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="lepChargeAsym";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -579,7 +579,7 @@ void Initialize2DBinningttpt(int iVar){
     case 1:
     {
       observablename="lep_azimuthal_asymmetry2";
-      xaxislabel="#Delta#phi_{l+l-}";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="lepAzimAsym2";
       Double_t pi = 3.141592653589793;
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
@@ -591,7 +591,7 @@ void Initialize2DBinningttpt(int iVar){
     case 2:
     {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{+}_{l})";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="lepPlusCosTheta";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -602,7 +602,7 @@ void Initialize2DBinningttpt(int iVar){
     case 3:
     {
       observablename="lepMinus_costheta_cms";
-      xaxislabel="cos(#theta^{-}_{l})";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="lepMinusCosTheta";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -613,7 +613,7 @@ void Initialize2DBinningttpt(int iVar){
     case 4:
     {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{*}_{l})";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="lepCosTheta";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -624,7 +624,7 @@ void Initialize2DBinningttpt(int iVar){
     case 5:
     {
       observablename="top_spin_correlation";
-      xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="topSpinCorr";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -635,7 +635,7 @@ void Initialize2DBinningttpt(int iVar){
     case 6:
     {
       observablename="top_rapidtiydiff_Marco";
-      xaxislabel="|y_{top}|-|y_{tbar}|";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="rapiditydiffMarco";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -646,7 +646,7 @@ void Initialize2DBinningttpt(int iVar){
     case 7:
     {
       observablename="top_costheta_cms";
-      xaxislabel="cos(#theta_{top})";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="topCosTheta";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -657,7 +657,7 @@ void Initialize2DBinningttpt(int iVar){
     case 8:
     {
       observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="lepAzimAsym";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -668,7 +668,7 @@ void Initialize2DBinningttpt(int iVar){
     case 9:
     {
       observablename="top_pseudorapidtiydiff_cms";
-      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="pseudorapiditydiff";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -679,7 +679,7 @@ void Initialize2DBinningttpt(int iVar){
     case 10:
     {
       observablename="top_rapidtiydiff_cms";
-      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
+      xaxislabel="p_{T,t#bar{t}}";
       acceptanceName="rapiditydiff";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
@@ -702,7 +702,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 0:
     {
       observablename="lep_charge_asymmetry";
-      xaxislabel="|#eta_{l+}|-|#eta_{l-}|";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="lepChargeAsym";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -713,7 +713,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 1:
     {
       observablename="lep_azimuthal_asymmetry2";
-      xaxislabel="#Delta#phi_{l+l-}";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="lepAzimAsym2";
       Double_t pi = 3.141592653589793;
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
@@ -725,7 +725,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 2:
     {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{+}_{l})";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="lepPlusCosTheta";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -736,7 +736,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 3:
     {
       observablename="lepMinus_costheta_cms";
-      xaxislabel="cos(#theta^{-}_{l})";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="lepMinusCosTheta";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -747,7 +747,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 4:
     {
       observablename="lep_costheta_cms";
-      xaxislabel="cos(#theta^{*}_{l})";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="lepCosTheta";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -758,7 +758,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 5:
     {
       observablename="top_spin_correlation";
-      xaxislabel="cos(#theta_{l+,n})cos(#theta_{l-,n})";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="topSpinCorr";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -769,7 +769,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 6:
     {
       observablename="top_rapidtiydiff_Marco";
-      xaxislabel="|y_{top}|-|y_{tbar}|";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="rapiditydiffMarco";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -780,7 +780,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 7:
     {
       observablename="top_costheta_cms";
-      xaxislabel="cos(#theta_{top})";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="topCosTheta";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -791,7 +791,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 8:
     {
       observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="lepAzimAsym";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -802,7 +802,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 9:
     {
       observablename="top_pseudorapidtiydiff_cms";
-      xaxislabel="|#eta_{top}|-|#eta_{tbar}|";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="pseudorapiditydiff";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
@@ -813,7 +813,7 @@ void Initialize2DBinningttrapidity2(int iVar){
     case 10:
     {
       observablename="top_rapidtiydiff_cms";
-      xaxislabel="(y_{top}-y_{tbar})(y_{top}+y_{tbar})";
+      xaxislabel="y_{t#bar{t}}";
       acceptanceName="rapiditydiff";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];

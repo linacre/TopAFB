@@ -7,7 +7,13 @@ echo "extracting yields"
 root -b -q macro_getYields.C >& getYields.log
 
 echo "produce plots"
-rootb -b -q macro_drawHists.C >& macro_drawHists.log
+root -b -q macro_drawHists.C >& macro_drawHists.log
+
+echo "produce reco level plots"
+root -b -q macro_recoLevel.C >& macro_recoLevel.log
+root -b -q macro_2DrecoLevel.C >& macro_2DrecoLevel.log
+root -b -q macro_2DrecoLevelttpt.C >& macro_2DrecoLevelttpt.log
+root -b -q macro_2DrecoLevelttrapidity2.C >& macro_2DrecoLevelttrapidity2.log
 
 echo "executing doAll_nocuts.C"
 root -b -q doAll_nocuts.C >& doAll_nocuts.log
