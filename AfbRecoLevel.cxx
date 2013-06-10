@@ -38,9 +38,9 @@ std::string formatFloat(double x, const char* formatS) {
 //==============================================================================
 
 const Double_t _topScalingFactor=9097.0/9344.0;
+TString Region="";
 
-
-void AfbRecoLevel(TString Region="")
+void AfbRecoLevel()
 {
 
   // setTDRStyle();
@@ -57,7 +57,7 @@ void AfbRecoLevel(TString Region="")
   Double_t weight;
   Int_t Nsolns;
 
-  int nVars =11;
+  int nVars =8;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
     Initialize1DBinning(iVar);
@@ -83,21 +83,27 @@ void AfbRecoLevel(TString Region="")
 
     for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
       ch_data->GetEntry(i);
-      if ( (Region=="Signal") && (ttmass>450) )  
-        fillUnderOverFlow(hData, observable, weight, Nsolns);
-      if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
+      if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+          // leptonic asymmetries don't need valid top mass solution
         fillUnderOverFlow(hData, observable, weight, Nsolns);    
-      if ( (Region=="") && (iVar<3) ) 
-        fillUnderOverFlow(hData, observable, weight, Nsolns);  
-
+      } else {
+        if ( ttmass > 0 ) {
+            // asymmetries with top properties are required to have a valid top mass solution
+          fillUnderOverFlow(hData, observable, weight, Nsolns);    
+        }
+      }
       if (combineLepMinus) {
-        if ( (Region=="Signal") && (ttmass>450) )  
-          fillUnderOverFlow(hData, observableMinus, weight, Nsolns);
-        if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
+        // combine plus and minus
+        if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+            // leptonic asymmetries don't need valid top mass solution
           fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
-        if ( (Region=="") && (iVar<3) ) 
-          fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
-      } 
+        } else {
+          if ( ttmass > 0 ) {
+              // asymmetries with top properties are required to have a valid top mass solution
+            fillUnderOverFlow(hData, observableMinus, weight, Nsolns);    
+          }
+        }
+      }    
     }
 
     TChain *ch_top = new TChain("tree");
@@ -112,18 +118,27 @@ void AfbRecoLevel(TString Region="")
 
     for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
       ch_top->GetEntry(i);
-      if ( (Region=="") && (iVar>=3) && (ttmass>0) ) {
-        fillUnderOverFlow(hTop, observable, weight, Nsolns);
-        if( combineLepMinus ) {
-  	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
-  	  }
+      if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+          // leptonic asymmetries don't need valid top mass solution
+        fillUnderOverFlow(hTop, observable, weight, Nsolns);    
+      } else {
+        if ( ttmass > 0 ) {
+            // asymmetries with top properties are required to have a valid top mass solution
+          fillUnderOverFlow(hTop, observable, weight, Nsolns);    
+        }
       }
-      if ( (Region=="") && (iVar<3) ) {
-        fillUnderOverFlow(hTop, observable, weight, Nsolns);
-        if( combineLepMinus ) {
-  	      fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);
-  	  }
-      }
+      if (combineLepMinus) {
+        // combine plus and minus
+        if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+            // leptonic asymmetries don't need valid top mass solution
+          fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);    
+        } else {
+          if ( ttmass > 0 ) {
+              // asymmetries with top properties are required to have a valid top mass solution
+            fillUnderOverFlow(hTop, observableMinus, weight, Nsolns);    
+          }
+        }
+      }    
     }
 
     TChain *ch_bkg = new TChain("tree");
@@ -144,21 +159,27 @@ void AfbRecoLevel(TString Region="")
 
     for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
       ch_bkg->GetEntry(i);
-      if ( (Region=="Signal") && (ttmass>450) )  
-        fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-      if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
-        fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-      if ( (Region=="") && (iVar<3) ) 
-        fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-
+      if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+          // leptonic asymmetries don't need valid top mass solution
+        fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
+      } else {
+        if ( ttmass > 0 ) {
+            // asymmetries with top properties are required to have a valid top mass solution
+          fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
+        }
+      }
       if (combineLepMinus) {
-  	    if ( (Region=="Signal") && (ttmass>450) )  
-  	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-  	    if ( (Region=="") && (iVar>=3) && (ttmass>0) ) 
-  	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-  	    if ( (Region=="") && (iVar<3) ) 
-  	      fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);
-  	}
+        // combine plus and minus
+        if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+            // leptonic asymmetries don't need valid top mass solution
+          fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+        } else {
+          if ( ttmass > 0 ) {
+              // asymmetries with top properties are required to have a valid top mass solution
+            fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+          }
+        }
+      }    
     }
 
     hTop->Scale(_topScalingFactor);
@@ -241,7 +262,7 @@ void AfbRecoLevel(TString Region="")
     blah->SetTextAlign(11);
 
     pt1->Draw();
-    c_test->SaveAs("finalplot_"+acceptanceName+Region+".pdf");
+    c_test->SaveAs("1D_reco_"+acceptanceName+Region+".pdf");
 
     delete hData;
     delete hBkg;
