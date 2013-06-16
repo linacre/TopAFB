@@ -1019,7 +1019,10 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             float aveAMWTweight = -999;
             bool useOnlyMaxWsoln = false;
 
-            float ndavtxweight = vtxweight(isData, true);
+            float ndavtxweight = 1.;
+            if ( !noVertexReweighting ) {
+              ndavtxweight = vtxweight(isData, true);              
+            }
 
             //if (prefix == "ttdil" || prefix == "ttotr") ndavtxweight = 1.;  //no vtx weighting for fastsim samples
 
