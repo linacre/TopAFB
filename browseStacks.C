@@ -184,7 +184,19 @@ xtitle = "M_{l2b2} (GeV/c^{2}) for M_{l1b1} > 170 GeV/c^{2}";
 	}
      
 	//if(plot.Contains("_0j") || plot.Contains("_1j") || plot.Contains("_2j")|| plot.Contains("_allj") ) htemp->Rebin(rebin);
-	if( htemp->GetNbinsX() % rebin == 0 && (plot.Contains("_0j") || plot.Contains("_1j") || plot.Contains("_2j")|| plot.Contains("_allj")) ) htemp->Rebin(rebin);
+  if( htemp->GetNbinsX() % rebin == 0 && (plot.Contains("_0j") || plot.Contains("_1j") || plot.Contains("_2j")|| plot.Contains("_allj")) ) {
+    htemp->Rebin(rebin);
+  } else if ( plot.Contains("httpT") ) {
+    // special rebinnig for httpT, choose numberOfBins = wanted number of bins for ttpT >= 0 and add 1
+    const int numberOfBins = 21;
+    Double_t rebinning[numberOfBins];
+    rebinning[0] = -4.;
+    rebinning[1] = 0.;
+    for ( int index = 0; index < numberOfBins-1; ++index ) {
+      rebinning[index+2] = 400./(numberOfBins-1)*(index+1);
+    }
+    htemp = dynamic_cast<TH1D*>(htemp->Rebin(numberOfBins,"",rebinning));    
+  }
 	//don't add the data histogram to the stack
 	if(v_samples.at(i_prefix) == "data") {
 	  hdata = htemp;	  

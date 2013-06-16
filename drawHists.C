@@ -76,6 +76,7 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
 
   hist::loadHist(FName.Data(),0,"*htopMass_allj*");
   hist::loadHist(FName.Data(),0,"*httMass_allj*"); 
+  hist::loadHist(FName.Data(),0,"*httpT_allj*"); 
   hist::loadHist(FName.Data(),0,"*httRapidity_allj*");   
   hist::loadHist(FName.Data(),0,"*httRapidity2_allj*");   
 
