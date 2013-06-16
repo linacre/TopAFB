@@ -122,8 +122,11 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
   // -----------
   // top pt reweighting
   // activate to reweight events according to top pt
+  // or alterniative scenarios
   //
   // v_baseCuts.push_back("applyTopPtWeighting");
+  // v_baseCuts.push_back("applyLeptonPtWeighting");
+  // v_baseCuts.push_back("applyJetPtWeighting");
   
   if(requireBTag && !doBFR)
     v_baseCuts.push_back("requireBTag");  

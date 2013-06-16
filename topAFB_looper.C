@@ -65,6 +65,46 @@ double topAFB_looper::TopPtWeight(double topPt)
     return result;
 }
 
+double topAFB_looper::LeptonPtWeight(double leptonPt)
+{
+
+  if ( leptonPt < 20 ) return 1;
+  if ( (leptonPt >= 20) && (leptonPt < 40) ) return 1.03545;
+  if ( (leptonPt >= 40) && (leptonPt < 60) ) return 1.01794;
+  if ( (leptonPt >= 60) && (leptonPt < 80) ) return 1.00371;
+  if ( (leptonPt >= 80) && (leptonPt < 100) ) return 0.932273;
+  if ( (leptonPt >= 100) && (leptonPt < 120) ) return 0.881938;
+  if ( (leptonPt >= 120) && (leptonPt < 140) ) return 0.867833;
+  if ( (leptonPt >= 140) && (leptonPt < 160) ) return 0.864478;
+  if ( (leptonPt >= 160) && (leptonPt < 180) ) return 0.811505;
+  if ( (leptonPt >= 180) && (leptonPt < 200) ) return 0.7997;
+  if ( (leptonPt >= 200) && (leptonPt < 220) ) return 0.876389;
+  if ( (leptonPt >= 220) && (leptonPt < 240) ) return 0.737906;  
+  if ( leptonPt >= 240 ) return 1;
+  
+  return 1;
+}
+
+double topAFB_looper::JetPtWeight(double jetPt)
+{
+
+  if ( jetPt < 30 ) return 1;
+  if ( (jetPt >= 30) && (jetPt < 60) ) return 1.04352;
+  if ( (jetPt >= 60) && (jetPt < 90) ) return 1.02321;
+  if ( (jetPt >= 90) && (jetPt < 120) ) return 0.952548;
+  if ( (jetPt >= 120) && (jetPt < 150) ) return 0.89809;
+  if ( (jetPt >= 150) && (jetPt < 180) ) return 0.862834;
+  if ( (jetPt >= 180) && (jetPt < 210) ) return 0.857449;
+  if ( (jetPt >= 210) && (jetPt < 240) ) return 0.896524;
+  if ( (jetPt >= 240) && (jetPt < 270) ) return 0.871748;
+  if ( (jetPt >= 270) && (jetPt < 300) ) return 0.747337;
+  if ( (jetPt >= 300) && (jetPt < 330) ) return 0.74634;
+  if ( (jetPt >= 330) && (jetPt < 360) ) return 0.692822;
+  if ( jetPt >= 360 ) return 1;
+  
+  return 1;
+}
+
 
 bool topAFB_looper::passbTagging(const unsigned int jet_idx, const string jetAlgo, const string bTagDiscriminator)
 {
@@ -713,6 +753,8 @@ topAFB_looper::topAFB_looper()
     useOS = false;
     useSS = false;
     applyTopPtWeighting = false;
+    applyLeptonPtWeighting = false;
+    applyJetPtWeighting = false;
     applyAlignmentCorrection   = false;
     vetoHypMassLt10            = false;
     vetoHypMassLt12            = false;
@@ -793,6 +835,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     useOS = find(v_Cuts.begin(), v_Cuts.end(), "useOS") != v_Cuts.end();
     useSS = find(v_Cuts.begin(), v_Cuts.end(), "useSS") != v_Cuts.end();
     applyTopPtWeighting = find(v_Cuts.begin(), v_Cuts.end(), "applyTopPtWeighting" ) != v_Cuts.end();
+    applyLeptonPtWeighting = find(v_Cuts.begin(), v_Cuts.end(), "applyLeptonPtWeighting" ) != v_Cuts.end();
+    applyJetPtWeighting = find(v_Cuts.begin(), v_Cuts.end(), "applyJetPtWeighting" ) != v_Cuts.end();
     applyAlignmentCorrection = find(v_Cuts.begin(), v_Cuts.end(), "applyAlignmentCorrection" ) != v_Cuts.end();
     vetoHypMassLt10               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt10"                  ) != v_Cuts.end();
     vetoHypMassLt12               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt12"                  ) != v_Cuts.end();
@@ -2574,7 +2618,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                 if (applyNoCuts) Nsolns = 1;
 
 
-                if (applyTopPtWeighting && (prefix == "ttdil" || prefix == "ttotr") )
+                
+                if ( applyTopPtWeighting && (prefix == "ttdil" || prefix == "ttotr") )
                 {
 
                     TLorentzVector topplus_genp_p4(0, 0, 0, 0), topminus_genp_p4(0, 0, 0, 0);
@@ -2841,6 +2886,14 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         if (m_top > 0) top_spin_correlation = lepPlus_costheta_cms * lepMinus_costheta_cms;
                         //if we have gotten here, then all cuts have been passed
 
+                        // insert reweighting accoridng to lepton pt and jet pt here, because lepton pt and jet pt have been just defined
+                        if ( applyLeptonPtWeighting && (prefix == "ttdil" || prefix == "ttotr") ){
+                          weight = weight * sqrt( LeptonPtWeight(lepPlus_Pt) * LeptonPtWeight(lepMinus_Pt) );
+                        }
+                        if ( applyJetPtWeighting && (prefix == "ttdil" || prefix == "ttotr") ){
+                          weight = weight * sqrt( JetPtWeight(thefirstJet_pt) * JetPtWeight(thesecondJet_pt) );
+                        }
+                        
                         nSelectedEvents = nSelectedEvents + 1.0 * weight;
 
                         //  weight_ = weight ;
