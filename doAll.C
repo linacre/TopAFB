@@ -127,6 +127,11 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
   // v_baseCuts.push_back("applyTopPtWeighting");
   // v_baseCuts.push_back("applyLeptonPtWeighting");
   // v_baseCuts.push_back("applyJetPtWeighting");
+  //
+  // default is using sqrt(weight(object_1)*weight(object_2)) for 100% correlated objects
+  // other possibilities are
+  // v_baseCuts.push_back("useReweightingUncorrelated"); // for completely uncorrelated objects
+  // v_baseCuts.push_back("useReweightingLeadingObject"); // to only reweight according to the leading object
   
   if(requireBTag && !doBFR)
     v_baseCuts.push_back("requireBTag");  

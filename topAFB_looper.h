@@ -90,6 +90,8 @@ class topAFB_looper
   bool applyTopPtWeighting;
   bool applyLeptonPtWeighting;
   bool applyJetPtWeighting;
+  bool useReweightingUncorrelated;
+  bool useReweightingLeadingObject;
 	bool applyAlignmentCorrection;
 	bool vetoHypMassLt10;
 	bool vetoHypMassLt12;

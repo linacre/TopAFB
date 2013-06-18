@@ -755,6 +755,8 @@ topAFB_looper::topAFB_looper()
     applyTopPtWeighting = false;
     applyLeptonPtWeighting = false;
     applyJetPtWeighting = false;
+    useReweightingUncorrelated = false;
+    useReweightingLeadingObject = false;
     applyAlignmentCorrection   = false;
     vetoHypMassLt10            = false;
     vetoHypMassLt12            = false;
@@ -837,6 +839,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     applyTopPtWeighting = find(v_Cuts.begin(), v_Cuts.end(), "applyTopPtWeighting" ) != v_Cuts.end();
     applyLeptonPtWeighting = find(v_Cuts.begin(), v_Cuts.end(), "applyLeptonPtWeighting" ) != v_Cuts.end();
     applyJetPtWeighting = find(v_Cuts.begin(), v_Cuts.end(), "applyJetPtWeighting" ) != v_Cuts.end();
+    useReweightingUncorrelated = find(v_Cuts.begin(), v_Cuts.end(), "useReweightingUncorrelated" ) != v_Cuts.end();
+    useReweightingLeadingObject = find(v_Cuts.begin(), v_Cuts.end(), "useReweightingLeadingObject" ) != v_Cuts.end();
     applyAlignmentCorrection = find(v_Cuts.begin(), v_Cuts.end(), "applyAlignmentCorrection" ) != v_Cuts.end();
     vetoHypMassLt10               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt10"                  ) != v_Cuts.end();
     vetoHypMassLt12               = find(v_Cuts.begin(), v_Cuts.end(), "vetoHypMassLt12"                  ) != v_Cuts.end();
@@ -2655,10 +2659,70 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                     float pT_topplus_gen = topplus_genp_p4.Pt();
                     float pT_topminus_gen = topminus_genp_p4.Pt();
-                    if (hastop && hastbar) weight = weight * sqrt( TopPtWeight(pT_topplus_gen) * TopPtWeight(pT_topminus_gen) );
-                    //if (hastop) cout << "pT weight top: " << TopPtWeight(pT_topplus_gen) << endl;
-                    //if (hastbar) cout << "pT weight tbar: " << TopPtWeight(pT_topminus_gen) << endl;
+                    if (hastop && hastbar) {
+                      if ( useReweightingUncorrelated ) {
+                        weight = weight * TopPtWeight(pT_topplus_gen) * TopPtWeight(pT_topminus_gen);
+                      } else if ( useReweightingLeadingObject ) {
+                        weight = weight * TopPtWeight(pT_topplus_gen);
+                      } else {
+                        weight = weight * sqrt( TopPtWeight(pT_topplus_gen) * TopPtWeight(pT_topminus_gen) );                       }
+                    } 
+                }
 
+
+                if ( applyLeptonPtWeighting && (prefix == "ttdil" || prefix == "ttotr") ){
+                  if ( hyp_lt_id()[hypIdx] < 0 )
+                  {
+                      lepPlus.SetXYZT(
+                          hyp_lt_p4()[hypIdx].x(),
+                          hyp_lt_p4()[hypIdx].y(),
+                          hyp_lt_p4()[hypIdx].z(),
+                          hyp_lt_p4()[hypIdx].t()
+                      );
+
+                      lepMinus.SetXYZT(
+                          hyp_ll_p4()[hypIdx].x(),
+                          hyp_ll_p4()[hypIdx].y(),
+                          hyp_ll_p4()[hypIdx].z(),
+                          hyp_ll_p4()[hypIdx].t()
+                      );
+
+                  }
+                  else
+                  {
+                      lepPlus.SetXYZT(
+                          hyp_ll_p4()[hypIdx].x(),
+                          hyp_ll_p4()[hypIdx].y(),
+                          hyp_ll_p4()[hypIdx].z(),
+                          hyp_ll_p4()[hypIdx].t()
+                      );
+
+                      lepMinus.SetXYZT(
+                          hyp_lt_p4()[hypIdx].x(),
+                          hyp_lt_p4()[hypIdx].y(),
+                          hyp_lt_p4()[hypIdx].z(),
+                          hyp_lt_p4()[hypIdx].t()
+                      );
+
+                  }
+                  float lepPlus_Pt = lepPlus.Pt();
+                  float lepMinus_Pt = lepMinus.Pt();
+                  if ( useReweightingUncorrelated ) {
+                    weight = weight * LeptonPtWeight(lepPlus_Pt) * LeptonPtWeight(lepMinus_Pt);                            
+                  } else if ( useReweightingLeadingObject ) {
+                    weight = weight * LeptonPtWeight(lepPlus_Pt);
+                  } else {
+                    weight = weight * sqrt( LeptonPtWeight(lepPlus_Pt) * LeptonPtWeight(lepMinus_Pt) );                            
+                  }
+                }
+                if ( applyJetPtWeighting && (prefix == "ttdil" || prefix == "ttotr") ){
+                  if ( useReweightingUncorrelated ) {
+                    weight = weight * JetPtWeight(thefirstJet_pt) * JetPtWeight(thesecondJet_pt);
+                  } else if ( useReweightingLeadingObject ) {
+                    weight = weight * JetPtWeight(thefirstJet_pt);
+                  } else {
+                    weight = weight * sqrt( JetPtWeight(thefirstJet_pt) * JetPtWeight(thesecondJet_pt) );
+                  }
                 }
 
 
@@ -2885,14 +2949,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         top_spin_correlation = -999.0;
                         if (m_top > 0) top_spin_correlation = lepPlus_costheta_cms * lepMinus_costheta_cms;
                         //if we have gotten here, then all cuts have been passed
-
-                        // insert reweighting accoridng to lepton pt and jet pt here, because lepton pt and jet pt have been just defined
-                        if ( applyLeptonPtWeighting && (prefix == "ttdil" || prefix == "ttotr") ){
-                          weight = weight * sqrt( LeptonPtWeight(lepPlus_Pt) * LeptonPtWeight(lepMinus_Pt) );
-                        }
-                        if ( applyJetPtWeighting && (prefix == "ttdil" || prefix == "ttotr") ){
-                          weight = weight * sqrt( JetPtWeight(thefirstJet_pt) * JetPtWeight(thesecondJet_pt) );
-                        }
                         
                         nSelectedEvents = nSelectedEvents + 1.0 * weight;
 
