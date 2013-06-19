@@ -120,6 +120,20 @@ void doAll_nocuts(TString outputDir="results", bool rundata=false, bool runsig=f
   //v_baseCuts.push_back("usecaloJets");         // use caloJETs for jet counting
   //v_baseCuts.push_back("useSS");
   
+  // -----------
+  // top pt reweighting
+  // activate to reweight events according to top pt
+  // or alterniative scenarios
+  //
+  // v_baseCuts.push_back("applyTopPtWeighting");
+  // v_baseCuts.push_back("applyLeptonPtWeighting");
+  // v_baseCuts.push_back("applyJetPtWeighting");
+  //
+  // default is using sqrt(weight(object_1)*weight(object_2)) for 100% correlated objects
+  // other possibilities are
+  // v_baseCuts.push_back("useReweightingUncorrelated"); // for completely uncorrelated objects
+  // v_baseCuts.push_back("useReweightingLeadingObject"); // to only reweight according to the leading object
+  
   if(scaleJESMETUp)
     v_baseCuts.push_back("scaleJESMETUp");
   if(scaleJESMETDown) 
