@@ -61,7 +61,7 @@ void AfbUnfoldExample()
   ofstream second_output_file;
   second_output_file.open("summary_2Dunfolding_ttrapidity2_formated.txt");
 
-  Float_t observable, observable_gen, ttrapidity2, ttrapidity2_gen;
+  Float_t observable, observable_gen, ttrapidity2, absttrapidity2, ttrapidity2_gen, absttrapidity2_gen;
   Float_t observableMinus, observableMinus_gen; 
   Double_t weight;
   Int_t Nsolns;
@@ -124,11 +124,12 @@ void AfbUnfoldExample()
 
     for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
       ch_data->GetEntry(i);
-      if ( ttrapidity2 > 0 ) {
+      absttrapidity2=sqrt(ttrapidity2*ttrapidity2);
+      if ( absttrapidity2 < 900 ) {
         if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-        fillUnderOverFlow(hData, sign(observable)*ttrapidity2, weight, Nsolns);    
+        fillUnderOverFlow(hData, sign(observable)*absttrapidity2, weight, Nsolns);    
         if (combineLepMinus) {
-          fillUnderOverFlow(hData, sign(observableMinus)*ttrapidity2, weight, Nsolns);    
+          fillUnderOverFlow(hData, sign(observableMinus)*absttrapidity2, weight, Nsolns);    
         }    
       }
     }
@@ -141,11 +142,12 @@ void AfbUnfoldExample()
 
     for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
       ch_bkg->GetEntry(i);
+      absttrapidity2=sqrt(ttrapidity2*ttrapidity2);
       if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-      if ( ttrapidity2 > 0 ) {
-        fillUnderOverFlow(hBkg, sign(observable)*ttrapidity2, weight, Nsolns);
+      if ( absttrapidity2 < 900 ) {
+        fillUnderOverFlow(hBkg, sign(observable)*absttrapidity2, weight, Nsolns);
         if (combineLepMinus) {
-          fillUnderOverFlow(hBkg, sign(observableMinus)*ttrapidity2, weight, Nsolns);
+          fillUnderOverFlow(hBkg, sign(observableMinus)*absttrapidity2, weight, Nsolns);
         }
       }
     }
@@ -162,16 +164,18 @@ void AfbUnfoldExample()
 
     for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
       ch_top->GetEntry(i);
+      absttrapidity2=sqrt(ttrapidity2*ttrapidity2);
+      absttrapidity2_gen=sqrt(ttrapidity2_gen*ttrapidity2_gen);
       if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
       if(observablename=="lep_azimuthal_asymmetry2") observable_gen = -cos(observable_gen);
-      if ( ttrapidity2 > 0 ) {
-        fillUnderOverFlow(hMeas, sign(observable)*ttrapidity2, weight, Nsolns);
-        fillUnderOverFlow(hTrue, sign(observable_gen)*ttrapidity2_gen, weight, Nsolns);
-        fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*ttrapidity2, sign(observable_gen)*ttrapidity2_gen, weight, Nsolns);
+      if ( absttrapidity2 < 900 ) {
+        fillUnderOverFlow(hMeas, sign(observable)*absttrapidity2, weight, Nsolns);
+        fillUnderOverFlow(hTrue, sign(observable_gen)*absttrapidity2_gen, weight, Nsolns);
+        fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*absttrapidity2, sign(observable_gen)*absttrapidity2_gen, weight, Nsolns);
         if( combineLepMinus ) {
-          fillUnderOverFlow(hMeas, sign(observableMinus)*ttrapidity2, weight, Nsolns);
-          fillUnderOverFlow(hTrue, sign(observableMinus_gen)*ttrapidity2_gen, weight, Nsolns);
-          fillUnderOverFlow(hTrue_vs_Meas, sign(observableMinus)*ttrapidity2, sign(observableMinus_gen)*ttrapidity2_gen, weight, Nsolns);
+          fillUnderOverFlow(hMeas, sign(observableMinus)*absttrapidity2, weight, Nsolns);
+          fillUnderOverFlow(hTrue, sign(observableMinus_gen)*absttrapidity2_gen, weight, Nsolns);
+          fillUnderOverFlow(hTrue_vs_Meas, sign(observableMinus)*absttrapidity2, sign(observableMinus_gen)*absttrapidity2_gen, weight, Nsolns);
         }
       }
     }

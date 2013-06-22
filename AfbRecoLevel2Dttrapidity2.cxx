@@ -52,7 +52,7 @@ void AfbRecoLevel2Dttrapidity2()
   TString observablename;
   TString xaxislabel;
 
-  Float_t observable, ttrapidity2;
+  Float_t observable, ttrapidity2, absttrapidity2;
   Float_t observableMinus; 
   Double_t weight;
   Int_t Nsolns;
@@ -81,11 +81,12 @@ void AfbRecoLevel2Dttrapidity2()
 
     for (Int_t i= 0; i<ch_data->GetEntries(); i++) {
       ch_data->GetEntry(i);
-      if ( ttrapidity2 > 0 ) {
+      absttrapidity2=sqrt(ttrapidity2*ttrapidity2);
+      if ( absttrapidity2 < 900 ) { // because sevents without top mass solution have ttRapidity2 = -999
         if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-        fillUnderOverFlow(hData, sign(observable)*ttrapidity2, weight, Nsolns);    
+        fillUnderOverFlow(hData, sign(observable)*absttrapidity2, weight, Nsolns);    
         if (combineLepMinus) {
-          fillUnderOverFlow(hData, sign(observableMinus)*ttrapidity2, weight, Nsolns);    
+          fillUnderOverFlow(hData, sign(observableMinus)*absttrapidity2, weight, Nsolns);    
         }    
       }
     }
@@ -100,11 +101,12 @@ void AfbRecoLevel2Dttrapidity2()
 
     for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
       ch_top->GetEntry(i);
+      absttrapidity2=sqrt(ttrapidity2*ttrapidity2);
       if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-      if ( ttrapidity2 > 0 ) {
-        fillUnderOverFlow(hTop, sign(observable)*ttrapidity2, weight, Nsolns);
+      if ( absttrapidity2 < 900 ) { // because sevents without top mass solution have ttRapidity2 = -999
+        fillUnderOverFlow(hTop, sign(observable)*absttrapidity2, weight, Nsolns);
         if (combineLepMinus) {
-          fillUnderOverFlow(hTop, sign(observableMinus)*ttrapidity2, weight, Nsolns);
+          fillUnderOverFlow(hTop, sign(observableMinus)*absttrapidity2, weight, Nsolns);
         }
       }
     }
@@ -125,11 +127,12 @@ void AfbRecoLevel2Dttrapidity2()
 
     for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
       ch_bkg->GetEntry(i);
+      absttrapidity2=sqrt(ttrapidity2*ttrapidity2);
       if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-      if ( ttrapidity2 > 0 ) {
-        fillUnderOverFlow(hBkg, sign(observable)*ttrapidity2, weight, Nsolns);
+      if ( absttrapidity2 < 900 ) { // because sevents without top mass solution have ttRapidity2 = -999
+        fillUnderOverFlow(hBkg, sign(observable)*absttrapidity2, weight, Nsolns);
         if( combineLepMinus ) {
-          fillUnderOverFlow(hBkg, sign(observableMinus)*ttrapidity2, weight, Nsolns);
+          fillUnderOverFlow(hBkg, sign(observableMinus)*absttrapidity2, weight, Nsolns);
         }
       }
     }
