@@ -802,9 +802,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 {
 
 
-
-
-
+  // reset JES scale variable in ScanChain
+  globalJESRescale = 1.;
+  
     //deal with the cuts
     applyNoCuts = find(v_Cuts.begin(), v_Cuts.end(), "applyNoCuts") != v_Cuts.end();
     getVtxDistOnly = find(v_Cuts.begin(), v_Cuts.end(), "getVtxDistOnly") != v_Cuts.end();
