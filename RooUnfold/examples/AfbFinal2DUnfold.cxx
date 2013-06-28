@@ -42,7 +42,7 @@ using std::endl;
   Int_t includeSys = 1;
 
 
-void AfbUnfoldExample()
+void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1.)
 {
   setTDRStyle();
   gStyle->SetOptFit();
@@ -50,16 +50,26 @@ void AfbUnfoldExample()
   gStyle->SetOptTitle(0);
   cout.precision(3);
 
+  TString summary_name="summary_2Dunfolding";
+
+  if (!(scalettotr==1. && scalewjets==1. && scaleDY==1. && scaletw==1. && scaleVV==1.))  summary_name = Form("summary_2Dunfolding_%i_%i_%i_%i_%i",int(10.*scalettotr+0.5),int(10.*scalewjets+0.5),int(10.*scaleDY+0.5),int(10.*scaletw+0.5),int(10.*scaleVV+0.5));
+
  TRandom3* random = new TRandom3();                                                                                                        
  random->SetSeed(5);
 
  ofstream myfile;
- myfile.open ("summary_2Dunfolding.txt");
+ myfile.open (summary_name+".txt");
  cout.rdbuf(myfile.rdbuf());
 
   // OGU 130516: add second output txt file with format easier to be pasted into google docs
   ofstream second_output_file;
-  second_output_file.open("summary_2Dunfolding_formated.txt");
+  second_output_file.open(summary_name+"_formated.txt");
+
+  const int nBkg = 7;
+  TString path="../";
+  TString bkgroot[nBkg] = {"ttotr.root","wjets.root","DYee.root","DYmm.root","DYtautau.root","tw.root","VV.root"};
+  double bkgSF[nBkg] = {scalettotr,scalewjets,scaleDY,scaleDY,scaleDY,scaletw,scaleVV};
+
 
  Float_t observable, observable_gen, ttmass, ttmass_gen;
  Float_t observableMinus, observableMinus_gen; 
@@ -97,7 +107,7 @@ void AfbUnfoldExample()
   
   //  Now test with data and with BKG subtraction
 
-  TChain *ch_bkg = new TChain("tree");
+  TChain *ch_bkg[nBkg]; 
   TChain *ch_top = new TChain("tree");
 
   TChain *ch_data = new TChain("tree");
@@ -108,13 +118,12 @@ void AfbUnfoldExample()
 
   ch_top->Add(path+"ttdil.root");
 
-  ch_bkg->Add(path+"ttotr.root");
-  ch_bkg->Add(path+"wjets.root");
-  ch_bkg->Add(path+"DYee.root");
-  ch_bkg->Add(path+"DYmm.root");
-  ch_bkg->Add(path+"DYtautau.root");
-  ch_bkg->Add(path+"tw.root");
-  ch_bkg->Add(path+"VV.root");
+  for (int iBkg = 0; iBkg < nBkg; ++iBkg)
+  {
+  	ch_bkg[iBkg] = new TChain("tree");
+  	ch_bkg[iBkg]->Add(path+bkgroot[iBkg]);
+  } 
+
 
   ch_data->SetBranchAddress(observablename,    &observable);
   if( combineLepMinus ) ch_data->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
@@ -133,19 +142,24 @@ void AfbUnfoldExample()
     }
   }
 
-  ch_bkg->SetBranchAddress(observablename,    &observable);
-  if( combineLepMinus ) ch_bkg->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
-  ch_bkg->SetBranchAddress("weight",&weight);
-  ch_bkg->SetBranchAddress("Nsolns",&Nsolns);
-  ch_bkg->SetBranchAddress("tt_mass",&ttmass);
 
-  for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
-    ch_bkg->GetEntry(i);
-    if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
-    if ( ttmass > 0 ) {
-      fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
-      if (combineLepMinus) {
-        fillUnderOverFlow(hBkg, sign(observableMinus)*ttmass, weight, Nsolns);
+  for (int iBkg = 0; iBkg < nBkg; ++iBkg)
+  {
+    ch_bkg[iBkg]->SetBranchAddress(observablename,    &observable);
+    if( combineLepMinus ) ch_bkg[iBkg]->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
+    ch_bkg[iBkg]->SetBranchAddress("weight",&weight);
+    ch_bkg[iBkg]->SetBranchAddress("Nsolns",&Nsolns);
+    ch_bkg[iBkg]->SetBranchAddress("tt_mass",&ttmass);
+  
+    for (Int_t i= 0; i<ch_bkg[iBkg]->GetEntries(); i++) {
+      ch_bkg[iBkg]->GetEntry(i);
+      weight *= bkgSF[iBkg];
+      if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
+      if ( ttmass > 0 ) {
+        fillUnderOverFlow(hBkg, sign(observable)*ttmass, weight, Nsolns);
+        if (combineLepMinus) {
+          fillUnderOverFlow(hBkg, sign(observableMinus)*ttmass, weight, Nsolns);
+        }
       }
     }
   }
@@ -162,6 +176,7 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
     ch_top->GetEntry(i);
+    weight *= scalettdil;
     if(observablename=="lep_azimuthal_asymmetry2") observable = -cos(observable);
     if(observablename=="lep_azimuthal_asymmetry2") observable_gen = -cos(observable_gen);
     if ( ttmass > 0 ) {

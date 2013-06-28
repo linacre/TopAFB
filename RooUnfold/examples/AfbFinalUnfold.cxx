@@ -73,6 +73,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   const int nBkg = 7;
   TString path="../";
   TString bkgroot[nBkg] = {"ttotr.root","wjets.root","DYee.root","DYmm.root","DYtautau.root","tw.root","VV.root"};
+  double bkgSF[nBkg] = {scalettotr,scalewjets,scaleDY,scaleDY,scaleDY,scaletw,scaleVV};
 
   Float_t observable, observable_gen, ttmass, ttRapidity, tmass;
   Float_t observableMinus, observableMinus_gen; 
@@ -121,7 +122,6 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
   TChain *ch_data = new TChain("tree");
 
-  double bkgSF[nBkg] = {scalettotr,scalewjets,scaleDY,scaleDY,scaleDY,scaletw,scaleVV};
 
   ch_data->Add(path+"data.root");
 
