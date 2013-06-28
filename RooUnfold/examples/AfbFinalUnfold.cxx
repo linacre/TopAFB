@@ -45,7 +45,7 @@ using std::endl;
   Int_t includeSys = 1;
 
 
-void AfbUnfoldExample()
+void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
 {
 
   setTDRStyle();
@@ -54,16 +54,25 @@ void AfbUnfoldExample()
   gStyle->SetOptTitle(0);
   cout.precision(3);
 
+  TString summary_name="summary_1Dunfolding";
+
+  if (!(scalettotr==1. && scalewjets==1. && scaleDY==1. && scaletw==1. && scaleVV==1.))  summary_name = Form("summary_1Dunfolding_%i_%i_%i_%i_%i",int(10.*scalettotr+0.5),int(10.*scalewjets+0.5),int(10.*scaleDY+0.5),int(10.*scaletw+0.5),int(10.*scaleVV+0.5));
+
   ofstream myfile;
-  myfile.open ("summary_1Dunfolding.txt");
+  myfile.open (summary_name+".txt");
   cout.rdbuf(myfile.rdbuf());
   
   // OGU 130516: add second output txt file with format easier to be pasted into google docs
   ofstream second_output_file;
-  second_output_file.open("summary_1Dunfolding_formated.txt");
+  second_output_file.open(summary_name+"_formated.txt");
 
   TRandom3* random = new TRandom3();                                                                                                        
   random->SetSeed(5);
+
+
+  const int nBkg = 7;
+  TString path="../";
+  TString bkgroot[nBkg] = {"ttotr.root","wjets.root","DYee.root","DYmm.root","DYtautau.root","tw.root","VV.root"};
 
   Float_t observable, observable_gen, ttmass, ttRapidity, tmass;
   Float_t observableMinus, observableMinus_gen; 
@@ -107,24 +116,23 @@ void AfbUnfoldExample()
 
   //  Now test with data and with BKG subtraction
 
-  TChain *ch_bkg = new TChain("tree");
+  TChain *ch_bkg[nBkg]; 
   TChain *ch_top = new TChain("tree");
 
   TChain *ch_data = new TChain("tree");
 
-  TString path="../";
+  double bkgSF[nBkg] = {scalettotr,scalewjets,scaleDY,scaleDY,scaleDY,scaletw,scaleVV};
 
   ch_data->Add(path+"data.root");
 
   ch_top->Add(path+"ttdil.root");
 
-  ch_bkg->Add(path+"ttotr.root");
-  ch_bkg->Add(path+"wjets.root");
-  ch_bkg->Add(path+"DYee.root");
-  ch_bkg->Add(path+"DYmm.root");
-  ch_bkg->Add(path+"DYtautau.root");
-  ch_bkg->Add(path+"tw.root");
-  ch_bkg->Add(path+"VV.root");
+  for (int iBkg = 0; iBkg < nBkg; ++iBkg)
+  {
+  	ch_bkg[iBkg] = new TChain("tree");
+  	ch_bkg[iBkg]->Add(path+bkgroot[iBkg]);
+  } 
+
 
   ch_data->SetBranchAddress(observablename,    &observable);
   if( combineLepMinus ) ch_data->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
@@ -168,45 +176,52 @@ void AfbUnfoldExample()
     }    
   }
 
-  ch_bkg->SetBranchAddress(observablename,    &observable);
-  if( combineLepMinus ) ch_bkg->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
-  ch_bkg->SetBranchAddress("weight",&weight);
-  ch_bkg->SetBranchAddress("Nsolns",&Nsolns);
-  ch_bkg->SetBranchAddress("tt_mass",&ttmass);
-  ch_bkg->SetBranchAddress("ttRapidity",&ttRapidity);
-  ch_bkg->SetBranchAddress("t_mass",&tmass);
 
-  for (Int_t i= 0; i<ch_bkg->GetEntries(); i++) {
-    ch_bkg->GetEntry(i);
-    // if ( (Region=="Signal") && (ttmass>450) ) {
-    //   fillUnderOverFlow(hBkg, observable, weight, Nsolns);
-    // } else if (Region=="") {
-      if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
-        // leptonic asymmetries don't need valid top mass solution
-        fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
-      } else {
-        if ( ttmass > 0 ) {
-          // asymmetries with top properties are required to have a valid top mass solution
-          fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
-        }
-      }
-    // }
-    if (combineLepMinus) {
-      // combine plus and minus
+  for (int iBkg = 0; iBkg < nBkg; ++iBkg)
+  {
+
+    ch_bkg[iBkg]->SetBranchAddress(observablename,    &observable);
+    if( combineLepMinus ) ch_bkg[iBkg]->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
+    ch_bkg[iBkg]->SetBranchAddress("weight",&weight);
+    ch_bkg[iBkg]->SetBranchAddress("Nsolns",&Nsolns);
+    ch_bkg[iBkg]->SetBranchAddress("tt_mass",&ttmass);
+    ch_bkg[iBkg]->SetBranchAddress("ttRapidity",&ttRapidity);
+    ch_bkg[iBkg]->SetBranchAddress("t_mass",&tmass);
+  
+    for (Int_t i= 0; i<ch_bkg[iBkg]->GetEntries(); i++) {
+      ch_bkg[iBkg]->GetEntry(i);
+      weight *= bkgSF[iBkg];
       // if ( (Region=="Signal") && (ttmass>450) ) {
       //   fillUnderOverFlow(hBkg, observable, weight, Nsolns);
       // } else if (Region=="") {
         if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
           // leptonic asymmetries don't need valid top mass solution
-          fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+          fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
         } else {
           if ( ttmass > 0 ) {
             // asymmetries with top properties are required to have a valid top mass solution
-            fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+            fillUnderOverFlow(hBkg, observable, weight, Nsolns);    
           }
         }
       // }
-    }    
+      if (combineLepMinus) {
+        // combine plus and minus
+        // if ( (Region=="Signal") && (ttmass>450) ) {
+        //   fillUnderOverFlow(hBkg, observable, weight, Nsolns);
+        // } else if (Region=="") {
+          if ( (acceptanceName=="lepChargeAsym") || (acceptanceName=="lepAzimAsym") || (acceptanceName=="lepAzimAsym2") ) {
+            // leptonic asymmetries don't need valid top mass solution
+            fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+          } else {
+            if ( ttmass > 0 ) {
+              // asymmetries with top properties are required to have a valid top mass solution
+              fillUnderOverFlow(hBkg, observableMinus, weight, Nsolns);    
+            }
+          }
+        // }
+      }    
+    }
+
   }
 
   ch_top->SetBranchAddress(observablename,    &observable);
@@ -222,6 +237,7 @@ void AfbUnfoldExample()
 
   for (Int_t i= 0; i<ch_top->GetEntries(); i++) {
     ch_top->GetEntry(i);
+    weight *= scalettdil;
     // if ( (Region=="Signal") && (ttmass>450) ) {
     //   fillUnderOverFlow(hMeas, observable, weight, Nsolns);
     //   fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
