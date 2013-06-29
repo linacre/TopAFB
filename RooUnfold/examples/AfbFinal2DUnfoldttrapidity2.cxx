@@ -475,6 +475,14 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
     c_ttrapidity2u->SaveAs("ttrapidity2_2D_unfolded_"+acceptanceName+Region+".pdf");
 
+    ch_data->Delete();
+  
+    ch_top->Delete();
+  
+    for (int iBkg = 0; iBkg < nBkg; ++iBkg)
+    {
+    	ch_bkg[iBkg]->Delete();
+    } 
 
   }
   myfile.close();

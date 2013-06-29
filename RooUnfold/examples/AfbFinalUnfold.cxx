@@ -492,6 +492,16 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   pt1->Draw();
 
   c_test->SaveAs("finalplot_unfolded_"+acceptanceName+Region+".pdf");
+
+  ch_data->Delete();
+
+  ch_top->Delete();
+
+  for (int iBkg = 0; iBkg < nBkg; ++iBkg)
+  {
+  	ch_bkg[iBkg]->Delete();
+  } 
+
   }
 
   myfile.close();
