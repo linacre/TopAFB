@@ -430,6 +430,42 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   }
 
 
+  TH1D* hData_unfolded_minussyst;
+  TH1D* hData_unfolded_plussyst;
+  if(observablename=="lep_azimuthal_asymmetry") {
+    hData_unfolded_minussyst= (TH1D*) hData_unfolded_arccos->Clone();
+    hData_unfolded_plussyst= (TH1D*) hData_unfolded_arccos->Clone();
+  } else {
+    hData_unfolded_minussyst= (TH1D*) hData_unfolded->Clone();
+    hData_unfolded_plussyst= (TH1D*) hData_unfolded->Clone();
+  }
+
+  for (Int_t i= 1; i<=nbins1D; i++) {
+    if(observablename=="lep_azimuthal_asymmetry") {
+    hData_unfolded_arccos          ->SetBinError(i, stat_uncorr[i-1]);
+    hData_unfolded_minussyst->SetBinContent(i,hData_unfolded_arccos->GetBinContent(i)
+                                            -sqrt( pow(stat_corr[i-1],2)-pow(stat_uncorr[i-1],2)+pow(syst_corr[i-1],2)));
+    }
+    else{
+    hData_unfolded          ->SetBinError(i, stat_uncorr[i-1]);
+    hData_unfolded_minussyst->SetBinContent(i,hData_unfolded->GetBinContent(i)
+                                            -sqrt( pow(stat_corr[i-1],2)-pow(stat_uncorr[i-1],2)+pow(syst_corr[i-1],2)));
+    }
+    hData_unfolded_minussyst->SetBinError(i, 0);
+    hData_unfolded_plussyst ->SetBinContent(i,2*sqrt( pow(stat_corr[i-1],2)-pow(stat_uncorr[i-1],2)+pow(syst_corr[i-1],2)));
+    hData_unfolded_plussyst ->SetBinError(i, 0);
+  }
+
+  THStack hs("hs_systband","Systematic band");
+  hData_unfolded_minussyst->SetLineColor(10);
+  hData_unfolded_minussyst->SetFillColor(10);
+  hs.Add(hData_unfolded_minussyst);
+  hData_unfolded_plussyst->SetFillStyle(3353);
+  hData_unfolded_plussyst->SetLineColor(kWhite);
+  hData_unfolded_plussyst->SetFillColor(15);
+  hs.Add(hData_unfolded_plussyst);
+
+
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
   if(observablename=="lep_azimuthal_asymmetry") {
   hData_unfolded_arccos->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
@@ -441,11 +477,12 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   hData_unfolded_arccos->Draw("E");
   hData_unfolded_arccos->SetLineWidth(lineWidth);
   hTrue_arccos->SetLineWidth(lineWidth);
-  hTrue_arccos->SetLineColor(TColor::GetColorDark(kGreen));
-  hTrue_arccos->SetFillColor(TColor::GetColorDark(kGreen));
-  hTrue_arccos->SetFillStyle(3353);
+  hTrue_arccos->SetLineColor(TColor::GetColorDark(kRed));
+  //  hTrue_arccos->SetFillColor(TColor::GetColorDark(kGreen));
+  //  hTrue_arccos->SetFillStyle(3353);
+  hs.Draw("same");
   hTrue_arccos->Draw("hist same");
-  hData_unfolded_arccos->Draw("E same");
+  hData_unfolded_arccos->Draw("EP same");
   }
   else {
   hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
@@ -457,11 +494,12 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   hData_unfolded->Draw("E");
   hData_unfolded->SetLineWidth(lineWidth);
   hTrue->SetLineWidth(lineWidth);
-  hTrue->SetLineColor(TColor::GetColorDark(kGreen));
-  hTrue->SetFillColor(TColor::GetColorDark(kGreen));
-  hTrue->SetFillStyle(3353);
+  hTrue->SetLineColor(TColor::GetColorDark(kRed));
+  //hTrue->SetFillColor(TColor::GetColorDark(kGreen));
+  //  hTrue->SetFillStyle(3353);
+  hs.Draw("same");
   hTrue->Draw("hist same");
-  hData_unfolded->Draw("E same");
+  hData_unfolded->Draw("EP same");
   }
 
   TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");                                                                           
