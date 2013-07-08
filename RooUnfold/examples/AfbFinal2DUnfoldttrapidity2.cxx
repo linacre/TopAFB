@@ -405,9 +405,13 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     TCanvas* c_afb = new TCanvas("c_afb","c_afb",500,500); 
     xbins2D[0]=0.0; xbins2D[1]=24.0; xbins2D[2]=52.0; xbins2D[3]=100.0;
     TH1D* hAfbVsttrapidity2 = new TH1D ("AfbVsttrapidity2",  "AfbVsttrapidity2",  3, xbins2D);
+    TH1D* hAfbVsttrapidity2_statonly = new TH1D ("AfbVsttrapidity2",  "AfbVsttrapidity2",  3, xbins2D);
     for (int nb=0; nb<3; nb++) {
       hAfbVsttrapidity2->SetBinContent(nb+1,afb_m[nb]);
-      hAfbVsttrapidity2->SetBinError(nb+1,afb_merr[nb]);
+      //hAfbVsttrapidity2->SetBinError(nb+1,afb_merr[nb]);
+      hAfbVsttrapidity2->SetBinError(nb+1,  sqrt( pow(stat_corr[nb],2) + pow(syst_corr[nb],2) ) );
+      hAfbVsttrapidity2_statonly->SetBinContent(nb+1,afb_m[nb]);
+      hAfbVsttrapidity2_statonly->SetBinError(nb+1,stat_uncorr[nb]);
     }
 
     TH1D* hTop_AfbVsttrapidity2 = new TH1D ("Top_AfbVsttrapidity2",  "Top_AfbVsttrapidity2",  3, xbins2D);
@@ -417,10 +421,11 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     }
 
     tdrStyle->SetErrorX(0.5);
-    hAfbVsttrapidity2->SetMinimum(-0.3);
-    hAfbVsttrapidity2->SetMaximum( 0.3);
+    hAfbVsttrapidity2->SetMinimum( hAfbVsttrapidity2->GetMinimum() - 0.1 );
+    hAfbVsttrapidity2->SetMaximum( hAfbVsttrapidity2->GetMaximum() + 0.1 );
     hAfbVsttrapidity2->SetLineWidth( 2.0 );
     hAfbVsttrapidity2->Draw("E");
+    hAfbVsttrapidity2->Draw("E1 same");
     hTop_AfbVsttrapidity2->SetLineColor(kGreen);
     hTop_AfbVsttrapidity2->SetMarkerColor(kGreen);
     hTop_AfbVsttrapidity2->SetMarkerSize(0);
@@ -436,6 +441,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     leg1->SetLineColor(0);                                                                                                                   
     leg1->SetBorderSize(0);                                                                                                                  
     leg1->SetTextSize(0.03);                                                                              
+    leg1->SetFillStyle(0);
     leg1->AddEntry(hAfbVsttrapidity2, "data");                                                                                       
     leg1->AddEntry(hTop_AfbVsttrapidity2,    "mc@nlo parton level");                                                               
     leg1->Draw();           

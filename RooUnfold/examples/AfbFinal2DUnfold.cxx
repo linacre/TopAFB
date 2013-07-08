@@ -401,9 +401,13 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   TCanvas* c_afb = new TCanvas("c_afb","c_afb",500,500); 
   xbins2D[0]=300.0; xbins2D[1]=450; xbins2D[2]=550.0; xbins2D[3]=800.0;
   TH1D* hAfbVsMtt = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, xbins2D);
+  TH1D* hAfbVsMtt_statonly = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, xbins2D);
   for (int nb=0; nb<3; nb++) {
       hAfbVsMtt->SetBinContent(nb+1,afb_m[nb]);
-      hAfbVsMtt->SetBinError(nb+1,afb_merr[nb]);
+      //hAfbVsMtt->SetBinError(nb+1,afb_merr[nb]);
+      hAfbVsMtt->SetBinError(nb+1,  sqrt( pow(stat_corr[nb],2) + pow(syst_corr[nb],2) ) );
+      hAfbVsMtt_statonly->SetBinContent(nb+1,afb_m[nb]);
+      hAfbVsMtt_statonly->SetBinError(nb+1,stat_uncorr[nb]);
   }
   
   //  GetAvsY(hTrue, m_unfoldE, afb_m, afb_merr);  
@@ -415,10 +419,11 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
    }
    
   tdrStyle->SetErrorX(0.5);
-  hAfbVsMtt->SetMinimum(-0.3);
-  hAfbVsMtt->SetMaximum( 0.3);
+  hAfbVsMtt->SetMinimum( hAfbVsMtt->GetMinimum() - 0.1 );
+  hAfbVsMtt->SetMaximum( hAfbVsMtt->GetMaximum() + 0.1 );
   hAfbVsMtt->SetLineWidth( 2.0 );
   hAfbVsMtt->Draw("E");
+  hAfbVsMtt_statonly->Draw("E1 same");
   hTop_AfbVsMtt->SetLineColor(kGreen);
   hTop_AfbVsMtt->SetMarkerColor(kGreen);
   hTop_AfbVsMtt->SetMarkerSize(0);
@@ -430,10 +435,11 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   
   leg1=new TLegend(0.6,0.72,0.9,0.938,NULL,"brNDC");   
   leg1->SetEntrySeparation(100);                                                                                                          
-  leg1->SetFillColor(0);                                                                                                                  
+  leg1->SetFillColor(0);
   leg1->SetLineColor(0);                                                                                                                   
   leg1->SetBorderSize(0);                                                                                                                  
   leg1->SetTextSize(0.03);                                                                              
+  leg1->SetFillStyle(0); 
   leg1->AddEntry(hAfbVsMtt, "data");                                                                                       
   leg1->AddEntry(hTop_AfbVsMtt,    "mc@nlo parton level");                                                               
   leg1->Draw();           
