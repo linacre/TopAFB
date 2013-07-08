@@ -421,7 +421,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     hAfbVsttpt->SetMaximum( hAfbVsttpt->GetMaximum() + 0.1 );
     hAfbVsttpt->SetLineWidth( 2.0 );
     hAfbVsttpt->Draw("E");
-    hAfbVsttpt->Draw("E1 same");
+    hAfbVsttpt_statonly->Draw("E1 same");
     hTop_AfbVsttpt->SetLineColor(kGreen);
     hTop_AfbVsttpt->SetMarkerColor(kGreen);
     hTop_AfbVsttpt->SetMarkerSize(0);
