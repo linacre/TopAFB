@@ -417,7 +417,7 @@ if(runttdil) {
     cout << "Processing Wjets.."<<endl;
   
     if(runskim){
-      ch_wjets->Add(Form("%s/%s", cms2_skim_location.c_str(),"WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29_singleLepton/skimmed*root")); 
+      ch_wjets->Add(Form("%s/%s", cms2_skim_location.c_str(),"WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29/DileptonHyp/skimmed*root")); 
     }
     else{
       ch_wjets->Add("/hadoop/cms/store/group/snt/papers2011/Summer11MC/WJetsToLNu_TuneZ2_7TeV-madgraph-tauola_Summer11-PU_S4_START42_V11-v1/V04-02-29_singleLepton/merged*root"); 
