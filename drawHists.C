@@ -111,10 +111,9 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   }
   //if(drawtprime && ! drawLogY) hist::scale("ttprime*", 10);
 
-  //hist::scale("ttdil*", 1.+(9746. - 9012.934570)/8255.404297 ); //scale powheg to data
+  //hist::scale("ttdil_*", 1.+(9824. - 10086.77)/9344.25); //scale mc@nlo to data
+  hist::scale("ttdil_*", 1.+(9824. - 10063.47)/9323.84); //scale mc@nlo to data, after pT reweighting
 
-  //hist::scale("ttdil*", 1.+(9824. - 10070.94)/9344.25 ); //scale mc@nlo to data
-  hist::scale("ttdil*", 1.+(9824. - 10047.64)/9323.84); //scale mc@nlo to data, after pT reweighting
 
   //if(scalebTagMCbyDataDrivenEsts) {                                                                                                                                                                                                
   vector<TString> v_samples;

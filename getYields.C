@@ -18,8 +18,8 @@ void getYields(TString FName="results/hist_usePtGt2020_applyTriggers_hypDisamb_u
     //hist::scale("*_*", scaleMC);
     // TH1F* ttdil= (TH1F*)gFile->Get("ttdil_hnJets");
     //cout << ttdil->Integral()<<endl;
-    //hist::scale("ttdil_*", 1.+(9824. - 10070.94)/9344.25); //scale mc@nlo to data
-    hist::scale("ttdil_*", 1.+(9824. - 10047.64)/9323.84); //scale mc@nlo to data, after pT reweighting
+    //hist::scale("ttdil_*", 1.+(9824. - 10086.77)/9344.25); //scale mc@nlo to data
+    hist::scale("ttdil_*", 1.+(9824. - 10063.47)/9323.84); //scale mc@nlo to data, after pT reweighting
     hist::loadHist(FName.Data(),0,"data_hnBtagJet_allj_*");
     //hist::loadHist(dataFName.Data(),0,"data_htcmet_allj_*");
     //hist::loadHist(dataFName.Data(),0,"data_*hdilMass_allj_*");
