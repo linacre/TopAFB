@@ -43,6 +43,7 @@ using std::endl;
   Double_t tau=1E-4;
   Int_t nVars =8;
   Int_t includeSys = 1;
+  Int_t checkErrors = 1;
 
 
 void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
@@ -442,11 +443,19 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
   for (Int_t i= 1; i<=nbins1D; i++) {
     if(observablename=="lep_azimuthal_asymmetry") {
+    if(checkErrors) {
+      if(includeSys) {  cout<<"Difference between calculated and hard-coded stat errors: "<<hData_unfolded_arccos->GetBinError(i) -  stat_corr[i-1] <<endl;   }
+      else {  cout<<"Difference between calculated and hard-coded stat errors: "<<hData_unfolded_arccos->GetBinError(i) -  stat_uncorr[i-1] <<endl;   }
+    }
     hData_unfolded_arccos          ->SetBinError(i, stat_uncorr[i-1]);
     hData_unfolded_minussyst->SetBinContent(i,hData_unfolded_arccos->GetBinContent(i)
                                             -sqrt( pow(stat_corr[i-1],2)-pow(stat_uncorr[i-1],2)+pow(syst_corr[i-1],2)));
     }
     else{
+    if(checkErrors) {
+      if(includeSys) {  cout<<"Difference between calculated and hard-coded stat errors: "<<hData_unfolded->GetBinError(i) -  stat_corr[i-1] <<endl;   }
+      else {  cout<<"Difference between calculated and hard-coded stat errors: "<<hData_unfolded->GetBinError(i) -  stat_uncorr[i-1] <<endl;   }
+    }
     hData_unfolded          ->SetBinError(i, stat_uncorr[i-1]);
     hData_unfolded_minussyst->SetBinContent(i,hData_unfolded->GetBinContent(i)
                                             -sqrt( pow(stat_corr[i-1],2)-pow(stat_uncorr[i-1],2)+pow(syst_corr[i-1],2)));

@@ -40,6 +40,7 @@ using std::endl;
   Double_t tau=1E-4;
   Int_t nVars =8;
   Int_t includeSys = 1;
+  Int_t checkErrors = 1;
 
 
 void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1.)
@@ -404,6 +405,10 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   TH1D* hAfbVsMtt_statonly = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, xbins2D);
   for (int nb=0; nb<3; nb++) {
       hAfbVsMtt->SetBinContent(nb+1,afb_m[nb]);
+      if(checkErrors) {
+        if(includeSys) {  cout<<"Difference between calculated and hard-coded stat errors: "<<afb_merr[nb] - stat_corr[nb] <<endl;   }
+        else {  cout<<"Difference between calculated and hard-coded stat errors: "<<afb_merr[nb] - stat_uncorr[nb] <<endl;   }
+      }
       //hAfbVsMtt->SetBinError(nb+1,afb_merr[nb]);
       hAfbVsMtt->SetBinError(nb+1,  sqrt( pow(stat_corr[nb],2) + pow(syst_corr[nb],2) ) );
       hAfbVsMtt_statonly->SetBinContent(nb+1,afb_m[nb]);
