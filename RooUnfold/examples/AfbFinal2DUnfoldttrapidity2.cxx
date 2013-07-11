@@ -296,8 +296,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     TCanvas* c_resp = new TCanvas("c_resp_ttrapidity2","c_resp_ttrapidity2");
     TH2D* hResp=(TH2D*) response.Hresponse();
     gStyle->SetPalette(1);
-    hResp->GetXaxis()->SetTitle("y_{t#bar{t}} #times sign("+xaxislabel+") (gen)");
-    hResp->GetYaxis()->SetTitle("y_{t#bar{t}} #times sign("+xaxislabel+") (reco)");
+    hResp->GetXaxis()->SetTitle("y_{t#bar{t}} #times sign("+xaxislabel+") (reco)");
+    hResp->GetYaxis()->SetTitle("y_{t#bar{t}} #times sign("+xaxislabel+") (gen)");
     hResp->Draw("COLZ");
     c_resp->SetLogz();
     c_resp->SaveAs("Response_2D_ttrapidity2_"+acceptanceName+Region+".pdf");

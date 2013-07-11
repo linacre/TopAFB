@@ -335,8 +335,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   TCanvas* c_resp = new TCanvas("c_resp","c_resp");
   TH2D* hResp=(TH2D*) response.Hresponse();
   gStyle->SetPalette(1);
-  hResp->GetXaxis()->SetTitle(xaxislabel+"_{gen}");
-  hResp->GetYaxis()->SetTitle(xaxislabel);
+  hResp->GetXaxis()->SetTitle(xaxislabel);
+  hResp->GetYaxis()->SetTitle(xaxislabel+"_{gen}");
   hResp->Draw("COLZ");
   c_resp->SaveAs("Response_"+acceptanceName+Region+".pdf");
     

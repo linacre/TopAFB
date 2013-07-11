@@ -292,8 +292,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     TCanvas* c_resp = new TCanvas("c_resp_ttpt","c_resp_ttpt");
     TH2D* hResp=(TH2D*) response.Hresponse();
     gStyle->SetPalette(1);
-    hResp->GetXaxis()->SetTitle("p_{T,tt} #times sign("+xaxislabel+") (gen)");
-    hResp->GetYaxis()->SetTitle("p_{T,tt} #times sign("+xaxislabel+") (reco)");
+    hResp->GetXaxis()->SetTitle("p_{T,tt} #times sign("+xaxislabel+") (reco)");
+    hResp->GetYaxis()->SetTitle("p_{T,tt} #times sign("+xaxislabel+") (gen)");
     hResp->Draw("COLZ");
     c_resp->SetLogz();
     c_resp->SaveAs("Response_2D_ttpt_"+acceptanceName+Region+".pdf");
