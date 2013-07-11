@@ -230,6 +230,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   leg1->SetLineColor(0);                                                                                                                   
   leg1->SetBorderSize(0);                                                                                 
   leg1->SetTextSize(0.03);
+  leg1->SetFillStyle(0);
   leg1->AddEntry(hData, "Data");
   leg1->AddEntry(hMeas,  "mc@nlo reco level", "F");                                                               
   leg1->AddEntry(hBkg,  "Background", "F");                                                               
@@ -402,7 +403,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   TCanvas* c_afb = new TCanvas("c_afb","c_afb",500,500); 
   xbins2D[0]=300.0; xbins2D[1]=450; xbins2D[2]=550.0; xbins2D[3]=800.0;
   TH1D* hAfbVsMtt = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, xbins2D);
-  TH1D* hAfbVsMtt_statonly = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, xbins2D);
+  TH1D* hAfbVsMtt_statonly = new TH1D ("AfbVsMtt_statonly",  "AfbVsMtt_statonly",  3, xbins2D);
   for (int nb=0; nb<3; nb++) {
       hAfbVsMtt->SetBinContent(nb+1,afb_m[nb]);
       if(checkErrors) {
@@ -478,6 +479,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   leg1->SetLineColor(0);                                                                                                                   
   leg1->SetBorderSize(0);                                                                                                                  
   leg1->SetTextSize(0.03);                                                                              
+  leg1->SetFillStyle(0);
   leg1->AddEntry(hData_unfolded, "( Data-BG ) Unfolded");                                                                                       
   leg1->AddEntry(hTrue,    "mc@nlo parton level", "F");                                                               
   leg1->Draw();                
