@@ -270,63 +270,53 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             weight *= scalettdil;
 
             if (evt != prevevt) i_ev++;
-            //if(evt!=prevevt) cout<<i_ev<<" "<<int(i_ev/PEsize)<<" "<<Nsolns<<endl;
             int randseed = i_ev + 1;
             random3_->SetSeed(randseed);
 
-            for (int iPE = 0; iPE < NPEs; ++iPE)
+            if (i_ev < Nevts / 2)
             {
-                Int_t num_ev = random3_->Poisson(double(PEsize) / double(Nevts));
-                //cout << i_ev << " " << iPE << " " << randnum << endl;
-                if (num_ev)
+                for (int iPE = 0; iPE < NPEs; ++iPE)
                 {
+                    Int_t num_ev = random3_->Poisson(double(PEsize) / double(Nevts / 2));
+                    //cout << i_ev << " " << iPE << " " << randnum << endl;
+                    if (num_ev)
+                    {
 
-                    if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
-                    {
-                        fillUnderOverFlow(hPseudoData[iPE], observable, weight*double(num_ev), Nsolns/double(num_ev));
-                        if ( combineLepMinus )
+                        if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
                         {
-                            fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight*double(num_ev), Nsolns/double(num_ev));
-                        }
-                    }
-                    else
-                    {
-                        if ( ttmass > 0 )
-                        {
-                            fillUnderOverFlow(hPseudoData[iPE], observable, weight*double(num_ev), Nsolns/double(num_ev));
+                            fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(num_ev), Nsolns / double(num_ev));
                             if ( combineLepMinus )
                             {
-
-                                fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight*double(num_ev), Nsolns/double(num_ev));
+                                fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(num_ev), Nsolns / double(num_ev));
                             }
                         }
+                        else
+                        {
+                            if ( ttmass > 0 )
+                            {
+                                fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(num_ev), Nsolns / double(num_ev));
+                                if ( combineLepMinus )
+                                {
+
+                                    fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(num_ev), Nsolns / double(num_ev));
+                                }
+                            }
+                        }
+
                     }
 
-                }
 
 
 
-
-            }
-
-
-
-
-            if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
-            {
-                fillUnderOverFlow(hMeas, observable, weight, Nsolns);
-                fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
-                fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-                if ( combineLepMinus )
-                {
-                    fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
-                    fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
                 }
             }
             else
             {
-                if ( ttmass > 0 )
+
+
+
+
+                if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
                 {
                     fillUnderOverFlow(hMeas, observable, weight, Nsolns);
                     fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
@@ -336,6 +326,21 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                         fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
                         fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
                         fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+                    }
+                }
+                else
+                {
+                    if ( ttmass > 0 )
+                    {
+                        fillUnderOverFlow(hMeas, observable, weight, Nsolns);
+                        fillUnderOverFlow(hTrue, observable_gen, weight, Nsolns);
+                        fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
+                        if ( combineLepMinus )
+                        {
+                            fillUnderOverFlow(hMeas, observableMinus, weight, Nsolns);
+                            fillUnderOverFlow(hTrue, observableMinus_gen, weight, Nsolns);
+                            fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+                        }
                     }
                 }
             }
