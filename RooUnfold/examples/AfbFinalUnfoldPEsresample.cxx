@@ -258,7 +258,32 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             if (evt != prevevt) i_ev++;
             prevevt = evt;
         }
-        Int_t Nevts = i_ev;
+        const int Nevts = i_ev;
+        Int_t event_multiplicity[Nevts][NPEs];
+        Int_t event_multiplicity_nonzero[Nevts][NPEs];
+        Int_t NnonzeroPE[Nevts] = {0};
+        Int_t inonzeroPE[Nevts][NPEs] = {0};
+
+        Double_t sample_split_factor = 2.;
+
+
+        for (int j = 0; j < Nevts; ++j)
+        {
+            int randseed = j + 1;
+            random3_->SetSeed(randseed);
+            for (int iPE = 0; iPE < NPEs; ++iPE)
+            {
+                event_multiplicity[j][iPE] = random3_->Poisson( sample_split_factor * double(PEsize) / double(Nevts) );
+                if (event_multiplicity[j][iPE] > 0)
+                {
+                    event_multiplicity_nonzero[j][ NnonzeroPE[j] ] = event_multiplicity[j][iPE];
+                    inonzeroPE[j][ NnonzeroPE[j] ] = iPE;
+                    NnonzeroPE[j]++;
+                }
+
+            }
+
+        }
 
 
         prevevt = -999;
@@ -270,42 +295,39 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             weight *= scalettdil;
 
             if (evt != prevevt) i_ev++;
-            int randseed = i_ev + 1;
-            random3_->SetSeed(randseed);
 
-            if (i_ev < Nevts / 2)
+
+            if (i_ev < Nevts / sample_split_factor)
             {
                 for (int iPE = 0; iPE < NPEs; ++iPE)
                 {
-                    Int_t num_ev = random3_->Poisson(double(PEsize) / double(Nevts / 2));
-                    //cout << i_ev << " " << iPE << " " << randnum << endl;
-                    if (num_ev)
+                    Int_t PE_event_multiplicity = event_multiplicity[i_ev][iPE];
+
+                    if (PE_event_multiplicity > 0)
                     {
 
                         if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
                         {
-                            fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(num_ev), Nsolns / double(num_ev));
+                            fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                             if ( combineLepMinus )
                             {
-                                fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(num_ev), Nsolns / double(num_ev));
+                                fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                             }
                         }
                         else
                         {
                             if ( ttmass > 0 )
                             {
-                                fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(num_ev), Nsolns / double(num_ev));
+                                fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                                 if ( combineLepMinus )
                                 {
 
-                                    fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(num_ev), Nsolns / double(num_ev));
+                                    fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                                 }
                             }
                         }
 
                     }
-
-
 
 
                 }
