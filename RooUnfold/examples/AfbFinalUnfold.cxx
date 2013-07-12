@@ -434,11 +434,11 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   TH1D* hData_unfolded_minussyst;
   TH1D* hData_unfolded_plussyst;
   if(observablename=="lep_azimuthal_asymmetry") {
-    hData_unfolded_minussyst= (TH1D*) hData_unfolded_arccos->Clone();
-    hData_unfolded_plussyst= (TH1D*) hData_unfolded_arccos->Clone();
+    hData_unfolded_minussyst= (TH1D*) hData_unfolded_arccos->Clone("Data_unfolded_minussyst");
+    hData_unfolded_plussyst= (TH1D*) hData_unfolded_arccos->Clone("Data_unfolded_plussyst");
   } else {
-    hData_unfolded_minussyst= (TH1D*) hData_unfolded->Clone();
-    hData_unfolded_plussyst= (TH1D*) hData_unfolded->Clone();
+    hData_unfolded_minussyst= (TH1D*) hData_unfolded->Clone("Data_unfolded_minussyst");
+    hData_unfolded_plussyst= (TH1D*) hData_unfolded->Clone("Data_unfolded_plussyst");
   }
 
   for (Int_t i= 1; i<=nbins1D; i++) {
