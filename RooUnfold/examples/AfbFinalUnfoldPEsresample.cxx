@@ -251,7 +251,18 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         ch_top->SetBranchAddress("evt", &evt);
 
         Int_t prevevt = -999;
-        Int_t i_ev = -1;
+        Int_t i_ev = 0;
+        for (Int_t i = 0; i < ch_top->GetEntries(); i++)
+        {
+            ch_top->GetEntry(i);
+            if (evt != prevevt) i_ev++;
+            prevevt = evt;
+        }
+        Int_t Nevts = i_ev;
+
+
+        prevevt = -999;
+        i_ev = -1;
 
         for (Int_t i = 0; i < ch_top->GetEntries(); i++)
         {
@@ -265,28 +276,28 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
             for (int iPE = 0; iPE < NPEs; ++iPE)
             {
-                double randnum = random3_->Uniform(1.);
+                Int_t num_ev = random3_->Poisson(double(PEsize) / double(Nevts));
                 //cout << i_ev << " " << iPE << " " << randnum << endl;
-                if (randnum < double(PEsize) / 280191.)
+                if (num_ev)
                 {
 
                     if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
                     {
-                        fillUnderOverFlow(hPseudoData[iPE], observable, weight, Nsolns);
+                        fillUnderOverFlow(hPseudoData[iPE], observable, weight*double(num_ev), Nsolns/double(num_ev));
                         if ( combineLepMinus )
                         {
-                            fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight, Nsolns);
+                            fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight*double(num_ev), Nsolns/double(num_ev));
                         }
                     }
                     else
                     {
                         if ( ttmass > 0 )
                         {
-                            fillUnderOverFlow(hPseudoData[iPE], observable, weight, Nsolns);
+                            fillUnderOverFlow(hPseudoData[iPE], observable, weight*double(num_ev), Nsolns/double(num_ev));
                             if ( combineLepMinus )
                             {
 
-                                fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight, Nsolns);
+                                fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight*double(num_ev), Nsolns/double(num_ev));
                             }
                         }
                     }
