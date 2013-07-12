@@ -259,10 +259,10 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             prevevt = evt;
         }
         const int Nevts = i_ev;
-        Int_t event_multiplicity[Nevts][NPEs];
+        //Int_t event_multiplicity[Nevts][NPEs];
         Int_t event_multiplicity_nonzero[Nevts][NPEs];
         Int_t NnonzeroPE[Nevts] = {0};
-        Int_t inonzeroPE[Nevts][NPEs] = {0};
+        Int_t iPEmapping[Nevts][NPEs] = {0};
 
         Double_t sample_split_factor = 2.;
 
@@ -273,11 +273,11 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             random3_->SetSeed(randseed);
             for (int iPE = 0; iPE < NPEs; ++iPE)
             {
-                event_multiplicity[j][iPE] = random3_->Poisson( sample_split_factor * double(PEsize) / double(Nevts) );
-                if (event_multiplicity[j][iPE] > 0)
+                Int_t temp_event_multiplicity = random3_->Poisson( sample_split_factor * double(PEsize) / double(Nevts) );
+                if (temp_event_multiplicity > 0)
                 {
-                    event_multiplicity_nonzero[j][ NnonzeroPE[j] ] = event_multiplicity[j][iPE];
-                    inonzeroPE[j][ NnonzeroPE[j] ] = iPE;
+                    event_multiplicity_nonzero[j][ NnonzeroPE[j] ] = temp_event_multiplicity;
+                    iPEmapping[j][ NnonzeroPE[j] ] = iPE;
                     NnonzeroPE[j]++;
                 }
 
@@ -299,30 +299,30 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
             if (i_ev < Nevts / sample_split_factor)
             {
-                for (int iPE = 0; iPE < NPEs; ++iPE)
+                for (int inonzeroPE = 0; inonzeroPE < NnonzeroPE[i_ev]; ++inonzeroPE)
                 {
-                    Int_t PE_event_multiplicity = event_multiplicity[i_ev][iPE];
+                    Int_t PE_event_multiplicity = event_multiplicity_nonzero[i_ev][inonzeroPE];
 
                     if (PE_event_multiplicity > 0)
                     {
 
                         if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
                         {
-                            fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                            fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                             if ( combineLepMinus )
                             {
-                                fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                             }
                         }
                         else
                         {
                             if ( ttmass > 0 )
                             {
-                                fillUnderOverFlow(hPseudoData[iPE], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                                 if ( combineLepMinus )
                                 {
 
-                                    fillUnderOverFlow(hPseudoData[iPE], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                                    fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
                                 }
                             }
                         }
@@ -439,8 +439,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         TCanvas *c_resp = new TCanvas("c_resp", "c_resp");
         TH2D *hResp = (TH2D *) response.Hresponse();
         gStyle->SetPalette(1);
-        hResp->GetXaxis()->SetTitle(xaxislabel + "_{gen}");
-        hResp->GetYaxis()->SetTitle(xaxislabel);
+        hResp->GetXaxis()->SetTitle(xaxislabel);
+        hResp->GetYaxis()->SetTitle(xaxislabel + "_{gen}");
         hResp->Draw("COLZ");
         c_resp->SaveAs("Response_" + acceptanceName + Region + ".pdf");
 
