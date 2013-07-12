@@ -396,11 +396,11 @@ void getEstimates( float& n_ee, float& n_mm,
 
 
 
-text << "$m_{lb}^{min}$ mass cut efficiency for DY MC & " << Form("%4.2f %s %4.2f", S_ee, " $\\pm$", S_eeE) << " & "
+text << "% $m_{lb}^{min}$ mass cut efficiency for DY MC & " << Form("%4.2f %s %4.2f", S_ee, " $\\pm$", S_eeE) << " & "
        << Form("%4.2f %s %4.2f", S_mm, " $\\pm$", S_mmE) << " \\\\ " << endl;   
   
   if(MCi_ee > 0) {
-    text << "DY Estimate (full selection) & " << Form("%4.2f", pred_ee*S_ee) 
+    text << "% DY Estimate (full selection) & " << Form("%4.2f", pred_ee*S_ee) 
 	 << " $\\pm$ " << Form("%4.2f", sqrt( pow( (pred_eeE/pred_ee) ,2) + pow( (S_eeE/S_ee) ,2) )*fabs(pred_ee)*S_ee  );
     if(sfmetcut != 0) 
       text << " $\\pm$  " << Form("%4.2f", pred_eeE_syst*S_ee);
@@ -614,41 +614,41 @@ void DYest(TString dataFName, TString mcFName, bool rundata = true, float METcut
   	
   	
   	if(rundata) {  	
-    std::cout << "Opening " << Form("dyee_hmetOutDYEst_%ij_ee",njet) << "\n";
+    std::cout << "Opening " << Form("dyee_hmetOutDYEst_%sj_ee","all") << "\n";
 
-    dyee_hmetOutDYEst_ee	= (TH1F*)f_mc->Get(Form("DYee_hmetOutDYEst_%ij_ee",njet));
+    dyee_hmetOutDYEst_ee	= (TH1F*)f_mc->Get(Form("DYee_hmetOutDYEst_%sj_ee","all"));
     std::cout << "dyee_hmetOutDYEst_ee -> GetEntries() = " << dyee_hmetOutDYEst_ee -> GetEntries() << endl;
-    dyee_hmetInDYEst_ee	        = (TH1F*)f_mc->Get(Form("DYee_hmetInDYEst_%ij_ee",njet));
-    data_hmetOutDYEst_ee	= (TH1F*)f_data->Get(Form("data_hmetOutDYEst_%ij_ee",njet));
-    data_hmetInDYEst_ee  	= (TH1F*)f_data->Get(Form("data_hmetInDYEst_%ij_ee",njet));
+    dyee_hmetInDYEst_ee	        = (TH1F*)f_mc->Get(Form("DYee_hmetInDYEst_%sj_ee","all"));
+    data_hmetOutDYEst_ee	= (TH1F*)f_data->Get(Form("data_hmetOutDYEst_%sj_ee","all"));
+    data_hmetInDYEst_ee  	= (TH1F*)f_data->Get(Form("data_hmetInDYEst_%sj_ee","all"));
 
-    dymm_hmetOutDYEst_mm	= (TH1F*)f_mc->Get(Form("DYmm_hmetOutDYEst_%ij_mm",njet));
-    dymm_hmetInDYEst_mm	        = (TH1F*)f_mc->Get(Form("DYmm_hmetInDYEst_%ij_mm",njet));
-    data_hmetOutDYEst_mm	= (TH1F*)f_data->Get(Form("data_hmetOutDYEst_%ij_mm",njet));
-    data_hmetInDYEst_mm	        = (TH1F*)f_data->Get(Form("data_hmetInDYEst_%ij_mm",njet));
+    dymm_hmetOutDYEst_mm	= (TH1F*)f_mc->Get(Form("DYmm_hmetOutDYEst_%sj_mm","all"));
+    dymm_hmetInDYEst_mm	        = (TH1F*)f_mc->Get(Form("DYmm_hmetInDYEst_%sj_mm","all"));
+    data_hmetOutDYEst_mm	= (TH1F*)f_data->Get(Form("data_hmetOutDYEst_%sj_mm","all"));
+    data_hmetInDYEst_mm	        = (TH1F*)f_data->Get(Form("data_hmetInDYEst_%sj_mm","all"));
     
     //get the emu data hists
-    data_hmetInDYEst_em	        = (TH1F*)f_data->Get(Form("data_hmetInDYEst_%ij_em",njet));
-    data_hmetOutDYEst_em	        = (TH1F*)f_data->Get(Form("data_hmetOutDYEst_%ij_em",njet));
+    data_hmetInDYEst_em	        = (TH1F*)f_data->Get(Form("data_hmetInDYEst_%sj_em","all"));
+    data_hmetOutDYEst_em	        = (TH1F*)f_data->Get(Form("data_hmetOutDYEst_%sj_em","all"));
     }
     
    	else {
-    std::cout << "Opening " << Form("dyee_hmetOutDYEst_%ij_ee",njet) << "\n";
+    std::cout << "Opening " << Form("dyee_hmetOutDYEst_%sj_ee","all") << "\n";
 
-    dyee_hmetOutDYEst_ee	= (TH1F*)f_mc->Get(Form("DYee_hmetOutDYEst_%ij_ee",njet));
+    dyee_hmetOutDYEst_ee	= (TH1F*)f_mc->Get(Form("DYee_hmetOutDYEst_%sj_ee","all"));
     std::cout << "dyee_hmetOutDYEst_ee -> GetEntries() = " << dyee_hmetOutDYEst_ee -> GetEntries() << endl;
-    dyee_hmetInDYEst_ee	        = (TH1F*)f_mc->Get(Form("DYee_hmetInDYEst_%ij_ee",njet));
-    data_hmetOutDYEst_ee	= AddUpAllMC(f_mc,Form("hmetOutDYEst_%ij_ee",njet));
-    data_hmetInDYEst_ee  	= AddUpAllMC(f_mc,Form("hmetInDYEst_%ij_ee",njet));
+    dyee_hmetInDYEst_ee	        = (TH1F*)f_mc->Get(Form("DYee_hmetInDYEst_%sj_ee","all"));
+    data_hmetOutDYEst_ee	= AddUpAllMC(f_mc,Form("hmetOutDYEst_%sj_ee","all"));
+    data_hmetInDYEst_ee  	= AddUpAllMC(f_mc,Form("hmetInDYEst_%sj_ee","all"));
 
-    dymm_hmetOutDYEst_mm	= (TH1F*)f_mc->Get(Form("DYmm_hmetOutDYEst_%ij_mm",njet));
-    dymm_hmetInDYEst_mm	        = (TH1F*)f_mc->Get(Form("DYmm_hmetInDYEst_%ij_mm",njet));
-    data_hmetOutDYEst_mm	= AddUpAllMC(f_mc,Form("hmetOutDYEst_%ij_mm",njet));
-    data_hmetInDYEst_mm	        = AddUpAllMC(f_mc,Form("hmetInDYEst_%ij_mm",njet));
+    dymm_hmetOutDYEst_mm	= (TH1F*)f_mc->Get(Form("DYmm_hmetOutDYEst_%sj_mm","all"));
+    dymm_hmetInDYEst_mm	        = (TH1F*)f_mc->Get(Form("DYmm_hmetInDYEst_%sj_mm","all"));
+    data_hmetOutDYEst_mm	= AddUpAllMC(f_mc,Form("hmetOutDYEst_%sj_mm","all"));
+    data_hmetInDYEst_mm	        = AddUpAllMC(f_mc,Form("hmetInDYEst_%sj_mm","all"));
     
     //get the emu data hists
-    data_hmetInDYEst_em	        = AddUpAllMC(f_mc,Form("hmetInDYEst_%ij_em",njet));
-    data_hmetOutDYEst_em	        = AddUpAllMC(f_mc,Form("hmetOutDYEst_%ij_em",njet));
+    data_hmetInDYEst_em	        = AddUpAllMC(f_mc,Form("hmetInDYEst_%sj_em","all"));
+    data_hmetOutDYEst_em	        = AddUpAllMC(f_mc,Form("hmetOutDYEst_%sj_em","all"));
     }
 
 
@@ -675,14 +675,14 @@ void DYest(TString dataFName, TString mcFName, bool rundata = true, float METcut
     getEstimates(n_ee, n_mm, n_eeE, n_mmE, verbose, scaleMC, 0, njet, rundata);
     text << "\\end{table}" << endl;
     
-    std::cout << "Writing the table with 50 GeV MET cut...\n";
+    std::cout << "Writing the table with " << METcut << " GeV MET cut...\n";
     text << "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"<<endl;
     text << "\\begin{table}" << endl;  	
   	if(rundata) {  	
-    text << "\\caption{Drell-Yan estimation with 50 GeV MET Cut in the " << njet << " Jet bin. }"<<endl;
+    text << "\\caption{Drell-Yan estimation with " << METcut << " GeV MET Cut in the " << njet << " Jet bin. }"<<endl;
   	}
   	else {
-  	text << "\\caption{Drell-Yan estimation closure test with 50 GeV MET Cut in the " << njet << " Jet bin. }"<<endl;  	}
+  	text << "\\caption{Drell-Yan estimation closure test with " << METcut << " GeV MET Cut in the " << njet << " Jet bin. }"<<endl;  	}
     getEstimates(n_ee, n_mm, n_eeE, n_mmE, verbose, scaleMC, METcut, njet, rundata);
     text << "\\end{table}" << endl;    
 
@@ -691,7 +691,7 @@ void DYest(TString dataFName, TString mcFName, bool rundata = true, float METcut
     text << "\\begin{center}"<<endl;
     text << "\\begin{tabular}{c}"<<endl;
     text << "\\epsfig{figure=Routin_mc_" << njet<< "Jet.pdf, width=2.5in}"<<endl; 
-    text << "\\epsfig{figure=Routin_data_"<< njet << "Jet.pdf, width=2.5in}"<<endl; 
+    text << "% \\epsfig{figure=Routin_data_"<< njet << "Jet.pdf, width=2.5in}"<<endl; 
     text << "\\end{tabular}"<<endl;
     text << "\\caption{$R_{out/in}$ dependence on the MET cut in the " << njet << " Jet bin. }"<<endl;
     text << "\\end{center}"<<endl;
