@@ -567,6 +567,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         TCanvas *c_pull = new TCanvas("c_pull", "c_pull", 800, 800);
         gStyle->SetOptStat("eMR");
+        gStyle->SetStatH(0.15);
+        gStyle->SetStatW(0.24);
         c_pull->Divide(2, 2);
         c_pull->cd(1);
         hPull->Draw();
