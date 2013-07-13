@@ -262,8 +262,9 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             if (evt != prevevt) i_ev++;
             prevevt = evt;
         }
+        i_ev /= sample_split_factor;
         const int Nevts = i_ev;
-        //Int_t event_multiplicity[Nevts][NPEs];
+
         Int_t event_multiplicity_nonzero[Nevts][NPEs];
         Int_t NnonzeroPE[Nevts] = {0};
         Int_t iPEmapping[Nevts][NPEs] = {0};
@@ -277,7 +278,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             random3_->SetSeed(randseed);
             for (int iPE = 0; iPE < NPEs; ++iPE)
             {
-                Int_t temp_event_multiplicity = random3_->Poisson( sample_split_factor * double(PEsize) / double(Nevts) );
+                Int_t temp_event_multiplicity = random3_->Poisson( double(PEsize) / double(Nevts) );
                 hEvtSamplingMultiplicity->Fill(temp_event_multiplicity);
                 if (temp_event_multiplicity > 0)
                 {
@@ -303,7 +304,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             if (evt != prevevt) i_ev++;
 
 
-            if (!split_sample || i_ev < Nevts / sample_split_factor)
+            if (!split_sample || i_ev < Nevts )
             {
                 for (int inonzeroPE = 0; inonzeroPE < NnonzeroPE[i_ev]; ++inonzeroPE)
                 {
@@ -339,7 +340,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
                 }
             }
-            if (!split_sample || i_ev >= Nevts / sample_split_factor)
+            if (!split_sample || i_ev >= Nevts )
             {
 
 
@@ -543,7 +544,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         meanAFBerr /= double(lastPE);
 
 
-        TH1D *hErr = new TH1D ("err", "err", 100, 0.9*meanAFBerr, 1.1*meanAFBerr);
+        TH1D *hErr = new TH1D ("err", "err", 100, meanAFBerr * ( 1. - 4. / sqrt(PEsize) ), meanAFBerr * ( 1. + 4. / sqrt(PEsize) ) );
         TH1D *hAfb = new TH1D ("Afb", "Afb", 100, meanAFB - 4.*meanAFBerr, meanAFB + 4.*meanAFBerr);
 
         for (int iPE = 0; iPE < lastPE; ++iPE)
