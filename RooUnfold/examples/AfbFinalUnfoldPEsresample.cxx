@@ -554,9 +554,19 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             hAfb->Fill(Afb);
         }
 
+        hPull->GetXaxis()->SetTitle("A(" + xaxislabel + ") pull");
+        hPull->GetYaxis()->SetTitle("PEs/bin");
+        hNevPE->GetXaxis()->SetTitle("Number of events per PE");
+        hNevPE->GetYaxis()->SetTitle("PEs/bin");
+        hAfb->GetXaxis()->SetTitle("A(" + xaxislabel + ")");
+        hAfb->GetYaxis()->SetTitle("PEs/bin");
+        hErr->GetXaxis()->SetTitle("A(" + xaxislabel + ") uncertainty");
+        hErr->GetYaxis()->SetTitle("PEs/bin");
+        hEvtSamplingMultiplicity->GetXaxis()->SetTitle("PE event sampling multiplicity");
+        hEvtSamplingMultiplicity->GetYaxis()->SetTitle("Number of occurances");
 
         TCanvas *c_pull = new TCanvas("c_pull", "c_pull", 800, 800);
-        gStyle->SetOptStat(1111);
+        gStyle->SetOptStat("eMR");
         c_pull->Divide(2, 2);
         c_pull->cd(1);
         hPull->Draw();
