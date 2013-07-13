@@ -315,22 +315,22 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
                         if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
                         {
-                            fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                            fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
 
                             if ( combineLepMinus )
                             {
-                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
                             }
                         }
                         else
                         {
                             if ( ttmass > 0 )
                             {
-                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
                                 if ( combineLepMinus )
                                 {
 
-                                    fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), Nsolns / double(PE_event_multiplicity));
+                                    fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
                                 }
                             }
                         }

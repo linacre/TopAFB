@@ -960,7 +960,7 @@ syst_corr[2] =  0.013571  ; stat_corr[2] =  0.038226  ; stat_uncorr[2] =  0.0267
   }
 }
 
-void fillUnderOverFlow(TH1D *h1, float value, double weight, int Nsolns)
+void fillUnderOverFlow(TH1D *h1, float value, double weight, double Nsolns)
 {
   double min = h1->GetXaxis()->GetXmin();
   double max = h1->GetXaxis()->GetXmax();
@@ -974,12 +974,12 @@ void fillUnderOverFlow(TH1D *h1, float value, double weight, int Nsolns)
 
   //h1->Fill(value, weight);
   h1->SetBinContent( bin_number, orig_content+weight );
-  h1->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*double(Nsolns) ) );
+  h1->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*Nsolns ) );
 }
 
 //--------------------------------------------------------------------
 
-void fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, double weight, int Nsolns)
+void fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, double weight, double Nsolns)
 {
   double maxx = h2->GetXaxis()->GetXmax();
   double minx = h2->GetXaxis()->GetXmin();
@@ -997,5 +997,5 @@ void fillUnderOverFlow(TH2D *h2, float xvalue, float yvalue, double weight, int 
 
   //h2->Fill(xvalue, yvalue, weight);
   h2->SetBinContent( bin_number, orig_content+weight );
-  h2->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*double(Nsolns) ) );
+  h2->SetBinError( bin_number, sqrt( orig_error*orig_error + weight*weight*Nsolns ) );
 }
