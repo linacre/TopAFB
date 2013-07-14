@@ -100,6 +100,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         TH1D *hData_unfolded = new TH1D ("Data_Unfold", "Data with background subtracted and unfolded", nbins1D, xbins1D);
 
         TH1D *hTrue = new TH1D ("true", "Truth",    nbins1D, xbins1D);
+        TH1D *hTrue_PEs = new TH1D ("true_PEs", "Truth in PEs subsample", nbins1D, xbins1D);
         TH1D *hMeas = new TH1D ("meas", "Measured", nbins1D, xbins1D);
 
         TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1D, xbins1D, nbins1D, xbins1D);
@@ -123,6 +124,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hBkg->Sumw2();
         hData_unfolded->Sumw2();
         hTrue->Sumw2();
+        hTrue_PEs->Sumw2();
         hMeas->Sumw2();
         hTrue_vs_Meas->Sumw2();
 
@@ -339,6 +341,27 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
                 }
+
+                if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
+                {
+                    fillUnderOverFlow(hTrue_PEs, observable_gen, weight, Nsolns);
+                    if ( combineLepMinus )
+                    {
+                        fillUnderOverFlow(hTrue_PEs, observableMinus_gen, weight, Nsolns);
+                    }
+                }
+                else
+                {
+                    if ( ttmass > 0 )
+                    {
+                        fillUnderOverFlow(hTrue_PEs, observable_gen, weight, Nsolns);
+                        if ( combineLepMinus )
+                        {
+                            fillUnderOverFlow(hTrue_PEs, observableMinus_gen, weight, Nsolns);
+                        }
+                    }
+                }
+
             }
             if (!split_sample || i_ev >= Nevts )
             {
@@ -474,6 +497,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             {
                 hTrue->SetBinContent(i, hTrue->GetBinContent(i) * 1.0 / acceptM->GetBinContent(i));
                 hTrue->SetBinError  (i, hTrue->GetBinError(i)  * 1.0 / acceptM->GetBinContent(i));
+                hTrue_PEs->SetBinContent(i, hTrue_PEs->GetBinContent(i) * 1.0 / acceptM->GetBinContent(i));
+                hTrue_PEs->SetBinError  (i, hTrue_PEs->GetBinError(i)  * 1.0 / acceptM->GetBinContent(i));
             }
         }
 
@@ -524,6 +549,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         cout << " True Top from acceptance denominator: " << Afb << " +/-  " << AfbErr << "\n";
         second_output_file << acceptanceName << " " << observablename << " True_Top_from_acceptance_denominator: " << Afb << " +/-  " << AfbErr << "\n";
 
+        GetAfb(hTrue_PEs, Afb, AfbErr);
         Float_t Afb_true = Afb;
 
         TH1D *hPull = new TH1D ("pull", "pull", 100, -4, 4);
@@ -567,18 +593,27 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         TCanvas *c_pull = new TCanvas("c_pull", "c_pull", 800, 800);
         gStyle->SetOptStat("eMR");
-        gStyle->SetStatH(0.15);
-        gStyle->SetStatW(0.24);
+        gStyle->SetStatH(0.30);
+        gStyle->SetStatW(0.30);
+        gStyle->SetStatFormat("6.3g");
+        gStyle->SetOptFit("pcev");
+        gStyle->SetFitFormat("6.3g");
         c_pull->Divide(2, 2);
         c_pull->cd(1);
         hPull->Draw();
+        hPull->Fit("gaus", "LEMV");
         c_pull->cd(2);
         hNevPE->Draw();
+        hNevPE->Fit("gaus", "LEMV");
         c_pull->cd(3);
         hAfb->Draw();
+        hAfb->Fit("gaus", "LEMV");
         c_pull->cd(4);
         hErr->Draw();
+        hErr->Fit("gaus", "LEMV");
         c_pull->SaveAs("Pull_" + acceptanceName + Region + ".pdf");
+        c_pull->SaveAs("Pull_" + acceptanceName + Region + ".root");
+        c_pull->SaveAs("Pull_" + acceptanceName + Region + ".C");
 
 
         TCanvas *c_Mult = new TCanvas("c_Mult", "c_Mult", 500, 500);
