@@ -596,7 +596,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         gStyle->SetStatH(0.30);
         gStyle->SetStatW(0.30);
         gStyle->SetStatFormat("6.3g");
-        gStyle->SetOptFit("pcev");
+        gStyle->SetOptFit(1111);
         gStyle->SetFitFormat("6.3g");
         c_pull->Divide(2, 2);
         c_pull->cd(1);
