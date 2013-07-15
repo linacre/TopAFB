@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include "AfbFinalUnfold.h"
 
 #include "TROOT.h"
@@ -54,6 +55,19 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     gStyle->SetOptTitle(0);
     cout.precision(3);
 
+    const int NPEs = 1000;
+    Int_t PEsize = 9081;
+    bool split_sample = false;
+    Double_t sample_split_factor = 2.;
+    if (!split_sample) sample_split_factor = 1.;
+
+    vector< vector<Int_t> > event_multiplicity_nonzero;
+    vector< vector<Int_t> > iPEmapping;
+    vector< Int_t > NnonzeroPE;
+    Int_t PENumEvts[NPEs] = {0};
+    Int_t NEvtsforPEs = 0;
+    bool PEvectorsfilled = false;
+
     TString summary_name = "summary_1Dunfolding";
 
     if (!(scalettotr == 1. && scalewjets == 1. && scaleDY == 1. && scaletw == 1. && scaleVV == 1.))  summary_name = Form("summary_1Dunfolding_%i_%i_%i_%i_%i", int(10.*scalettotr + 0.5), int(10.*scalewjets + 0.5), int(10.*scaleDY + 0.5), int(10.*scaletw + 0.5), int(10.*scaleVV + 0.5));
@@ -82,11 +96,6 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     Double_t weight;
     Int_t evt;
     Int_t Nsolns;
-    const int NPEs = 1000;
-    Int_t PEsize = 9081;
-    bool split_sample = false;
-    Double_t sample_split_factor = 2.;
-    if (!split_sample) sample_split_factor = 1.;
 
 
     for (Int_t iVar = 0; iVar < nVars; iVar++)
@@ -256,47 +265,63 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         ch_top->SetBranchAddress("t_mass", &tmass);
         ch_top->SetBranchAddress("evt", &evt);
 
-        Int_t prevevt = -999;
-        Int_t i_ev = 0;
-        for (Int_t i = 0; i < ch_top->GetEntries(); i++)
+
+
+        if (!PEvectorsfilled)
         {
-            ch_top->GetEntry(i);
-            if (evt != prevevt) i_ev++;
-            prevevt = evt;
-        }
-        i_ev /= sample_split_factor;
-        const int Nevts = i_ev;
-
-        Int_t event_multiplicity_nonzero[Nevts][NPEs];
-        Int_t NnonzeroPE[Nevts] = {0};
-        Int_t iPEmapping[Nevts][NPEs] = {0};
-        Int_t PENumEvts[NPEs] = {0};
-        TH1D *hEvtSamplingMultiplicity = new TH1D ("EvtSamplingMultiplicity", "EvtSamplingMultiplicity", 5, 0, 5);
-
-
-        for (int j = 0; j < Nevts; ++j)
-        {
-            int randseed = j + 1;
-            random3_->SetSeed(randseed);
-            for (int iPE = 0; iPE < NPEs; ++iPE)
+            Int_t prevevt = -999;
+            for (Int_t i = 0; i < ch_top->GetEntries(); i++)
             {
-                Int_t temp_event_multiplicity = random3_->Poisson( double(PEsize) / double(Nevts) );
-                hEvtSamplingMultiplicity->Fill(temp_event_multiplicity);
-                if (temp_event_multiplicity > 0)
+                ch_top->GetEntry(i);
+                if (evt != prevevt) NEvtsforPEs++;
+                prevevt = evt;
+            }
+            NEvtsforPEs /= sample_split_factor;
+        }
+
+        const int Nevts = NEvtsforPEs;
+
+        TH1D *hEvtSamplingMultiplicity = new TH1D ("EvtSamplingMultiplicity", "EvtSamplingMultiplicity", 5, 0, 5);
+        double mean_event_duplication = double(PEsize * NPEs) / double(Nevts);
+        TH1D *hEvtTotalMultiplicity = new TH1D ("hEvtTotalMultiplicity", "hEvtTotalMultiplicity", 100, mean_event_duplication - sqrt(mean_event_duplication), mean_event_duplication + sqrt(mean_event_duplication));
+
+        if (!PEvectorsfilled)
+        {
+            for (int j = 0; j < Nevts; ++j)
+            {
+                int randseed = j + 1;
+                random3_->SetSeed(randseed);
+
+                vector<Int_t> temp_event_multiplicity_vector;
+                vector<Int_t> temp_iPEmapping_vector;
+                Int_t temp_NnonzeroPE = 0;
+                Int_t event_multiplicity_total = 0;
+                for (int iPE = 0; iPE < NPEs; ++iPE)
                 {
-                    event_multiplicity_nonzero[j][ NnonzeroPE[j] ] = temp_event_multiplicity;
-                    PENumEvts[iPE] += temp_event_multiplicity;
-                    iPEmapping[j][ NnonzeroPE[j] ] = iPE;
-                    NnonzeroPE[j]++;
+                    Int_t temp_event_multiplicity = random3_->Poisson( double(PEsize) / double(Nevts) );
+                    hEvtSamplingMultiplicity->Fill(temp_event_multiplicity);
+                    if (temp_event_multiplicity > 0)
+                    {
+                        temp_event_multiplicity_vector.push_back(temp_event_multiplicity);
+                        temp_iPEmapping_vector.push_back(iPE);
+                        PENumEvts[iPE] += temp_event_multiplicity;
+                        temp_NnonzeroPE++;
+                        event_multiplicity_total += temp_event_multiplicity;
+                    }
+
                 }
+                event_multiplicity_nonzero.push_back(temp_event_multiplicity_vector);
+                iPEmapping.push_back(temp_iPEmapping_vector);
+                NnonzeroPE.push_back(temp_NnonzeroPE);
+                hEvtTotalMultiplicity->Fill(event_multiplicity_total);
 
             }
-
         }
+        PEvectorsfilled = true;
 
 
-        prevevt = -999;
-        i_ev = -1;
+        Int_t prevevt = -999;
+        Int_t i_ev = -1;
 
         for (Int_t i = 0; i < ch_top->GetEntries(); i++)
         {
@@ -552,8 +577,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         GetAfb(hTrue_PEs, Afb, AfbErr);
         Float_t Afb_true = Afb;
 
-        TH1D *hPull = new TH1D ("pull", "pull", 100, -4, 4);
-        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", 100, PEsize - 4 * sqrt(PEsize), PEsize + 4 * sqrt(PEsize));
+        TH1D *hPull = new TH1D ("pull", "pull", lastPE / 30, -4, 4);
+        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", lastPE / 30, PEsize - 4 * sqrt(PEsize), PEsize + 4 * sqrt(PEsize));
 
         double meanAFB = 0.;
         double meanAFBerr = 0.;
@@ -570,8 +595,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         meanAFBerr /= double(lastPE);
 
 
-        TH1D *hErr = new TH1D ("err", "err", 100, meanAFBerr * ( 1. - 4. / sqrt(PEsize) ), meanAFBerr * ( 1. + 4. / sqrt(PEsize) ) );
-        TH1D *hAfb = new TH1D ("Afb", "Afb", 100, meanAFB - 4.*meanAFBerr, meanAFB + 4.*meanAFBerr);
+        TH1D *hErr = new TH1D ("err", "err", lastPE / 30, meanAFBerr * ( 1. - 4. / sqrt(PEsize) ), meanAFBerr * ( 1. + 4. / sqrt(PEsize) ) );
+        TH1D *hAfb = new TH1D ("Afb", "Afb", lastPE / 30, meanAFB - 4.*meanAFBerr, meanAFB + 4.*meanAFBerr);
 
         for (int iPE = 0; iPE < lastPE; ++iPE)
         {
@@ -590,6 +615,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hErr->GetYaxis()->SetTitle("PEs/bin");
         hEvtSamplingMultiplicity->GetXaxis()->SetTitle("PE event sampling multiplicity");
         hEvtSamplingMultiplicity->GetYaxis()->SetTitle("Number of occurances");
+        hEvtTotalMultiplicity->GetXaxis()->SetTitle("Total event sampling multiplicity");
+        hEvtTotalMultiplicity->GetYaxis()->SetTitle("Number of events");
 
         TCanvas *c_pull = new TCanvas("c_pull", "c_pull", 800, 800);
         gStyle->SetOptStat("eMR");
@@ -600,19 +627,19 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         gStyle->SetFitFormat("6.3g");
         c_pull->Divide(2, 2);
         c_pull->cd(1);
-        hPull->SetMaximum(1.3*hPull->GetMaximum());
+        hPull->SetMaximum(1.35 * hPull->GetMaximum());
         hPull->Draw();
         hPull->Fit("gaus", "LEMV");
         c_pull->cd(2);
-        hNevPE->SetMaximum(1.3*hNevPE->GetMaximum());
+        hNevPE->SetMaximum(1.35 * hNevPE->GetMaximum());
         hNevPE->Draw();
         hNevPE->Fit("gaus", "LEMV");
         c_pull->cd(3);
-        hAfb->SetMaximum(1.3*hAfb->GetMaximum());
+        hAfb->SetMaximum(1.35 * hAfb->GetMaximum());
         hAfb->Draw();
         hAfb->Fit("gaus", "LEMV");
         c_pull->cd(4);
-        hErr->SetMaximum(1.3*hErr->GetMaximum());
+        hErr->SetMaximum(1.35 * hErr->GetMaximum());
         hErr->Draw();
         hErr->Fit("gaus", "LEMV");
         c_pull->SaveAs("Pull_" + acceptanceName + Region + ".pdf");
@@ -621,10 +648,16 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
         TCanvas *c_Mult = new TCanvas("c_Mult", "c_Mult", 500, 500);
-        c_Mult->SetLogy();
+        c_Mult->Divide(2, 1);
+        c_Mult->cd(1);
+        c_Mult->SetLogy(1);
         hEvtSamplingMultiplicity->Draw();
+        c_Mult->cd(2);
+        c_Mult->SetLogy(0);
+        hEvtTotalMultiplicity->SetMaximum(1.35 * hEvtTotalMultiplicity->GetMaximum());
+        hEvtTotalMultiplicity->Draw();
+        hEvtTotalMultiplicity->Fit("gaus", "LEMV");
         c_Mult->SaveAs("SamplingMultiplicity_" + acceptanceName + Region + ".pdf");
-
 
 
         gStyle->SetOptStat(0);
