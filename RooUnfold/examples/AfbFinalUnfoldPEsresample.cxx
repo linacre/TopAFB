@@ -1,6 +1,5 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include "AfbFinalUnfold.h"
 
 #include "TROOT.h"
@@ -49,24 +48,18 @@ Int_t includeSys = 0;
 void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
 {
 
-    setTDRStyle();
-    gStyle->SetOptFit();
-    gStyle->SetOptStat(0);
-    gStyle->SetOptTitle(0);
-    cout.precision(3);
-
     const int NPEs = 1000;
     Int_t PEsize = 9081;
     bool split_sample = false;
     Double_t sample_split_factor = 2.;
     if (!split_sample) sample_split_factor = 1.;
 
-    vector< vector<Int_t> > event_multiplicity_nonzero;
-    vector< vector<Int_t> > iPEmapping;
-    vector< Int_t > NnonzeroPE;
-    Int_t PENumEvts[NPEs] = {0};
-    Int_t NEvtsforPEs = 0;
-    bool PEvectorsfilled = false;
+
+    setTDRStyle();
+    gStyle->SetOptFit();
+    gStyle->SetOptStat(0);
+    gStyle->SetOptTitle(0);
+    cout.precision(3);
 
     TString summary_name = "summary_1Dunfolding";
 
@@ -265,63 +258,27 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         ch_top->SetBranchAddress("t_mass", &tmass);
         ch_top->SetBranchAddress("evt", &evt);
 
-
-
-        if (!PEvectorsfilled)
+        Int_t NEvtsforPEs = 0;
+        Int_t prevevent = -999;
+        for (Int_t i = 0; i < ch_top->GetEntries(); i++)
         {
-            Int_t prevevt = -999;
-            for (Int_t i = 0; i < ch_top->GetEntries(); i++)
-            {
-                ch_top->GetEntry(i);
-                if (evt != prevevt) NEvtsforPEs++;
-                prevevt = evt;
-            }
-            NEvtsforPEs /= sample_split_factor;
+            ch_top->GetEntry(i);
+            if (evt != prevevent) NEvtsforPEs++;
+            prevevent = evt;
         }
+        NEvtsforPEs /= sample_split_factor;
 
         const int Nevts = NEvtsforPEs;
 
         TH1D *hEvtSamplingMultiplicity = new TH1D ("EvtSamplingMultiplicity", "EvtSamplingMultiplicity", 5, 0, 5);
         double mean_event_duplication = double(PEsize * NPEs) / double(Nevts);
-        TH1D *hEvtTotalMultiplicity = new TH1D ("hEvtTotalMultiplicity", "hEvtTotalMultiplicity", 100, mean_event_duplication - sqrt(mean_event_duplication), mean_event_duplication + sqrt(mean_event_duplication));
-
-        if (!PEvectorsfilled)
-        {
-            for (int j = 0; j < Nevts; ++j)
-            {
-                int randseed = j + 1;
-                random3_->SetSeed(randseed);
-
-                vector<Int_t> temp_event_multiplicity_vector;
-                vector<Int_t> temp_iPEmapping_vector;
-                Int_t temp_NnonzeroPE = 0;
-                Int_t event_multiplicity_total = 0;
-                for (int iPE = 0; iPE < NPEs; ++iPE)
-                {
-                    Int_t temp_event_multiplicity = random3_->Poisson( double(PEsize) / double(Nevts) );
-                    hEvtSamplingMultiplicity->Fill(temp_event_multiplicity);
-                    if (temp_event_multiplicity > 0)
-                    {
-                        temp_event_multiplicity_vector.push_back(temp_event_multiplicity);
-                        temp_iPEmapping_vector.push_back(iPE);
-                        PENumEvts[iPE] += temp_event_multiplicity;
-                        temp_NnonzeroPE++;
-                        event_multiplicity_total += temp_event_multiplicity;
-                    }
-
-                }
-                event_multiplicity_nonzero.push_back(temp_event_multiplicity_vector);
-                iPEmapping.push_back(temp_iPEmapping_vector);
-                NnonzeroPE.push_back(temp_NnonzeroPE);
-                hEvtTotalMultiplicity->Fill(event_multiplicity_total);
-
-            }
-        }
-        PEvectorsfilled = true;
-
+        TH1D *hEvtTotalMultiplicity = new TH1D ("hEvtTotalMultiplicity", "hEvtTotalMultiplicity", 2 * int(4.*sqrt(mean_event_duplication) + 0.5), int(mean_event_duplication + 0.5) - int(4.*sqrt(mean_event_duplication) + 0.5), int(mean_event_duplication + 0.5) + int(4.*sqrt(mean_event_duplication) + 0.5) );
+        Int_t PENumEvts[NPEs] = {0};
 
         Int_t prevevt = -999;
         Int_t i_ev = -1;
+        vector<Int_t> temp_event_multiplicity_vector;
+        vector<Int_t> temp_iPEmapping_vector;
 
         for (Int_t i = 0; i < ch_top->GetEntries(); i++)
         {
@@ -333,31 +290,59 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
             if (!split_sample || i_ev < Nevts )
             {
-                for (int inonzeroPE = 0; inonzeroPE < NnonzeroPE[i_ev]; ++inonzeroPE)
+
+                if (evt != prevevt)
                 {
-                    Int_t PE_event_multiplicity = event_multiplicity_nonzero[i_ev][inonzeroPE];
+                    int randseed = i_ev + 1;
+                    random3_->SetSeed(randseed);
+                    temp_event_multiplicity_vector.clear();
+                    temp_iPEmapping_vector.clear();
+                    Int_t event_multiplicity_total = 0;
+
+                    for (int iPE = 0; iPE < NPEs; ++iPE)
+                    {
+                        Int_t temp_event_multiplicity = random3_->Poisson( double(PEsize) / double(Nevts) );
+                        hEvtSamplingMultiplicity->Fill(temp_event_multiplicity);
+                        if (temp_event_multiplicity > 0)
+                        {
+                            temp_event_multiplicity_vector.push_back(temp_event_multiplicity);
+                            temp_iPEmapping_vector.push_back(iPE);
+                            PENumEvts[iPE] += temp_event_multiplicity;
+                            event_multiplicity_total += temp_event_multiplicity;
+                        }
+
+                    }
+                    hEvtTotalMultiplicity->Fill(event_multiplicity_total);
+
+                }
+
+
+
+                for (int inonzeroPE = 0; inonzeroPE < temp_event_multiplicity_vector.size(); ++inonzeroPE)
+                {
+                    Int_t PE_event_multiplicity = temp_event_multiplicity_vector[inonzeroPE];
 
                     if (PE_event_multiplicity > 0)
                     {
 
                         if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
                         {
-                            fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
+                            fillUnderOverFlow(hPseudoData[ temp_iPEmapping_vector[ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
 
                             if ( combineLepMinus )
                             {
-                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
+                                fillUnderOverFlow(hPseudoData[ temp_iPEmapping_vector[ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
                             }
                         }
                         else
                         {
                             if ( ttmass > 0 )
                             {
-                                fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
+                                fillUnderOverFlow(hPseudoData[ temp_iPEmapping_vector[ inonzeroPE ] ], observable, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
                                 if ( combineLepMinus )
                                 {
 
-                                    fillUnderOverFlow(hPseudoData[ iPEmapping[i_ev][ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
+                                    fillUnderOverFlow(hPseudoData[ temp_iPEmapping_vector[ inonzeroPE ] ], observableMinus, weight * double(PE_event_multiplicity), double(Nsolns) / double(PE_event_multiplicity));
                                 }
                             }
                         }
@@ -388,6 +373,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                 }
 
             }
+
             if (!split_sample || i_ev >= Nevts )
             {
 
@@ -423,6 +409,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
             prevevt = evt;
         }
+
 
         Int_t lastPE = NPEs;
 
@@ -576,9 +563,10 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         GetAfb(hTrue_PEs, Afb, AfbErr);
         Float_t Afb_true = Afb;
+        cout << " True Top in PEs subsample: " << Afb << " +/-  " << AfbErr << "\n";
 
-        TH1D *hPull = new TH1D ("pull", "pull", lastPE / 30, -4, 4);
-        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", lastPE / 30, PEsize - 4 * sqrt(PEsize), PEsize + 4 * sqrt(PEsize));
+        TH1D *hPull = new TH1D ("pull", "pull", 100, -4, 4);
+        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", 100, PEsize - 4 * sqrt(PEsize), PEsize + 4 * sqrt(PEsize));
 
         double meanAFB = 0.;
         double meanAFBerr = 0.;
@@ -595,8 +583,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         meanAFBerr /= double(lastPE);
 
 
-        TH1D *hErr = new TH1D ("err", "err", lastPE / 30, meanAFBerr * ( 1. - 4. / sqrt(PEsize) ), meanAFBerr * ( 1. + 4. / sqrt(PEsize) ) );
-        TH1D *hAfb = new TH1D ("Afb", "Afb", lastPE / 30, meanAFB - 4.*meanAFBerr, meanAFB + 4.*meanAFBerr);
+        TH1D *hErr = new TH1D ("err", "err", 100, meanAFBerr * ( 1. - 4. / sqrt(PEsize) ), meanAFBerr * ( 1. + 4. / sqrt(PEsize) ) );
+        TH1D *hAfb = new TH1D ("Afb", "Afb", 100, meanAFB - 4.*meanAFBerr, meanAFB + 4.*meanAFBerr);
 
         for (int iPE = 0; iPE < lastPE; ++iPE)
         {
@@ -647,7 +635,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         c_pull->SaveAs("Pull_" + acceptanceName + Region + ".C");
 
 
-        TCanvas *c_Mult = new TCanvas("c_Mult", "c_Mult", 500, 500);
+        TCanvas *c_Mult = new TCanvas("c_Mult", "c_Mult", 800, 400);
         c_Mult->Divide(2, 1);
         c_Mult->cd(1);
         c_Mult->SetLogy(1);
@@ -663,8 +651,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         gStyle->SetOptStat(0);
 
         vector<double> afb_bins;
-        vector<double> afb_bins;
-        GetCorrectedAfbBinByBin(hData_unfolded, m_correctE, afb_bins, afb_bins, second_output_file);
+        vector<double> afb_bins_err;
+        GetCorrectedAfbBinByBin(hData_unfolded, m_correctE, afb_bins, afb_bins_err, second_output_file);
 
         //scale to total xsec with option "width",  so that differential xsec is plotted
         hData_unfolded->Scale(1. / hData_unfolded->Integral(), "width");
