@@ -41,6 +41,7 @@ using std::endl;
   Int_t nVars =8;
   Int_t includeSys = 1;
   Int_t checkErrors = 1;
+  bool draw_truth_before_pT_reweighting = true;
 
 
 void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1.)
@@ -341,6 +342,34 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
 
+  TFile *file_nopTreweighting = new TFile("../acceptance/mcnlo_nopTreweighting/accept_"+acceptanceName+".root");
+
+  TH2D *denomM_nopTreweighting_2d = (TH2D*) file_nopTreweighting->Get("denominator_"+acceptanceName+"_mtt");
+  TH1D* denomM_nopTreweighting = new TH1D ("denomnopTreweighting", "denomnopTreweighting",    nbins2D, xbins2D);
+  
+  denomM_nopTreweighting->SetBinContent(1,denomM_nopTreweighting_2d->GetBinContent(1,3));
+  denomM_nopTreweighting->SetBinContent(2,denomM_nopTreweighting_2d->GetBinContent(1,2));
+  denomM_nopTreweighting->SetBinContent(3,denomM_nopTreweighting_2d->GetBinContent(1,1));
+
+  denomM_nopTreweighting->SetBinContent(4,denomM_nopTreweighting_2d->GetBinContent(2,1));
+  denomM_nopTreweighting->SetBinContent(5,denomM_nopTreweighting_2d->GetBinContent(2,2));
+  denomM_nopTreweighting->SetBinContent(6,denomM_nopTreweighting_2d->GetBinContent(2,3));  
+  
+  TH1D* denomM_nopTreweighting_0 = new TH1D ("denominator0nopTreweighting", "denominator0nopTreweighting",    2, -1500.,1500.);
+  TH1D* denomM_nopTreweighting_1 = new TH1D ("denominator1nopTreweighting", "denominator1nopTreweighting",    2, -1500.,1500.);
+  TH1D* denomM_nopTreweighting_2 = new TH1D ("denominator2nopTreweighting", "denominator2nopTreweighting",    2, -1500.,1500.);
+
+  denomM_nopTreweighting_2->SetBinContent(1,denomM_nopTreweighting_2d->GetBinContent(1,3));
+  denomM_nopTreweighting_1->SetBinContent(1,denomM_nopTreweighting_2d->GetBinContent(1,2));
+  denomM_nopTreweighting_0->SetBinContent(1,denomM_nopTreweighting_2d->GetBinContent(1,1));
+
+  denomM_nopTreweighting_0->SetBinContent(2,denomM_nopTreweighting_2d->GetBinContent(2,1));
+  denomM_nopTreweighting_1->SetBinContent(2,denomM_nopTreweighting_2d->GetBinContent(2,2));
+  denomM_nopTreweighting_2->SetBinContent(2,denomM_nopTreweighting_2d->GetBinContent(2,3));
+
+
+
+
 
   for (Int_t i= 1; i<=nbins2D; i++) {
 
@@ -399,6 +428,14 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   GetAfb(denomM_2, AfbG[2], AfbErr);
   cout<<" True Top 2 from acceptance denominator: "<< AfbG[2] <<" +/-  "<< AfbErr<<"\n";
   second_output_file << acceptanceName << " " << observablename << " True_Top_2_from_acceptance_denominator: "<< AfbG[2] <<" +/-  "<< AfbErr<<"\n";
+
+
+  if(draw_truth_before_pT_reweighting) {
+    GetAfb(denomM_nopTreweighting_0, AfbG[0], AfbErr);
+    GetAfb(denomM_nopTreweighting_1, AfbG[1], AfbErr);
+    GetAfb(denomM_nopTreweighting_2, AfbG[2], AfbErr);
+  }
+
 
   TCanvas* c_afb = new TCanvas("c_afb","c_afb",500,500); 
   xbins2D[0]=300.0; xbins2D[1]=450; xbins2D[2]=550.0; xbins2D[3]=800.0;

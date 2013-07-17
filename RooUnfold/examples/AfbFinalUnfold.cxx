@@ -44,6 +44,7 @@ using std::endl;
   Int_t nVars =8;
   Int_t includeSys = 1;
   Int_t checkErrors = 1;
+  bool draw_truth_before_pT_reweighting = true;
 
 
 void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
@@ -346,6 +347,13 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
   TH1D *denominatorM = (TH1D*) file->Get("denominator_"+acceptanceName);
 
+
+  TFile *file_nopTreweighting = new TFile("../acceptance/mcnlo_nopTreweighting/accept_"+acceptanceName+".root");
+  TH1D *denominatorM_nopTreweighting = (TH1D*) file_nopTreweighting->Get("denominator_"+acceptanceName);
+  denominatorM_nopTreweighting->Scale(1./denominatorM_nopTreweighting->Integral(),"width");
+
+
+
   for (Int_t i= 1; i<=nbins1D; i++) {
 
     if (acceptM->GetBinContent(i)!=0) {
@@ -405,8 +413,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   //cout<<" Unfolded (ignoring correlation): "<< Afb <<" +/-  "<< AfbErr<<"\n";
 
   vector<double> afb_bins;
-  vector<double> afb_bins;  
-  GetCorrectedAfbBinByBin(hData_unfolded, m_correctE, afb_bins, afb_bins, second_output_file);
+  vector<double> afb_bins_err;  
+  GetCorrectedAfbBinByBin(hData_unfolded, m_correctE, afb_bins, afb_bins_err, second_output_file);
 
   //scale to total xsec with option "width",  so that differential xsec is plotted
   //hData_unfolded->Scale(xsection/hData_unfolded->Integral(),"width");
@@ -488,7 +496,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   hTrue_arccos->SetLineWidth(lineWidth);
   hTrue_arccos->SetLineColor(TColor::GetColorDark(kRed));
   //  hTrue_arccos->SetFillColor(TColor::GetColorDark(kGreen));
-  //  hTrue_arccos->SetFillStyle(3353);
+  hTrue_arccos->SetFillStyle(0);
   hs.Draw("same");
   hTrue_arccos->Draw("hist same");
   hData_unfolded_arccos->Draw("EP same");
@@ -502,12 +510,16 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   hData_unfolded->SetMarkerSize(1.5);
   hData_unfolded->Draw("E");
   hData_unfolded->SetLineWidth(lineWidth);
+  denominatorM_nopTreweighting->SetLineWidth(lineWidth);
+  denominatorM_nopTreweighting->SetLineColor(TColor::GetColorDark(kRed));
+  denominatorM_nopTreweighting->SetFillStyle(0);
   hTrue->SetLineWidth(lineWidth);
   hTrue->SetLineColor(TColor::GetColorDark(kRed));
   //hTrue->SetFillColor(TColor::GetColorDark(kGreen));
-  //  hTrue->SetFillStyle(3353);
+  hTrue->SetFillStyle(0);
   hs.Draw("same");
-  hTrue->Draw("hist same");
+  if(!draw_truth_before_pT_reweighting) hTrue->Draw("hist same");
+  else denominatorM_nopTreweighting->Draw("hist same");
   hData_unfolded->Draw("EP same");
   }
 
