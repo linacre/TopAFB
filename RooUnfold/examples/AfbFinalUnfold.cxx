@@ -99,6 +99,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
   TH1D* hTrue= new TH1D ("true", "Truth",    nbins1D, xbins1D);
   TH1D* hMeas= new TH1D ("meas", "Measured", nbins1D, xbins1D);
+  TH1D* denominatorM_nopTreweighting= new TH1D ("denominatorM_nopTreweighting", "denominatorM_nopTreweighting",    nbins1D, xbins1D);
 
   TH2D* hTrue_vs_Meas= new TH2D ("true_vs_meas", "True vs Measured", nbins1D, xbins1D, nbins1D, xbins1D);
 
@@ -349,8 +350,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
   TFile *file_nopTreweighting = new TFile("../acceptance/mcnlo_nopTreweighting/accept_"+acceptanceName+".root");
-  TH1D *denominatorM_nopTreweighting = (TH1D*) file_nopTreweighting->Get("denominator_"+acceptanceName);
-  denominatorM_nopTreweighting->Scale(1./denominatorM_nopTreweighting->Integral(),"width");
+  TH1D *denominatorM_nopTreweighting_raw = (TH1D*) file_nopTreweighting->Get("denominator_"+acceptanceName);
+
 
 
 
@@ -370,8 +371,13 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
       
       hTrue_arccos->SetBinContent(nbins1D +1 - i, hTrue->GetBinContent(i) );
       hTrue_arccos->SetBinError  (nbins1D +1 - i, hTrue->GetBinError(i) );
-    }  
+    }
+
+    denominatorM_nopTreweighting->SetBinContent(i, denominatorM_nopTreweighting_raw->GetBinContent(i));
+
   } 
+
+  denominatorM_nopTreweighting->Scale(1./denominatorM_nopTreweighting->Integral(),"width");
 
   //scaling is now moved to after Afb is calculated
   //double dataIntegral = hData_unfolded->Integral();
@@ -473,42 +479,53 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     hData_unfolded_plussyst ->SetBinError(i, 0);
   }
 
-  THStack hs("hs_systband","Systematic band");
+  THStack *hs = new THStack("hs_systband","Systematic band");
   hData_unfolded_minussyst->SetLineColor(10);
   hData_unfolded_minussyst->SetFillColor(10);
-  hs.Add(hData_unfolded_minussyst);
+  hData_unfolded_minussyst->SetFillStyle(0);
+  hs->Add(hData_unfolded_minussyst);
   hData_unfolded_plussyst->SetFillStyle(3353);
   hData_unfolded_plussyst->SetLineColor(kWhite);
   hData_unfolded_plussyst->SetFillColor(15);
-  hs.Add(hData_unfolded_plussyst);
+  hs->Add(hData_unfolded_plussyst);
+  //hs->SetMinimum( 0 );
+  hs->SetMinimum( hData_unfolded->GetMinimum() - ( 0.3 * hData_unfolded->GetMaximum() ) > 0.15 ? hData_unfolded->GetMinimum() - ( 0.3 * hData_unfolded->GetMaximum() ) : 0 );
+  hs->SetMaximum(1.3 * hData_unfolded->GetMaximum());
 
 
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
-  if(observablename=="lep_azimuthal_asymmetry") {
-  hData_unfolded_arccos->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
-  hData_unfolded_arccos->GetYaxis()->SetTitle("1/#sigma d#sigma/d(#Delta#phi_{l+l-})");
-  hData_unfolded_arccos->SetMinimum(0.0);
-  hData_unfolded_arccos->SetMaximum( 2.0* hData_unfolded_arccos->GetMaximum());
+  if(observablename=="lep_azimuthal_asymmetry") {  
+  hs->Draw();
+  hs->GetXaxis()->SetTitle(xaxislabel);
+  hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
+  //hData_unfolded_arccos->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
+  //hData_unfolded_arccos->GetYaxis()->SetTitle("1/#sigma d#sigma/d(#Delta#phi_{l+l-})");
+  //hData_unfolded_arccos->SetMinimum(0.0);
+  //hData_unfolded_arccos->SetMaximum( 2.0* hData_unfolded_arccos->GetMaximum());
   hData_unfolded_arccos->SetMarkerStyle(23);
   hData_unfolded_arccos->SetMarkerSize(1.5);
-  hData_unfolded_arccos->Draw("E");
+  hData_unfolded_arccos->SetFillStyle(0);
+  hData_unfolded_arccos->Draw("E same");
   hData_unfolded_arccos->SetLineWidth(lineWidth);
   hTrue_arccos->SetLineWidth(lineWidth);
   hTrue_arccos->SetLineColor(TColor::GetColorDark(kRed));
   //  hTrue_arccos->SetFillColor(TColor::GetColorDark(kGreen));
   hTrue_arccos->SetFillStyle(0);
-  hs.Draw("same");
   hTrue_arccos->Draw("hist same");
   hData_unfolded_arccos->Draw("EP same");
   }
   else {
-  hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
-  hData_unfolded->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
-  hData_unfolded->SetMinimum(0.0);
-  hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
+  hs->Draw();
+  hs->GetXaxis()->SetTitle(xaxislabel);
+  hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
+  //hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
+  //hData_unfolded->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
+  //hData_unfolded->SetMinimum(0.0);
+  //hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
   hData_unfolded->SetMarkerStyle(23);
   hData_unfolded->SetMarkerSize(1.5);
-  hData_unfolded->Draw("E");
+  hData_unfolded->SetFillStyle(0);
+  hData_unfolded->Draw("E same");
   hData_unfolded->SetLineWidth(lineWidth);
   denominatorM_nopTreweighting->SetLineWidth(lineWidth);
   denominatorM_nopTreweighting->SetLineColor(TColor::GetColorDark(kRed));
@@ -517,35 +534,36 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   hTrue->SetLineColor(TColor::GetColorDark(kRed));
   //hTrue->SetFillColor(TColor::GetColorDark(kGreen));
   hTrue->SetFillStyle(0);
-  hs.Draw("same");
   if(!draw_truth_before_pT_reweighting) hTrue->Draw("hist same");
   else denominatorM_nopTreweighting->Draw("hist same");
   hData_unfolded->Draw("EP same");
   }
 
-  TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");                                                                           
+  //TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");
+  TLegend* leg1=new TLegend(0.59,0.75,0.9,0.93,NULL,"brNDC");
   leg1->SetEntrySeparation(100);                                                                                                          
   leg1->SetFillColor(0);                                                                                                                  
   leg1->SetLineColor(0);                                                                                                                   
   leg1->SetBorderSize(0);                    
   leg1->SetTextSize(0.03);
   if(observablename=="lep_azimuthal_asymmetry") {
-  	leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) Unfolded");  
-  	leg1->AddEntry(hTrue_arccos,    "SM parton level (mc@nlo)", "F"); 
+  	leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) unfolded");  
+  	leg1->AddEntry(hTrue_arccos,    "MC@NLO parton level", "L"); 
   }
   else{
-  	leg1->AddEntry(hData_unfolded, "( Data - BG ) Unfolded");  
-  	leg1->AddEntry(hTrue,    "SM parton level (mc@nlo)", "F");                                                               
+  	leg1->AddEntry(hData_unfolded, "( Data - BG ) unfolded");  
+  	leg1->AddEntry(hTrue,    "MC@NLO parton level", "L");                                                               
   }
   leg1->Draw();
 
-  TPaveText *pt1 = new TPaveText(0.19, 0.85, 0.42, 0.89, "brNDC");
+  TPaveText *pt1 = new TPaveText(0.17, 0.87, 0.40, 0.91, "brNDC");
   pt1->SetName("pt1name");
   pt1->SetBorderSize(0);
   pt1->SetFillStyle(0);
 
   TText *blah;
-  blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
+  //blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
+  blah = pt1->AddText("CMS, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
   blah->SetTextSize(0.032);
   blah->SetTextAlign(11);
   pt1->Draw();
