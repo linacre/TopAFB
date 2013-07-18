@@ -496,14 +496,14 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   TCanvas* c_test = new TCanvas("c_final","c_final",500,500); 
   if(observablename=="lep_azimuthal_asymmetry") {  
   hs->Draw();
-  hs->GetXaxis()->SetTitle(xaxislabel);
-  hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
+  hs->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
+  hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d(#Delta#phi_{l+l-})");
   //hData_unfolded_arccos->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
   //hData_unfolded_arccos->GetYaxis()->SetTitle("1/#sigma d#sigma/d(#Delta#phi_{l+l-})");
   //hData_unfolded_arccos->SetMinimum(0.0);
   //hData_unfolded_arccos->SetMaximum( 2.0* hData_unfolded_arccos->GetMaximum());
   hData_unfolded_arccos->SetMarkerStyle(23);
-  hData_unfolded_arccos->SetMarkerSize(1.5);
+  hData_unfolded_arccos->SetMarkerSize(1);
   hData_unfolded_arccos->SetFillStyle(0);
   hData_unfolded_arccos->Draw("E same");
   hData_unfolded_arccos->SetLineWidth(lineWidth);
@@ -523,7 +523,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   //hData_unfolded->SetMinimum(0.0);
   //hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
   hData_unfolded->SetMarkerStyle(23);
-  hData_unfolded->SetMarkerSize(1.5);
+  hData_unfolded->SetMarkerSize(1);
   hData_unfolded->SetFillStyle(0);
   hData_unfolded->Draw("E same");
   hData_unfolded->SetLineWidth(lineWidth);
@@ -540,8 +540,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   }
 
   //TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");
-  TLegend* leg1=new TLegend(0.59,0.75,0.9,0.93,NULL,"brNDC");
-  leg1->SetEntrySeparation(100);                                                                                                          
+  TLegend* leg1=new TLegend(0.60,0.75,0.9,0.93,NULL,"brNDC");
+  leg1->SetEntrySeparation(60);                                                                                                          
   leg1->SetFillColor(0);                                                                                                                  
   leg1->SetLineColor(0);                                                                                                                   
   leg1->SetBorderSize(0);                    
@@ -556,7 +556,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
   }
   leg1->Draw();
 
-  TPaveText *pt1 = new TPaveText(0.17, 0.87, 0.40, 0.91, "brNDC");
+  TPaveText *pt1 = new TPaveText(0.18, 0.87, 0.41, 0.91, "brNDC");
   pt1->SetName("pt1name");
   pt1->SetBorderSize(0);
   pt1->SetFillStyle(0);
