@@ -623,7 +623,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hs->Add(hData_unfolded_plussyst);
         //hs->SetMinimum( 0 );
         hs->SetMinimum( hData_unfolded->GetMinimum() - ( 0.3 * hData_unfolded->GetMaximum() ) > 0.15 ? hData_unfolded->GetMinimum() - ( 0.3 * hData_unfolded->GetMaximum() ) : 0 );
-        hs->SetMaximum(1.3 * hData_unfolded->GetMaximum());
+        if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation") hs->SetMaximum(1.35 * hData_unfolded->GetMaximum());
+        else hs->SetMaximum(1.3 * hData_unfolded->GetMaximum());
 
 
         TCanvas *c_test = new TCanvas("c_final", "c_final", 500, 500);
@@ -695,39 +696,42 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         leg1->SetFillColor(0);
         leg1->SetLineColor(0);
         leg1->SetBorderSize(0);
+        leg1->SetFillStyle(0);
         leg1->SetTextSize(0.03);
         if (observablename == "lep_azimuthal_asymmetry")
         {
             leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) unfolded");
-            leg1->AddEntry(hData_unfolded_plussyst,    "Syst. Uncertainty", "F");
+            leg1->AddEntry(hData_unfolded_plussyst,    "Syst. uncertainty", "F");
             leg1->AddEntry(hTrue_arccos,    "MC@NLO parton level", "L");
-        }
-        else if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
-        {
-            leg1->AddEntry(hData_unfolded, "( Data - BG ) unfolded");
-            leg1->AddEntry(hData_unfolded_plussyst,    "Syst. Uncertainty", "F");
-            leg1->AddEntry(hTrue,    "MC@NLO parton level", "L");
-            leg1->AddEntry(theoryProfileCorr,  "W.Bernreuther & Z.G.Si (SM, #mu=M_{t})", "L");
-            leg1->AddEntry(theoryProfileUnCorr,  "W.Bernreuther & Z.G.Si (uncorrelated, #mu=M_{t})", "L");
         }
         else
         {
             leg1->AddEntry(hData_unfolded, "( Data - BG ) unfolded");
-            leg1->AddEntry(hData_unfolded_plussyst,    "Syst. Uncertainty", "F");
+            leg1->AddEntry(hData_unfolded_plussyst,    "Syst. uncertainty", "F");
             leg1->AddEntry(hTrue,    "MC@NLO parton level", "L");
+        }
+
+        leg1->Draw();
+
+        if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
+        {
+            TLegend *leg2 = new TLegend(0.18, 0.75, 0.6, 0.87, NULL, "brNDC");
+            leg2->SetEntrySeparation(0.5);
+            leg2->SetFillColor(0);
+            leg2->SetLineColor(0);
+            leg2->SetBorderSize(0);
+            leg2->SetFillStyle(0);
+            leg2->SetTextSize(0.03);
+            leg2->AddEntry(theoryProfileCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(SM, #mu=M_{t})}", "L");
+            leg2->AddEntry(theoryProfileUnCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(uncorrelated, #mu=M_{t})}", "L");
+            leg2->Draw();
         }
 
 
 
 
 
-
-
-
-
-        leg1->Draw();
-
-        TPaveText *pt1 = new TPaveText(0.18, 0.87, 0.41, 0.91, "brNDC");
+        TPaveText *pt1 = new TPaveText(0.18, 0.88, 0.41, 0.91, "brNDC");
         pt1->SetName("pt1name");
         pt1->SetBorderSize(0);
         pt1->SetFillStyle(0);
