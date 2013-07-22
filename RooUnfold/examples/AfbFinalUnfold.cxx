@@ -467,7 +467,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             Float_t c1c2, v1, v2, v3;
             Int_t ncols, nlines;
             nlines = 0;
-            FILE *fp = fopen("theory/lhc7_muhm_cos1cos2.dat", "r");
+            FILE *fp = fopen("theory/lhc7_mu1m_cos1cos2.dat", "r");
             while (1)
             {
                 ncols = fscanf(fp, "%f %f %f %f", &c1c2, &v1, &v2, &v3);
@@ -478,7 +478,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             }
 
             nlines = 0;
-            fp = fopen("theory/lhc7_mu2m_cos1cos2.dat", "r");
+            fp = fopen("theory/lhc7_mu1m_cos1cos2.dat", "r");
             while (1)
             {
                 ncols = fscanf(fp, "%f %f %f %f", &c1c2, &v1, &v2, &v3);
@@ -522,9 +522,9 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
         {
-            GetAfb( (TH1D *) theoryProfileCorr, Afb, AfbErr);
+            GetAfb_integratewidth( (TH1D *) theoryProfileCorr, Afb, AfbErr);
             cout << " Bernreuther correlated: " << Afb << " +/-  " << AfbErr << "\n";
-            GetAfb( (TH1D *) theoryProfileUnCorr, Afb, AfbErr);
+            GetAfb_integratewidth( (TH1D *) theoryProfileUnCorr, Afb, AfbErr);
             cout << " Bernreuther uncorrelated: " << Afb << " +/-  " << AfbErr << "\n";
         }
 

@@ -59,6 +59,27 @@ void GetAfb(TH1D* h, Float_t &afb, Float_t  &afberr){
 }
 
 
+void GetAfb_integratewidth(TH1D* h, Float_t &afb, Float_t  &afberr){
+
+  Int_t nbins = h->GetNbinsX();
+  Float_t event_minus;
+  Float_t event_plus;
+  Float_t event_total;
+  Double_t event_plus_err;
+  Double_t event_minus_err;
+
+  event_minus  = h-> IntegralAndError(0, nbins/2, event_minus_err,"width");
+  event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_plus_err,"width");
+  event_total = event_plus + event_minus;
+
+  afb = (event_plus-event_minus)/(event_plus+event_minus);
+  afberr   = sqrt(4*(event_plus*event_plus*event_minus_err*event_minus_err 
+    + event_minus*event_minus*event_plus_err*event_plus_err)/
+    (event_total*event_total*event_total*event_total));
+
+}
+
+
 //void GetAfbBinByBin(TH1D* h, Float_t &afbbin, Float_t  &afberrbin){
 void GetAfbBinByBin(TH1D* h){
 
