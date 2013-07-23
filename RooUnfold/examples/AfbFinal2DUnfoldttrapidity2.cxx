@@ -233,7 +233,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hs->SetMinimum(0.0);
         hs->SetMaximum( 2.0 * hs->GetMaximum());
         hs->Draw("hist");
-        hs->GetXaxis()->SetTitle("y_{t#bar{t}}");
+        hs->GetXaxis()->SetTitle("|y_{t#bar{t}}|");
         hs->GetYaxis()->SetTitleOffset(1.3);
         hs->GetYaxis()->SetTitle("Events");
 
@@ -308,8 +308,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         TCanvas *c_resp = new TCanvas("c_resp_ttrapidity2", "c_resp_ttrapidity2");
         TH2D *hResp = (TH2D *) response.Hresponse();
         gStyle->SetPalette(1);
-        hResp->GetXaxis()->SetTitle("y_{t#bar{t}} #times sign(" + xaxislabel + ") (reco)");
-        hResp->GetYaxis()->SetTitle("y_{t#bar{t}} #times sign(" + xaxislabel + ") (gen)");
+        hResp->GetXaxis()->SetTitle("|y_{t#bar{t}}| #times sign(" + xaxislabel + ") (reco)");
+        hResp->GetYaxis()->SetTitle("|y_{t#bar{t}}| #times sign(" + xaxislabel + ") (gen)");
         hResp->Draw("COLZ");
         c_resp->SetLogz();
         c_resp->SaveAs("Response_2D_ttrapidity2_" + acceptanceName + Region + ".pdf");
@@ -457,9 +457,9 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
         TCanvas *c_afb = new TCanvas("c_afb", "c_afb", 500, 500);
-        xbins2D[0] = 0.0; xbins2D[1] = 24.0; xbins2D[2] = 52.0; xbins2D[3] = 100.0;
-        TH1D *hAfbVsttrapidity2 = new TH1D ("AfbVsttrapidity2",  "AfbVsttrapidity2",  3, xbins2D);
-        TH1D *hAfbVsttrapidity2_statonly = new TH1D ("AfbVsttrapidity2_statonly",  "AfbVsttrapidity2_statonly",  3, xbins2D);
+        double xbins2D_positive[4] = {xbins2D[3], xbins2D[4], xbins2D[5], xbins2D[6]};
+        TH1D *hAfbVsttrapidity2 = new TH1D ("AfbVsttrapidity2",  "AfbVsttrapidity2",  3, xbins2D_positive);
+        TH1D *hAfbVsttrapidity2_statonly = new TH1D ("AfbVsttrapidity2_statonly",  "AfbVsttrapidity2_statonly",  3, xbins2D_positive);
         for (int nb = 0; nb < 3; nb++)
         {
             hAfbVsttrapidity2->SetBinContent(nb + 1, afb_m[nb]);
@@ -480,7 +480,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             hAfbVsttrapidity2_statonly->SetBinError(nb + 1, stat_uncorr[nb]);
         }
 
-        TH1D *hTop_AfbVsttrapidity2 = new TH1D ("Top_AfbVsttrapidity2",  "Top_AfbVsttrapidity2",  3, xbins2D);
+        TH1D *hTop_AfbVsttrapidity2 = new TH1D ("Top_AfbVsttrapidity2",  "Top_AfbVsttrapidity2",  3, xbins2D_positive);
         for (int nb = 0; nb < 3; nb++)
         {
             hTop_AfbVsttrapidity2->SetBinContent(nb + 1, AfbG[nb]);
@@ -493,13 +493,13 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hAfbVsttrapidity2->SetLineWidth( 2.0 );
         hAfbVsttrapidity2->Draw("E");
         hAfbVsttrapidity2_statonly->Draw("E1 same");
-        hTop_AfbVsttrapidity2->SetLineColor(kGreen);
-        hTop_AfbVsttrapidity2->SetMarkerColor(kGreen);
+        hTop_AfbVsttrapidity2->SetLineColor(TColor::GetColorDark(kRed));
+        hTop_AfbVsttrapidity2->SetMarkerColor(TColor::GetColorDark(kRed));
         hTop_AfbVsttrapidity2->SetMarkerSize(0);
         hTop_AfbVsttrapidity2->SetLineWidth( 2.0 );
         hAfbVsttrapidity2->GetYaxis()->SetTitle(asymlabel);
         hAfbVsttrapidity2->GetYaxis()->SetTitleOffset(1.2);
-        hAfbVsttrapidity2->GetXaxis()->SetTitle("y_{t#bar{t}}");
+        hAfbVsttrapidity2->GetXaxis()->SetTitle("|y_{t#bar{t}}|");
         hTop_AfbVsttrapidity2->Draw("E same");
 
         leg1 = new TLegend(0.6, 0.72, 0.9, 0.938, NULL, "brNDC");
@@ -534,8 +534,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hData_unfolded->Scale(1. / hData_unfolded->Integral(), "width");
         hTrue->Scale(1. / hTrue->Integral(), "width");
 
-        hData_unfolded->GetXaxis()->SetTitle("y_{t#bar{t}}");
-        hData_unfolded->GetYaxis()->SetTitle("d#sigma/dy_{t#bar{t}}");
+        hData_unfolded->GetXaxis()->SetTitle("|y_{t#bar{t}}|");
+        hData_unfolded->GetYaxis()->SetTitle("d#sigma/d|y_{t#bar{t}}|");
         hData_unfolded->SetMinimum(0.0);
         hData_unfolded->SetMaximum( 2.0 * hData_unfolded->GetMaximum());
         hData_unfolded->SetMarkerStyle(23);

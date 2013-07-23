@@ -453,9 +453,9 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
         TCanvas *c_afb = new TCanvas("c_afb", "c_afb", 500, 500);
-        xbins2D[0] = 0.0; xbins2D[1] = 24.0; xbins2D[2] = 52.0; xbins2D[3] = 100.0;
-        TH1D *hAfbVsttpt = new TH1D ("AfbVsttpt",  "AfbVsttpt",  3, xbins2D);
-        TH1D *hAfbVsttpt_statonly = new TH1D ("AfbVsttpt_statonly",  "AfbVsttpt_statonly",  3, xbins2D);
+        double xbins2D_positive[4] = {xbins2D[3], xbins2D[4], xbins2D[5], xbins2D[6]};
+        TH1D *hAfbVsttpt = new TH1D ("AfbVsttpt",  "AfbVsttpt",  3, xbins2D_positive);
+        TH1D *hAfbVsttpt_statonly = new TH1D ("AfbVsttpt_statonly",  "AfbVsttpt_statonly",  3, xbins2D_positive);
         for (int nb = 0; nb < 3; nb++)
         {
             hAfbVsttpt->SetBinContent(nb + 1, afb_m[nb]);
@@ -476,7 +476,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             hAfbVsttpt_statonly->SetBinError(nb + 1, stat_uncorr[nb]);
         }
 
-        TH1D *hTop_AfbVsttpt = new TH1D ("Top_AfbVsttpt",  "Top_AfbVsttpt",  3, xbins2D);
+        TH1D *hTop_AfbVsttpt = new TH1D ("Top_AfbVsttpt",  "Top_AfbVsttpt",  3, xbins2D_positive);
         for (int nb = 0; nb < 3; nb++)
         {
             hTop_AfbVsttpt->SetBinContent(nb + 1, AfbG[nb]);
@@ -489,8 +489,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hAfbVsttpt->SetLineWidth( 2.0 );
         hAfbVsttpt->Draw("E");
         hAfbVsttpt_statonly->Draw("E1 same");
-        hTop_AfbVsttpt->SetLineColor(kGreen);
-        hTop_AfbVsttpt->SetMarkerColor(kGreen);
+        hTop_AfbVsttpt->SetLineColor(TColor::GetColorDark(kRed));
+        hTop_AfbVsttpt->SetMarkerColor(TColor::GetColorDark(kRed));
         hTop_AfbVsttpt->SetMarkerSize(0);
         hTop_AfbVsttpt->SetLineWidth( 2.0 );
         hAfbVsttpt->GetYaxis()->SetTitle(asymlabel);
