@@ -259,13 +259,22 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         ch_top->SetBranchAddress("evt", &evt);
 
         Int_t NEvtsforPEs = 0;
+        Int_t NEvtsforPEs_weighted = 0;
         Int_t prevevent = -999;
         for (Int_t i = 0; i < ch_top->GetEntries(); i++)
         {
             ch_top->GetEntry(i);
-            if (evt != prevevent) NEvtsforPEs++;
+            if (evt != prevevent)
+            {
+                NEvtsforPEs++;
+                if (weight > 0) NEvtsforPEs_weighted++;
+                else NEvtsforPEs_weighted--;
+            }
             prevevent = evt;
         }
+        Int_t PEsize_unweighted = PEsize;
+        double positive_event_SF = double(NEvtsforPEs_weighted) / double(NEvtsforPEs);
+        if (NEvtsforPEs_weighted != NEvtsforPEs) PEsize = Int_t(0.5 + double(PEsize) / positive_event_SF );
         NEvtsforPEs /= sample_split_factor;
 
         const int Nevts = NEvtsforPEs;
@@ -307,7 +316,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                         {
                             temp_event_multiplicity_vector.push_back(temp_event_multiplicity);
                             temp_iPEmapping_vector.push_back(iPE);
-                            PENumEvts[iPE] += temp_event_multiplicity;
+                            if (weight > 0) PENumEvts[iPE] += temp_event_multiplicity;
+                            else PENumEvts[iPE] -= temp_event_multiplicity;
                             event_multiplicity_total += temp_event_multiplicity;
                         }
 
@@ -566,7 +576,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         cout << " True Top in PEs subsample: " << Afb << " +/-  " << AfbErr << "\n";
 
         TH1D *hPull = new TH1D ("pull", "pull", 100, -4, 4);
-        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", 100, PEsize - 4 * sqrt(PEsize), PEsize + 4 * sqrt(PEsize));
+        int NevPEerr = int(sqrt(PEsize) + 0.5);
+        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", NevPEerr * ( int(100/NevPEerr) > 0 ? int(100/NevPEerr) : 1), PEsize_unweighted - 4 * NevPEerr, PEsize_unweighted + 4 * NevPEerr )
 
         double meanAFB = 0.;
         double meanAFBerr = 0.;
