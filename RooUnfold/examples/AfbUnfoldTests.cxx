@@ -69,13 +69,6 @@ void AfbUnfoldLinearityTest(Int_t iVar = 0, TString TestType = "Pull")
     TH1D *hSmeared = new TH1D ("smeared", "Smeared", nbins1D, xbins1D);
     TH1D *hUnfolded = new TH1D ("unfolded", "Unfolded", nbins1D, xbins1D);
 
-    TH1D *hTrue_test = new TH1D ("true_test", "Truth",    nbins1D, xbins1D);
-    TH1D *hMeas_test = new TH1D ("meas_test", "Measured", nbins1D, xbins1D);
-    TH1D *hUnfolded_test = new TH1D ("unfolded_test", "Unfolded", nbins1D, xbins1D);
-
-    TH1D *hData = new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1D, xbins1D);
-    TH1D *hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
-    TH1D *hData_unfolded = new TH1D ("Data_Unfold", "Data with background subtracted and unfolded", nbins1D, xbins1D);
 
     TH1D *AfbPull = new TH1D("h_afbpull", "Pulls for Afb", 50, -5, 5);
 
@@ -88,12 +81,7 @@ void AfbUnfoldLinearityTest(Int_t iVar = 0, TString TestType = "Pull")
     hMeas_after->Sumw2();
     hSmeared->Sumw2();
     hUnfolded->Sumw2();
-    hTrue_test->Sumw2();
-    hMeas_test->Sumw2();
-    hUnfolded_test->Sumw2();
-    hData->Sumw2();
-    hBkg->Sumw2();
-    hData_unfolded->Sumw2();
+
     AfbPull->Sumw2();
     hTrue_vs_Meas->Sumw2();
 
@@ -125,6 +113,7 @@ void AfbUnfoldLinearityTest(Int_t iVar = 0, TString TestType = "Pull")
 
     evtree->SetBranchAddress(observablename,    &observable);
     evtree->SetBranchAddress(observablename + "_gen", &observable_gen);
+    if (observablename == "lep_azimuthal_asymmetry2") evtree->SetBranchAddress("lep_azimuthal_asymmetry_gen2", &observable_gen);
     if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
     if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms_gen",    &observableMinus_gen);
     evtree->SetBranchAddress("weight", &weight);
@@ -149,6 +138,7 @@ void AfbUnfoldLinearityTest(Int_t iVar = 0, TString TestType = "Pull")
         hMeas_before->Reset();
         hTrue_after->Reset();
         hMeas_after->Reset();
+        hTrue_vs_Meas->Reset();
 
         if (observable < xmin) observable = xmin;
         if (observable > xmax) observable = xmax;
