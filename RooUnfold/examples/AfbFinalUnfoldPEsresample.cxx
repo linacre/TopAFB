@@ -48,7 +48,7 @@ Int_t includeSys = 0;
 void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
 {
 
-    const int NPEs = 1000;
+    const int NPEs = 3000;
     Int_t PEsize = 9081;
     bool split_sample = false;
     Double_t sample_split_factor = 2.;
@@ -273,14 +273,15 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             prevevent = evt;
         }
         Int_t PEsize_unweighted = PEsize;
+        Int_t PEsize_weighted = PEsize;
         double positive_event_SF = double(NEvtsforPEs_weighted) / double(NEvtsforPEs);
-        if (NEvtsforPEs_weighted != NEvtsforPEs) PEsize = Int_t(0.5 + double(PEsize) / positive_event_SF );
+        if (NEvtsforPEs_weighted != NEvtsforPEs) PEsize_weighted = Int_t(0.5 + double(PEsize) / positive_event_SF );
         NEvtsforPEs /= sample_split_factor;
 
         const int Nevts = NEvtsforPEs;
 
         TH1D *hEvtSamplingMultiplicity = new TH1D ("EvtSamplingMultiplicity", "EvtSamplingMultiplicity", 5, 0, 5);
-        double mean_event_duplication = double(PEsize * NPEs) / double(Nevts);
+        double mean_event_duplication = double(PEsize_weighted * NPEs) / double(Nevts);
         TH1D *hEvtTotalMultiplicity = new TH1D ("hEvtTotalMultiplicity", "hEvtTotalMultiplicity", 2 * int(4.*sqrt(mean_event_duplication) + 0.5), int(mean_event_duplication + 0.5) - int(4.*sqrt(mean_event_duplication) + 0.5), int(mean_event_duplication + 0.5) + int(4.*sqrt(mean_event_duplication) + 0.5) );
         Int_t PENumEvts[NPEs] = {0};
 
@@ -310,7 +311,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
                     for (int iPE = 0; iPE < NPEs; ++iPE)
                     {
-                        Int_t temp_event_multiplicity = random3_->Poisson( double(PEsize) / double(Nevts) );
+                        Int_t temp_event_multiplicity = random3_->Poisson( double(PEsize_weighted) / double(Nevts) );
                         hEvtSamplingMultiplicity->Fill(temp_event_multiplicity);
                         if (temp_event_multiplicity > 0)
                         {
@@ -576,7 +577,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         cout << " True Top in PEs subsample: " << Afb << " +/-  " << AfbErr << "\n";
 
         TH1D *hPull = new TH1D ("pull", "pull", 100, -4, 4);
-        int NevPEerr = int(sqrt(PEsize) + 0.5);
+        int NevPEerr = int(sqrt(PEsize_weighted) + 0.5);
         int nBinsforNevPE = NevPEerr * ( int(100 / NevPEerr) > 0 ? int(100 / NevPEerr) : 1);
         TH1D *hNevPE = new TH1D ("NevPE", "NevPE", nBinsforNevPE, PEsize_unweighted - 4 * NevPEerr, PEsize_unweighted + 4 * NevPEerr );
 
@@ -595,7 +596,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         meanAFBerr /= double(lastPE);
 
 
-        TH1D *hErr = new TH1D ("err", "err", 100, meanAFBerr * ( 1. - 4. / sqrt(PEsize) ), meanAFBerr * ( 1. + 4. / sqrt(PEsize) ) );
+        TH1D *hErr = new TH1D ("err", "err", 100, meanAFBerr * ( 1. - 4. / sqrt(PEsize_weighted) ), meanAFBerr * ( 1. + 4. / sqrt(PEsize_weighted) ) );
         TH1D *hAfb = new TH1D ("Afb", "Afb", 100, meanAFB - 4.*meanAFBerr, meanAFB + 4.*meanAFBerr);
 
         for (int iPE = 0; iPE < lastPE; ++iPE)
@@ -650,10 +651,11 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         TCanvas *c_Mult = new TCanvas("c_Mult", "c_Mult", 800, 400);
         c_Mult->Divide(2, 1);
         c_Mult->cd(1);
-        c_Mult->SetLogy(1);
+        c_Mult->SetLogy();
         hEvtSamplingMultiplicity->Draw();
+        c_Mult->SetLogy();
+        c_Mult->Update();
         c_Mult->cd(2);
-        c_Mult->SetLogy(0);
         hEvtTotalMultiplicity->SetMaximum(1.3 * hEvtTotalMultiplicity->GetMaximum());
         hEvtTotalMultiplicity->Draw();
         hEvtTotalMultiplicity->Fit("gaus", "LEMV");
