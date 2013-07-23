@@ -577,7 +577,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         TH1D *hPull = new TH1D ("pull", "pull", 100, -4, 4);
         int NevPEerr = int(sqrt(PEsize) + 0.5);
-        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", NevPEerr * ( int(100/NevPEerr) > 0 ? int(100/NevPEerr) : 1), PEsize_unweighted - 4 * NevPEerr, PEsize_unweighted + 4 * NevPEerr )
+        int nBinsforNevPE = NevPEerr * ( int(100 / NevPEerr) > 0 ? int(100 / NevPEerr) : 1);
+        TH1D *hNevPE = new TH1D ("NevPE", "NevPE", nBinsforNevPE, PEsize_unweighted - 4 * NevPEerr, PEsize_unweighted + 4 * NevPEerr );
 
         double meanAFB = 0.;
         double meanAFBerr = 0.;
