@@ -45,7 +45,7 @@ Int_t nVars = 8;
 Int_t includeSys = 0;
 
 
-void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
+void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
 {
 
     const int NPEs = 3000;
@@ -61,7 +61,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     gStyle->SetOptTitle(0);
     cout.precision(3);
 
-    TString summary_name = "summary_1Dunfolding";
+    Initialize1DBinning(iVar);
+    TString summary_name = "summary_1Dunfolding_" + acceptanceName;
 
     if (!(scalettotr == 1. && scalewjets == 1. && scaleDY == 1. && scaletw == 1. && scaleVV == 1.))  summary_name = Form("summary_1Dunfolding_%i_%i_%i_%i_%i", int(10.*scalettotr + 0.5), int(10.*scalewjets + 0.5), int(10.*scaleDY + 0.5), int(10.*scaletw + 0.5), int(10.*scaleVV + 0.5));
 
@@ -90,11 +91,9 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     Int_t evt;
     Int_t Nsolns;
 
-
-    for (Int_t iVar = 0; iVar < nVars; iVar++)
-    {
-
-        Initialize1DBinning(iVar);
+    //for (Int_t iVar = 0; iVar < nVars; iVar++)
+    //{
+        //Initialize1DBinning(iVar);
         bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
 
         TH1D *hData = new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1D, xbins1D);
@@ -730,7 +729,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             ch_bkg[iBkg]->Delete();
         }
 
-    }
+    //} //end commented out iVar loop
 
     myfile.close();
     second_output_file.close();
