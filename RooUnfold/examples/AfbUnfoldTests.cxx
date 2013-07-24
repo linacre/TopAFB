@@ -123,9 +123,11 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
     evtree->SetBranchAddress("t_mass", &tmass);
 
     Float_t slope = 0.0;
-    Float_t A_gen[6], Aerr_gen[6], A_unf[6], Aerr_unf[6], A_meas[6], Aerr_meas[6];
+    const int Nlin = 7;
+    Float_t A_gen[Nlin], Aerr_gen[Nlin], A_unf[Nlin], Aerr_unf[Nlin], A_meas[Nlin], Aerr_meas[Nlin];
+    Float_t A_pull[Nlin], A_pullwidth[Nlin], Aerr_pull[Nlin], Aerr_pullwidth[Nlin];
 
-    for (int k = 0; k < 6; k++)
+    for (int k = 0; k < Nlin; k++)
     {
 
         if ((TestType == "Pull") && (k == 1)) break;
@@ -139,6 +141,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
         hTrue_after->Reset();
         hMeas_after->Reset();
         hTrue_vs_Meas->Reset();
+        AfbPull->Reset();
+
 
         if (observable < xmin) observable = xmin;
         if (observable > xmax) observable = xmax;
@@ -344,30 +348,65 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
         A_unf[k] = SumAsym / nPseudos;
         Aerr_unf[k] = SumErrAsym / nPseudos;
 
+        A_pull[k] = AfbPull->GetMean();
+        Aerr_pull[k] = AfbPull->GetMeanError();
+        A_pullwidth[k] = AfbPull->GetRMS();
+        Aerr_pullwidth[k] = AfbPull->GetRMSError();
+
     }
 
-    TGraphErrors *Asym2D_TrueUnf = new TGraphErrors (6, A_gen, A_unf, Aerr_gen, Aerr_unf);
+    TGraphErrors *Asym2D_TrueUnf = new TGraphErrors (Nlin, A_gen, A_unf, Aerr_gen, Aerr_unf);
 
-    TGraphErrors *Asym2D_TrueMeas = new TGraphErrors (6, A_gen, A_meas, Aerr_gen, Aerr_meas);
+    TGraphErrors *Asym2D_TrueMeas = new TGraphErrors (Nlin, A_gen, A_meas, Aerr_gen, Aerr_meas);
 
+    TGraphErrors *Asym2D_PullWidth = new TGraphErrors (Nlin, A_gen, A_pullwidth, Aerr_gen, Aerr_pullwidth);
+
+    TGraphErrors *Asym2D_Pull = new TGraphErrors (Nlin, A_gen, A_pull, Aerr_gen, Aerr_pull);
 
     if ((TestType == "Linearity"))
     {
         TCanvas *c_ttbar = new TCanvas("c_ttbar", "c_ttbar", 500, 500);
         Asym2D_TrueUnf->SetTitle(asymlabel);
         Asym2D_TrueUnf->SetMarkerStyle(23);
-        Asym2D_TrueUnf->SetMarkerColor(kRed);
-        Asym2D_TrueUnf->SetMarkerSize(2.0);
+        Asym2D_TrueUnf->SetMarkerColor(kBlack);
+        Asym2D_TrueUnf->SetMarkerSize(1.0);
         Asym2D_TrueUnf->GetXaxis()->SetTitle(asymlabel + " (true)");
         Asym2D_TrueUnf->GetYaxis()->SetTitle(asymlabel + " (unfolded)");
         Asym2D_TrueUnf->Draw("AP same");
         Asym2D_TrueUnf->Fit("pol1");
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.pdf");
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.C");
+
+        TCanvas *c_Pull_lin = new TCanvas("c_Pull_lin", "c_Pull_lin", 500, 500);
+        Asym2D_Pull->SetTitle(asymlabel);
+        Asym2D_Pull->SetMarkerStyle(23);
+        Asym2D_Pull->SetMarkerColor(kBlack);
+        Asym2D_Pull->SetMarkerSize(1.0);
+        Asym2D_Pull->GetXaxis()->SetTitle(asymlabel + " (true)");
+        Asym2D_Pull->GetYaxis()->SetTitle(asymlabel + " pull");
+        Asym2D_Pull->Draw("AP same");
+        Asym2D_Pull->Fit("pol1");
+        c_Pull_lin->SaveAs(acceptanceName + "_LinearityCheck_Pull.pdf");
+        c_Pull_lin->SaveAs(acceptanceName + "_LinearityCheck_Pull.C");
+
+        TCanvas *c_PullWidth_lin = new TCanvas("c_PullWidth_lin", "c_PullWidth_lin", 500, 500);
+        Asym2D_PullWidth->SetTitle(asymlabel);
+        Asym2D_PullWidth->SetMarkerStyle(23);
+        Asym2D_PullWidth->SetMarkerColor(kBlack);
+        Asym2D_PullWidth->SetMarkerSize(1.0);
+        Asym2D_PullWidth->GetXaxis()->SetTitle(asymlabel + " (true)");
+        Asym2D_PullWidth->GetYaxis()->SetTitle(asymlabel + " pull width");
+        Asym2D_PullWidth->Draw("AP same");
+        Asym2D_PullWidth->Fit("pol1");
+        c_PullWidth_lin->SaveAs(acceptanceName + "_LinearityCheck_PullWidth.pdf");
+        c_PullWidth_lin->SaveAs(acceptanceName + "_LinearityCheck_PullWidth.C");
     }
     else
     {
         TCanvas *c_pull = new TCanvas("c_pull", "c_pull", 500, 500);
+        AfbPull->SetMarkerStyle(23);
+        AfbPull->SetMarkerColor(kBlack);
+        AfbPull->SetMarkerSize(1.0);
         AfbPull->GetXaxis()->SetTitle(asymlabel + " pull");
         AfbPull->GetYaxis()->SetTitle("Number of PEs / 0.2");
         AfbPull ->Fit("gaus");
