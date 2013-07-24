@@ -211,23 +211,23 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
             if ( tmass > 0  )
             {
-                fillUnderOverFlow(hMeas_before, sign(observable)*obs2D, weight, Nsolns);
-                fillUnderOverFlow(hTrue_before, sign(observable_gen)*obs2D_gen, weight, Nsolns);
-                fillUnderOverFlow(hTrue_vs_Meas, sign(observable)*obs2D, sign(observable_gen)*obs2D_gen, weight, Nsolns);
+                fillUnderOverFlow(hMeas_before, sign(observable - asym_centre)*obs2D, weight, Nsolns);
+                fillUnderOverFlow(hTrue_before, sign(observable_gen - asym_centre)*obs2D_gen, weight, Nsolns);
+                fillUnderOverFlow(hTrue_vs_Meas, sign(observable - asym_centre)*obs2D, sign(observable_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 if ( combineLepMinus )
                 {
-                    fillUnderOverFlow(hMeas_before, sign(observableMinus)*obs2D, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_before, sign(observableMinus_gen)*obs2D_gen, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_vs_Meas, observableMinus, sign(observableMinus_gen)*obs2D_gen, weight, Nsolns);
+                    fillUnderOverFlow(hMeas_before, sign(observableMinus - asym_centre)*obs2D, weight, Nsolns);
+                    fillUnderOverFlow(hTrue_before, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
+                    fillUnderOverFlow(hTrue_vs_Meas, sign(observableMinus - asym_centre)*obs2D, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 }
                 if (TestType == "Linearity") weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
-                fillUnderOverFlow(hMeas_after, sign(observable)*obs2D, weight, Nsolns);
-                fillUnderOverFlow(hTrue_after, sign(observable_gen)*obs2D_gen, weight, Nsolns);
+                fillUnderOverFlow(hMeas_after, sign(observable - asym_centre)*obs2D, weight, Nsolns);
+                fillUnderOverFlow(hTrue_after, sign(observable_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 if ( combineLepMinus )
                 {
                     if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * (observableMinus_gen - asym_centre) );
-                    fillUnderOverFlow(hMeas_after, sign(observableMinus)*obs2D, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_after, sign(observableMinus_gen)*obs2D_gen, weight, Nsolns);
+                    fillUnderOverFlow(hMeas_after, sign(observableMinus - asym_centre)*obs2D, weight, Nsolns);
+                    fillUnderOverFlow(hTrue_after, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 }
 
             }
