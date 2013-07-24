@@ -156,6 +156,10 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     const int Nlin = 7;
     Float_t A_gen[Nlin], Aerr_gen[Nlin], A_unf[Nlin], Aerr_unf[Nlin], A_meas[Nlin], Aerr_meas[Nlin];
     Float_t A_pull[Nlin], A_pullwidth[Nlin], Aerr_pull[Nlin], Aerr_pullwidth[Nlin];
+    Float_t A_pull_bin1[Nlin], A_pullwidth_bin1[Nlin], Aerr_pull_bin1[Nlin], Aerr_pullwidth_bin1[Nlin];
+    Float_t A_pull_bin2[Nlin], A_pullwidth_bin2[Nlin], Aerr_pull_bin2[Nlin], Aerr_pullwidth_bin2[Nlin];
+    Float_t A_pull_bin3[Nlin], A_pullwidth_bin3[Nlin], Aerr_pull_bin3[Nlin], Aerr_pullwidth_bin3[Nlin];
+
     Float_t A_unf2Dbin1[Nlin], A_unf2Dbin2[Nlin], A_unf2Dbin3[Nlin];
     Float_t Aerr_unf2Dbin1[Nlin], Aerr_unf2Dbin2[Nlin], Aerr_unf2Dbin3[Nlin];
     Float_t A_gen2Dbin1[Nlin], A_gen2Dbin2[Nlin], A_gen2Dbin3[Nlin];
@@ -431,6 +435,21 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         A_pullwidth[k] = AfbPull->GetRMS();
         Aerr_pullwidth[k] = AfbPull->GetRMSError();
 
+        A_pull_bin1[k] = Afb2DPullBin1->GetMean();
+        Aerr_pull_bin1[k] = Afb2DPullBin1->GetMeanError();
+        A_pullwidth_bin1[k] = Afb2DPullBin1->GetRMS();
+        Aerr_pullwidth_bin1[k] = Afb2DPullBin1->GetRMSError();
+
+        A_pull_bin2[k] = Afb2DPullBin2->GetMean();
+        Aerr_pull_bin2[k] = Afb2DPullBin2->GetMeanError();
+        A_pullwidth_bin2[k] = Afb2DPullBin2->GetRMS();
+        Aerr_pullwidth_bin2[k] = Afb2DPullBin2->GetRMSError();
+
+        A_pull_bin3[k] = Afb2DPullBin3->GetMean();
+        Aerr_pull_bin3[k] = Afb2DPullBin3->GetMeanError();
+        A_pullwidth_bin3[k] = Afb2DPullBin3->GetRMS();
+        Aerr_pullwidth_bin3[k] = Afb2DPullBin3->GetRMSError();
+
     }
 
     TGraphErrors *Asym2D_TrueUnf = new TGraphErrors (Nlin, A_gen, A_unf, Aerr_gen, Aerr_unf);
@@ -438,7 +457,6 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     TGraphErrors *Asym2D_TrueMeas = new TGraphErrors (Nlin, A_gen, A_meas, Aerr_gen, Aerr_meas);
 
     TGraphErrors *Asym2D_PullWidth = new TGraphErrors (Nlin, A_gen, A_pullwidth, Aerr_gen, Aerr_pullwidth);
-
     TGraphErrors *Asym2D_Pull = new TGraphErrors (Nlin, A_gen, A_pull, Aerr_gen, Aerr_pull);
 
 
@@ -446,6 +464,12 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     TGraphErrors *Asym2D_TrueUnfbin2 = new TGraphErrors (Nlin, A_gen2Dbin2, A_unf2Dbin2, Aerr_gen2Dbin2, Aerr_unf2Dbin2);
     TGraphErrors *Asym2D_TrueUnfbin3 = new TGraphErrors (Nlin, A_gen2Dbin3, A_unf2Dbin3, Aerr_gen2Dbin3, Aerr_unf2Dbin3);
 
+    TGraphErrors *Asym2D_PullWidthbin1 = new TGraphErrors (Nlin, A_gen2Dbin1, A_pullwidth_bin1, Aerr_gen2Dbin1, Aerr_pullwidth_bin1);
+    TGraphErrors *Asym2D_Pullbin1 = new TGraphErrors (Nlin, A_gen2Dbin1, A_pull_bin1, Aerr_gen2Dbin1, Aerr_pull_bin1);
+    TGraphErrors *Asym2D_PullWidthbin2 = new TGraphErrors (Nlin, A_gen2Dbin2, A_pullwidth_bin2, Aerr_gen2Dbin2, Aerr_pullwidth_bin2);
+    TGraphErrors *Asym2D_Pullbin2 = new TGraphErrors (Nlin, A_gen2Dbin2, A_pull_bin2, Aerr_gen2Dbin2, Aerr_pull_bin2);
+    TGraphErrors *Asym2D_PullWidthbin3 = new TGraphErrors (Nlin, A_gen2Dbin3, A_pullwidth_bin3, Aerr_gen2Dbin3, Aerr_pullwidth_bin3);
+    TGraphErrors *Asym2D_Pullbin3 = new TGraphErrors (Nlin, A_gen2Dbin3, A_pull_bin3, Aerr_gen2Dbin3, Aerr_pull_bin3);
 
     if ((TestType == "Linearity"))
     {
@@ -455,7 +479,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         Asym2D_TrueUnf->SetTitle(asymlabel);
         Asym2D_TrueUnf->SetMarkerStyle(23);
         Asym2D_TrueUnf->SetMarkerColor(kBlack);
-        Asym2D_TrueUnf->SetMarkerSize(1.0);
+        Asym2D_TrueUnf->SetMarkerSize(0.6);
         Asym2D_TrueUnf->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " inclusive (true)");
         Asym2D_TrueUnf->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " inclusive (unfolded)");
         Asym2D_TrueUnf->Draw("AP same");
@@ -465,7 +489,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         Asym2D_TrueUnfbin1->SetTitle(asymlabel);
         Asym2D_TrueUnfbin1->SetMarkerStyle(23);
         Asym2D_TrueUnfbin1->SetMarkerColor(kBlue);
-        Asym2D_TrueUnfbin1->SetMarkerSize(1.0);
+        Asym2D_TrueUnfbin1->SetMarkerSize(0.6);
         Asym2D_TrueUnfbin1->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 1 (true)");
         Asym2D_TrueUnfbin1->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 1 (unfolded)");
         Asym2D_TrueUnfbin1->Draw("AP same");
@@ -475,7 +499,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         Asym2D_TrueUnfbin2->SetTitle(asymlabel);
         Asym2D_TrueUnfbin2->SetMarkerStyle(23);
         Asym2D_TrueUnfbin2->SetMarkerColor(kBlue);
-        Asym2D_TrueUnfbin2->SetMarkerSize(1.0);
+        Asym2D_TrueUnfbin2->SetMarkerSize(0.6);
         Asym2D_TrueUnfbin2->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 2 (true)");
         Asym2D_TrueUnfbin2->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 2 (unfolded)");
         Asym2D_TrueUnfbin2->Draw("AP same");
@@ -485,7 +509,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         Asym2D_TrueUnfbin3->SetTitle(asymlabel);
         Asym2D_TrueUnfbin3->SetMarkerStyle(23);
         Asym2D_TrueUnfbin3->SetMarkerColor(kBlue);
-        Asym2D_TrueUnfbin3->SetMarkerSize(1.0);
+        Asym2D_TrueUnfbin3->SetMarkerSize(0.6);
         Asym2D_TrueUnfbin3->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 3 (true)");
         Asym2D_TrueUnfbin3->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 3 (unfolded)");
         Asym2D_TrueUnfbin3->Draw("AP same");
@@ -494,27 +518,98 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         c_ttbar->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck.pdf");
         c_ttbar->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck.C");
 
+
+
         TCanvas *c_Pull_lin = new TCanvas("c_Pull_lin", "c_Pull_lin", 500, 500);
+        c_Pull_lin->Divide(2, 2);
+        c_Pull_lin->cd(1);
         Asym2D_Pull->SetTitle(asymlabel);
         Asym2D_Pull->SetMarkerStyle(23);
         Asym2D_Pull->SetMarkerColor(kBlack);
-        Asym2D_Pull->SetMarkerSize(1.0);
+        Asym2D_Pull->SetMarkerSize(0.6);
         Asym2D_Pull->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " inclusive (true)");
         Asym2D_Pull->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " inclusive pull");
         Asym2D_Pull->Draw("AP same");
         Asym2D_Pull->Fit("pol1");
+
+        c_Pull_lin->cd(2);
+        Asym2D_Pullbin1->SetTitle(asymlabel);
+        Asym2D_Pullbin1->SetMarkerStyle(23);
+        Asym2D_Pullbin1->SetMarkerColor(kBlue);
+        Asym2D_Pullbin1->SetMarkerSize(0.6);
+        Asym2D_Pullbin1->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 1 (true)");
+        Asym2D_Pullbin1->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 1 pull");
+        Asym2D_Pullbin1->Draw("AP same");
+        Asym2D_Pullbin1->Fit("pol1");
+
+        c_Pull_lin->cd(3);
+        Asym2D_Pullbin2->SetTitle(asymlabel);
+        Asym2D_Pullbin2->SetMarkerStyle(23);
+        Asym2D_Pullbin2->SetMarkerColor(kBlue);
+        Asym2D_Pullbin2->SetMarkerSize(0.6);
+        Asym2D_Pullbin2->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 2 (true)");
+        Asym2D_Pullbin2->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 2 pull");
+        Asym2D_Pullbin2->Draw("AP same");
+        Asym2D_Pullbin2->Fit("pol1");
+
+        c_Pull_lin->cd(4);
+        Asym2D_Pullbin3->SetTitle(asymlabel);
+        Asym2D_Pullbin3->SetMarkerStyle(23);
+        Asym2D_Pullbin3->SetMarkerColor(kBlue);
+        Asym2D_Pullbin3->SetMarkerSize(0.6);
+        Asym2D_Pullbin3->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 3 (true)");
+        Asym2D_Pullbin3->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 3 pull");
+        Asym2D_Pullbin3->Draw("AP same");
+        Asym2D_Pullbin3->Fit("pol1");
+
         c_Pull_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_Pull.pdf");
         c_Pull_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_Pull.C");
 
+
+
+
         TCanvas *c_PullWidth_lin = new TCanvas("c_PullWidth_lin", "c_PullWidth_lin", 500, 500);
+        c_PullWidth_lin->Divide(2, 2);
+        c_PullWidth_lin->cd(1);
         Asym2D_PullWidth->SetTitle(asymlabel);
         Asym2D_PullWidth->SetMarkerStyle(23);
         Asym2D_PullWidth->SetMarkerColor(kBlack);
-        Asym2D_PullWidth->SetMarkerSize(1.0);
+        Asym2D_PullWidth->SetMarkerSize(0.6);
         Asym2D_PullWidth->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " inclusive (true)");
         Asym2D_PullWidth->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " inclusive pull width");
         Asym2D_PullWidth->Draw("AP same");
         Asym2D_PullWidth->Fit("pol1");
+
+        c_PullWidth_lin->cd(2);
+        Asym2D_PullWidthbin1->SetTitle(asymlabel);
+        Asym2D_PullWidthbin1->SetMarkerStyle(23);
+        Asym2D_PullWidthbin1->SetMarkerColor(kBlue);
+        Asym2D_PullWidthbin1->SetMarkerSize(0.6);
+        Asym2D_PullWidthbin1->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 1 (true)");
+        Asym2D_PullWidthbin1->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 1 pull width");
+        Asym2D_PullWidthbin1->Draw("AP same");
+        Asym2D_PullWidthbin1->Fit("pol1");
+
+        c_PullWidth_lin->cd(3);
+        Asym2D_PullWidthbin2->SetTitle(asymlabel);
+        Asym2D_PullWidthbin2->SetMarkerStyle(23);
+        Asym2D_PullWidthbin2->SetMarkerColor(kBlue);
+        Asym2D_PullWidthbin2->SetMarkerSize(0.6);
+        Asym2D_PullWidthbin2->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 2 (true)");
+        Asym2D_PullWidthbin2->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 2 pull width");
+        Asym2D_PullWidthbin2->Draw("AP same");
+        Asym2D_PullWidthbin2->Fit("pol1");
+
+        c_PullWidth_lin->cd(4);
+        Asym2D_PullWidthbin3->SetTitle(asymlabel);
+        Asym2D_PullWidthbin3->SetMarkerStyle(23);
+        Asym2D_PullWidthbin3->SetMarkerColor(kBlue);
+        Asym2D_PullWidthbin3->SetMarkerSize(0.6);
+        Asym2D_PullWidthbin3->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 3 (true)");
+        Asym2D_PullWidthbin3->GetYaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 3 pull width");
+        Asym2D_PullWidthbin3->Draw("AP same");
+        Asym2D_PullWidthbin3->Fit("pol1");
+
         c_PullWidth_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_PullWidth.pdf");
         c_PullWidth_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_PullWidth.C");
     }
@@ -525,7 +620,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         c_pull->cd(1);
         AfbPull->SetMarkerStyle(23);
         AfbPull->SetMarkerColor(kBlack);
-        AfbPull->SetMarkerSize(1.0);
+        AfbPull->SetMarkerSize(0.6);
         AfbPull->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " inclusive pull");
         AfbPull->GetYaxis()->SetTitle("Number of PEs / 0.2");
         AfbPull ->Fit("gaus");
@@ -536,7 +631,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         c_pull->cd(2);
         Afb2DPullBin1->SetMarkerStyle(23);
         Afb2DPullBin1->SetMarkerColor(kBlue);
-        Afb2DPullBin1->SetMarkerSize(1.0);
+        Afb2DPullBin1->SetMarkerSize(0.6);
         Afb2DPullBin1->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 1 pull");
         Afb2DPullBin1->GetYaxis()->SetTitle("Number of PEs / 0.2");
         Afb2DPullBin1 ->Fit("gaus");
@@ -545,7 +640,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         c_pull->cd(3);
         Afb2DPullBin2->SetMarkerStyle(23);
         Afb2DPullBin2->SetMarkerColor(kBlue);
-        Afb2DPullBin2->SetMarkerSize(1.0);
+        Afb2DPullBin2->SetMarkerSize(0.6);
         Afb2DPullBin2->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 2 pull");
         Afb2DPullBin2->GetYaxis()->SetTitle("Number of PEs / 0.2");
         Afb2DPullBin2 ->Fit("gaus");
@@ -554,7 +649,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         c_pull->cd(4);
         Afb2DPullBin3->SetMarkerStyle(23);
         Afb2DPullBin3->SetMarkerColor(kBlue);
-        Afb2DPullBin3->SetMarkerSize(1.0);
+        Afb2DPullBin3->SetMarkerSize(0.6);
         Afb2DPullBin3->GetXaxis()->SetTitle(asymlabel + " vs. " + yaxislabel + " bin 3 pull");
         Afb2DPullBin3->GetYaxis()->SetTitle("Number of PEs / 0.2");
         Afb2DPullBin3 ->Fit("gaus");
