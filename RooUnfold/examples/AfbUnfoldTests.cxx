@@ -37,7 +37,7 @@ Int_t lineWidth = 5;
 
 
 // "Pull" or "Linearity"
-void AfbUnfoldLinearityTest(Int_t iVar = 0, TString TestType = "Pull")
+void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
 {
 #ifdef __CINT__
     gSystem->Load("libRooUnfold");
