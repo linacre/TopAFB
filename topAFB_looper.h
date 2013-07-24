@@ -14,6 +14,11 @@
 #include "../CORE/jetSelections.cc"
 #include "../CORE/jetSmearingTools.h"
 //class TChain;
+// indices in LHAPDF for the genset and the 
+// alternate set
+static const unsigned int set_ = 2;
+static const unsigned int genset_ = 1;
+
 
 class topAFB_looper
 {
@@ -57,6 +62,7 @@ class topAFB_looper
 	JetSmearer* jet_smearer_;
         TFile *babyFile_;
         TTree *babyTree_;
+	bool applyPDFWeight;
 	bool applyNoCuts;
 	bool getVtxDistOnly;
 	bool usePtGt2020;

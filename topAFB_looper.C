@@ -722,6 +722,7 @@ double topAFB_looper::getFRWeight(const int hypIdx, SimpleFakeRate *mufr, Simple
 
 topAFB_looper::topAFB_looper()
 {
+    applyPDFWeight = false;
     applyNoCuts = false;
     getVtxDistOnly = false;
     usePtGt2020 = false;
@@ -788,6 +789,9 @@ topAFB_looper::topAFB_looper()
     jptL2L3ResidualCorr = NULL;
     pfL2L3ResidualCorr = NULL;
     d_llsol = new ttdilepsolve;
+    LHAPDF::setPDFPath("../CORE/topmass/pdfs");
+    LHAPDF::initPDFSetM(genset_, "cteq6mE.LHgrid");
+    LHAPDF::initPDFM(genset_, 0);
 }
 
 
@@ -806,6 +810,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
   globalJESRescale = 1.;
   
     //deal with the cuts
+    applyPDFWeight = find(v_Cuts.begin(), v_Cuts.end(), "applyPDFWeight") != v_Cuts.end();
     applyNoCuts = find(v_Cuts.begin(), v_Cuts.end(), "applyNoCuts") != v_Cuts.end();
     getVtxDistOnly = find(v_Cuts.begin(), v_Cuts.end(), "getVtxDistOnly") != v_Cuts.end();
     usePtGt2020 = find(v_Cuts.begin(), v_Cuts.end(), "usePtGt2020") != v_Cuts.end();
@@ -870,6 +875,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     doBFR =  find(v_Cuts.begin(), v_Cuts.end(), "doBFR"                ) != v_Cuts.end();
     requireExact2BTag    = find(v_Cuts.begin(), v_Cuts.end(), "requireExact2BTag"                      ) != v_Cuts.end();
     applyTopSystEta       = find(v_Cuts.begin(), v_Cuts.end(), "applyTopSystEta"                      ) != v_Cuts.end();
+   
+
+    // unsigned int nsets = 1 + LHAPDF::numberPDFM(set_);
+    unsigned int nsets = 1 ;
+    if(applyPDFWeight)LHAPDF::initPDFSetM(set_, "cteq6mE.LHgrid");
     // top mass
 
     //std::vector<std::string> jetcorr_filenames_pfL1FastJetL2L3;
@@ -1260,6 +1270,41 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             } //ntaus>0
             //cout<<weight_taudecay<<endl;
 
+	    // Caculate PDF Systematics
+	    double pdf_weight = 1.0;
+	    if (applyPDFWeight && prefix == "ttdil"  ){
+	     
+	      for (unsigned int subset = 0; subset < nsets; subset++)
+		{
+		  
+		  // std::cout << "doing set, subset: " << set_ << ", " << subset << std::endl;
+		  LHAPDF::initPDFM(2,0);
+		  
+		  float   x1          = 0.0;      // momentum fraction for parton1
+		  float   x2          = 0.0;
+		  int     id1         = 0;        // pdgid of parton1
+		  int     id2         = 0;
+		  float   Q           = 0.0;      // event momentum scale
+		  x1          = cms2.pdfinfo_x1();
+		  x2          = cms2.pdfinfo_x2();
+		  id1         = cms2.pdfinfo_id1();
+		  id2         = cms2.pdfinfo_id2();
+		  Q           = cms2.pdfinfo_scale();
+		  // generated pdf values
+		  double fx1Q0gen = LHAPDF::xfxM(genset_, x1, Q, id1) / x1;
+		  double fx2Q0gen = LHAPDF::xfxM(genset_, x2, Q, id2) / x2;
+		  // subset pdf values
+		  double fx1Qi = LHAPDF::xfxM(set_, x1, Q, id1) / x1;
+		  double fx2Qi = LHAPDF::xfxM(set_, x2, Q, id2) / x2;
+		  // calculate weight and fill histogram
+		  pdf_weight = ((fx1Qi*fx2Qi)/(fx1Q0gen*fx2Q0gen));
+		  //cout << fx1Qi <<endl;
+		  // cout << fx1Q0gen <<endl;
+		  // cout << pdf_weight <<endl;
+		  
+		  
+		}// end of loop over subset of PDFs
+	    }
 
             if (!applyNoCuts)
             {
@@ -1308,7 +1353,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 		  weight = kFactor * evt_scale1fb() * lumi * ndavtxweight;
 		  //weight = kFactor * evt_scale1fb() * lumi ;
                     //negative weights for MC@NLO
-                    if (prefix == "ttdil" || prefix == "ttotr") weight = weight * fabs(genps_weight()) / genps_weight();
+		  if (prefix == "ttdil" || prefix == "ttotr") weight = weight * (fabs(genps_weight()) / genps_weight()) * pdf_weight;
                     //tau decay cosTheta* weighting
                     if (weighttaudecay && (prefix == "ttdil" || prefix == "ttotr")  && ntaus > 0) weight *= weight_taudecay;
                 }
@@ -1331,7 +1376,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             {
                 if (!isData) weight = kFactor * evt_scale1fb() * lumi;
                 //negative weights for MC@NLO
-                if (prefix == "ttdil" || prefix == "ttotr") weight = weight * fabs(genps_weight()) / genps_weight();
+                if (prefix == "ttdil" || prefix == "ttotr") weight = weight * (fabs(genps_weight()) / genps_weight()) *pdf_weight;
                 //tau decay cosTheta* weighting
                 if (weighttaudecay && (prefix == "ttdil" || prefix == "ttotr")  && ntaus > 0) weight *= weight_taudecay;
                 for (size_t v = 0; v < cms2.davtxs_position().size(); ++v)

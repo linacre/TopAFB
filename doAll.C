@@ -1,5 +1,5 @@
 void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bool runmc = true, bool requireBTag=true, bool require2BTag=false, bool usePF = true, 
-	   bool doFRestimation = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = false, bool createBabyNtuples = true, bool doBFR = false)
+	   bool doFRestimation = false, bool sendOutputToLogFile = true, bool BTagAlgTCHE = false, bool createBabyNtuples = true, bool doBFR = false, bool applyPDFWeight = false)
 {
   //gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_v5.28.00.so");
   // gSystem->Load("/home/users/yanjuntu/MiniFWlib/libMiniFWLite_5.27.06b-cms10.so");
@@ -84,6 +84,7 @@ void doAll(TString outputDir="results", bool rundata=true, bool runsig=false, bo
   float kphoton15 = 1.;
 
     vector<TString> v_baseCuts;
+  //if(applyPDFWeight) v_baseCuts.push_back("applyPDFWeight");         // 
   //v_baseCuts.push_back("applyNoCuts");         // no cuts, set runskim=false too
   v_baseCuts.push_back("usePtGt2020");         // use leptons with pt > 20
   //v_baseCuts.push_back("applyTriggers");       // apply triggers
