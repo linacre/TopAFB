@@ -150,40 +150,30 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
         if (observable_gen < xmin) observable_gen = xmin;
         if (observable_gen > xmax) observable_gen = xmax;
 
+        if ( combineLepMinus )
+        {
+
+            if (observableMinus < xmin) observableMinus = xmin;
+            if (observableMinus > xmax) observableMinus = xmax;
+
+            if (observableMinus_gen < xmin) observableMinus_gen = xmin;
+            if (observableMinus_gen > xmax) observableMinus_gen = xmax;
+        }
+
+        double asym_centre = (xmax + xmin) / 2.;
+
         for (Int_t i = 0; i < entries; i++)
         {
             evtree->GetEntry(i);
             double orig_weight = weight;
             //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
-/*
-            if ( (Region == "Signal") && (ttmass > 450) )
-            {
-                fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
-                fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
-                fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-                if ( combineLepMinus )
-                {
-                    fillUnderOverFlow(hMeas_before, observableMinus, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_before, observableMinus_gen, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
-                }
-                if (TestType == "Linearity") weight = weight * (1.0 + slope * observable_gen);
-                fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
-                fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
-                if ( combineLepMinus )
-                {
-                    fillUnderOverFlow(hMeas_after, observableMinus, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_after, observableMinus_gen, weight, Nsolns);
-                }
 
-            }
-*/
             if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
             {
                 fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
                 fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
                 fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-                if (TestType == "Linearity") weight = weight * (1.0 + slope * observable_gen);
+                if (TestType == "Linearity") weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
                 fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
                 fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
 
@@ -199,12 +189,12 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
                     fillUnderOverFlow(hTrue_before, observableMinus_gen, weight, Nsolns);
                     fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
                 }
-                if (TestType == "Linearity") weight = weight * (1.0 + slope * observable_gen);
+                if (TestType == "Linearity") weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
                 fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
                 fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
                 if ( combineLepMinus )
                 {
-                    if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * observableMinus_gen);
+                    if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * (observableMinus_gen - asym_centre) );
                     fillUnderOverFlow(hMeas_after, observableMinus, weight, Nsolns);
                     fillUnderOverFlow(hTrue_after, observableMinus_gen, weight, Nsolns);
                 }
@@ -213,6 +203,10 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
         }
 
         RooUnfoldResponse response (hMeas_before, hTrue_before, hTrue_vs_Meas);
+
+        //scale to keep total yield constant
+        hMeas_after->Scale( hMeas_before->Integral() / hMeas_after->Integral() );
+        hTrue_after->Scale( hTrue_before->Integral() / hTrue_after->Integral() );
 
 
         TFile *accfile = new TFile("../acceptance/mcnlo/accept_" + acceptanceName + ".root");
