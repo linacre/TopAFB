@@ -329,7 +329,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull")
 
                 for (int j = 0; j < nbins1D; j++)
                 {
-                    double pull = (hUnfolded->GetBinContent(j + 1) - hTrue_after->GetBinContent(j + 1)) / hTrue_after->GetBinError(j + 1);
+                    double pull = (hUnfolded->GetBinContent(j + 1) - hTrue_after->GetBinContent(j + 1)) / hUnfolded->GetBinError(j + 1);
                     h_pulls[j]->Fill(pull);
                     double resd = (hUnfolded->GetBinContent(j + 1) - hTrue_after->GetBinContent(j + 1)) / hTrue_after->GetBinContent(j + 1);
                     h_resd[j]->Fill(resd);
