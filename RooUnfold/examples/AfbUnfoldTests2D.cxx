@@ -59,6 +59,12 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     random->SetSeed(5);
 
 
+    //initialise 1D binning to get xmin and xmax for the asym variable
+    Initialize1DBinning(iVar);
+
+    Float_t asym_centre = (xmax + xmin) / 2.;
+
+    //initialise 2D binning
     if (Var2D == "ttmass") Initialize2DBinning(iVar);
     else if (Var2D == "ttrapidity2") Initialize2DBinningttrapidity2(iVar);
     else if (Var2D == "ttpt") Initialize2DBinningttpt(iVar);
@@ -148,9 +154,6 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         evtree->SetBranchAddress("ttPt_gen", &obs2D_gen);
     }
 
-    obs2D = fabs(obs2D);
-    obs2D_gen = fabs(obs2D_gen);
-
 
     Float_t slope = 0.0;
     const int Nlin = 7;
@@ -164,6 +167,8 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     Float_t Aerr_unf2Dbin1[Nlin], Aerr_unf2Dbin2[Nlin], Aerr_unf2Dbin3[Nlin];
     Float_t A_gen2Dbin1[Nlin], A_gen2Dbin2[Nlin], A_gen2Dbin3[Nlin];
     Float_t Aerr_gen2Dbin1[Nlin], Aerr_gen2Dbin2[Nlin], Aerr_gen2Dbin3[Nlin];
+
+
 
     for (int k = 0; k < Nlin; k++)
     {
@@ -184,30 +189,14 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         Afb2DPullBin2->Reset();
         Afb2DPullBin3->Reset();
 
-
-        if (observable < xmin) observable = xmin;
-        if (observable > xmax) observable = xmax;
-
-        if (observable_gen < xmin) observable_gen = xmin;
-        if (observable_gen > xmax) observable_gen = xmax;
-
-        if ( combineLepMinus )
-        {
-
-            if (observableMinus < xmin) observableMinus = xmin;
-            if (observableMinus > xmax) observableMinus = xmax;
-
-            if (observableMinus_gen < xmin) observableMinus_gen = xmin;
-            if (observableMinus_gen > xmax) observableMinus_gen = xmax;
-        }
-
-        double asym_centre = (xmax + xmin) / 2.;
-
         for (Int_t i = 0; i < entries; i++)
         {
             evtree->GetEntry(i);
-            double orig_weight = weight;
+            Double_t orig_weight = weight;
             //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
+
+            obs2D = fabs(obs2D);
+            obs2D_gen = fabs(obs2D_gen);
 
             if ( tmass > 0  )
             {
