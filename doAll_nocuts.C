@@ -84,7 +84,7 @@ void doAll_nocuts(TString outputDir="results", bool rundata=false, bool runsig=f
   float kphoton15 = 1.;
 
     vector<TString> v_baseCuts;
-  //v_baseCuts.push_back("applyPDFWeight");         
+  if(applyPDFWeight) v_baseCuts.push_back("applyPDFWeight");         
   v_baseCuts.push_back("applyNoCuts");         // no cuts, set runskim=false too
   v_baseCuts.push_back("usePtGt2020");         // use leptons with pt > 20
   //v_baseCuts.push_back("applyTriggers");       // apply triggers
