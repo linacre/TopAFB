@@ -37,7 +37,7 @@ Int_t lineWidth = 5;
 
 
 // "Pull" or "Linearity"
-void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D = "ttmass")
+void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D = "mtt")
 {
 #ifdef __CINT__
     gSystem->Load("libRooUnfold");
@@ -65,7 +65,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     Float_t asym_centre = (xmax + xmin) / 2.;
 
     //initialise 2D binning
-    if (Var2D == "ttmass") Initialize2DBinning(iVar);
+    if (Var2D == "mtt") Initialize2DBinning(iVar);
     else if (Var2D == "ttrapidity2") Initialize2DBinningttrapidity2(iVar);
     else if (Var2D == "ttpt") Initialize2DBinningttpt(iVar);
 
@@ -138,7 +138,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     evtree->SetBranchAddress("Nsolns", &Nsolns);
     evtree->SetBranchAddress("t_mass", &tmass);
 
-    if (Var2D == "ttmass")
+    if (Var2D == "mtt")
     {
         evtree->SetBranchAddress("tt_mass", &obs2D);
         evtree->SetBranchAddress("tt_mass_gen", &obs2D_gen);
@@ -232,7 +232,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
         TFile *accfile = new TFile("../acceptance/mcnlo/accept_" + acceptanceName + ".root");
 
-        TH2D *acceptM_2d = (TH2D *) accfile->Get("accept_" + acceptanceName + "_ttrapidity2");
+        TH2D *acceptM_2d = (TH2D *) accfile->Get("accept_" + acceptanceName + "_" + Var2D);
 
         TH1D *acceptM = new TH1D ("accept", "accept",    nbins2D, xbins2D);
         acceptM->SetBinContent(1, acceptM_2d->GetBinContent(1, 3));
@@ -614,8 +614,6 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         AfbPull->GetYaxis()->SetTitle("Number of PEs / 0.2");
         AfbPull ->Fit("gaus");
         AfbPull ->Draw();
-        c_pull->SaveAs(acceptanceName + "_" + Var2D + "_Pull.pdf");
-        c_pull->SaveAs(acceptanceName + "_" + Var2D + "_Pull.C");
 
         c_pull->cd(2);
         Afb2DPullBin1->SetMarkerStyle(23);
