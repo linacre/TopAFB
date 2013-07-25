@@ -365,6 +365,10 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
                 vector<double> afbtrue2D;
                 vector<double> afbtrue2Derr;
                 GetAvsY(hTrue_after, m_unfoldE, afbtrue2D, afbtrue2Derr, second_output_file);
+                //true errors are much smaller (from denominator)
+                afbtrue2Derr[0] = 0.01;
+                afbtrue2Derr[1] = 0.01;
+                afbtrue2Derr[2] = 0.01;
 
                 AfbPull -> Fill( (Afb - A_gen[k])  / AfbErr );
                 Afb2DPullBin1->Fill( (afb2D[0] - afbtrue2D[0])  / afb2Derr[0] );

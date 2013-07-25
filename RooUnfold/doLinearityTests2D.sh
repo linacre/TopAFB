@@ -1,19 +1,19 @@
-root -q -b 'examples/AfbUnfoldTests2D.cxx(0,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(1,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(2,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(3,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(4,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(5,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(6,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(7,"Pull","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(0,"Linearity","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(1,"Linearity","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(2,"Linearity","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(3,"Linearity","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(4,"Linearity","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(5,"Linearity","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(6,"Linearity","ttmass")' &
-root -q -b 'examples/AfbUnfoldTests2D.cxx(7,"Linearity","ttmass")' 
+root -q -b 'examples/AfbUnfoldTests2D.cxx(0,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(1,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(2,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(3,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(4,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(5,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(6,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(7,"Pull","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(0,"Linearity","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(1,"Linearity","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(2,"Linearity","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(3,"Linearity","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(4,"Linearity","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(5,"Linearity","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(6,"Linearity","mtt")' &
+root -q -b 'examples/AfbUnfoldTests2D.cxx(7,"Linearity","mtt")' 
 root -q -b 'examples/AfbUnfoldTests2D.cxx(0,"Pull","ttpt")' &
 root -q -b 'examples/AfbUnfoldTests2D.cxx(1,"Pull","ttpt")' &
 root -q -b 'examples/AfbUnfoldTests2D.cxx(2,"Pull","ttpt")' &
