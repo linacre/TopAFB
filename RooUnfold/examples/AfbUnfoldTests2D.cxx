@@ -36,8 +36,10 @@ Int_t includeSys = 0;
 Int_t lineWidth = 5;
 
 
-// "Pull" or "Linearity"
-void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D = "mtt")
+//TestType: "Pull" or "Linearity"
+//Var2D: "mtt" or "ttrapidity2" or "ttpt"
+//slopeOption: 0 = continuous reweighting, 1 = 2-binned reweighting (i.e. sign(var))
+void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D = "mtt", Int_t slopeOption = 0)
 {
 #ifdef __CINT__
     gSystem->Load("libRooUnfold");
@@ -218,12 +220,14 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
                     fillUnderOverFlow(hTrue_before, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                     fillUnderOverFlow(hTrue_vs_Meas, sign(observableMinus - asym_centre)*obs2D, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 }
-                if (TestType == "Linearity") weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
+                if (TestType == "Linearity" && slopeOption != 0) weight = weight * (1.0 + 0.5 * slope * sign(observable_gen - asym_centre) );
+                if (TestType == "Linearity" && slopeOption == 0) weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
                 fillUnderOverFlow(hMeas_after, sign(observable - asym_centre)*obs2D, weight, Nsolns);
                 fillUnderOverFlow(hTrue_after, sign(observable_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 if ( combineLepMinus )
                 {
-                    if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * (observableMinus_gen - asym_centre) );
+                    if (TestType == "Linearity" && slopeOption != 0) weight = orig_weight * (1.0 + 0.5 * slope * sign(observableMinus_gen - asym_centre) );
+                    if (TestType == "Linearity" && slopeOption == 0) weight = orig_weight * (1.0 + slope * (observableMinus_gen - asym_centre) );
                     fillUnderOverFlow(hMeas_after, sign(observableMinus - asym_centre)*obs2D, weight, Nsolns);
                     fillUnderOverFlow(hTrue_after, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 }
