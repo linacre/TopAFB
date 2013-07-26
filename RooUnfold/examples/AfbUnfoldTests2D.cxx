@@ -80,11 +80,17 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     TH1D *hSmeared = new TH1D ("smeared", "Smeared", nbins2D, xbins2D);
     TH1D *hUnfolded = new TH1D ("unfolded", "Unfolded", nbins2D, xbins2D);
 
+    double pullMax = 5;
+    int pullBins = 50;
+    if (TestType == "Linearity") pullMax = 100;
+    if (TestType == "Linearity") pullBins = 1000;
 
-    TH1D *AfbPull = new TH1D("h_afbpull", "Pulls for Afb", 50, -5, 5);
-    TH1D *Afb2DPullBin1 = new TH1D("h_afb2DpullBin1", "Pulls for Afb 2D Bin1", 50, -5, 5);
-    TH1D *Afb2DPullBin2 = new TH1D("h_afb2DpullBin2", "Pulls for Afb 2D Bin2", 50, -5, 5);
-    TH1D *Afb2DPullBin3 = new TH1D("h_afb2DpullBin3", "Pulls for Afb 2D Bin3", 50, -5, 5);
+
+
+    TH1D *AfbPull = new TH1D("h_afbpull", "Pulls for Afb", pullBins, -pullMax, pullMax);
+    TH1D *Afb2DPullBin1 = new TH1D("h_afb2DpullBin1", "Pulls for Afb 2D Bin1", pullBins, -pullMax, pullMax);
+    TH1D *Afb2DPullBin2 = new TH1D("h_afb2DpullBin2", "Pulls for Afb 2D Bin2", pullBins, -pullMax, pullMax);
+    TH1D *Afb2DPullBin3 = new TH1D("h_afb2DpullBin3", "Pulls for Afb 2D Bin3", pullBins, -pullMax, pullMax);
 
     TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins2D, xbins2D, nbins2D, xbins2D);
 
@@ -111,7 +117,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     {
         TString name = "h_pull_";
         name += i;
-        h_pulls[i] = new TH1F(name, name, 100, -5.0, 5.0);
+        h_pulls[i] = new TH1F(name, name, 50, -5.0, 5.0);
         name = "h_resd_";
         name += i;
         h_resd[i] = new TH1F(name, name, 20, -1, 1);
