@@ -16,7 +16,7 @@ using std::endl;
 #include "AfbFinalUnfold.h"
 
 #include "tdrstyle.C"
-
+#include "../CommonFunctions.C"
 
 //==============================================================================
 // Global definitions
@@ -176,6 +176,9 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
 
 
+    TH1D *hTrue_after_array[Nlin];
+    TH1D *hMeas_after_array[Nlin];
+
     for (int k = 0; k < Nlin; k++)
     {
 
@@ -233,6 +236,9 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         //scale to keep total yield constant
         hMeas_after->Scale( hMeas_before->Integral() / hMeas_after->Integral() );
         hTrue_after->Scale( hTrue_before->Integral() / hTrue_after->Integral() );
+
+        hTrue_after_array[k] = (TH1D *) hTrue_after->Clone();
+        hMeas_after_array[k] = (TH1D *) hMeas_after->Clone();
 
 
 
@@ -372,9 +378,9 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
                 vector<double> afbtrue2Derr;
                 GetAvsY(hTrue_after, m_unfoldE, afbtrue2D, afbtrue2Derr, second_output_file);
                 //true errors are much smaller (from denominator)
-                afbtrue2Derr[0] = 0.01;
-                afbtrue2Derr[1] = 0.01;
-                afbtrue2Derr[2] = 0.01;
+                afbtrue2Derr[0] = 0.0;
+                afbtrue2Derr[1] = 0.0;
+                afbtrue2Derr[2] = 0.0;
 
                 AfbPull -> Fill( (Afb - A_gen[k])  / AfbErr );
                 Afb2DPullBin1->Fill( (afb2D[0] - afbtrue2D[0])  / afb2Derr[0] );
@@ -611,6 +617,91 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
         c_PullWidth_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_PullWidth.pdf");
         c_PullWidth_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_PullWidth.C");
+
+
+        gStyle->SetOptStat(0);
+        TCanvas *c_asymdist_lin = new TCanvas("c_asymdist_lin", "c_asymdist_lin", 1000, 500);
+        c_asymdist_lin->Divide(4, 2);
+        c_asymdist_lin->cd(1);
+        hTrue_before->SetLineColor(TColor::GetColorDark(kRed));
+        hTrue_before->SetLineWidth(1);
+        hTrue_before->SetFillStyle(0);
+        hTrue_before->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+        hTrue_before->GetYaxis()->SetTitle("Number of events");
+        hTrue_before->Draw("hist");
+        hMeas_before->SetLineColor(TColor::GetColorDark(kBlue));
+        hMeas_before->SetLineWidth(1);
+        hMeas_before->SetFillStyle(0);
+        hMeas_before->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+        hMeas_before->GetYaxis()->SetTitle("Number of events");
+        hMeas_before->Draw("hist same");
+
+        TLegend *leg1 = new TLegend(0.60, 0.75, 0.9, 0.93, NULL, "brNDC");
+        leg1->SetEntrySeparation(0.1);
+        leg1->SetFillColor(0);
+        leg1->SetLineColor(0);
+        leg1->SetBorderSize(0);
+        leg1->SetFillStyle(0);
+        leg1->SetTextSize(0.03);
+        leg1->AddEntry(hTrue_before,    "gen",  "L");
+        leg1->AddEntry(hMeas_before,    "reco", "L");
+        leg1->Draw();
+
+
+        for (int k = 0; k < Nlin; ++k)
+        {
+
+            c_asymdist_lin->cd(k + 2);
+            hTrue_after_array[k]->SetLineColor(TColor::GetColorDark(kRed));
+            hTrue_after_array[k]->SetLineWidth(1);
+            hTrue_after_array[k]->SetFillStyle(0);
+            hTrue_after_array[k]->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+            hTrue_after_array[k]->GetYaxis()->SetTitle("Number of events");
+            hTrue_after_array[k]->Draw("hist");
+            hMeas_after_array[k]->SetLineColor(TColor::GetColorDark(kBlue));
+            hMeas_after_array[k]->SetLineWidth(1);
+            hMeas_after_array[k]->SetFillStyle(0);
+            hMeas_after_array[k]->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+            hMeas_after_array[k]->GetYaxis()->SetTitle("Number of events");
+            hMeas_after_array[k]->Draw("hist same");
+
+            TPaveText *pt1 = new TPaveText(0.40, 0.76, 0.60, 0.91, "brNDC");
+            pt1->SetName("pt1name");
+            pt1->SetBorderSize(0);
+            pt1->SetFillStyle(0);
+
+            TText *blah;
+
+            Float_t Afb, AfbErr;
+            GetAfb(hTrue_after_array[k], Afb, AfbErr);
+
+            TString Asym1_temp = formatFloat(Afb, "%6.2f");
+            Asym1_temp.ReplaceAll(" " , "" );
+            Asym1_temp = TString(" Asym (gen): ") +  Asym1_temp;
+            blah = pt1->AddText(Asym1_temp.Data());
+            blah->SetTextSize(0.03);
+            blah->SetTextAlign(11);
+            blah->SetTextColor(TColor::GetColorDark(kRed));
+
+            GetAfb(hMeas_after_array[k], Afb, AfbErr);
+
+            TString Asym2_temp = formatFloat(Afb, "%6.2f");
+            Asym2_temp.ReplaceAll(" " , "" );
+            Asym2_temp = TString(" Asym (reco): ") +  Asym2_temp;
+            blah = pt1->AddText(Asym2_temp.Data());
+            blah->SetTextSize(0.03);
+            blah->SetTextAlign(11);
+            blah->SetTextColor(TColor::GetColorDark(kBlue));
+
+            pt1->Draw();
+
+        }
+
+        c_asymdist_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_AsymDists.pdf");
+        c_asymdist_lin->SaveAs(acceptanceName + "_" + Var2D + "_LinearityCheck_AsymDists.C");
+
+
+
     }
     else
     {
