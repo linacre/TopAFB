@@ -20,7 +20,7 @@ using std::endl;
 #include "TCut.h"
 #include "TText.h"
 #include "TPaveText.h"
-#include "tdrStyle.C"
+#include "RooUnfold/tdrstyle.C"
 
 #include "RooUnfold/examples/AfbFinalUnfold.h"
 
@@ -37,13 +37,13 @@ std::string formatFloat(double x, const char* formatS) {
 // Global definitions
 //==============================================================================
 
-const Double_t _topScalingFactor=9097.0/9344.0;
+const Double_t _topScalingFactor=1.+(9824. - 10063.47)/9323.84;
 
 
 void AfbRecoLevel2Dttpt()
 {
 
-  // setTDRStyle();
+  setTDRStyle();
   gStyle->SetOptFit();
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
@@ -166,10 +166,9 @@ void AfbRecoLevel2Dttpt()
     c_test->SetLeftMargin(0.2);
 
     hData->SetMinimum(0.0);
-    hData->SetMaximum( 2.0* hData->GetMaximum());
-    hData->GetXaxis()->SetTitle(xaxislabel);
-    hData->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
-    hData->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
+    hData->SetMaximum( 1.35* hData->GetMaximum());
+    hData->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+    hData->GetYaxis()->SetTitle("Events/(" + yaxislabel + " #times sign(" + xaxislabel + ") )");
     hData->GetYaxis()->SetTitleOffset(1.6);
     hData->SetLineWidth(lineWidth);
 
@@ -188,16 +187,16 @@ void AfbRecoLevel2Dttpt()
     hs->Add(hBkg);
     hs->Add(hTop);
     hs->SetMinimum(0.0);
-    hs->SetMaximum( 2.0* hs->GetMaximum());
+    hs->SetMaximum( 1.35* hs->GetMaximum());
     hs->Draw("hist");
-    hs->GetXaxis()->SetTitle(xaxislabel);
-    hs->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
-    hs->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
+    hs->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+    hs->GetYaxis()->SetTitle("Events/(" + yaxislabel + " #times sign(" + xaxislabel + ") )");
     hs->GetYaxis()->SetTitleOffset(1.6);
 
     hData->Draw("E same");
 
-    TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");
+    //TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");
+    TLegend* leg1=new TLegend(0.68, 0.75, 0.95, 0.93, NULL, "brNDC");
     leg1->SetFillStyle(0);
     leg1->SetEntrySeparation(100);  
     leg1->SetBorderSize(0);                                                                                 
@@ -207,18 +206,20 @@ void AfbRecoLevel2Dttpt()
     leg1->AddEntry(hBkg,  "Background");                                                               
     leg1->Draw();                
 
-    TPaveText *pt1 = new TPaveText(0.19, 0.82, 0.42, 0.86, "brNDC");
+    TPaveText *pt1 = new TPaveText(0.22, 0.88, 0.45, 0.91, "brNDC");
     pt1->SetName("pt1name");
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
 
     TText *blah;
-    blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at #sqrt{s}=7 TeV");
+    //blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at #sqrt{s}=7 TeV");
+    blah = pt1->AddText("CMS, 5.0 fb^{-1} at #sqrt{s}=7 TeV");
     blah->SetTextSize(0.035);
     blah->SetTextAlign(11);
 
     pt1->Draw();
     c_test->SaveAs("2D_ttpt_reco_"+acceptanceName+".pdf");
+    c_test->SaveAs("2D_ttpt_reco_"+acceptanceName+".C");
 
     delete hData;
     delete hBkg;
