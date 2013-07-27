@@ -58,23 +58,23 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   std::cout << "Opened " << Form("ttdil_h%sGen_allj_all", histname.Data()) << " and "<< Form("ttdil_h%sGen2d_allj_all", histname.Data()) <<"\n";
 
   Double_t pi = 3.141592653589793;
-  Double_t bins_lepChargeAsym[] =  { -4., -0.8, -0.4, 0., 0.4, 0.8, 4.}; 
+  Double_t bins_lepChargeAsym[] =  { -2., -0.8, -0.4, 0., 0.4, 0.8, 2.}; 
   Double_t bins_lepAzimAsym[] = {-1., -0.8, -0.4, 0., 0.4, 0.8, 1.}; 
   Double_t bins_lepAzimAsym2[] = {0., 4.*pi/20., 7.*pi/20., 10.*pi/20., 13.*pi/20., 16.*pi/20., pi}; 
   Double_t bins_topCosTheta[] = {-1., -0.7, -0.4, 0., 0.4, 0.7, 1.}; 
-  Double_t bins_pseudorapiditydiff[] =  { -4., -1.0, -0.5, 0., 0.5, 1.0, 4.}; 
-  Double_t bins_rapiditydiff[] =  { -4., -0.8, -0.3, 0., 0.3, 0.8, 4.}; 
-  Double_t bins_rapiditydiffMarco[] =  { -4., -0.7, -0.3, 0., 0.3, 0.7, 4.}; 
+  Double_t bins_pseudorapiditydiff[] =  { -2., -1.0, -0.5, 0., 0.5, 1.0, 2.}; 
+  Double_t bins_rapiditydiff[] =  { -2., -0.8, -0.3, 0., 0.3, 0.8, 2.}; 
+  Double_t bins_rapiditydiffMarco[] =  { -2., -0.7, -0.3, 0., 0.3, 0.7, 2.}; 
   Double_t bins_lepCosTheta[] = {-1., -0.6, -0.3, 0., 0.3, 0.6, 1.}; 
   Double_t bins_topSpinCorr[] = {-1., -0.5, -0.2, 0., 0.2, 0.5, 1.}; 
 
-  Double_t bins_lepChargeAsym_for2D[] =  { -4., 0., 4.};
+  Double_t bins_lepChargeAsym_for2D[] =  { -2., 0., 2.};
   Double_t bins_lepAzimAsym_for2D[] = {-1., 0., 1.};
   Double_t bins_lepAzimAsym2_for2D[] = {0., pi/2., pi};
   Double_t bins_topCosTheta_for2D[] = {-1., 0., 1.};
-  Double_t bins_pseudorapiditydiff_for2D[] =  { -4., 0., 4.};
-  Double_t bins_rapiditydiff_for2D[] =  { -4., 0., 4.};
-  Double_t bins_rapiditydiffMarco_for2D[] =  { -4., 0., 4.};
+  Double_t bins_pseudorapiditydiff_for2D[] =  { -2., 0., 2.};
+  Double_t bins_rapiditydiff_for2D[] =  { -2., 0., 2.};
+  Double_t bins_rapiditydiffMarco_for2D[] =  { -2., 0., 2.};
   Double_t bins_lepCosTheta_for2D[] = {-1., 0., 1.};
   Double_t bins_topSpinCorr_for2D[] = {-1., 0., 1.};
 
@@ -241,7 +241,8 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   pt1->SetFillStyle(0);
 
   TText *blah;
-  blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
+  //blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
+  blah = pt1->AddText("CMS, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
   blah->SetTextSize(0.032);
   blah->SetTextAlign(11);  
 
