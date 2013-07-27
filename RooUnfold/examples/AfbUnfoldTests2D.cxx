@@ -629,6 +629,8 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         c_asymdist_lin->cd(1);
         hTrue_before->SetLineColor(TColor::GetColorDark(kRed));
         hTrue_before->SetLineWidth(1);
+        hTrue_before->SetMinimum(0);
+        hTrue_before->SetMaximum(1.3 * hTrue_before->GetMaximum());
         hTrue_before->SetFillStyle(0);
         hTrue_before->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
         hTrue_before->GetYaxis()->SetTitle("Number of events");
@@ -640,7 +642,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         hMeas_before->GetYaxis()->SetTitle("Number of events");
         hMeas_before->Draw("hist same");
 
-        TLegend *leg1 = new TLegend(0.60, 0.75, 0.9, 0.93, NULL, "brNDC");
+        TLegend *leg1 = new TLegend(0.70, 0.76, 0.9, 0.93, NULL, "brNDC");
         leg1->SetEntrySeparation(0.1);
         leg1->SetFillColor(0);
         leg1->SetLineColor(0);
@@ -654,10 +656,13 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
         for (int k = 0; k < Nlin; ++k)
         {
-
+            slope = -0.3 + 0.1 * k;
+            TString slope_temp = formatFloat(slope, "%6.1f");
             c_asymdist_lin->cd(k + 2);
             hTrue_after_array[k]->SetLineColor(TColor::GetColorDark(kRed));
             hTrue_after_array[k]->SetLineWidth(1);
+            hTrue_after_array[k]->SetMinimum(0);
+            hTrue_after_array[k]->SetMaximum(1.3 * hTrue_after_array[k]->GetMaximum());
             hTrue_after_array[k]->SetFillStyle(0);
             hTrue_after_array[k]->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
             hTrue_after_array[k]->GetYaxis()->SetTitle("Number of events");
@@ -669,7 +674,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
             hMeas_after_array[k]->GetYaxis()->SetTitle("Number of events");
             hMeas_after_array[k]->Draw("hist same");
 
-            TPaveText *pt1 = new TPaveText(0.40, 0.76, 0.60, 0.91, "brNDC");
+            TPaveText *pt1 = new TPaveText(0.65, 0.76, 0.90, 0.93, "brNDC");
             pt1->SetName("pt1name");
             pt1->SetBorderSize(0);
             pt1->SetFillStyle(0);
