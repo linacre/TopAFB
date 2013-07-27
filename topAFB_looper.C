@@ -789,9 +789,9 @@ topAFB_looper::topAFB_looper()
     jptL2L3ResidualCorr = NULL;
     pfL2L3ResidualCorr = NULL;
     d_llsol = new ttdilepsolve;
-    LHAPDF::setPDFPath("../CORE/topmass/pdfs");
-    LHAPDF::initPDFSetM(genset_, "cteq6mE.LHgrid");
-    LHAPDF::initPDFM(genset_, 0);
+    //LHAPDF::setPDFPath("../CORE/topmass/pdfs");
+    //LHAPDF::initPDFSetM(genset_, "cteq6mE.LHgrid");
+    //LHAPDF::initPDFM(genset_, 0);
 }
 
 
@@ -3219,7 +3219,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     float top_costheta_cms_gen;
                     float lep_charge_asymmetry_gen;
                     float lep_azimuthal_asymmetry_gen;
-                    float lep_azimuthal_asymmetry_gen2;
+                    float lep_azimuthal_asymmetry2_gen;
                     float top_spin_correlation_gen;
                     float lepPlus_costheta_cms_gen;
                     float lepMinus_costheta_cms_gen;
@@ -3343,7 +3343,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         lep_charge_asymmetry_gen = abs(lepPlus_gen.Eta()) - abs(lepMinus_gen.Eta());
                         lep_azimuthal_asymmetry_gen = cos(lepPlus_gen.DeltaPhi(lepMinus_gen));
-                        lep_azimuthal_asymmetry_gen2 = acos(lep_azimuthal_asymmetry_gen);
+                        lep_azimuthal_asymmetry2_gen = acos(lep_azimuthal_asymmetry_gen);
 
                         lepPlus_gen.Boost(-cms_gen.BoostVector());
                         lepPlus_gen.Boost(-topplus_genp_p4.BoostVector());
@@ -3545,7 +3545,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         ttRapidity_gen_ = ttRapidity_gen;
                         lep_charge_asymmetry_gen_ = lep_charge_asymmetry_gen;
                         lep_azimuthal_asymmetry_gen_ = lep_azimuthal_asymmetry_gen;
-                        lep_azimuthal_asymmetry_gen2_ = lep_azimuthal_asymmetry_gen2;
+                        lep_azimuthal_asymmetry2_gen_ = lep_azimuthal_asymmetry2_gen;
                         top_spin_correlation_gen_ = top_spin_correlation_gen;
                         top_costheta_cms_gen_     = top_costheta_cms_gen;
                         lepPlus_costheta_cms_gen_ = lepPlus_costheta_cms_gen;
@@ -3619,7 +3619,7 @@ void topAFB_looper::InitBabyNtuple ()
     ttRapidity_gen_ = -999.0;
     lep_charge_asymmetry_gen_ = -999.0;
     lep_azimuthal_asymmetry_gen_ = -999.0;
-    lep_azimuthal_asymmetry_gen2_ = -999.0;
+    lep_azimuthal_asymmetry2_gen_ = -999.0;
     top_spin_correlation_gen_ = -999.0;
     top_costheta_cms_gen_     = -999.0;
     lepPlus_costheta_cms_gen_ = -999.0;
@@ -3676,7 +3676,7 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("ttRapidity_gen",            &ttRapidity_gen_,          "ttRapidity_gen/F"            );
     babyTree_->Branch("lep_charge_asymmetry_gen",  &lep_charge_asymmetry_gen_, "lep_charge_asymmetry_gen_/F" );
     babyTree_->Branch("lep_azimuthal_asymmetry_gen",    &lep_azimuthal_asymmetry_gen_,  "lep_azimuthal_asymmetry_gen_/F"   );
-    babyTree_->Branch("lep_azimuthal_asymmetry_gen2",    &lep_azimuthal_asymmetry_gen2_,  "lep_azimuthal_asymmetry_gen2_/F"   );
+    babyTree_->Branch("lep_azimuthal_asymmetry2_gen",    &lep_azimuthal_asymmetry2_gen_,  "lep_azimuthal_asymmetry2_gen_/F"   );
     babyTree_->Branch("top_spin_correlation_gen",  &top_spin_correlation_gen_, "top_spin_correlation_gen/F"  );
     babyTree_->Branch("top_costheta_cms_gen",      &top_costheta_cms_gen_,    "top_costheta_cms_gen/F"      );
     babyTree_->Branch("lep_costheta_cms_gen",      &lepPlus_costheta_cms_gen_, "lep_costheta_cms_gen/F"      );
