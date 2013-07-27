@@ -162,7 +162,7 @@ bool drawDiffs = true, float lumi=1.0, int rebin=1, bool allhypOnly = false) {
           htemp->GetYaxis()->SetTitle(ytitle.c_str());	  
 
         }
-        string ytitle = "Events";
+        string ytitle = "Events/bin";
         htemp->GetYaxis()->SetTitle(ytitle.c_str());
         htemp->GetYaxis()->SetTitleOffset(1.5);
         htemp->GetXaxis()->SetTitleSize(0.045);
@@ -478,7 +478,7 @@ bool drawDiffs = true, float lumi=1.0, int rebin=1, bool allhypOnly = false) {
         else
           c->Print((tempstring + ".pdf)").Data());
 
-        c->Print(("results/" + plot + ".png").Data());
+        c->Print(("results/" + plot + ".pdf").Data());
 
       }//histos loop
 
@@ -666,16 +666,16 @@ TPaveText *getPaveText(const vector<TH1D*> &v_hists, int i_channel, float lumi, 
 
 
   TText *blah;
-  if(drawFullErrors)
-    blah = pt1->AddText("CMS");
-  else
-    blah = pt1->AddText("CMS Preliminary");
-    //blah = pt1->AddText("");
-  blah->SetTextSize(0.036);
-  blah->SetTextAlign(11);  
+  //if(drawFullErrors)
+  //  blah = pt1->AddText("CMS");
+  //else
+  //  blah = pt1->AddText("CMS Preliminary");
+  //  //blah = pt1->AddText("");
+  //blah->SetTextSize(0.036);
+  //blah->SetTextAlign(11);  
   TString temp = formatFloat(lumi,"%6.1f");
   temp.ReplaceAll(" " , "" );
-  temp = temp + TString(" fb^{-1} at   #sqrt{s}=7 TeV");
+  temp = TString("CMS, ") + temp + TString(" fb^{-1} at   #sqrt{s}=7 TeV");
   blah = pt1->AddText(temp.Data());
   blah->SetTextSize(0.036);       
   blah->SetTextAlign(11);
