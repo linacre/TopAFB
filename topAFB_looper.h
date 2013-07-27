@@ -170,7 +170,7 @@ class topAFB_looper
 	float ttPt_gen_ ;
 	float lep_charge_asymmetry_gen_ ;
 	float lep_azimuthal_asymmetry_gen_ ;
-	float lep_azimuthal_asymmetry_gen2_ ;
+	float lep_azimuthal_asymmetry2_gen_ ;
 	float top_spin_correlation_gen_ ;
 	float  top_costheta_cms_gen_    ;
 	float lepPlus_costheta_cms_gen_ ;

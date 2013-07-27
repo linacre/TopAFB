@@ -247,7 +247,6 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
 
         ch_top->SetBranchAddress(observablename,    &observable);
         ch_top->SetBranchAddress(observablename + "_gen", &observable_gen);
-        if (observablename == "lep_azimuthal_asymmetry2") ch_top->SetBranchAddress("lep_azimuthal_asymmetry_gen2", &observable_gen);
         if ( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
         if ( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms_gen",    &observableMinus_gen);
         ch_top->SetBranchAddress("weight", &weight);
