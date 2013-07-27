@@ -125,7 +125,7 @@ void doAll_nocuts(TString outputDir="results", bool rundata=false, bool runsig=f
   // activate to reweight events according to top pt
   // or alterniative scenarios
   //
-  // v_baseCuts.push_back("applyTopPtWeighting");
+  v_baseCuts.push_back("applyTopPtWeighting");
   // v_baseCuts.push_back("applyLeptonPtWeighting");
   // v_baseCuts.push_back("applyJetPtWeighting");
   //
