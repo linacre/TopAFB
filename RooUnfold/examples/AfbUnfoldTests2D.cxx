@@ -657,20 +657,22 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         for (int k = 0; k < Nlin; ++k)
         {
             slope = -0.3 + 0.1 * k;
+            if (fabs(slope) < 0.001) slope = 0;
             TString slope_temp = formatFloat(slope, "%6.1f");
+            slope_temp.ReplaceAll(" " , "" );
             c_asymdist_lin->cd(k + 2);
             hTrue_after_array[k]->SetLineColor(TColor::GetColorDark(kRed));
             hTrue_after_array[k]->SetLineWidth(1);
             hTrue_after_array[k]->SetMinimum(0);
             hTrue_after_array[k]->SetMaximum(1.3 * hTrue_after_array[k]->GetMaximum());
             hTrue_after_array[k]->SetFillStyle(0);
-            hTrue_after_array[k]->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+            hTrue_after_array[k]->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + "), slope = " + slope_temp);
             hTrue_after_array[k]->GetYaxis()->SetTitle("Number of events");
             hTrue_after_array[k]->Draw("hist");
             hMeas_after_array[k]->SetLineColor(TColor::GetColorDark(kBlue));
             hMeas_after_array[k]->SetLineWidth(1);
             hMeas_after_array[k]->SetFillStyle(0);
-            hMeas_after_array[k]->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + ")");
+            hMeas_after_array[k]->GetXaxis()->SetTitle(yaxislabel + " #times sign(" + xaxislabel + "), slope = " + slope_temp);
             hMeas_after_array[k]->GetYaxis()->SetTitle("Number of events");
             hMeas_after_array[k]->Draw("hist same");
 
