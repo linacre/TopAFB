@@ -36,6 +36,7 @@ Int_t nPseudos = 10000;
 Int_t includeSys = 0;
 
 Int_t lineWidth = 5;
+bool plot_inclusive_only = true;
 
 
 
@@ -600,8 +601,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
 
         TCanvas *c_ttbar = new TCanvas("c_ttbar", "c_ttbar", 500, 500);
-        c_ttbar->Divide(2, 2);
-        c_ttbar->cd(1);
+        if (!plot_inclusive_only) c_ttbar->Divide(2, 2);
+        if (!plot_inclusive_only) c_ttbar->cd(1);
         Asym2D_TrueUnf->SetTitle(asymlabel);
         Asym2D_TrueUnf->SetMarkerStyle(23);
         Asym2D_TrueUnf->SetMarkerColor(kBlack);
@@ -611,35 +612,38 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Asym2D_TrueUnf->Draw("AP same");
         Asym2D_TrueUnf->Fit("pol1");
 
-        c_ttbar->cd(2);
-        Asym2D_TrueUnfbin1->SetTitle(asymlabel);
-        Asym2D_TrueUnfbin1->SetMarkerStyle(23);
-        Asym2D_TrueUnfbin1->SetMarkerColor(kBlue);
-        Asym2D_TrueUnfbin1->SetMarkerSize(0.6);
-        Asym2D_TrueUnfbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
-        Asym2D_TrueUnfbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair (unfolded)");
-        Asym2D_TrueUnfbin1->Draw("AP same");
-        Asym2D_TrueUnfbin1->Fit("pol1");
+        if (!plot_inclusive_only)
+        {
+            c_ttbar->cd(2);
+            Asym2D_TrueUnfbin1->SetTitle(asymlabel);
+            Asym2D_TrueUnfbin1->SetMarkerStyle(23);
+            Asym2D_TrueUnfbin1->SetMarkerColor(kBlue);
+            Asym2D_TrueUnfbin1->SetMarkerSize(0.6);
+            Asym2D_TrueUnfbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
+            Asym2D_TrueUnfbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair (unfolded)");
+            Asym2D_TrueUnfbin1->Draw("AP same");
+            Asym2D_TrueUnfbin1->Fit("pol1");
 
-        c_ttbar->cd(3);
-        Asym2D_TrueUnfbin2->SetTitle(asymlabel);
-        Asym2D_TrueUnfbin2->SetMarkerStyle(23);
-        Asym2D_TrueUnfbin2->SetMarkerColor(kBlue);
-        Asym2D_TrueUnfbin2->SetMarkerSize(0.6);
-        Asym2D_TrueUnfbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
-        Asym2D_TrueUnfbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair (unfolded)");
-        Asym2D_TrueUnfbin2->Draw("AP same");
-        Asym2D_TrueUnfbin2->Fit("pol1");
+            c_ttbar->cd(3);
+            Asym2D_TrueUnfbin2->SetTitle(asymlabel);
+            Asym2D_TrueUnfbin2->SetMarkerStyle(23);
+            Asym2D_TrueUnfbin2->SetMarkerColor(kBlue);
+            Asym2D_TrueUnfbin2->SetMarkerSize(0.6);
+            Asym2D_TrueUnfbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
+            Asym2D_TrueUnfbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair (unfolded)");
+            Asym2D_TrueUnfbin2->Draw("AP same");
+            Asym2D_TrueUnfbin2->Fit("pol1");
 
-        c_ttbar->cd(4);
-        Asym2D_TrueUnfbin3->SetTitle(asymlabel);
-        Asym2D_TrueUnfbin3->SetMarkerStyle(23);
-        Asym2D_TrueUnfbin3->SetMarkerColor(kBlue);
-        Asym2D_TrueUnfbin3->SetMarkerSize(0.6);
-        Asym2D_TrueUnfbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
-        Asym2D_TrueUnfbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair (unfolded)");
-        Asym2D_TrueUnfbin3->Draw("AP same");
-        Asym2D_TrueUnfbin3->Fit("pol1");
+            c_ttbar->cd(4);
+            Asym2D_TrueUnfbin3->SetTitle(asymlabel);
+            Asym2D_TrueUnfbin3->SetMarkerStyle(23);
+            Asym2D_TrueUnfbin3->SetMarkerColor(kBlue);
+            Asym2D_TrueUnfbin3->SetMarkerSize(0.6);
+            Asym2D_TrueUnfbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
+            Asym2D_TrueUnfbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair (unfolded)");
+            Asym2D_TrueUnfbin3->Draw("AP same");
+            Asym2D_TrueUnfbin3->Fit("pol1");
+        }
 
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.pdf");
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.C");
@@ -647,8 +651,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
 
         TCanvas *c_Pull_lin = new TCanvas("c_Pull_lin", "c_Pull_lin", 500, 500);
-        c_Pull_lin->Divide(2, 2);
-        c_Pull_lin->cd(1);
+        if (!plot_inclusive_only) c_Pull_lin->Divide(2, 2);
+        if (!plot_inclusive_only) c_Pull_lin->cd(1);
         Asym2D_Pull->SetTitle(asymlabel);
         Asym2D_Pull->SetMarkerStyle(23);
         Asym2D_Pull->SetMarkerColor(kBlack);
@@ -658,35 +662,38 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Asym2D_Pull->Draw("AP same");
         Asym2D_Pull->Fit("pol1");
 
-        c_Pull_lin->cd(2);
-        Asym2D_Pullbin1->SetTitle(asymlabel);
-        Asym2D_Pullbin1->SetMarkerStyle(23);
-        Asym2D_Pullbin1->SetMarkerColor(kBlue);
-        Asym2D_Pullbin1->SetMarkerSize(0.6);
-        Asym2D_Pullbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
-        Asym2D_Pullbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair pull");
-        Asym2D_Pullbin1->Draw("AP same");
-        Asym2D_Pullbin1->Fit("pol1");
+        if (!plot_inclusive_only)
+        {
+            c_Pull_lin->cd(2);
+            Asym2D_Pullbin1->SetTitle(asymlabel);
+            Asym2D_Pullbin1->SetMarkerStyle(23);
+            Asym2D_Pullbin1->SetMarkerColor(kBlue);
+            Asym2D_Pullbin1->SetMarkerSize(0.6);
+            Asym2D_Pullbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
+            Asym2D_Pullbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair pull");
+            Asym2D_Pullbin1->Draw("AP same");
+            Asym2D_Pullbin1->Fit("pol1");
 
-        c_Pull_lin->cd(3);
-        Asym2D_Pullbin2->SetTitle(asymlabel);
-        Asym2D_Pullbin2->SetMarkerStyle(23);
-        Asym2D_Pullbin2->SetMarkerColor(kBlue);
-        Asym2D_Pullbin2->SetMarkerSize(0.6);
-        Asym2D_Pullbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
-        Asym2D_Pullbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair pull");
-        Asym2D_Pullbin2->Draw("AP same");
-        Asym2D_Pullbin2->Fit("pol1");
+            c_Pull_lin->cd(3);
+            Asym2D_Pullbin2->SetTitle(asymlabel);
+            Asym2D_Pullbin2->SetMarkerStyle(23);
+            Asym2D_Pullbin2->SetMarkerColor(kBlue);
+            Asym2D_Pullbin2->SetMarkerSize(0.6);
+            Asym2D_Pullbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
+            Asym2D_Pullbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair pull");
+            Asym2D_Pullbin2->Draw("AP same");
+            Asym2D_Pullbin2->Fit("pol1");
 
-        c_Pull_lin->cd(4);
-        Asym2D_Pullbin3->SetTitle(asymlabel);
-        Asym2D_Pullbin3->SetMarkerStyle(23);
-        Asym2D_Pullbin3->SetMarkerColor(kBlue);
-        Asym2D_Pullbin3->SetMarkerSize(0.6);
-        Asym2D_Pullbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
-        Asym2D_Pullbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair pull");
-        Asym2D_Pullbin3->Draw("AP same");
-        Asym2D_Pullbin3->Fit("pol1");
+            c_Pull_lin->cd(4);
+            Asym2D_Pullbin3->SetTitle(asymlabel);
+            Asym2D_Pullbin3->SetMarkerStyle(23);
+            Asym2D_Pullbin3->SetMarkerColor(kBlue);
+            Asym2D_Pullbin3->SetMarkerSize(0.6);
+            Asym2D_Pullbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
+            Asym2D_Pullbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair pull");
+            Asym2D_Pullbin3->Draw("AP same");
+            Asym2D_Pullbin3->Fit("pol1");
+        }
 
         c_Pull_lin->SaveAs(acceptanceName + "_LinearityCheck_Pull.pdf");
         c_Pull_lin->SaveAs(acceptanceName + "_LinearityCheck_Pull.C");
@@ -695,8 +702,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
 
         TCanvas *c_PullWidth_lin = new TCanvas("c_PullWidth_lin", "c_PullWidth_lin", 500, 500);
-        c_PullWidth_lin->Divide(2, 2);
-        c_PullWidth_lin->cd(1);
+        if (!plot_inclusive_only) c_PullWidth_lin->Divide(2, 2);
+        if (!plot_inclusive_only) c_PullWidth_lin->cd(1);
         Asym2D_PullWidth->SetTitle(asymlabel);
         Asym2D_PullWidth->SetMarkerStyle(23);
         Asym2D_PullWidth->SetMarkerColor(kBlack);
@@ -706,35 +713,38 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Asym2D_PullWidth->Draw("AP same");
         Asym2D_PullWidth->Fit("pol1");
 
-        c_PullWidth_lin->cd(2);
-        Asym2D_PullWidthbin1->SetTitle(asymlabel);
-        Asym2D_PullWidthbin1->SetMarkerStyle(23);
-        Asym2D_PullWidthbin1->SetMarkerColor(kBlue);
-        Asym2D_PullWidthbin1->SetMarkerSize(0.6);
-        Asym2D_PullWidthbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
-        Asym2D_PullWidthbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair pull width");
-        Asym2D_PullWidthbin1->Draw("AP same");
-        Asym2D_PullWidthbin1->Fit("pol1");
+        if (!plot_inclusive_only)
+        {
+            c_PullWidth_lin->cd(2);
+            Asym2D_PullWidthbin1->SetTitle(asymlabel);
+            Asym2D_PullWidthbin1->SetMarkerStyle(23);
+            Asym2D_PullWidthbin1->SetMarkerColor(kBlue);
+            Asym2D_PullWidthbin1->SetMarkerSize(0.6);
+            Asym2D_PullWidthbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
+            Asym2D_PullWidthbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair pull width");
+            Asym2D_PullWidthbin1->Draw("AP same");
+            Asym2D_PullWidthbin1->Fit("pol1");
 
-        c_PullWidth_lin->cd(3);
-        Asym2D_PullWidthbin2->SetTitle(asymlabel);
-        Asym2D_PullWidthbin2->SetMarkerStyle(23);
-        Asym2D_PullWidthbin2->SetMarkerColor(kBlue);
-        Asym2D_PullWidthbin2->SetMarkerSize(0.6);
-        Asym2D_PullWidthbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
-        Asym2D_PullWidthbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair pull width");
-        Asym2D_PullWidthbin2->Draw("AP same");
-        Asym2D_PullWidthbin2->Fit("pol1");
+            c_PullWidth_lin->cd(3);
+            Asym2D_PullWidthbin2->SetTitle(asymlabel);
+            Asym2D_PullWidthbin2->SetMarkerStyle(23);
+            Asym2D_PullWidthbin2->SetMarkerColor(kBlue);
+            Asym2D_PullWidthbin2->SetMarkerSize(0.6);
+            Asym2D_PullWidthbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
+            Asym2D_PullWidthbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair pull width");
+            Asym2D_PullWidthbin2->Draw("AP same");
+            Asym2D_PullWidthbin2->Fit("pol1");
 
-        c_PullWidth_lin->cd(4);
-        Asym2D_PullWidthbin3->SetTitle(asymlabel);
-        Asym2D_PullWidthbin3->SetMarkerStyle(23);
-        Asym2D_PullWidthbin3->SetMarkerColor(kBlue);
-        Asym2D_PullWidthbin3->SetMarkerSize(0.6);
-        Asym2D_PullWidthbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
-        Asym2D_PullWidthbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair pull width");
-        Asym2D_PullWidthbin3->Draw("AP same");
-        Asym2D_PullWidthbin3->Fit("pol1");
+            c_PullWidth_lin->cd(4);
+            Asym2D_PullWidthbin3->SetTitle(asymlabel);
+            Asym2D_PullWidthbin3->SetMarkerStyle(23);
+            Asym2D_PullWidthbin3->SetMarkerColor(kBlue);
+            Asym2D_PullWidthbin3->SetMarkerSize(0.6);
+            Asym2D_PullWidthbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
+            Asym2D_PullWidthbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair pull width");
+            Asym2D_PullWidthbin3->Draw("AP same");
+            Asym2D_PullWidthbin3->Fit("pol1");
+        }
 
         c_PullWidth_lin->SaveAs(acceptanceName + "_LinearityCheck_PullWidth.pdf");
         c_PullWidth_lin->SaveAs(acceptanceName + "_LinearityCheck_PullWidth.C");
@@ -835,8 +845,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
 
         TCanvas *c_pull = new TCanvas("c_pull", "c_pull", 500, 500);
-        c_pull->Divide(2, 2);
-        c_pull->cd(1);
+        if (!plot_inclusive_only) c_pull->Divide(2, 2);
+        if (!plot_inclusive_only) c_pull->cd(1);
         AfbPull[0]->SetMarkerStyle(23);
         AfbPull[0]->SetMarkerColor(kBlack);
         AfbPull[0]->SetMarkerSize(0.6);
@@ -845,32 +855,35 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         AfbPull[0] ->Fit("gaus");
         AfbPull[0] ->Draw();
 
-        c_pull->cd(2);
-        AfbPull[1]->SetMarkerStyle(23);
-        AfbPull[1]->SetMarkerColor(kBlue);
-        AfbPull[1]->SetMarkerSize(0.6);
-        AfbPull[1]->GetXaxis()->SetTitle(asymlabel + " end bin pair pull");
-        AfbPull[1]->GetYaxis()->SetTitle("Number of PEs / 0.2");
-        AfbPull[1] ->Fit("gaus");
-        AfbPull[1] ->Draw();
+        if (!plot_inclusive_only)
+        {
+            c_pull->cd(2);
+            AfbPull[1]->SetMarkerStyle(23);
+            AfbPull[1]->SetMarkerColor(kBlue);
+            AfbPull[1]->SetMarkerSize(0.6);
+            AfbPull[1]->GetXaxis()->SetTitle(asymlabel + " end bin pair pull");
+            AfbPull[1]->GetYaxis()->SetTitle("Number of PEs / 0.2");
+            AfbPull[1] ->Fit("gaus");
+            AfbPull[1] ->Draw();
 
-        c_pull->cd(3);
-        AfbPull[2]->SetMarkerStyle(23);
-        AfbPull[2]->SetMarkerColor(kBlue);
-        AfbPull[2]->SetMarkerSize(0.6);
-        AfbPull[2]->GetXaxis()->SetTitle(asymlabel + " middle bin pair pull");
-        AfbPull[2]->GetYaxis()->SetTitle("Number of PEs / 0.2");
-        AfbPull[2] ->Fit("gaus");
-        AfbPull[2] ->Draw();
+            c_pull->cd(3);
+            AfbPull[2]->SetMarkerStyle(23);
+            AfbPull[2]->SetMarkerColor(kBlue);
+            AfbPull[2]->SetMarkerSize(0.6);
+            AfbPull[2]->GetXaxis()->SetTitle(asymlabel + " middle bin pair pull");
+            AfbPull[2]->GetYaxis()->SetTitle("Number of PEs / 0.2");
+            AfbPull[2] ->Fit("gaus");
+            AfbPull[2] ->Draw();
 
-        c_pull->cd(4);
-        AfbPull[3]->SetMarkerStyle(23);
-        AfbPull[3]->SetMarkerColor(kBlue);
-        AfbPull[3]->SetMarkerSize(0.6);
-        AfbPull[3]->GetXaxis()->SetTitle(asymlabel + " central bin pair pull");
-        AfbPull[3]->GetYaxis()->SetTitle("Number of PEs / 0.2");
-        AfbPull[3] ->Fit("gaus");
-        AfbPull[3] ->Draw();
+            c_pull->cd(4);
+            AfbPull[3]->SetMarkerStyle(23);
+            AfbPull[3]->SetMarkerColor(kBlue);
+            AfbPull[3]->SetMarkerSize(0.6);
+            AfbPull[3]->GetXaxis()->SetTitle(asymlabel + " central bin pair pull");
+            AfbPull[3]->GetYaxis()->SetTitle("Number of PEs / 0.2");
+            AfbPull[3] ->Fit("gaus");
+            AfbPull[3] ->Draw();
+        }
 
         c_pull->SaveAs(acceptanceName + "_Pull.pdf");
         c_pull->SaveAs(acceptanceName + "_Pull.C");
