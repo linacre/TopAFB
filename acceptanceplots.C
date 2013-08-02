@@ -19,6 +19,7 @@ using namespace std;
 TH1D* hnumerator;
 TH1D* hdenominator;
 TH1D* hacceptance;
+TH1D* hacceptance_copy;
 
 TH2D* hnumerator2d_mtt;
 TH2D* hdenominator2d_mtt;
@@ -37,6 +38,33 @@ TH2D* hdenominator2d_ttrapidity2;
 TH2D* hnumerator2drebinned_ttrapidity2;
 TH2D* hdenominator2drebinned_ttrapidity2;
 TH2D* hacceptance2drebinned_ttrapidity2;
+
+
+void GetAfb(TH1D* h, Double_t &afb, Double_t  &afberr){
+ 
+  Int_t nbins = h->GetNbinsX();
+  Float_t event_minus;
+  Float_t event_plus;
+  Float_t event_total;
+  Double_t event_plus_err;
+  Double_t event_minus_err;
+
+  //event_minus  = h-> IntegralAndError(0, nbins/2, event_plus_err,"");
+  event_minus  = h-> IntegralAndError(0, nbins/2, event_minus_err,"width");
+  //event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_minus_err,"");
+  event_plus   = h-> IntegralAndError(nbins/2+1, nbins+1, event_plus_err,"width");
+  event_total = event_plus + event_minus;
+  
+  //cout<<event_minus<<" "<<event_minus_err<<" "<<event_plus<<" "<<event_plus_err<<" "<<event_total<<endl;
+
+  afb = (event_plus-event_minus)/(event_plus+event_minus);
+  afberr   = sqrt(4*(event_plus*event_plus*event_minus_err*event_minus_err 
+         + event_minus*event_minus*event_plus_err*event_plus_err)/
+      (event_total*event_total*event_total*event_total));
+
+}
+
+
 
 void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TString FName1 = "results/hist_usePtGt2020_hypDisamb_usepfMET_usepfJets_useOS_vetoHypMassLt12_requireBTag_sortJetCandidatesbyPt_generalLeptonVeto_createBabyNtuples_applylepIDCuts_applylepIsoCuts_vetoZmass_veto2Jets_vetoMET.root", TString FName2 = "results/hist_noCuts.root"){
   setTDRStyle();
@@ -217,16 +245,54 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
     hacceptance->GetXaxis()->SetTitle(" |#eta_{l^{+}}| - |#eta_{l^{-}}| ");
   }
 
+  double Asym1,Asym2,Asym3;
+  double Asym1err,Asym2err,Asym3err;
+  
+  hacceptance_copy = new TH1D("hac","hac",6, bins);
+  TAxis *xaxis_ = hacceptance->GetXaxis();
+  for (int i=1;i<=xaxis_->GetNbins();i++) {
+    hacceptance_copy->Fill(xaxis_->GetBinCenter(i), hacceptance->GetBinContent(i));
+  }
+
+  
+
   if(!drawnorm){
     hacceptance->Draw("hist TEXT00E");
   }
   else{
-    hacceptance->DrawNormalized("hist");
-    hnumerator->DrawNormalized("histsame");
-    hdenominator->DrawNormalized("histsame");
+
+    hacceptance_copy->Scale(1./hacceptance_copy->Integral("width"));
+    hnumerator->Scale(1./hnumerator->Integral(),"width");
+    hdenominator->Scale(1./hdenominator->Integral(),"width");
+
+    double max = 0.;
+    if(hacceptance_copy->GetMaximum() > max) max = hacceptance_copy->GetMaximum();
+    if(hnumerator->GetMaximum() > max) max = hnumerator->GetMaximum();
+    if(hdenominator->GetMaximum() > max) max = hdenominator->GetMaximum();
+
+    double min = 9999.;
+    if(hacceptance_copy->GetMinimum() < min) min = hacceptance_copy->GetMinimum();
+    if(hnumerator->GetMinimum() < min) min = hnumerator->GetMinimum();
+    if(hdenominator->GetMinimum() < min) min = hdenominator->GetMinimum();
+    min -= max*0.2;
+    if(min < 0.2 * max ) min = 0.;
+
+    max*=1.2;
+
+    TH1 *frame=new TH1F("frame","",1000,bins[0],bins[6]);frame->SetMaximum(max);frame->SetMinimum(min);frame->Draw();
+    frame->GetXaxis()->SetTitle( hacceptance->GetXaxis()->GetTitle() );
+    frame->GetYaxis()->SetTitle( "Normalized to unit area");
+
+    GetAfb(hacceptance_copy,Asym1, Asym1err);
+    GetAfb(hnumerator,Asym2, Asym2err);
+    GetAfb(hdenominator,Asym3, Asym3err);
+
+    hacceptance_copy->Draw("histsame");
+    hnumerator->Draw("histsame");
+    hdenominator->Draw("histsame");
   }
 
-  TLegend *leg = new TLegend(0.74,0.86,0.90,0.92);
+  TLegend *leg = new TLegend(0.74,0.84,0.90,0.92);
   leg->SetFillStyle(0);
   leg->SetLineColor(0);
   leg->SetTextSize(0.032);
@@ -234,8 +300,10 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   leg->AddEntry(hacceptance, "acceptance","l");
   if(drawnorm) leg->AddEntry(hnumerator, "numerator","l");
   if(drawnorm) leg->AddEntry(hdenominator, "denominator","l");
+  if(drawnorm) leg->Draw("same");
 
   TPaveText *pt1 = new TPaveText(0.18, 0.86, 0.40, 0.92, "brNDC");
+  if(drawnorm) pt1 = new TPaveText(0.18, 0.77, 0.40, 0.92, "brNDC");
   pt1->SetName("pt1name");
   pt1->SetBorderSize(0);
   pt1->SetFillStyle(0);
@@ -245,6 +313,36 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   blah = pt1->AddText("CMS, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
   blah->SetTextSize(0.032);
   blah->SetTextAlign(11);  
+
+
+  if(drawnorm) {
+  blah = pt1->AddText("");
+
+  TString Asym1_temp = formatFloat(Asym1,"%6.4f");
+  Asym1_temp.ReplaceAll(" " , "" );
+  Asym1_temp = TString("   Asym: ") +  Asym1_temp;
+  blah = pt1->AddText(Asym1_temp.Data());
+  blah->SetTextSize(0.032);
+  blah->SetTextAlign(11);  
+  blah->SetTextColor(kBlack);  
+
+  TString Asym2_temp = formatFloat(Asym2,"%6.4f");
+  Asym2_temp.ReplaceAll(" " , "" );
+  Asym2_temp = TString("   Asym: ") +  Asym2_temp;
+  blah = pt1->AddText(Asym2_temp.Data());
+  blah->SetTextSize(0.032);
+  blah->SetTextAlign(11);  
+  blah->SetTextColor(kBlue);  
+
+  TString Asym3_temp = formatFloat(Asym3,"%6.4f");
+  Asym3_temp.ReplaceAll(" " , "" );
+  Asym3_temp = TString("   Asym: ") +  Asym3_temp;
+  blah = pt1->AddText(Asym3_temp.Data());
+  blah->SetTextSize(0.032);
+  blah->SetTextAlign(11);  
+  blah->SetTextColor(kRed);
+  }
+  
 
   pt1->Draw();
 
