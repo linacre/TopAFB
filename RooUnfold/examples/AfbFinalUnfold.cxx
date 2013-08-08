@@ -82,7 +82,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     Double_t weight;
     Int_t Nsolns;
 
-    for (Int_t iVar = 0; iVar < nVars; iVar++)
+    for (Int_t iVar = 5; iVar < nVars; iVar++)
     {
 
         Initialize1DBinning(iVar);
@@ -477,6 +477,17 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             }
 
             nlines = 0;
+            fp = fopen("theory/SMhel-uncorr-nocut-7TeVmuf", "r");
+            while (1)
+            {
+                ncols = fscanf(fp, "%f %f", &c1c2, &v1);
+                if (ncols < 0) break;
+                if (nlines < 5) printf("c1c2=%8f, v=%8f\n", c1c2, v1);
+                theoryProfileUnCorr->Fill(c1c2, v1);
+                nlines++;
+            }
+/*
+            nlines = 0;
             fp = fopen("theory/lhc7_mu1m_cos1cos2.dat", "r");
             while (1)
             {
@@ -486,6 +497,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                 theoryProfileUnCorr->Fill(c1c2, v1);
                 nlines++;
             }
+*/
         }
 
 
