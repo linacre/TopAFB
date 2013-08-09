@@ -82,7 +82,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     Double_t weight;
     Int_t Nsolns;
 
-    for (Int_t iVar = 5; iVar < nVars; iVar++)
+    for (Int_t iVar = 0; iVar < nVars; iVar++)
     {
 
         Initialize1DBinning(iVar);
