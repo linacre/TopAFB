@@ -477,7 +477,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             }
 
             nlines = 0;
-            fp = fopen("theory/SMhel-uncorr-nocut-7TeVmuf", "r");
+            fp = fopen("theory/lhc7_uncorr_mu1m_cos1cos2.dat", "r");
             while (1)
             {
                 ncols = fscanf(fp, "%f %f", &c1c2, &v1);
