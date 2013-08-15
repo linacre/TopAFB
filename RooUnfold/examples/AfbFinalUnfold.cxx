@@ -334,7 +334,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         else if (unfoldingType == 2)
         {
             TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);
-            unfold_TUnfold.SetInput(hMeas);
+            unfold_TUnfold.SetInput(hData_bkgSub);
             //Double_t biasScale=1.0;
             unfold_TUnfold.SetBias(hTrue);
             unfold_TUnfold.DoUnfold(tau);
