@@ -36,17 +36,41 @@ Int_t nPseudos = 10000;
 Int_t includeSys = 0;
 
 Int_t lineWidth = 5;
-bool plot_inclusive_only = true;
+bool plot_inclusive_only = false;
 
 
 
 //TestType: "Pull" or "Linearity"
 //slopeOption: 0 = continuous reweighting, 1 = 6-binned reweighting, 2 = 2-binned reweighting (i.e. sign(var))
-void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption = 0)
+void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption = 0, Int_t Nfunction = 1)
 {
 #ifdef __CINT__
     gSystem->Load("libRooUnfold");
 #endif
+
+//    TF1 *fsin = new TF1("fsin","sin(TMath::Pi()*x)",-1,1);
+//    TF1 *fcos = new TF1("fcos","cos(TMath::Pi()*x)",-1,1);
+//    TF1 *fmx2 = new TF1("fmx2","1 - (2*x - 1)^2",-1,1);
+//    TF1 *fx = new TF1("fx","x",-1,1);
+//    TF1 *fx2 = new TF1("fx2","x^2",-1,1);
+//    TF1 *fx3 = new TF1("fx3","x^3",-1,1);
+//    TF1 *fxhalf = new TF1("fxhalf","x^0.5",-1,1);
+//    TF1 *fxquarter = new TF1("fxquarter","x^0.25",-1,1);
+//    TF1 *fexpx = new TF1("fexpx","exp(x)/exp(1)",-1,1);
+
+
+    TF1 *fx;
+
+    if(Nfunction == 0) TF1 *fx = new TF1("fx","x",-1,1);
+    if(Nfunction == 1) TF1 *fx = new TF1("fx","x^2",-1,1);
+    if(Nfunction == 2) TF1 *fx = new TF1("fx","x^3",-1,1);
+    if(Nfunction == 3) TF1 *fx = new TF1("fx","x^0.5",-1,1);
+    if(Nfunction == 4) TF1 *fx = new TF1("fx","x^0.25",-1,1);
+    if(Nfunction == 5) TF1 *fx = new TF1("fx","exp(x)/exp(1)",-1,1);
+    if(Nfunction == 6) TF1 *fx = new TF1("fx","1 - (2*x - 1)^2",-1,1);
+    if(Nfunction == 7) TF1 *fx = new TF1("fx","sin(TMath::Pi()*x)",-1,1);
+    if(Nfunction == 8) TF1 *fx = new TF1("fx","cos(TMath::Pi()*x)",-1,1);
+
 
     setTDRStyle();
     gStyle->SetOptTitle(0);
@@ -54,19 +78,42 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     gStyle->SetOptStat("emr");
     cout.precision(3);
 
+    Initialize1DBinning(iVar);
+    bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
+    const int nDiff = nbins1D / 2;
+
     ofstream myfile;
-    myfile.open ("summary_PEtest.txt");
+    //myfile.open ("summary_PEtest.txt");
     //cout.rdbuf(myfile.rdbuf());
     ofstream second_output_file;
-    second_output_file.open("summary_PEtest_formated.txt");
+    //second_output_file.open("summary_PEtest_formated.txt");
+
+    TString FunctionName = formatFloat(Nfunction,"%6.0i");
+    FunctionName.ReplaceAll(" " , "" );
+    TString file_name = "p1_f" + FunctionName + "_" + acceptanceName;
+    ofstream third_output_file;
+    third_output_file.open(file_name + ".txt");
 
     TRandom3 *random = new TRandom3();
     random->SetSeed(5);
 
 
-    Initialize1DBinning(iVar);
-    bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
-    const int nDiff = nbins1D / 2;
+    double asym_centre = (xmax + xmin) / 2.;
+    
+    Double_t myfunction(Double_t *x, Double_t *par)
+    {
+        Float_t xx =x[0];
+        Float_t ac = (xmax + xmin) / 2.;
+        Double_t fscaled = par[1] * ( 1.+sign(xx-ac)*par[0]* ( fx->Eval( fabs( (xx-ac)/(xmax - ac) ) ) ) ) ;
+        return fscaled;
+    }
+    TF1 *fx_scaled = new TF1("fx_scaled",myfunction,xmin,xmax,2);
+    //fx_scaled->SetParameters(0.3,30);
+    //fx_scaled->Eval(0.5);
+    //cout<<"***** "<<fx_scaled->Eval(0.5)<<endl;
+    double fscale = -9999;
+
+
 
     TH1D *hEmpty = new TH1D ("Empty", "Empty",    nbins1D, xbins1D);
 
@@ -183,9 +230,6 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             AfbPull[iD]->Reset();
         }
 
-
-        double asym_centre = (xmax + xmin) / 2.;
-
         for (Int_t i = 0; i < entries; i++)
         {
             evtree->GetEntry(i);
@@ -203,6 +247,23 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                 }
             }
 
+
+            double xval = (observable_gen - asym_centre)/fabs(xmax - asym_centre);
+            double xsign = sign(xval);
+
+            double xminusval = -9999;
+            double xminussign = -9999;
+
+            if ( combineLepMinus ) {
+                double xminusval = (observableMinus_gen - asym_centre)/fabs(xmax - asym_centre);
+                double xminussign = sign(xval);
+            }
+
+
+
+
+
+
             //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
 
             if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
@@ -210,7 +271,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                 fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
                 fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
                 fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-                if (TestType == "Linearity" && slopeOption != 2) weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
+                if (TestType == "Linearity" && slopeOption != 2) weight = weight * (1.0 + slope * xsign*( fx->Eval(fabs(xval)) ) );
                 if (TestType == "Linearity" && slopeOption == 2) weight = weight * (1.0 + 0.5 * slope * sign(observable_gen - asym_centre) );
                 fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
                 fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
@@ -227,13 +288,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                     fillUnderOverFlow(hTrue_before, observableMinus_gen, weight, Nsolns);
                     fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
                 }
-                if (TestType == "Linearity" && slopeOption != 2) weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
+                if (TestType == "Linearity" && slopeOption != 2) weight = weight * (1.0 + slope * xsign*( fx->Eval(fabs(xval)) ) );
                 if (TestType == "Linearity" && slopeOption == 2) weight = weight * (1.0 + 0.5 * slope * sign(observable_gen - asym_centre) );
                 fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
                 fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
                 if ( combineLepMinus )
                 {
-                    if (TestType == "Linearity" && slopeOption != 2) weight = orig_weight * (1.0 + slope * (observableMinus_gen - asym_centre) );
+                    if (TestType == "Linearity" && slopeOption != 2) weight = orig_weight * (1.0 + slope * xminussign*( fx->Eval(fabs(xminusval)) ) );
                     if (TestType == "Linearity" && slopeOption == 2) weight = orig_weight * (1.0 + 0.5 * slope * sign(observableMinus_gen - asym_centre) );
                     fillUnderOverFlow(hMeas_after, observableMinus, weight, Nsolns);
                     fillUnderOverFlow(hTrue_after, observableMinus_gen, weight, Nsolns);
@@ -247,6 +308,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         //scale to keep total yield constant
         hMeas_after->Scale( hMeas_before->Integral() / hMeas_after->Integral() );
         hTrue_after->Scale( hTrue_before->Integral() / hTrue_after->Integral() );
+
+        fscale = double(hTrue_before->Integral()) / double(nbins1D);
 
         hTrue_after_array[k] = (TH1D *) hTrue_after->Clone();
         hMeas_after_array[k] = (TH1D *) hMeas_after->Clone();
@@ -610,7 +673,11 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Asym2D_TrueUnf->GetXaxis()->SetTitle(asymlabel + " inclusive (true)");
         Asym2D_TrueUnf->GetYaxis()->SetTitle(asymlabel + " inclusive (unfolded)");
         Asym2D_TrueUnf->Draw("AP same");
-        Asym2D_TrueUnf->Fit("pol1");
+        //Asym2D_TrueUnf->Fit("pol1");
+        TFitResultPtr r = Asym2D_TrueUnf->Fit("pol1","S");
+        Double_t par1   = r->Parameter(1);
+        third_output_file << acceptanceName << " " << Nfunction << " " << par1 << endl;   
+
 
         if (!plot_inclusive_only)
         {
@@ -781,9 +848,11 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         leg1->Draw();
 
 
+
         for (int k = 0; k < Nlin; ++k)
         {
             slope = -0.3 + 0.1 * k;
+            fx_scaled->SetParameters(slope,fscale);
             if (fabs(slope) < 0.001) slope = 0;
             TString slope_temp = formatFloat(slope, "%6.1f");
             slope_temp.ReplaceAll(" " , "" );
@@ -802,8 +871,10 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             hMeas_after_array[k]->GetXaxis()->SetTitle(xaxislabel + ", slope = " + slope_temp);
             hMeas_after_array[k]->GetYaxis()->SetTitle("Number of events");
             hMeas_after_array[k]->Draw("hist same");
+            fx_scaled->SetLineColor(TColor::GetColorDark(kGreen));
+            fx_scaled->DrawCopy("LSAME");
 
-            TPaveText *pt1 = new TPaveText(0.65, 0.76, 0.90, 0.93, "brNDC");
+            TPaveText *pt1 = new TPaveText(0.20, 0.76, 0.45, 0.93, "brNDC");
             pt1->SetName("pt1name");
             pt1->SetBorderSize(0);
             pt1->SetFillStyle(0);
@@ -832,6 +903,16 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             blah->SetTextColor(TColor::GetColorDark(kBlue));
 
             pt1->Draw();
+
+            TLegend *leg1 = new TLegend(0.70, 0.84, 0.9, 0.93, NULL, "brNDC");
+            leg1->SetEntrySeparation(0.1);
+            leg1->SetFillColor(0);
+            leg1->SetLineColor(0);
+            leg1->SetBorderSize(0);
+            leg1->SetFillStyle(0);
+            leg1->SetTextSize(0.03);
+            leg1->AddEntry(fx_scaled,    "weight fn",  "L");
+            leg1->Draw();
 
         }
 
@@ -903,7 +984,9 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
     }
 
-    myfile.close();
+    //myfile.close();
+    //second_output_file.close();
+    third_output_file.close();
 
 }
 
