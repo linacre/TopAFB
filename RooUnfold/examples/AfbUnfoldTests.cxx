@@ -42,7 +42,7 @@ bool plot_inclusive_only = false;
 
 //TestType: "Pull" or "Linearity"
 //slopeOption: 0 = continuous reweighting, 1 = 6-binned reweighting
-void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption = 0, Int_t Nfunction = 1)
+void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption = 0, Int_t Nfunction = 0)
 {
 #ifdef __CINT__
     gSystem->Load("libRooUnfold");
@@ -251,6 +251,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
             double xval = (observable_gen - asym_centre)/fabs(xmax - asym_centre);
             double xsign = sign(xval);
+            //restrict range from -1 to +1
+            if ( fabs(xval) > 1. ) xval = xsign;
 
             double xminusval = -9999;
             double xminussign = -9999;
@@ -258,6 +260,8 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             if ( combineLepMinus ) {
                 double xminusval = (observableMinus_gen - asym_centre)/fabs(xmax - asym_centre);
                 double xminussign = sign(xminusval);
+                //restrict range from -1 to +1
+                if ( fabs(xminusval) > 1. ) xminusval = xminussign;
             }
 
             //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
