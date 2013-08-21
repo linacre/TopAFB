@@ -42,7 +42,7 @@ TString Region = "";
 Int_t kterm = 3;
 Double_t tau = 1E-4;
 Int_t nVars = 8;
-Int_t includeSys = 1;
+Int_t includeSys = 0;
 Int_t checkErrors = 1;
 bool draw_truth_before_pT_reweighting = true;
 
@@ -597,7 +597,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                         cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded_arccos->GetBinError(i) -  stat_uncorr[i - 1] << endl;
                     }
                 }
-                hData_unfolded_arccos          ->SetBinError(i, stat_uncorr[i - 1]);
+                //hData_unfolded_arccos          ->SetBinError(i, stat_uncorr[i - 1]);  //running with includeSys = 0 means we can use the RooUnfold stat-only errors
                 hData_unfolded_minussyst->SetBinContent(i, hData_unfolded_arccos->GetBinContent(i)
                                                         - sqrt( pow(stat_corr[i - 1], 2) - pow(stat_uncorr[i - 1], 2) + pow(syst_corr[i - 1], 2)));
             }
@@ -614,12 +614,12 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                         cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded->GetBinError(i) -  stat_uncorr[i - 1] << endl;
                     }
                 }
-                hData_unfolded          ->SetBinError(i, stat_uncorr[i - 1]);
+                //hData_unfolded          ->SetBinError(i, stat_uncorr[i - 1]);  //running with includeSys = 0 means we can use the RooUnfold stat-only errors
                 hData_unfolded_minussyst->SetBinContent(i, hData_unfolded->GetBinContent(i)
-                                                        - sqrt( pow(stat_corr[i - 1], 2) - pow(stat_uncorr[i - 1], 2) + pow(syst_corr[i - 1], 2)));
+                                                        - sqrt(  pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst 
             }
             hData_unfolded_minussyst->SetBinError(i, 0);
-            hData_unfolded_plussyst ->SetBinContent(i, 2 * sqrt( pow(stat_corr[i - 1], 2) - pow(stat_uncorr[i - 1], 2) + pow(syst_corr[i - 1], 2)));
+            hData_unfolded_plussyst ->SetBinContent(i, 2 * sqrt( pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst 
             hData_unfolded_plussyst ->SetBinError(i, 0);
         }
 
