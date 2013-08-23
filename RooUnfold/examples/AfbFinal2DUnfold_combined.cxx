@@ -62,7 +62,7 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
     else if (Var2D == "ttrapidity2") yaxisunit = "";
     else if (Var2D == "ttpt") yaxisunit = " (GeV/c)";
 
-    if (!(scalettotr == 1. && scalewjets == 1. && scaleDY == 1. && scaletw == 1. && scaleVV == 1.))  summary_name = Form("%s_%i_%i_%i_%i_%i", summary_name, int(10.*scalettotr + 0.5), int(10.*scalewjets + 0.5), int(10.*scaleDY + 0.5), int(10.*scaletw + 0.5), int(10.*scaleVV + 0.5));
+    if (!(scalettotr == 1. && scalewjets == 1. && scaleDY == 1. && scaletw == 1. && scaleVV == 1.))  summary_name = summary_name + Form("_%i_%i_%i_%i_%i", int(10.*scalettotr + 0.5), int(10.*scalewjets + 0.5), int(10.*scaleDY + 0.5), int(10.*scaletw + 0.5), int(10.*scaleVV + 0.5));
 
     TRandom3 *random = new TRandom3();
     random->SetSeed(5);
@@ -90,7 +90,7 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
     for (Int_t iVar = 0; iVar < nVars; iVar++)
     {
 
-        //initialise 2D binning to get x values
+        //initialise 1D binning to get x values
         Initialize1DBinning(iVar);
         Float_t asym_centre = (xmax + xmin) / 2.;
         //initialise 2D binning
@@ -616,6 +616,14 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 
         c_mttu->SaveAs(Var2D + "_2D_unfolded_" + acceptanceName + Region + ".pdf");
 
+        TFile *output = new TFile(Form("DataMC_%s.root",Var2D.Data()), "UPDATE");
+
+        TH1D *hDataMCratio  = (TH1D *) hData_unfolded->Clone("hDataMCratio" + Var2D + acceptanceName);
+        hDataMCratio->SetTitle("hDataMCratio" + Var2D + acceptanceName);
+        hDataMCratio->Reset();
+        hDataMCratio->Divide(hData_unfolded, hTrue, 1., 1.);
+        hDataMCratio->Write();
+
         ch_data->Delete();
 
         ch_top->Delete();
@@ -624,6 +632,8 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         {
             ch_bkg[iBkg]->Delete();
         }
+
+        output->Close();
 
     }
     myfile.close();
