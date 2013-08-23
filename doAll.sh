@@ -26,11 +26,19 @@ echo "create acceptance histograms"
 root -b -q 'macro_acceptanceHists.C("'$rootfile'")' >& macro_acceptanceHists.log
 mkdir -p acceptance/mcnlo/
 mv -f accept_*.* acceptance/mcnlo/
+echo "making temporary copy of acceptance histograms ***TO BE REPLACED WITH RESULTS WITH NO TOP PT REWEIGHTING***"
+cp -pr acceptance/mcnlo acceptance/mcnlo_nopTreweighting 
 
 echo "run 1D unfolding"
 cd RooUnfold
 make
-root -b -q macro_1DUnfolding.C >& macro_1DUnfolding.log &
+root -b -q macro_1DUnfolding.C >& macro_1DUnfolding.log 
+
+echo "re-building using custom TSVDUnfold.cxx for 2D unfolding"
+make clean
+mv GNUmakefile GNUmakefile_for1D
+cp -p GNUmakefile_for2D GNUmakefile
+make
 
 echo "run 2D unfolding"
 root -b -q macro_2DUnfolding.C >& macro_2DUnfolding.log &
