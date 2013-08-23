@@ -624,6 +624,8 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         hDataMCratio->Divide(hData_unfolded, hTrue, 1., 1.);
         hDataMCratio->Write();
 
+        output->Close();
+
         ch_data->Delete();
 
         ch_top->Delete();
