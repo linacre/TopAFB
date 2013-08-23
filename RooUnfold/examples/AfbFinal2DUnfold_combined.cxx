@@ -616,7 +616,7 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 
         c_mttu->SaveAs(Var2D + "_2D_unfolded_" + acceptanceName + Region + ".pdf");
 
-        TFile *output = new TFile(Form("DataMC_%s.root",Var2D.Data()), "UPDATE");
+        TFile *output = new TFile(Form("DataMC_%s.root", Var2D.Data()), "UPDATE");
 
         TH1D *hDataMCratio  = (TH1D *) hData_unfolded->Clone("hDataMCratio" + Var2D + acceptanceName);
         hDataMCratio->SetTitle("hDataMCratio" + Var2D + acceptanceName);
@@ -632,8 +632,6 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         {
             ch_bkg[iBkg]->Delete();
         }
-
-        output->Close();
 
     }
     myfile.close();
