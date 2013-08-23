@@ -1,4 +1,4 @@
 {
-gROOT->ProcessLine(".L examples/AfbFinal2DUnfoldttrapidity2.cxx");
-AfbUnfoldExample();
+gROOT->ProcessLine(".L examples/AfbFinal2DUnfold_combined.cxx");
+AfbUnfoldExample("ttrapidity2");
 }
