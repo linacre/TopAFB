@@ -69,7 +69,6 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
     Float_t asym_centre = (xmax + xmin) / 2.;
 
     TFile *filedataMC[n2Dvar];
-    TH1D *hEmpty[n2Dvar];
     TH1D *dataMCweight[n2Dvar];
 
     for (int i = 0; i < n2Dvar; ++i)
@@ -80,7 +79,6 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
         else if (Var2DString[i] == "ttpt") Initialize2DBinningttpt(iVar);
         filedataMC[i] = new TFile("DataMC_" + Var2DString[i] + ".root");
         dataMCweight[i] = (TH1D *) filedataMC[i]->Get("hDataMCratio" + Var2DString[i] + acceptanceName);
-        hEmpty[i] = new TH1D ("Empty", "Empty",    nbins2D, xbins2D);
     }
 
     //initialise 2D binning for real
@@ -97,7 +95,7 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
 
     for (int i = 0; i < n2Dvar + 1; ++i)
     {
-        hAfbVs2Dvar[i] = new TH1D ("hAfbVs2Dvar",  "hAfbVs2Dvar",  nbins2Do2, xbins2D_positive);
+        hAfbVs2Dvar[i] = new TH1D ("hAfbVs2Dvar"+i,  "hAfbVs2Dvar"+i,  nbins2Do2, xbins2D_positive);
     }
 
 
@@ -260,15 +258,13 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
                 Double_t variable_gen = sign(observable_gen - asym_centre) * obs2Dforweighting_gen;
                 Double_t variableMinus_gen = sign(observableMinus_gen - asym_centre) * obs2Dforweighting_gen;
 
-                //find the bin centre
-                //variable =  hEmpty[k]->GetBinCenter( hEmpty[k]->FindBin( variable ) );
-                //variable_gen =  hEmpty[k]->GetBinCenter( hEmpty[k]->FindBin( variable_gen ) );
-                //variableMinus =  hEmpty[k]->GetBinCenter( hEmpty[k]->FindBin( variableMinus ) );
-                //variableMinus_gen =  hEmpty[k]->GetBinCenter( hEmpty[k]->FindBin( variableMinus_gen ) );
-
                 //find the bin from which to take the data/MC weight
                 Int_t genbin =  dataMCweight[k]->FindBin( variable_gen );
                 Int_t genbinMinus =  dataMCweight[k]->FindBin( variableMinus_gen );
+                if (genbin < 1) genbin = 1;
+                if (genbin > nbins2D) genbin = nbins2D;
+                if (genbinMinus < 1) genbinMinus = 1;
+                if (genbinMinus > nbins2D) genbinMinus = nbins2D;
 
                 Double_t dataMCw = dataMCweight[k]->GetBinContent(genbin);
                 Double_t dataMCwMinus = dataMCweight[k]->GetBinContent(genbinMinus);
