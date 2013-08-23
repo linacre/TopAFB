@@ -676,6 +676,15 @@ void TSVDUnfold::FillCurvatureMatrix( TMatrixD& tCurv, TMatrixD& tC ) const
          tC(i,i) = 1.0;
       }
    }
+//   else if (fDdim == 2) {
+//      for (Int_t i=0; i<ndim; i++) {
+//         if (i > 0)      tC(i,i-1) = 1.0;
+//         if (i < ndim-1) tC(i,i+1) = 1.0;
+//         tC(i,i) = -2.0;
+//      }
+//      tC(0,0) = -1.0;
+//      tC(ndim-1,ndim-1) = -1.0;
+//   }
    else if (fDdim == 2) {
       for (Int_t i=0; i<ndim; i++) {
          if (i > 0)      tC(i,i-1) = 1.0;
@@ -684,6 +693,10 @@ void TSVDUnfold::FillCurvatureMatrix( TMatrixD& tCurv, TMatrixD& tC ) const
       }
       tC(0,0) = -1.0;
       tC(ndim-1,ndim-1) = -1.0;
+      tC (2,2) = -1.0;
+      tC (3,3) = -1.0;
+      tC (2,3) = 0.0;
+      tC (3,2) = 0.0; 
    }
    else if (fDdim == 3) {
       for (Int_t i=1; i<ndim-2; i++) {
