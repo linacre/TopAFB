@@ -606,28 +606,28 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
         third_output_file << acceptanceName << " vs " << Var2D << " inclusive residuals, ";
         for (int k = 0; k < Nlin; k++)
         {
-            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf[k]
+            third_output_file << " w_" << Var2DString[k] << " " << A_unf[k];
         }
         third_output_file << endl;
 
         third_output_file << acceptanceName << " vs " << Var2D << " bin1 residuals, ";
         for (int k = 0; k < Nlin; k++)
         {
-            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf2Dbin1[k]
+            third_output_file << " w_" << Var2DString[k] << " " << A_unf2Dbin1[k];
         }
         third_output_file << endl;
 
         third_output_file << acceptanceName << " vs " << Var2D << " bin2 residuals, ";
         for (int k = 0; k < Nlin; k++)
         {
-            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf2Dbin2[k]
+            third_output_file << " w_" << Var2DString[k] << " " << A_unf2Dbin2[k];
         }
         third_output_file << endl;
 
         third_output_file << acceptanceName << " vs " << Var2D << " bin3 residuals, ";
         for (int k = 0; k < Nlin; k++)
         {
-            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf2Dbin3[k]
+            third_output_file << " w_" << Var2DString[k] << " " << A_unf2Dbin3[k];
         }
         third_output_file << endl;
 
