@@ -543,15 +543,22 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
 
 
             A_unf[k] = SumAsym / nPseudos   -  A_gen[k];
-            Aerr_unf[k] = SumErrAsym / nPseudos  * 0.;
+            Aerr_unf[k] = SumErrAsym / nPseudos / sqrt(nPseudos);
 
             A_unf2Dbin1[k] = SumAsymBin1 / nPseudos   -  A_gen2Dbin1[k];
-            Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos  * 0.;
+            Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos / sqrt(nPseudos);
             A_unf2Dbin2[k] = SumAsymBin2 / nPseudos   -  A_gen2Dbin2[k];
-            Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos  * 0.;
+            Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos / sqrt(nPseudos);
             A_unf2Dbin3[k] = SumAsymBin3 / nPseudos   -  A_gen2Dbin3[k];
-            Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos  * 0.;
+            Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos / sqrt(nPseudos);
 
+            if (nPseudos == 1)
+            {
+                Aerr_unf[k] = 0;
+                Aerr_unf2Dbin1[k] = 0;
+                Aerr_unf2Dbin2[k] = 0;
+                Aerr_unf2Dbin3[k] = 0;
+            }
 
 
             A_pull[k] = AfbPull->GetMean();
