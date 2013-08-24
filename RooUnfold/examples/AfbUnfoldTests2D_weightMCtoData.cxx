@@ -30,7 +30,7 @@ TString Region = "";
 
 Int_t kterm = 3;
 Double_t tau = 1E-4;
-Int_t nPseudos = 2;
+Int_t nPseudos = 1;
 Int_t includeSys = 0;
 
 Int_t lineWidth = 5;
@@ -95,7 +95,7 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
 
     for (int i = 0; i < n2Dvar + 1; ++i)
     {
-        hAfbVs2Dvar[i] = new TH1D ("hAfbVs2Dvar"+i,  "hAfbVs2Dvar"+i,  nbins2Do2, xbins2D_positive);
+        hAfbVs2Dvar[i] = new TH1D ("hAfbVs2Dvar" + i,  "hAfbVs2Dvar" + i,  nbins2Do2, xbins2D_positive);
     }
 
 
@@ -400,7 +400,7 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
         Float_t SumTrueAsymBin1 = 0.0, SumTrueErrAsymBin1 = 0.0, SumTrueAsymBin2 = 0.0, SumTrueErrAsymBin2 = 0.0, SumTrueAsymBin3 = 0.0, SumTrueErrAsymBin3 = 0.0;
 
 
-        if (nPseudos > 1)
+        if (nPseudos > 0)
         {
 
             for (int i = 0; i < nPseudos; i++)
@@ -408,8 +408,9 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
 
                 for (int j = 1; j < hMeas_after->GetNbinsX() + 1; j++)
                 {
-                    //double fluct = random->Poisson(hMeas_after->GetBinContent(j));
-                    double fluct = hMeas_after->GetBinContent(j);
+                    double fluct;
+                    if (nPseudos > 1) fluct = random->Poisson(hMeas_after->GetBinContent(j));
+                    else fluct = hMeas_after->GetBinContent(j);
                     hSmeared->SetBinError(j, sqrt(fluct));
                     hSmeared->SetBinContent(j, fluct);
                 }
@@ -516,54 +517,57 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
                 }
             }
 
+
+            cout << "Average Asymmetry =" << SumAsym / nPseudos << " +/-  " << SumErrAsym / (nPseudos) << "\n";
+            //A_unf[k] = SumAsym / nPseudos;
+            //Aerr_unf[k] = SumErrAsym / nPseudos;
+
+            //A_unf2Dbin1[k] = SumAsymBin1 / nPseudos;
+            //Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos;
+            //A_unf2Dbin2[k] = SumAsymBin2 / nPseudos;
+            //Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos;
+            //A_unf2Dbin3[k] = SumAsymBin3 / nPseudos;
+            //Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos;
+
+            A_gen2Dbin1[k] = SumTrueAsymBin1 / nPseudos;
+            Aerr_gen2Dbin1[k] = SumTrueErrAsymBin1 / nPseudos;
+            A_gen2Dbin2[k] = SumTrueAsymBin2 / nPseudos;
+            Aerr_gen2Dbin2[k] = SumTrueErrAsymBin2 / nPseudos;
+            A_gen2Dbin3[k] = SumTrueAsymBin3 / nPseudos;
+            Aerr_gen2Dbin3[k] = SumTrueErrAsymBin3 / nPseudos;
+
+
+            A_unf[k] = SumAsym / nPseudos   -  A_gen[k];
+            Aerr_unf[k] = SumErrAsym / nPseudos  * 0.;
+
+            A_unf2Dbin1[k] = SumAsymBin1 / nPseudos   -  A_gen2Dbin1[k];
+            Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos  * 0.;
+            A_unf2Dbin2[k] = SumAsymBin2 / nPseudos   -  A_gen2Dbin2[k];
+            Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos  * 0.;
+            A_unf2Dbin3[k] = SumAsymBin3 / nPseudos   -  A_gen2Dbin3[k];
+            Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos  * 0.;
+
+
+            A_pull[k] = AfbPull->GetMean();
+            Aerr_pull[k] = AfbPull->GetMeanError();
+            A_pullwidth[k] = AfbPull->GetRMS();
+            Aerr_pullwidth[k] = AfbPull->GetRMSError();
+
+            A_pull_bin1[k] = Afb2DPullBin1->GetMean();
+            Aerr_pull_bin1[k] = Afb2DPullBin1->GetMeanError();
+            A_pullwidth_bin1[k] = Afb2DPullBin1->GetRMS();
+            Aerr_pullwidth_bin1[k] = Afb2DPullBin1->GetRMSError();
+
+            A_pull_bin2[k] = Afb2DPullBin2->GetMean();
+            Aerr_pull_bin2[k] = Afb2DPullBin2->GetMeanError();
+            A_pullwidth_bin2[k] = Afb2DPullBin2->GetRMS();
+            Aerr_pullwidth_bin2[k] = Afb2DPullBin2->GetRMSError();
+
+            A_pull_bin3[k] = Afb2DPullBin3->GetMean();
+            Aerr_pull_bin3[k] = Afb2DPullBin3->GetMeanError();
+            A_pullwidth_bin3[k] = Afb2DPullBin3->GetRMS();
+            Aerr_pullwidth_bin3[k] = Afb2DPullBin3->GetRMSError();
         }
-
-        cout << "Average Asymmetry =" << SumAsym / nPseudos << " +/-  " << SumErrAsym / (nPseudos) << "\n";
-        A_unf[k] = SumAsym / nPseudos;
-        Aerr_unf[k] = SumErrAsym / nPseudos;
-
-        //A_unf2Dbin1[k] = SumAsymBin1 / nPseudos;
-        //Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos;
-        //A_unf2Dbin2[k] = SumAsymBin2 / nPseudos;
-        //Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos;
-        //A_unf2Dbin3[k] = SumAsymBin3 / nPseudos;
-        //Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos;
-
-        A_gen2Dbin1[k] = SumTrueAsymBin1 / nPseudos;
-        Aerr_gen2Dbin1[k] = SumTrueErrAsymBin1 / nPseudos;
-        A_gen2Dbin2[k] = SumTrueAsymBin2 / nPseudos;
-        Aerr_gen2Dbin2[k] = SumTrueErrAsymBin2 / nPseudos;
-        A_gen2Dbin3[k] = SumTrueAsymBin3 / nPseudos;
-        Aerr_gen2Dbin3[k] = SumTrueErrAsymBin3 / nPseudos;
-
-
-        A_unf2Dbin1[k] = SumAsymBin1 / nPseudos   -  A_gen2Dbin1[k];
-        Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos;
-        A_unf2Dbin2[k] = SumAsymBin2 / nPseudos   -  A_gen2Dbin2[k];
-        Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos;
-        A_unf2Dbin3[k] = SumAsymBin3 / nPseudos   -  A_gen2Dbin3[k];
-        Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos;
-
-
-        A_pull[k] = AfbPull->GetMean();
-        Aerr_pull[k] = AfbPull->GetMeanError();
-        A_pullwidth[k] = AfbPull->GetRMS();
-        Aerr_pullwidth[k] = AfbPull->GetRMSError();
-
-        A_pull_bin1[k] = Afb2DPullBin1->GetMean();
-        Aerr_pull_bin1[k] = Afb2DPullBin1->GetMeanError();
-        A_pullwidth_bin1[k] = Afb2DPullBin1->GetRMS();
-        Aerr_pullwidth_bin1[k] = Afb2DPullBin1->GetRMSError();
-
-        A_pull_bin2[k] = Afb2DPullBin2->GetMean();
-        Aerr_pull_bin2[k] = Afb2DPullBin2->GetMeanError();
-        A_pullwidth_bin2[k] = Afb2DPullBin2->GetRMS();
-        Aerr_pullwidth_bin2[k] = Afb2DPullBin2->GetRMSError();
-
-        A_pull_bin3[k] = Afb2DPullBin3->GetMean();
-        Aerr_pull_bin3[k] = Afb2DPullBin3->GetMeanError();
-        A_pullwidth_bin3[k] = Afb2DPullBin3->GetRMS();
-        Aerr_pullwidth_bin3[k] = Afb2DPullBin3->GetRMSError();
 
     }
 
