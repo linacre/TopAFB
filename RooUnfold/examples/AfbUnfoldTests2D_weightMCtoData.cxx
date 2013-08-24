@@ -86,8 +86,13 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
     else if (Var2D == "ttrapidity2") Initialize2DBinningttrapidity2(iVar);
     else if (Var2D == "ttpt") Initialize2DBinningttpt(iVar);
 
-    const Int_t nbins2Do2 = nbins2D / 2;
 
+    TString file_name = "residuals_" + acceptanceName + "_" + Var2D;
+    ofstream third_output_file;
+    third_output_file.open(file_name + ".txt");
+
+
+    const Int_t nbins2Do2 = nbins2D / 2;
 
     double xbins2D_positive[nbins2Do2 + 1] = {xbins2D[3], xbins2D[4], xbins2D[5], xbins2D[6]};
     if (Var2D == "mtt") xbins2D_positive[0] = 300.0;
@@ -548,6 +553,7 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
             Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos  * 0.;
 
 
+
             A_pull[k] = AfbPull->GetMean();
             Aerr_pull[k] = AfbPull->GetMeanError();
             A_pullwidth[k] = AfbPull->GetRMS();
@@ -590,8 +596,43 @@ void AfbUnfoldTests2D_weightMCtoData(Int_t iVar = 0, TString TestType = "Pull", 
     TGraphErrors *Asym2D_PullWidthbin3 = new TGraphErrors (Nlin, A_gen2Dbin3, A_pullwidth_bin3, Aerr_gen2Dbin3, Aerr_pullwidth_bin3);
     TGraphErrors *Asym2D_Pullbin3 = new TGraphErrors (Nlin, A_gen2Dbin3, A_pull_bin3, Aerr_gen2Dbin3, Aerr_pull_bin3);
 
+
+
+
     if ((TestType == "Linearity"))
     {
+
+
+        third_output_file << acceptanceName << " vs " << Var2D << " inclusive residuals, ";
+        for (int k = 0; k < Nlin; k++)
+        {
+            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf[k]
+        }
+        third_output_file << endl;
+
+        third_output_file << acceptanceName << " vs " << Var2D << " bin1 residuals, ";
+        for (int k = 0; k < Nlin; k++)
+        {
+            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf2Dbin1[k]
+        }
+        third_output_file << endl;
+
+        third_output_file << acceptanceName << " vs " << Var2D << " bin2 residuals, ";
+        for (int k = 0; k < Nlin; k++)
+        {
+            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf2Dbin2[k]
+        }
+        third_output_file << endl;
+
+        third_output_file << acceptanceName << " vs " << Var2D << " bin3 residuals, ";
+        for (int k = 0; k < Nlin; k++)
+        {
+            third_output_file << " weighted " << Var2DString[k] << ":  " << A_unf2Dbin3[k]
+        }
+        third_output_file << endl;
+
+
+
         TCanvas *c_ttbar = new TCanvas("c_ttbar", "c_ttbar", 500, 500);
         c_ttbar->Divide(2, 2);
         c_ttbar->cd(1);
