@@ -85,9 +85,6 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   hdenominator2d_ttrapidity2 = (TH2D*)f_2->Get(Form("ttdil_h%sttRapidity2Gen2d_allj_all", histname.Data())); 
 
 
-  hnumerator->Sumw2();
-  hdenominator->Sumw2();
-  
   std::cout << "Opened " << Form("ttdil_h%sGen_allj_all", histname.Data()) << " and "<< Form("ttdil_h%sGen2d_allj_all", histname.Data()) <<"\n";
 
   Double_t pi = 3.141592653589793;
@@ -201,7 +198,6 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   hacceptance =  (TH1D*) hnumerator->Clone(accepthistname.Data());
   hacceptance->SetTitle(accepthistname.Data());
   hacceptance->Reset();
-  hacceptance->Sumw2();
   hacceptance->Divide(hnumerator,hdenominator,1., 1.);
 
   hacceptance2drebinned_mtt =  (TH2D*) hnumerator2drebinned_mtt->Clone( Form("%s_mtt", accepthistname.Data()) );
