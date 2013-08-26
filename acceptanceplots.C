@@ -69,6 +69,7 @@ void GetAfb(TH1D* h, Double_t &afb, Double_t  &afberr){
 void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TString FName1 = "results/hist_usePtGt2020_hypDisamb_usepfMET_usepfJets_useOS_vetoHypMassLt12_requireBTag_sortJetCandidatesbyPt_generalLeptonVeto_createBabyNtuples_applylepIDCuts_applylepIsoCuts_vetoZmass_veto2Jets_vetoMET.root", TString FName2 = "results/hist_noCuts.root"){
   setTDRStyle();
 
+
   std::cout << "Opening " << FName1.Data() << "\n";
   TFile *f_1         = TFile::Open(FName1.Data());  
   hnumerator = (TH1D*)f_1->Get(Form("ttdil_h%sGen_allj_all", histname.Data())); 
@@ -83,6 +84,10 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   hdenominator2d_ttpt = (TH2D*)f_2->Get(Form("ttdil_h%sttpTGen2d_allj_all", histname.Data())); 
   hdenominator2d_ttrapidity2 = (TH2D*)f_2->Get(Form("ttdil_h%sttRapidity2Gen2d_allj_all", histname.Data())); 
 
+
+  hnumerator->Sumw2();
+  hdenominator->Sumw2();
+  
   std::cout << "Opened " << Form("ttdil_h%sGen_allj_all", histname.Data()) << " and "<< Form("ttdil_h%sGen2d_allj_all", histname.Data()) <<"\n";
 
   Double_t pi = 3.141592653589793;
@@ -196,6 +201,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   hacceptance =  (TH1D*) hnumerator->Clone(accepthistname.Data());
   hacceptance->SetTitle(accepthistname.Data());
   hacceptance->Reset();
+  hacceptance->Sumw2();
   hacceptance->Divide(hnumerator,hdenominator,1., 1.);
 
   hacceptance2drebinned_mtt =  (TH2D*) hnumerator2drebinned_mtt->Clone( Form("%s_mtt", accepthistname.Data()) );
@@ -233,16 +239,30 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   if(hacceptance->GetMinimum() > 0.) hacceptance->SetMinimum(0.75*hacceptance->GetMinimum() );  
 
   hacceptance->GetYaxis()->SetTitle("Acceptance");
-  hacceptance->GetYaxis()->SetTitleOffset(1.6);
+  hacceptance->SetTitleSize(0.05, "XYZ");
+  hacceptance->GetYaxis()->SetTitleOffset(1.5);
 
+
+  if(histname.Contains("lepChargeAsym") ) {
+    hacceptance->GetXaxis()->SetTitle("#Delta|#eta_{l}|");
+  }
+  if(histname.Contains("lepAzimAsym2") ) {
+    hacceptance->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
+  }
+  if(histname.Contains("lepCosTheta") ) {
+    hacceptance->GetXaxis()->SetTitle("cos(#theta_{l})");
+  }
   if(histname.Contains("lepPlusCosTheta") ) {
-    hacceptance->GetXaxis()->SetTitle("cos(#theta^{+}_{l})");
+    hacceptance->GetXaxis()->SetTitle("cos(#theta_{l+})");
   }
   if(histname.Contains("lepMinusCosTheta") ) {
-    hacceptance->GetXaxis()->SetTitle("cos(#theta^{-}_{l})");
+    hacceptance->GetXaxis()->SetTitle("cos(#theta_{l-})");
   }
-  if(histname.Contains("lepChargeAsym") ) {
-    hacceptance->GetXaxis()->SetTitle(" |#eta_{l^{+}}| - |#eta_{l^{-}}| ");
+  if(histname.Contains("topSpinCorr") ) {
+    hacceptance->GetXaxis()->SetTitle("cos(#theta_{l+})cos(#theta_{l-})");
+  }
+  if(histname.Contains("rapiditydiffMarco") ) {
+    hacceptance->GetXaxis()->SetTitle("#Delta|y_{t}|");
   }
 
   double Asym1,Asym2,Asym3;
@@ -257,7 +277,9 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   
 
   if(!drawnorm){
-    hacceptance->Draw("hist TEXT00E");
+    hacceptance->SetMarkerSize(1.5);
+    //hacceptance->Draw("hist TEXT30E");
+    hacceptance->Draw("histE");
   }
   else{
 
