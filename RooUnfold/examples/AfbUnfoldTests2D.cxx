@@ -38,8 +38,8 @@ Int_t lineWidth = 5;
 
 //TestType: "Pull" or "Linearity"
 //Var2D: "mtt" or "ttrapidity2" or "ttpt"
-//slopeOption: 0 = continuous reweighting, 1 = 2-binned reweighting (i.e. sign(var))
-void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D = "mtt", Int_t slopeOption = 0)
+//slopeOption: 1 = continuous reweighting, 2 = 2-binned reweighting (i.e. sign(var)), -1,-2 = also add linear slope in secondary variable
+void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D = "mtt", Int_t slopeOption = 1)
 {
 #ifdef __CINT__
     gSystem->Load("libRooUnfold");
@@ -52,10 +52,10 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     cout.precision(3);
 
     ofstream myfile;
-    myfile.open ("summary_PEtest_2D.txt");
-    cout.rdbuf(myfile.rdbuf());
+    //myfile.open ("summary_PEtest_2D.txt");
+    //cout.rdbuf(myfile.rdbuf());
     ofstream second_output_file;
-    second_output_file.open("summary_PEtest_2D_formated.txt");
+    //second_output_file.open("summary_PEtest_2D_formated.txt");
 
     TRandom3 *random = new TRandom3();
     random->SetSeed(5);
@@ -70,6 +70,13 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
     if (Var2D == "mtt") Initialize2DBinning(iVar);
     else if (Var2D == "ttrapidity2") Initialize2DBinningttrapidity2(iVar);
     else if (Var2D == "ttpt") Initialize2DBinningttpt(iVar);
+
+    //set ranges for slope
+    double Var2Dlower = 0.;
+    double Var2Dupper = xbins2D[6];
+    double Var2Dmid = (xbins2D[4] + xbins2D[5]) / 2.;
+    if (Var2D == "mtt") Var2Dlower = 350.;
+    if (Var2D == "ttpt") Var2Dupper = 200.;
 
     bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
 
@@ -162,7 +169,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         evtree->SetBranchAddress("ttPt_gen", &obs2D_gen);
     }
 
-
+    Float_t slopex = 0.0;
     Float_t slope = 0.0;
     const int Nlin = 7;
     Float_t A_gen[Nlin], Aerr_gen[Nlin], A_unf[Nlin], Aerr_unf[Nlin], A_meas[Nlin], Aerr_meas[Nlin];
@@ -186,9 +193,9 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
         if ((TestType == "Pull") && (k == 1)) break;
 
-        slope = -0.3 + 0.1 * k;
+        slopex = -0.3 + 0.1 * k;
 
-        cout << "slope =" << slope << "\n";
+        cout << "slope =" << slopex << "\n";
 
         hTrue_before->Reset();
         hMeas_before->Reset();
@@ -209,6 +216,12 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
             obs2D = fabs(obs2D);
             obs2D_gen = fabs(obs2D_gen);
 
+            double slopemult = 2.;
+            if (slopeOption < 0) slopemult = ( obs2D_gen - Var2Dmid ) > 0 ? ( obs2D_gen - Var2Dmid ) / (Var2Dupper - Var2Dmid) : ( obs2D_gen - Var2Dmid ) / (Var2Dmid - Var2Dlower) ;
+            slope = slopex * slopemult / 2.;
+
+            //cout << "slope =" << slope << "\n";
+
             if ( tmass > 0  )
             {
                 fillUnderOverFlow(hMeas_before, sign(observable - asym_centre)*obs2D, weight, Nsolns);
@@ -220,14 +233,14 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
                     fillUnderOverFlow(hTrue_before, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                     fillUnderOverFlow(hTrue_vs_Meas, sign(observableMinus - asym_centre)*obs2D, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 }
-                if (TestType == "Linearity" && slopeOption != 0) weight = weight * (1.0 + 0.5 * slope * sign(observable_gen - asym_centre) );
-                if (TestType == "Linearity" && slopeOption == 0) weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
+                if (TestType == "Linearity" && abs(slopeOption) == 2) weight = weight * (1.0 + 0.5 * slope * sign(observable_gen - asym_centre) );
+                if (TestType == "Linearity" && abs(slopeOption) == 1) weight = weight * (1.0 + slope * (observable_gen - asym_centre) );
                 fillUnderOverFlow(hMeas_after, sign(observable - asym_centre)*obs2D, weight, Nsolns);
                 fillUnderOverFlow(hTrue_after, sign(observable_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 if ( combineLepMinus )
                 {
-                    if (TestType == "Linearity" && slopeOption != 0) weight = orig_weight * (1.0 + 0.5 * slope * sign(observableMinus_gen - asym_centre) );
-                    if (TestType == "Linearity" && slopeOption == 0) weight = orig_weight * (1.0 + slope * (observableMinus_gen - asym_centre) );
+                    if (TestType == "Linearity" && abs(slopeOption) == 2) weight = orig_weight * (1.0 + 0.5 * slope * sign(observableMinus_gen - asym_centre) );
+                    if (TestType == "Linearity" && abs(slopeOption) == 1) weight = orig_weight * (1.0 + slope * (observableMinus_gen - asym_centre) );
                     fillUnderOverFlow(hMeas_after, sign(observableMinus - asym_centre)*obs2D, weight, Nsolns);
                     fillUnderOverFlow(hTrue_after, sign(observableMinus_gen - asym_centre)*obs2D_gen, weight, Nsolns);
                 }
@@ -296,7 +309,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
         Float_t SumTrueAsymBin1 = 0.0, SumTrueErrAsymBin1 = 0.0, SumTrueAsymBin2 = 0.0, SumTrueErrAsymBin2 = 0.0, SumTrueAsymBin3 = 0.0, SumTrueErrAsymBin3 = 0.0;
 
 
-        if (nPseudos > 1)
+        if (nPseudos > 0)
         {
 
             for (int i = 0; i < nPseudos; i++)
@@ -304,8 +317,9 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
                 for (int j = 1; j < hMeas_after->GetNbinsX() + 1; j++)
                 {
-                    double fluct = random->Poisson(hMeas_after->GetBinContent(j));
-                    //      double fluct = hMeas_after->GetBinContent(j);
+                    double fluct;
+                    if (nPseudos > 1) fluct = random->Poisson(hMeas_after->GetBinContent(j));
+                    else fluct = hMeas_after->GetBinContent(j);
                     hSmeared->SetBinError(j, sqrt(fluct));
                     hSmeared->SetBinContent(j, fluct);
                 }
@@ -419,45 +433,53 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
                 }
             }
 
+            cout << "Average Asymmetry =" << SumAsym / nPseudos << " +/-  " << SumErrAsym / (nPseudos) << "\n";
+            A_unf[k] = SumAsym / nPseudos;
+            Aerr_unf[k] = SumErrAsym / nPseudos / sqrt(nPseudos);
+
+            A_unf2Dbin1[k] = SumAsymBin1 / nPseudos;
+            Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos / sqrt(nPseudos);
+            A_unf2Dbin2[k] = SumAsymBin2 / nPseudos;
+            Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos / sqrt(nPseudos);
+            A_unf2Dbin3[k] = SumAsymBin3 / nPseudos;
+            Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos / sqrt(nPseudos);
+
+            if (nPseudos == 1)
+            {
+                Aerr_unf[k] = 0;
+                Aerr_unf2Dbin1[k] = 0;
+                Aerr_unf2Dbin2[k] = 0;
+                Aerr_unf2Dbin3[k] = 0;
+            }
+
+            A_gen2Dbin1[k] = SumTrueAsymBin1 / nPseudos;
+            Aerr_gen2Dbin1[k] = SumTrueErrAsymBin1 / nPseudos;
+            A_gen2Dbin2[k] = SumTrueAsymBin2 / nPseudos;
+            Aerr_gen2Dbin2[k] = SumTrueErrAsymBin2 / nPseudos;
+            A_gen2Dbin3[k] = SumTrueAsymBin3 / nPseudos;
+            Aerr_gen2Dbin3[k] = SumTrueErrAsymBin3 / nPseudos;
+
+            A_pull[k] = AfbPull->GetMean();
+            Aerr_pull[k] = AfbPull->GetMeanError();
+            A_pullwidth[k] = AfbPull->GetRMS();
+            Aerr_pullwidth[k] = AfbPull->GetRMSError();
+
+            A_pull_bin1[k] = Afb2DPullBin1->GetMean();
+            Aerr_pull_bin1[k] = Afb2DPullBin1->GetMeanError();
+            A_pullwidth_bin1[k] = Afb2DPullBin1->GetRMS();
+            Aerr_pullwidth_bin1[k] = Afb2DPullBin1->GetRMSError();
+
+            A_pull_bin2[k] = Afb2DPullBin2->GetMean();
+            Aerr_pull_bin2[k] = Afb2DPullBin2->GetMeanError();
+            A_pullwidth_bin2[k] = Afb2DPullBin2->GetRMS();
+            Aerr_pullwidth_bin2[k] = Afb2DPullBin2->GetRMSError();
+
+            A_pull_bin3[k] = Afb2DPullBin3->GetMean();
+            Aerr_pull_bin3[k] = Afb2DPullBin3->GetMeanError();
+            A_pullwidth_bin3[k] = Afb2DPullBin3->GetRMS();
+            Aerr_pullwidth_bin3[k] = Afb2DPullBin3->GetRMSError();
+
         }
-
-        cout << "Average Asymmetry =" << SumAsym / nPseudos << " +/-  " << SumErrAsym / (nPseudos) << "\n";
-        A_unf[k] = SumAsym / nPseudos;
-        Aerr_unf[k] = SumErrAsym / nPseudos;
-
-        A_unf2Dbin1[k] = SumAsymBin1 / nPseudos;
-        Aerr_unf2Dbin1[k] = SumErrAsymBin1 / nPseudos;
-        A_unf2Dbin2[k] = SumAsymBin2 / nPseudos;
-        Aerr_unf2Dbin2[k] = SumErrAsymBin2 / nPseudos;
-        A_unf2Dbin3[k] = SumAsymBin3 / nPseudos;
-        Aerr_unf2Dbin3[k] = SumErrAsymBin3 / nPseudos;
-
-        A_gen2Dbin1[k] = SumTrueAsymBin1 / nPseudos;
-        Aerr_gen2Dbin1[k] = SumTrueErrAsymBin1 / nPseudos;
-        A_gen2Dbin2[k] = SumTrueAsymBin2 / nPseudos;
-        Aerr_gen2Dbin2[k] = SumTrueErrAsymBin2 / nPseudos;
-        A_gen2Dbin3[k] = SumTrueAsymBin3 / nPseudos;
-        Aerr_gen2Dbin3[k] = SumTrueErrAsymBin3 / nPseudos;
-
-        A_pull[k] = AfbPull->GetMean();
-        Aerr_pull[k] = AfbPull->GetMeanError();
-        A_pullwidth[k] = AfbPull->GetRMS();
-        Aerr_pullwidth[k] = AfbPull->GetRMSError();
-
-        A_pull_bin1[k] = Afb2DPullBin1->GetMean();
-        Aerr_pull_bin1[k] = Afb2DPullBin1->GetMeanError();
-        A_pullwidth_bin1[k] = Afb2DPullBin1->GetRMS();
-        Aerr_pullwidth_bin1[k] = Afb2DPullBin1->GetRMSError();
-
-        A_pull_bin2[k] = Afb2DPullBin2->GetMean();
-        Aerr_pull_bin2[k] = Afb2DPullBin2->GetMeanError();
-        A_pullwidth_bin2[k] = Afb2DPullBin2->GetRMS();
-        Aerr_pullwidth_bin2[k] = Afb2DPullBin2->GetRMSError();
-
-        A_pull_bin3[k] = Afb2DPullBin3->GetMean();
-        Aerr_pull_bin3[k] = Afb2DPullBin3->GetMeanError();
-        A_pullwidth_bin3[k] = Afb2DPullBin3->GetRMS();
-        Aerr_pullwidth_bin3[k] = Afb2DPullBin3->GetRMSError();
 
     }
 
@@ -772,7 +794,7 @@ void AfbUnfoldTests2D(Int_t iVar = 0, TString TestType = "Pull", TString Var2D =
 
     }
 
-    myfile.close();
+    //myfile.close();
 
 }
 
