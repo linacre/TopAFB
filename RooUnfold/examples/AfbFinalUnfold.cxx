@@ -96,7 +96,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         //xbins1D_arccos[0]=acos(-1.0); xbins1D_arccos[1]=acos(-0.6); xbins1D_arccos[2]=acos(-0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(0.3); xbins1D_arccos[5]=acos(0.6); xbins1D_arccos[6]=acos(1.0);
         xbins1D_arccos[0] = acos(1.0); xbins1D_arccos[1] = acos(0.8); xbins1D_arccos[2] = acos(0.4); xbins1D_arccos[3] = acos(0.0); xbins1D_arccos[4] = acos(-0.4); xbins1D_arccos[5] = acos(-0.8); xbins1D_arccos[6] = acos(-1.0);
         TH1D *hData_unfolded_arccos = new TH1D ("Data_Unfold_arccos", "Data with background subtracted and unfolded arccos", nbins1D, xbins1D_arccos);
-        TH1D *hTrue_arccos = new TH1D ("Top Gen arccos",  "Top Gen arccos",    nbins1D, xbins1D_arccos);
+        TH1D *hTrue_arccos = new TH1D ("Top_Gen_arccos",  "Top Gen arccos",    nbins1D, xbins1D_arccos);
 
         TH1D *hTrue = new TH1D ("true", "Truth",    nbins1D, xbins1D);
         TH1D *hMeas = new TH1D ("meas", "Measured", nbins1D, xbins1D);
@@ -429,8 +429,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
 
-        TProfile *theoryProfileCorr = new TProfile("th profile correlated", "correlated data from theory file", nbins1D, xbins1D);
-        TProfile *theoryProfileUnCorr = new TProfile("th profile uncorrelated", "uncorrelated data from theory file", nbins1D, xbins1D);
+        TProfile *theoryProfileCorr = new TProfile("thprofilecorrelated", "correlated data from theory file", nbins1D, xbins1D);
+        TProfile *theoryProfileUnCorr = new TProfile("thprofileuncorrelated", "uncorrelated data from theory file", nbins1D, xbins1D);
 
         if (observablename == "lep_azimuthal_asymmetry2")
         {
