@@ -616,10 +616,10 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                 }
                 //hData_unfolded          ->SetBinError(i, stat_uncorr[i - 1]);  //running with includeSys = 0 means we can use the RooUnfold stat-only errors
                 hData_unfolded_minussyst->SetBinContent(i, hData_unfolded->GetBinContent(i)
-                                                        - sqrt(  pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst 
+                                                        - sqrt(  pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst
             }
             hData_unfolded_minussyst->SetBinError(i, 0);
-            hData_unfolded_plussyst ->SetBinContent(i, 2 * sqrt( pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst 
+            hData_unfolded_plussyst ->SetBinContent(i, 2 * sqrt( pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst
             hData_unfolded_plussyst ->SetBinError(i, 0);
         }
 
@@ -702,13 +702,13 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         }
 
         //TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");
-        TLegend *leg1 = new TLegend(0.60, 0.75, 0.9, 0.93, NULL, "brNDC");
+        TLegend *leg1 = new TLegend(0.58, 0.75, 0.9, 0.93, NULL, "brNDC");
         leg1->SetEntrySeparation(0.1);
         leg1->SetFillColor(0);
         leg1->SetLineColor(0);
         leg1->SetBorderSize(0);
         leg1->SetFillStyle(0);
-        leg1->SetTextSize(0.03);
+        leg1->SetTextSize(0.032);
         if (observablename == "lep_azimuthal_asymmetry")
         {
             leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) unfolded");
@@ -726,15 +726,15 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
         {
-            TLegend *leg2 = new TLegend(0.18, 0.75, 0.6, 0.87, NULL, "brNDC");
+            TLegend *leg2 = new TLegend(0.18, 0.745, 0.45, 0.88, NULL, "brNDC");
             leg2->SetEntrySeparation(0.5);
             leg2->SetFillColor(0);
             leg2->SetLineColor(0);
             leg2->SetBorderSize(0);
             leg2->SetFillStyle(0);
-            leg2->SetTextSize(0.03);
-            leg2->AddEntry(theoryProfileCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(SM, #mu=M_{t})}", "L");
-            leg2->AddEntry(theoryProfileUnCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(uncorrelated, #mu=M_{t})}", "L");
+            leg2->SetTextSize(0.032);
+            leg2->AddEntry(theoryProfileCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(SM, #mu=^{}m_{t})}", "L");
+            leg2->AddEntry(theoryProfileUnCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(uncorrelated, #mu=^{}m_{t})}", "L");
             leg2->Draw();
         }
 
@@ -742,7 +742,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
 
-        TPaveText *pt1 = new TPaveText(0.18, 0.88, 0.41, 0.91, "brNDC");
+        TPaveText *pt1 = new TPaveText(0.175, 0.885, 0.41, 0.91, "brNDC");
         pt1->SetName("pt1name");
         pt1->SetBorderSize(0);
         pt1->SetFillStyle(0);
