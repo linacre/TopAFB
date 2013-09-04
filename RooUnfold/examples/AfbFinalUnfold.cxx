@@ -86,23 +86,31 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     {
 
         Initialize1DBinning(iVar);
+
+        //use twice as many reco bins for TUnfold
+        int recobinsmult = 2;
+        if (unfoldingType == 0) recobinsmult = 1;
+        const int nbins1Dreco = nbins1D * recobinsmult;
+        double xbins1Dreco[nbins1Dreco + 1];
+
+        for (int i = 0; i < nbins1Dreco + 1; ++i)
+        {
+            if (unfoldingType == 0) xbins1Dreco[i] = xbins1D[i];
+            else xbins1Dreco[i] = (xbins1D[int(i / 2)] + xbins1D[int((i + 1) / 2)]) / 2.;
+            //cout << xbins1Dreco[i] << endl;
+        }
+
         bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
 
-        TH1D *hData = new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1D, xbins1D);
-        TH1D *hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
+        TH1D *hData = new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1Dreco, xbins1Dreco);
+        TH1D *hBkg = new TH1D ("Background",  "Background",    nbins1Dreco, xbins1Dreco);
         TH1D *hData_unfolded = new TH1D ("Data_Unfold", "Data with background subtracted and unfolded", nbins1D, xbins1D);
 
-        double xbins1D_arccos[nbins1D + 1];
-        //xbins1D_arccos[0]=acos(-1.0); xbins1D_arccos[1]=acos(-0.6); xbins1D_arccos[2]=acos(-0.3); xbins1D_arccos[3]=acos(0.0); xbins1D_arccos[4]=acos(0.3); xbins1D_arccos[5]=acos(0.6); xbins1D_arccos[6]=acos(1.0);
-        xbins1D_arccos[0] = acos(1.0); xbins1D_arccos[1] = acos(0.8); xbins1D_arccos[2] = acos(0.4); xbins1D_arccos[3] = acos(0.0); xbins1D_arccos[4] = acos(-0.4); xbins1D_arccos[5] = acos(-0.8); xbins1D_arccos[6] = acos(-1.0);
-        TH1D *hData_unfolded_arccos = new TH1D ("Data_Unfold_arccos", "Data with background subtracted and unfolded arccos", nbins1D, xbins1D_arccos);
-        TH1D *hTrue_arccos = new TH1D ("Top_Gen_arccos",  "Top Gen arccos",    nbins1D, xbins1D_arccos);
-
         TH1D *hTrue = new TH1D ("true", "Truth",    nbins1D, xbins1D);
-        TH1D *hMeas = new TH1D ("meas", "Measured", nbins1D, xbins1D);
+        TH1D *hMeas = new TH1D ("meas", "Measured", nbins1Dreco, xbins1Dreco);
         TH1D *denominatorM_nopTreweighting = new TH1D ("denominatorM_nopTreweighting", "denominatorM_nopTreweighting",    nbins1D, xbins1D);
 
-        TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1D, xbins1D, nbins1D, xbins1D);
+        TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1Dreco, xbins1Dreco, nbins1D, xbins1D);
 
         TH1D *hData_bkgSub;
 
@@ -112,8 +120,6 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hTrue->Sumw2();
         hMeas->Sumw2();
         hTrue_vs_Meas->Sumw2();
-        hData_unfolded_arccos->Sumw2();
-        hTrue_arccos->Sumw2();
 
 
         TMatrixD m_unfoldE (nbins1D, nbins1D);
@@ -392,18 +398,12 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             {
                 hData_unfolded->SetBinContent(i, hData_unfolded->GetBinContent(i) * 1.0 / acceptM->GetBinContent(i));
                 hData_unfolded->SetBinError  (i, hData_unfolded->GetBinError  (i) * 1.0 / acceptM->GetBinContent(i));
-
-                hData_unfolded_arccos->SetBinContent(nbins1D + 1 - i, hData_unfolded->GetBinContent(i));
-                hData_unfolded_arccos->SetBinError  (nbins1D + 1 - i, hData_unfolded->GetBinError(i));
             }
 
             if (acceptM->GetBinContent(i) != 0)
             {
                 hTrue->SetBinContent(i, hTrue->GetBinContent(i) * 1.0 / acceptM->GetBinContent(i));
                 hTrue->SetBinError  (i, hTrue->GetBinError(i)  * 1.0 / acceptM->GetBinContent(i));
-
-                hTrue_arccos->SetBinContent(nbins1D + 1 - i, hTrue->GetBinContent(i) );
-                hTrue_arccos->SetBinError  (nbins1D + 1 - i, hTrue->GetBinError(i) );
             }
 
             denominatorM_nopTreweighting->SetBinContent(i, denominatorM_nopTreweighting_raw->GetBinContent(i));
@@ -486,18 +486,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                 theoryProfileUnCorr->Fill(c1c2, v1);
                 nlines++;
             }
-/*
-            nlines = 0;
-            fp = fopen("theory/lhc7_mu1m_cos1cos2.dat", "r");
-            while (1)
-            {
-                ncols = fscanf(fp, "%f %f %f %f", &c1c2, &v1, &v2, &v3);
-                if (ncols < 0) break;
-                if (nlines < 5) printf("c1c2=%8f, v=%8f\n", c1c2, v1);
-                theoryProfileUnCorr->Fill(c1c2, v1);
-                nlines++;
-            }
-*/
+
         }
 
 
@@ -522,9 +511,6 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         cout << " True Top from acceptance denominator: " << Afb << " +/-  " << AfbErr << "\n";
         second_output_file << acceptanceName << " " << observablename << " True_Top_from_acceptance_denominator: " << Afb << " +/-  " << AfbErr << "\n";
 
-        //GetCorrectedAfb(hData_unfolded_arccos, m_correctE, Afb, AfbErr);
-        //cout<<" Unfolded (from arccos histo): "<< Afb <<" +/-  "<< AfbErr<<"\n";
-
         //GetAfbBinByBin(hData_unfolded);
 
         //GetAfb(hData_unfolded, Afb, AfbErr);
@@ -548,76 +534,34 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         //hTrue->Scale(xsection/hTrue->Integral(),"width");
         hData_unfolded->Scale(1. / hData_unfolded->Integral(), "width");
         hTrue->Scale(1. / hTrue->Integral(), "width");
-        hData_unfolded_arccos->Scale(1. / hData_unfolded_arccos->Integral(), "width");
-        hTrue_arccos->Scale(1. / hTrue_arccos->Integral(), "width");
 
-        if (observablename == "lep_azimuthal_asymmetry")
+        for (int i = 1; i < nbins1D + 1; i++)
         {
-            for (int i = 1; i < nbins1D + 1; i++)
-            {
-                cout << i << " bin = " << hData_unfolded_arccos->GetBinContent(i) << " +/- " << hData_unfolded_arccos->GetBinError(i) << endl;
-                second_output_file << acceptanceName << " " << observablename << " bin" << i << ": " << hData_unfolded_arccos->GetBinContent(i) << " +/- " << hData_unfolded_arccos->GetBinError(i) << endl;
-            }
+            cout << i << " bin = " << hData_unfolded->GetBinContent(i) << " +/- " << hData_unfolded->GetBinError(i) << endl;
+            second_output_file << acceptanceName << " " << observablename << " bin" << i << ": " << hData_unfolded->GetBinContent(i) << " +/- " << hData_unfolded->GetBinError(i) << endl;
         }
-        else
-        {
-            for (int i = 1; i < nbins1D + 1; i++)
-            {
-                cout << i << " bin = " << hData_unfolded->GetBinContent(i) << " +/- " << hData_unfolded->GetBinError(i) << endl;
-                second_output_file << acceptanceName << " " << observablename << " bin" << i << ": " << hData_unfolded->GetBinContent(i) << " +/- " << hData_unfolded->GetBinError(i) << endl;
-            }
-        }
-
 
         TH1D *hData_unfolded_minussyst;
         TH1D *hData_unfolded_plussyst;
-        if (observablename == "lep_azimuthal_asymmetry")
-        {
-            hData_unfolded_minussyst = (TH1D *) hData_unfolded_arccos->Clone("Data_unfolded_minussyst");
-            hData_unfolded_plussyst = (TH1D *) hData_unfolded_arccos->Clone("Data_unfolded_plussyst");
-        }
-        else
-        {
-            hData_unfolded_minussyst = (TH1D *) hData_unfolded->Clone("Data_unfolded_minussyst");
-            hData_unfolded_plussyst = (TH1D *) hData_unfolded->Clone("Data_unfolded_plussyst");
-        }
+        hData_unfolded_minussyst = (TH1D *) hData_unfolded->Clone("Data_unfolded_minussyst");
+        hData_unfolded_plussyst = (TH1D *) hData_unfolded->Clone("Data_unfolded_plussyst");
 
         for (Int_t i = 1; i <= nbins1D; i++)
         {
-            if (observablename == "lep_azimuthal_asymmetry")
+            if (checkErrors)
             {
-                if (checkErrors)
+                if (includeSys)
                 {
-                    if (includeSys)
-                    {
-                        cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded_arccos->GetBinError(i) -  stat_corr[i - 1] << endl;
-                    }
-                    else
-                    {
-                        cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded_arccos->GetBinError(i) -  stat_uncorr[i - 1] << endl;
-                    }
+                    cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded->GetBinError(i) -  stat_corr[i - 1] << endl;
                 }
-                //hData_unfolded_arccos          ->SetBinError(i, stat_uncorr[i - 1]);  //running with includeSys = 0 means we can use the RooUnfold stat-only errors
-                hData_unfolded_minussyst->SetBinContent(i, hData_unfolded_arccos->GetBinContent(i)
-                                                        - sqrt( pow(stat_corr[i - 1], 2) - pow(stat_uncorr[i - 1], 2) + pow(syst_corr[i - 1], 2)));
-            }
-            else
-            {
-                if (checkErrors)
+                else
                 {
-                    if (includeSys)
-                    {
-                        cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded->GetBinError(i) -  stat_corr[i - 1] << endl;
-                    }
-                    else
-                    {
-                        cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded->GetBinError(i) -  stat_uncorr[i - 1] << endl;
-                    }
+                    cout << "Difference between calculated and hard-coded stat errors: " << hData_unfolded->GetBinError(i) -  stat_uncorr[i - 1] << endl;
                 }
-                //hData_unfolded          ->SetBinError(i, stat_uncorr[i - 1]);  //running with includeSys = 0 means we can use the RooUnfold stat-only errors
-                hData_unfolded_minussyst->SetBinContent(i, hData_unfolded->GetBinContent(i)
-                                                        - sqrt(  pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst
             }
+            //hData_unfolded          ->SetBinError(i, stat_uncorr[i - 1]);  //running with includeSys = 0 means we can use the RooUnfold stat-only errors
+            hData_unfolded_minussyst->SetBinContent(i, hData_unfolded->GetBinContent(i)
+                                                    - sqrt(  pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst
             hData_unfolded_minussyst->SetBinError(i, 0);
             hData_unfolded_plussyst ->SetBinContent(i, 2 * sqrt( pow(syst_corr[i - 1], 2)));  //hard-coded syst_corr now includes unfolding syst
             hData_unfolded_plussyst ->SetBinError(i, 0);
@@ -649,56 +593,32 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         theoryProfileUnCorr->SetLineStyle(2);
         theoryProfileUnCorr->SetMarkerStyle(1);
 
-        if (observablename == "lep_azimuthal_asymmetry")
+        hs->Draw();
+        hs->GetXaxis()->SetTitle(xaxislabel);
+        hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d(" + xaxislabel + ")");
+        //hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
+        //hData_unfolded->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
+        //hData_unfolded->SetMinimum(0.0);
+        //hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
+        hData_unfolded->SetMarkerStyle(23);
+        hData_unfolded->SetMarkerSize(1);
+        hData_unfolded->SetFillStyle(0);
+        hData_unfolded->Draw("E same");
+        hData_unfolded->SetLineWidth(lineWidth);
+        denominatorM_nopTreweighting->SetLineWidth(lineWidth);
+        denominatorM_nopTreweighting->SetLineColor(TColor::GetColorDark(kRed));
+        denominatorM_nopTreweighting->SetFillStyle(0);
+        hTrue->SetLineWidth(lineWidth);
+        hTrue->SetLineColor(TColor::GetColorDark(kRed));
+        //hTrue->SetFillColor(TColor::GetColorDark(kGreen));
+        hTrue->SetFillStyle(0);
+        if (!draw_truth_before_pT_reweighting) hTrue->Draw("hist same");
+        else denominatorM_nopTreweighting->Draw("hist same");
+        hData_unfolded->Draw("EP same");
+        if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
         {
-            hs->Draw();
-            hs->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
-            hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d(#Delta#phi_{l+l-})");
-            //hData_unfolded_arccos->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
-            //hData_unfolded_arccos->GetYaxis()->SetTitle("1/#sigma d#sigma/d(#Delta#phi_{l+l-})");
-            //hData_unfolded_arccos->SetMinimum(0.0);
-            //hData_unfolded_arccos->SetMaximum( 2.0* hData_unfolded_arccos->GetMaximum());
-            hData_unfolded_arccos->SetMarkerStyle(23);
-            hData_unfolded_arccos->SetMarkerSize(1);
-            hData_unfolded_arccos->SetFillStyle(0);
-            hData_unfolded_arccos->Draw("E same");
-            hData_unfolded_arccos->SetLineWidth(lineWidth);
-            hTrue_arccos->SetLineWidth(lineWidth);
-            hTrue_arccos->SetLineColor(TColor::GetColorDark(kRed));
-            //  hTrue_arccos->SetFillColor(TColor::GetColorDark(kGreen));
-            hTrue_arccos->SetFillStyle(0);
-            hTrue_arccos->Draw("hist same");
-            hData_unfolded_arccos->Draw("EP same");
-        }
-        else
-        {
-            hs->Draw();
-            hs->GetXaxis()->SetTitle(xaxislabel);
-            hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d(" + xaxislabel + ")");
-            //hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
-            //hData_unfolded->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
-            //hData_unfolded->SetMinimum(0.0);
-            //hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
-            hData_unfolded->SetMarkerStyle(23);
-            hData_unfolded->SetMarkerSize(1);
-            hData_unfolded->SetFillStyle(0);
-            hData_unfolded->Draw("E same");
-            hData_unfolded->SetLineWidth(lineWidth);
-            denominatorM_nopTreweighting->SetLineWidth(lineWidth);
-            denominatorM_nopTreweighting->SetLineColor(TColor::GetColorDark(kRed));
-            denominatorM_nopTreweighting->SetFillStyle(0);
-            hTrue->SetLineWidth(lineWidth);
-            hTrue->SetLineColor(TColor::GetColorDark(kRed));
-            //hTrue->SetFillColor(TColor::GetColorDark(kGreen));
-            hTrue->SetFillStyle(0);
-            if (!draw_truth_before_pT_reweighting) hTrue->Draw("hist same");
-            else denominatorM_nopTreweighting->Draw("hist same");
-            hData_unfolded->Draw("EP same");
-            if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
-            {
-                theoryProfileUnCorr->Draw("hist same");
-                theoryProfileCorr->Draw("hist same");
-            }
+            theoryProfileUnCorr->Draw("hist same");
+            theoryProfileCorr->Draw("hist same");
         }
 
         //TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");
@@ -709,18 +629,9 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         leg1->SetBorderSize(0);
         leg1->SetFillStyle(0);
         leg1->SetTextSize(0.032);
-        if (observablename == "lep_azimuthal_asymmetry")
-        {
-            leg1->AddEntry(hData_unfolded_arccos, "( Data - BG ) unfolded");
-            leg1->AddEntry(hData_unfolded_plussyst,    "Syst. uncertainty", "F");
-            leg1->AddEntry(hTrue_arccos,    "MC@NLO parton level", "L");
-        }
-        else
-        {
-            leg1->AddEntry(hData_unfolded, "( Data - BG ) unfolded");
-            leg1->AddEntry(hData_unfolded_plussyst,    "Syst. uncertainty", "F");
-            leg1->AddEntry(hTrue,    "MC@NLO parton level", "L");
-        }
+        leg1->AddEntry(hData_unfolded, "( Data - BG ) unfolded");
+        leg1->AddEntry(hData_unfolded_plussyst,    "Syst. uncertainty", "F");
+        leg1->AddEntry(hTrue,    "MC@NLO parton level", "L");
 
         leg1->Draw();
 
