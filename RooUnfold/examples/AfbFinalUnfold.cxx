@@ -320,6 +320,49 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hData_bkgSub = (TH1D *) hData->Clone();
         hData_bkgSub->Add(hBkg, -1.0);
 
+        Double_t biasScale =  hData_bkgSub->Integral() / hMeas->Integral() ;
+        hMeas->Scale(biasScale);
+
+        TCanvas *c_reco = new TCanvas("c_reco", "c_reco", 500, 500);
+
+        hData->SetLineWidth(lineWidth + 2);
+
+        hMeas->SetLineColor(TColor::GetColorDark(kGreen));
+        hMeas->SetFillColor(TColor::GetColorDark(kGreen));
+        hMeas->SetFillStyle(3353);
+
+        hBkg->SetLineColor(kYellow);
+        hBkg->SetFillColor(kYellow);
+
+
+        THStack *hMC = new THStack("hMC", "Stacked Top+BG");
+
+        hMC->Add(hBkg);
+        hMC->Add(hMeas);
+
+        hMC->SetMinimum(0.0);
+        hMC->SetMaximum( 1.5 * hMC->GetMaximum());
+        hMC->Draw("hist");
+        hMC->GetXaxis()->SetTitle(xaxislabel);
+        hMC->GetYaxis()->SetTitleOffset(1.3);
+        hMC->GetYaxis()->SetTitle("Events/bin");
+
+        hData->Draw("E same");
+
+        TLegend *leg0 = new TLegend(0.58, 0.75, 0.9, 0.93, NULL, "brNDC");
+        leg0->SetEntrySeparation(100);
+        leg0->SetFillColor(0);
+        leg0->SetLineColor(0);
+        leg0->SetBorderSize(0);
+        leg0->SetTextSize(0.03);
+        leg0->SetFillStyle(0);
+        leg0->AddEntry(hData, "Data");
+        leg0->AddEntry(hMeas,  "MC@NLO reco level", "F");
+        leg0->AddEntry(hBkg,  "Background", "F");
+        leg0->Draw();
+        c_reco->SaveAs("Reco_" + acceptanceName + Region + ".pdf");
+
+
         if (unfoldingType == 0)
         {
             RooUnfoldSvd unfold_svd (&response, hData_bkgSub, kterm);
@@ -341,9 +384,36 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         {
             TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);
             unfold_TUnfold.SetInput(hData_bkgSub);
-            //Double_t biasScale=1.0;
-            unfold_TUnfold.SetBias(hTrue);
-            unfold_TUnfold.DoUnfold(tau);
+            //unfold_TUnfold.SetBias(hTrue);
+
+            Int_t nScan = 300;
+            Int_t iBest;
+            TSpline *logTauX, *logTauY;
+            TGraph *lCurve;
+
+            iBest = unfold_TUnfold.ScanLcurve(nScan, 1E-3, 1E-2, &lCurve, &logTauX, &logTauY);
+            //iBest = unfold_TUnfold.ScanTau();
+
+            TCanvas *c_l = new TCanvas("c_l", "c_l", 1200, 600);
+            c_l->Divide(3, 1);
+            c_l->cd(1);
+            logTauX->Draw("L");
+            c_l->cd(2);
+            logTauY->Draw("L");
+            c_l->cd(3);
+            lCurve->Draw("AC");
+            c_l->SaveAs("Lcurve_" + acceptanceName + Region + ".pdf");
+
+
+            std::cout << "tau=" << unfold_TUnfold.GetTau() << " iBest=" <<   iBest << "\n";
+            cout << "bias scale for TUnfold: " << biasScale << endl;
+            //biasScale = 0.0;
+            tau = unfold_TUnfold.GetTau();
+            //do the unfolding with the "optimised" tau, and calculated bias scale (N_data/N_MC)
+            unfold_TUnfold.DoUnfold(tau, hData_bkgSub, biasScale);
+            //unfold_TUnfold.DoUnfold(0.005,hData_bkgSub,biasScale);
+
+
             unfold_TUnfold.GetOutput(hData_unfolded);
 
 
@@ -355,6 +425,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
                     m_unfoldE(cmi, cmj) = ematrix->GetBinContent(cmi + 1, cmj + 1);
                 }
             }
+
+
         }
         else cout << "Unfolding TYPE not Specified" << "\n";
 
