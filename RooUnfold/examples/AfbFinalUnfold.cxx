@@ -426,8 +426,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             }
 
 
-            //biasScale = 0.0; //set biasScale to 0 when using kRegModeSize
-            //do the unfolding with calculated bias scale (N_data/N_MC), and tau from ScanLcurve if doScanLCurve=true
+            //biasScale = 0.0; //set biasScale to 0 when using kRegModeSize, or to compare with unfoldingType == 1
+            //do the unfolding with calculated bias scale (N_data/N_MC), and tau from ScanLcurve if doScanLCurve=true. Note that the results will only be the same as unfoldingType == 1 with biasScale=0 and the same value of tau.
             cout << "bias scale for TUnfold: " << biasScale << endl;
             unfold_TUnfold.DoUnfold(tau, hData_bkgSub, biasScale);
             //unfold_TUnfold.DoUnfold(0.005,hData_bkgSub,biasScale);
