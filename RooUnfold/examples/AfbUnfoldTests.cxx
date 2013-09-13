@@ -31,7 +31,7 @@ TString Region = "";
 
 
 Int_t kterm = 3;
-Double_t tau = 1E-4;
+Double_t tau = 0.005;
 Int_t nPseudos = 10000;
 Int_t includeSys = 0;
 
@@ -80,6 +80,21 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     cout.precision(3);
 
     Initialize1DBinning(iVar);
+
+    //use twice as many reco bins for TUnfold
+    int recobinsmult = 2;
+    if (unfoldingType == 0) recobinsmult = 1;
+    const int nbins1Dreco = nbins1D * recobinsmult;
+    double xbins1Dreco[nbins1Dreco + 1];
+
+    for (int i = 0; i < nbins1Dreco + 1; ++i)
+    {
+        if (unfoldingType == 0) xbins1Dreco[i] = xbins1D[i];
+        else xbins1Dreco[i] = (xbins1D[int(i / 2)] + xbins1D[int((i + 1) / 2)]) / 2.;  //reco-level bins from dividing gen-level bins in 2
+        //else xbins1Dreco[i] = xmin + double(i) / nbins1Dreco * (xmax - xmin); //uniform reco-level bins
+        cout << xbins1Dreco[i] << endl;
+    }
+
     bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
     const int nDiff = nbins1D / 2;
 
@@ -119,12 +134,12 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     TH1D *hEmpty = new TH1D ("Empty", "Empty",    nbins1D, xbins1D);
 
     TH1D *hTrue_before = new TH1D ("trueBeforeScaling", "Truth",    nbins1D, xbins1D);
-    TH1D *hMeas_before = new TH1D ("measBeforeScaling", "Measured", nbins1D, xbins1D);
+    TH1D *hMeas_before = new TH1D ("measBeforeScaling", "Measured", nbins1Dreco, xbins1Dreco);
 
     TH1D *hTrue_after = new TH1D ("trueAfterScaling", "Truth",    nbins1D, xbins1D);
-    TH1D *hMeas_after = new TH1D ("measAfterScaling", "Measured", nbins1D, xbins1D);
+    TH1D *hMeas_after = new TH1D ("measAfterScaling", "Measured", nbins1Dreco, xbins1Dreco);
 
-    TH1D *hSmeared = new TH1D ("smeared", "Smeared", nbins1D, xbins1D);
+    TH1D *hSmeared = new TH1D ("smeared", "Smeared", nbins1Dreco, xbins1Dreco);
     TH1D *hUnfolded = new TH1D ("unfolded", "Unfolded", nbins1D, xbins1D);
 
     double pullMax = 5;
@@ -141,7 +156,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     }
 
 
-    TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1D, xbins1D, nbins1D, xbins1D);
+    TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1Dreco, xbins1Dreco, nbins1D, xbins1D);
 
 
     hTrue_before->Sumw2();
@@ -181,7 +196,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
     evtree->SetBranchAddress(observablename,    &observable);
     evtree->SetBranchAddress(observablename + "_gen", &observable_gen);
-    if (observablename == "lep_azimuthal_asymmetry2") evtree->SetBranchAddress("lep_azimuthal_asymmetry_gen2", &observable_gen);
+    //if (observablename == "lep_azimuthal_asymmetry2") evtree->SetBranchAddress("lep_azimuthal_asymmetry_gen2", &observable_gen);
     if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
     if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms_gen",    &observableMinus_gen);
     evtree->SetBranchAddress("weight", &weight);
@@ -383,7 +398,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                 {
                     RooUnfoldSvd unfold_svd (&response, hSmeared, kterm);
                     unfold_svd.Setup(&response, hSmeared);
-                    //      unfold_svd.IncludeSystematics(includeSys);
+                    unfold_svd.IncludeSystematics(includeSys);
                     hUnfolded = (TH1D *) unfold_svd.Hreco();
                     m_unfoldE = unfold_svd.Ereco();
                 }
@@ -392,17 +407,19 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                     RooUnfoldTUnfold unfold_rooTUnfold (&response, hSmeared, TUnfold::kRegModeCurvature);
                     unfold_rooTUnfold.Setup(&response, hSmeared);
                     unfold_rooTUnfold.FixTau(tau);
-                    //  unfold_rooTUnfold.IncludeSystematics(includeSys);
+                    unfold_rooTUnfold.IncludeSystematics(includeSys);
                     hUnfolded = (TH1D *) unfold_rooTUnfold.Hreco();
                     m_unfoldE = unfold_rooTUnfold.Ereco();
                 }
                 else if (unfoldingType == 2)
                 {
                     TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);
-                    //  Double_t biasScale=5.0;
-                    //  unfold_TUnfold.SetBias(hTrue_before);
+                    Double_t biasScale = 1.0;
+                    biasScale =  hSmeared->Integral() / hMeas_before->Integral() ;
+                    cout << "bias scale for TUnfold: " << biasScale << endl;
+                    //  unfold_TUnfold.SetBias(hTrue_before);  //doesn't make any difference, because if not set the bias distribution is automatically determined from hTrue_vs_Meas, which gives exactly hTrue
                     unfold_TUnfold.SetInput(hSmeared);
-                    unfold_TUnfold.DoUnfold(tau);
+                    unfold_TUnfold.DoUnfold(tau, hSmeared, biasScale);
                     unfold_TUnfold.GetOutput(hUnfolded);
 
 
