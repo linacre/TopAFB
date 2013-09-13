@@ -106,6 +106,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
     TString FunctionName = formatFloat(Nfunction, "%6.0i");
     FunctionName.ReplaceAll(" " , "" );
+    if (Nfunction == 0) FunctionName = "0";
     TString file_name = "p1_f" + FunctionName + "_" + acceptanceName;
     ofstream third_output_file;
     third_output_file.open(file_name + ".txt");
@@ -716,7 +717,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_TrueUnfbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
             Asym2D_TrueUnfbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair (unfolded)");
             Asym2D_TrueUnfbin1->Draw("AP same");
-            Asym2D_TrueUnfbin1->Fit("pol1");
+            //Asym2D_TrueUnfbin1->Fit("pol1");
+            TFitResultPtr rbin1 = Asym2D_TrueUnfbin1->Fit("pol1", "S");
+            par1   = rbin1->Parameter(1);
+            par0   = rbin1->Parameter(0);
+            par1err   = rbin1->ParError(1);
+            par0err   = rbin1->ParError(0);
+            third_output_file << acceptanceName << " f " << Nfunction << " p0bin1: " << par0 << " +/- " << par0err << " p1bin1: " << par1 << " +/- " << par1err <<  endl;
 
             c_ttbar->cd(3);
             Asym2D_TrueUnfbin2->SetTitle(asymlabel);
@@ -726,7 +733,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_TrueUnfbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
             Asym2D_TrueUnfbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair (unfolded)");
             Asym2D_TrueUnfbin2->Draw("AP same");
-            Asym2D_TrueUnfbin2->Fit("pol1");
+            //Asym2D_TrueUnfbin2->Fit("pol1");
+            TFitResultPtr rbin2 = Asym2D_TrueUnfbin2->Fit("pol1", "S");
+            par1   = rbin2->Parameter(1);
+            par0   = rbin2->Parameter(0);
+            par1err   = rbin2->ParError(1);
+            par0err   = rbin2->ParError(0);
+            third_output_file << acceptanceName << " f " << Nfunction << " p0bin2: " << par0 << " +/- " << par0err << " p1bin2: " << par1 << " +/- " << par1err <<  endl;
 
             c_ttbar->cd(4);
             Asym2D_TrueUnfbin3->SetTitle(asymlabel);
@@ -736,7 +749,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_TrueUnfbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
             Asym2D_TrueUnfbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair (unfolded)");
             Asym2D_TrueUnfbin3->Draw("AP same");
-            Asym2D_TrueUnfbin3->Fit("pol1");
+            //Asym2D_TrueUnfbin3->Fit("pol1");
+            TFitResultPtr rbin3 = Asym2D_TrueUnfbin3->Fit("pol1", "S");
+            par1   = rbin3->Parameter(1);
+            par0   = rbin3->Parameter(0);
+            par1err   = rbin3->ParError(1);
+            par0err   = rbin3->ParError(0);
+            third_output_file << acceptanceName << " f " << Nfunction << " p0bin3: " << par0 << " +/- " << par0err << " p1bin3: " << par1 << " +/- " << par1err <<  endl;
         }
 
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.pdf");
