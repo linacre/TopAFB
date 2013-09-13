@@ -39,12 +39,14 @@ using std::endl;
 int unfoldingType = 0;
 
 TString Region = "";
-Int_t kterm = 3;
-Double_t tau = 1E-4;
+Int_t kterm = 3; //for SVD
+Double_t tau = 0.005; //for TUnfold - this is a more reasonable default (1E-4 gives very little regularisation)
+bool doScanLCurve = false; //determine tau automatically when using unfoldingType=2, using scanLcurve (overrides value set above) - doesn't work very well
 Int_t nVars = 8;
 Int_t includeSys = 0;
-Int_t checkErrors = 1;
-bool draw_truth_before_pT_reweighting = true;
+bool checkErrors = true; //turn this on when making the final plots for the paper, to check the hard-coded systematics have been correctly entered
+bool draw_truth_before_pT_reweighting = true; //turn this on when making the final plots for the paper (want to compare the data against the unweighted MC)
+//bool drawTheory = true; //turn this on to show Bernreuther's predictions for AdeltaPhi and Ac1c2
 
 
 void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
@@ -96,7 +98,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         for (int i = 0; i < nbins1Dreco + 1; ++i)
         {
             if (unfoldingType == 0) xbins1Dreco[i] = xbins1D[i];
-            else xbins1Dreco[i] = (xbins1D[int(i / 2)] + xbins1D[int((i + 1) / 2)]) / 2.;
+            else xbins1Dreco[i] = (xbins1D[int(i / 2)] + xbins1D[int((i + 1) / 2)]) / 2.;  //reco-level bins from dividing gen-level bins in 2
+            //else xbins1Dreco[i] = xmin + double(i) / nbins1Dreco * (xmax - xmin); //uniform reco-level bins
             //cout << xbins1Dreco[i] << endl;
         }
 
@@ -383,33 +386,49 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         else if (unfoldingType == 2)
         {
             TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);
+            //TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert);
             unfold_TUnfold.SetInput(hData_bkgSub);
-            //unfold_TUnfold.SetBias(hTrue);
+            //unfold_TUnfold.SetBias(hTrue);  //doesn't make any difference, because if not set the bias distribution is automatically determined from hTrue_vs_Meas, which gives exactly hTrue
 
-            Int_t nScan = 300;
-            Int_t iBest;
-            TSpline *logTauX, *logTauY;
-            TGraph *lCurve;
+            if (doScanLCurve)
+            {
 
-            iBest = unfold_TUnfold.ScanLcurve(nScan, 1E-3, 1E-2, &lCurve, &logTauX, &logTauY);
-            //iBest = unfold_TUnfold.ScanTau();
+                Int_t nScan = 3000;
+                Int_t iBest;
+                TSpline *logTauX, *logTauY;
+                TGraph *lCurve;
 
-            TCanvas *c_l = new TCanvas("c_l", "c_l", 1200, 600);
-            c_l->Divide(3, 1);
-            c_l->cd(1);
-            logTauX->Draw("L");
-            c_l->cd(2);
-            logTauY->Draw("L");
-            c_l->cd(3);
-            lCurve->Draw("AC");
-            c_l->SaveAs("Lcurve_" + acceptanceName + Region + ".pdf");
+                //restrict scan range to observed useful range of tau (5E-4 gives very weak regularisation, 2E-2 very strong)
+                iBest = unfold_TUnfold.ScanLcurve(nScan, 5E-4, 2E-2, &lCurve, &logTauX, &logTauY);
+
+                TCanvas *c_l = new TCanvas("c_l", "c_l", 1200, 600);
+                c_l->Divide(3, 1);
+                c_l->cd(1);
+                logTauX->Draw("L");
+                c_l->cd(2);
+                logTauY->Draw("L");
+                c_l->cd(3);
+                lCurve->Draw("AC");
+                c_l->SaveAs("Lcurve_" + acceptanceName + Region + ".pdf");
 
 
-            std::cout << "tau=" << unfold_TUnfold.GetTau() << " iBest=" <<   iBest << "\n";
+                std::cout << "tau=" << unfold_TUnfold.GetTau() << " iBest=" <<   iBest << "\n";
+
+                tau = unfold_TUnfold.GetTau();
+
+                //when an extreme value is chosen, normally it means scanLcurve didn't work very well, so reset tau to a reasonable value
+                if (tau > 1E-2 || tau < 1E-3)
+                {
+                    tau = 0.005;
+                    cout << "setting tau to 0.005" << endl;
+                }
+
+            }
+
+
+            //biasScale = 0.0; //set biasScale to 0 when using kRegModeSize
+            //do the unfolding with calculated bias scale (N_data/N_MC), and tau from ScanLcurve if doScanLCurve=true
             cout << "bias scale for TUnfold: " << biasScale << endl;
-            //biasScale = 0.0;
-            tau = unfold_TUnfold.GetTau();
-            //do the unfolding with the "optimised" tau, and calculated bias scale (N_data/N_MC)
             unfold_TUnfold.DoUnfold(tau, hData_bkgSub, biasScale);
             //unfold_TUnfold.DoUnfold(0.005,hData_bkgSub,biasScale);
 
