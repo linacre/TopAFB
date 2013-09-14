@@ -704,7 +704,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Double_t par0   = r->Parameter(0);
         Double_t par1err   = r->ParError(1);
         Double_t par0err   = r->ParError(0);
-        third_output_file << acceptanceName << " f " << Nfunction << " p0: " << par0 << " +/- " << par0err << " p1: " << par1 << " +/- " << par1err <<  endl;
+        third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0: " << par0 << " +/- " << par0err << " p1: " << par1 << " +/- " << par1err <<  endl;
 
 
         if (!plot_inclusive_only)
@@ -723,7 +723,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             par0   = rbin1->Parameter(0);
             par1err   = rbin1->ParError(1);
             par0err   = rbin1->ParError(0);
-            third_output_file << acceptanceName << " f " << Nfunction << " p0bin1: " << par0 << " +/- " << par0err << " p1bin1: " << par1 << " +/- " << par1err <<  endl;
+            third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0bin1: " << par0 << " +/- " << par0err << " p1bin1: " << par1 << " +/- " << par1err <<  endl;
 
             c_ttbar->cd(3);
             Asym2D_TrueUnfbin2->SetTitle(asymlabel);
@@ -739,7 +739,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             par0   = rbin2->Parameter(0);
             par1err   = rbin2->ParError(1);
             par0err   = rbin2->ParError(0);
-            third_output_file << acceptanceName << " f " << Nfunction << " p0bin2: " << par0 << " +/- " << par0err << " p1bin2: " << par1 << " +/- " << par1err <<  endl;
+            third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0bin2: " << par0 << " +/- " << par0err << " p1bin2: " << par1 << " +/- " << par1err <<  endl;
 
             c_ttbar->cd(4);
             Asym2D_TrueUnfbin3->SetTitle(asymlabel);
@@ -755,7 +755,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             par0   = rbin3->Parameter(0);
             par1err   = rbin3->ParError(1);
             par0err   = rbin3->ParError(0);
-            third_output_file << acceptanceName << " f " << Nfunction << " p0bin3: " << par0 << " +/- " << par0err << " p1bin3: " << par1 << " +/- " << par1err <<  endl;
+            third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0bin3: " << par0 << " +/- " << par0err << " p1bin3: " << par1 << " +/- " << par1err <<  endl;
         }
 
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.pdf");
@@ -773,7 +773,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Asym2D_Pull->GetXaxis()->SetTitle(asymlabel + " inclusive (true)");
         Asym2D_Pull->GetYaxis()->SetTitle(asymlabel + " inclusive pull");
         Asym2D_Pull->Draw("AP same");
-        Asym2D_Pull->Fit("pol1");
+        //Asym2D_Pull->Fit("pol1");
+        TFitResultPtr rp = Asym2D_Pull->Fit("pol1", "S");
+        par1   = rp->Parameter(1);
+        par0   = rp->Parameter(0);
+        par1err   = rp->ParError(1);
+        par0err   = rp->ParError(0);
+        third_output_file << acceptanceName << " Pull, f " << Nfunction << " p0: " << par0 << " +/- " << par0err << " p1: " << par1 << " +/- " << par1err <<  endl;
 
         if (!plot_inclusive_only)
         {
@@ -785,7 +791,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_Pullbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
             Asym2D_Pullbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair pull");
             Asym2D_Pullbin1->Draw("AP same");
-            Asym2D_Pullbin1->Fit("pol1");
+            //Asym2D_Pullbin1->Fit("pol1");
+            TFitResultPtr rpbin1 = Asym2D_Pullbin1->Fit("pol1", "S");
+            par1   = rpbin1->Parameter(1);
+            par0   = rpbin1->Parameter(0);
+            par1err   = rpbin1->ParError(1);
+            par0err   = rpbin1->ParError(0);
+            third_output_file << acceptanceName << " Pull, f " << Nfunction << " p0bin1: " << par0 << " +/- " << par0err << " p1bin1: " << par1 << " +/- " << par1err <<  endl;
 
             c_Pull_lin->cd(3);
             Asym2D_Pullbin2->SetTitle(asymlabel);
@@ -795,7 +807,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_Pullbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
             Asym2D_Pullbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair pull");
             Asym2D_Pullbin2->Draw("AP same");
-            Asym2D_Pullbin2->Fit("pol1");
+            //Asym2D_Pullbin2->Fit("pol1");
+            TFitResultPtr rpbin2 = Asym2D_Pullbin2->Fit("pol1", "S");
+            par1   = rpbin2->Parameter(1);
+            par0   = rpbin2->Parameter(0);
+            par1err   = rpbin2->ParError(1);
+            par0err   = rpbin2->ParError(0);
+            third_output_file << acceptanceName << " Pull, f " << Nfunction << " p0bin2: " << par0 << " +/- " << par0err << " p1bin2: " << par1 << " +/- " << par1err <<  endl;
 
             c_Pull_lin->cd(4);
             Asym2D_Pullbin3->SetTitle(asymlabel);
@@ -805,7 +823,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_Pullbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
             Asym2D_Pullbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair pull");
             Asym2D_Pullbin3->Draw("AP same");
-            Asym2D_Pullbin3->Fit("pol1");
+            //Asym2D_Pullbin3->Fit("pol1");
+            TFitResultPtr rpbin3 = Asym2D_Pullbin3->Fit("pol1", "S");
+            par1   = rpbin3->Parameter(1);
+            par0   = rpbin3->Parameter(0);
+            par1err   = rpbin3->ParError(1);
+            par0err   = rpbin3->ParError(0);
+            third_output_file << acceptanceName << " Pull, f " << Nfunction << " p0bin3: " << par0 << " +/- " << par0err << " p1bin3: " << par1 << " +/- " << par1err <<  endl;
         }
 
         c_Pull_lin->SaveAs(acceptanceName + "_LinearityCheck_Pull.pdf");
@@ -824,7 +848,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Asym2D_PullWidth->GetXaxis()->SetTitle(asymlabel + " inclusive (true)");
         Asym2D_PullWidth->GetYaxis()->SetTitle(asymlabel + " inclusive pull width");
         Asym2D_PullWidth->Draw("AP same");
-        Asym2D_PullWidth->Fit("pol1");
+        //Asym2D_PullWidth->Fit("pol1");
+        TFitResultPtr rpw = Asym2D_PullWidth->Fit("pol1", "S");
+        par1   = rpw->Parameter(1);
+        par0   = rpw->Parameter(0);
+        par1err   = rpw->ParError(1);
+        par0err   = rpw->ParError(0);
+        third_output_file << acceptanceName << " PullWidth, f " << Nfunction << " p0: " << par0 << " +/- " << par0err << " p1: " << par1 << " +/- " << par1err <<  endl;
 
         if (!plot_inclusive_only)
         {
@@ -836,7 +866,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_PullWidthbin1->GetXaxis()->SetTitle(asymlabel + " end bin pair (true)");
             Asym2D_PullWidthbin1->GetYaxis()->SetTitle(asymlabel + " end bin pair pull width");
             Asym2D_PullWidthbin1->Draw("AP same");
-            Asym2D_PullWidthbin1->Fit("pol1");
+            //Asym2D_PullWidthbin1->Fit("pol1");
+            TFitResultPtr rpwbin1 = Asym2D_PullWidthbin1->Fit("pol1", "S");
+            par1   = rpwbin1->Parameter(1);
+            par0   = rpwbin1->Parameter(0);
+            par1err   = rpwbin1->ParError(1);
+            par0err   = rpwbin1->ParError(0);
+            third_output_file << acceptanceName << " PullWidth, f " << Nfunction << " p0bin1: " << par0 << " +/- " << par0err << " p1bin1: " << par1 << " +/- " << par1err <<  endl;
 
             c_PullWidth_lin->cd(3);
             Asym2D_PullWidthbin2->SetTitle(asymlabel);
@@ -846,7 +882,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_PullWidthbin2->GetXaxis()->SetTitle(asymlabel + " middle bin pair (true)");
             Asym2D_PullWidthbin2->GetYaxis()->SetTitle(asymlabel + " middle bin pair pull width");
             Asym2D_PullWidthbin2->Draw("AP same");
-            Asym2D_PullWidthbin2->Fit("pol1");
+            //Asym2D_PullWidthbin2->Fit("pol1");
+            TFitResultPtr rpwbin2 = Asym2D_PullWidthbin2->Fit("pol1", "S");
+            par1   = rpwbin2->Parameter(1);
+            par0   = rpwbin2->Parameter(0);
+            par1err   = rpwbin2->ParError(1);
+            par0err   = rpwbin2->ParError(0);
+            third_output_file << acceptanceName << " PullWidth, f " << Nfunction << " p0bin2: " << par0 << " +/- " << par0err << " p1bin2: " << par1 << " +/- " << par1err <<  endl;
 
             c_PullWidth_lin->cd(4);
             Asym2D_PullWidthbin3->SetTitle(asymlabel);
@@ -856,7 +898,13 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             Asym2D_PullWidthbin3->GetXaxis()->SetTitle(asymlabel + " central bin pair (true)");
             Asym2D_PullWidthbin3->GetYaxis()->SetTitle(asymlabel + " central bin pair pull width");
             Asym2D_PullWidthbin3->Draw("AP same");
-            Asym2D_PullWidthbin3->Fit("pol1");
+            //Asym2D_PullWidthbin3->Fit("pol1");
+            TFitResultPtr rpwbin3 = Asym2D_PullWidthbin3->Fit("pol1", "S");
+            par1   = rpwbin3->Parameter(1);
+            par0   = rpwbin3->Parameter(0);
+            par1err   = rpwbin3->ParError(1);
+            par0err   = rpwbin3->ParError(0);
+            third_output_file << acceptanceName << " PullWidth, f " << Nfunction << " p0bin3: " << par0 << " +/- " << par0err << " p1bin3: " << par1 << " +/- " << par1err <<  endl;
         }
 
         c_PullWidth_lin->SaveAs(acceptanceName + "_LinearityCheck_PullWidth.pdf");
