@@ -96,7 +96,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     }
 
     bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
-    const int nDiff = nbins1D / 2;
+    const int nDiff = nbins1D + nbins1D / 2;
 
     ofstream myfile;
     //myfile.open ("summary_PEtest.txt");
@@ -483,13 +483,30 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                 SumTrueErrAsym[0] + = Aerr_gen_k;
 
 
-                for (int iD = 1; iD < nDiff + 1; ++iD)
+                for (int iD = 1; iD < nbins1D / 2 + 1; ++iD)
                 {
                     AfbPull[iD]->Fill( (afb2D[iD - 1] - afbtrue2D[iD - 1])  / afb2Derr[iD - 1] );
                     SumAsym[iD] + = afb2D[iD - 1];
                     SumErrAsym[iD] + = afb2Derr[iD - 1];
                     SumTrueAsym[iD] + = afbtrue2D[iD - 1];
                     SumTrueErrAsym[iD] + = afbtrue2Derr[iD - 1];
+                }
+
+                hUnfolded_clone = (TH1D *) hUnfolded->Clone("hUnfolded_clone");
+                hTrue_after_clone = (TH1D *) hTrue_after->Clone("hTrue_after_clone");
+
+                hUnfolded_clone->Scale(1. / hUnfolded_clone->Integral(), "width");
+                hTrue_after_clone->Scale(1. / hTrue_after_clone->Integral(), "width");
+
+
+                for (int iD = nbins1D / 2 + 1; iD < nDiff + 1; ++iD)
+                {
+                    AfbPull[iD]->Fill( (hUnfolded_clone->GetBinContent(iD - nbins1D / 2) - hTrue_after_clone->GetBinContent(iD - nbins1D / 2)) / hUnfolded_clone->GetBinError(iD - nbins1D / 2) );
+                    SumAsym[iD] + = hUnfolded_clone->GetBinContent(iD - nbins1D / 2);
+                    SumErrAsym[iD] + = hUnfolded_clone->GetBinError(iD - nbins1D / 2);
+                    SumTrueAsym[iD] + = hTrue_after_clone->GetBinContent(iD - nbins1D / 2);
+                    //SumTrueErrAsym[iD] + = hTrue_after_clone->GetBinError(iD - nbins1D / 2);
+                    SumTrueErrAsym[iD] + = 0.0;
                 }
 
 
@@ -596,6 +613,25 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         Float_t bin3_A_gen[Nlin], bin3_Aerr_gen[Nlin], bin3_A_unf[Nlin], bin3_Aerr_unf[Nlin];
         Float_t bin3_A_pull[Nlin], bin3_A_pullwidth[Nlin], bin3_Aerr_pull[Nlin], bin3_Aerr_pullwidth[Nlin];
 
+        Float_t bin1_V_gen[Nlin], bin1_Verr_gen[Nlin], bin1_V_unf[Nlin], bin1_Verr_unf[Nlin];
+        Float_t bin1_V_pull[Nlin], bin1_V_pullwidth[Nlin], bin1_Verr_pull[Nlin], bin1_Verr_pullwidth[Nlin];
+
+        Float_t bin2_V_gen[Nlin], bin2_Verr_gen[Nlin], bin2_V_unf[Nlin], bin2_Verr_unf[Nlin];
+        Float_t bin2_V_pull[Nlin], bin2_V_pullwidth[Nlin], bin2_Verr_pull[Nlin], bin2_Verr_pullwidth[Nlin];
+
+        Float_t bin3_V_gen[Nlin], bin3_Verr_gen[Nlin], bin3_V_unf[Nlin], bin3_Verr_unf[Nlin];
+        Float_t bin3_V_pull[Nlin], bin3_V_pullwidth[Nlin], bin3_Verr_pull[Nlin], bin3_Verr_pullwidth[Nlin];
+
+        Float_t bin4_V_gen[Nlin], bin4_Verr_gen[Nlin], bin4_V_unf[Nlin], bin4_Verr_unf[Nlin];
+        Float_t bin4_V_pull[Nlin], bin4_V_pullwidth[Nlin], bin4_Verr_pull[Nlin], bin4_Verr_pullwidth[Nlin];
+
+        Float_t bin5_V_gen[Nlin], bin5_Verr_gen[Nlin], bin5_V_unf[Nlin], bin5_Verr_unf[Nlin];
+        Float_t bin5_V_pull[Nlin], bin5_V_pullwidth[Nlin], bin5_Verr_pull[Nlin], bin5_Verr_pullwidth[Nlin];
+
+        Float_t bin6_V_gen[Nlin], bin6_Verr_gen[Nlin], bin6_V_unf[Nlin], bin6_Verr_unf[Nlin];
+        Float_t bin6_V_pull[Nlin], bin6_V_pullwidth[Nlin], bin6_Verr_pull[Nlin], bin6_Verr_pullwidth[Nlin];
+
+
         for (int k = 0; k < Nlin; k++)
         {
 
@@ -634,6 +670,76 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             bin3_A_pullwidth[k] = A_pullwidth[k][3];
             bin3_Aerr_pull[k] = Aerr_pull[k][3];
             bin3_Aerr_pullwidth[k] = Aerr_pullwidth[k][3];
+
+            bin1_V_gen[k] = A_gen[k][4];
+            bin1_Verr_gen[k] = Aerr_gen[k][4];
+            bin1_V_unf[k] = A_unf[k][4];
+            bin1_Verr_unf[k] = Aerr_unf[k][4];
+            bin1_V_pull[k] = A_pull[k][4];
+            bin1_V_pullwidth[k] = A_pullwidth[k][4];
+            bin1_Verr_pull[k] = Aerr_pull[k][4];
+            bin1_Verr_pullwidth[k] = Aerr_pullwidth[k][4];
+
+            bin2_V_gen[k] = A_gen[k][5];
+            bin2_Verr_gen[k] = Aerr_gen[k][5];
+            bin2_V_unf[k] = A_unf[k][5];
+            bin2_Verr_unf[k] = Aerr_unf[k][5];
+            bin2_V_pull[k] = A_pull[k][5];
+            bin2_V_pullwidth[k] = A_pullwidth[k][5];
+            bin2_Verr_pull[k] = Aerr_pull[k][5];
+            bin2_Verr_pullwidth[k] = Aerr_pullwidth[k][5];
+
+            bin3_V_gen[k] = A_gen[k][6];
+            bin3_Verr_gen[k] = Aerr_gen[k][6];
+            bin3_V_unf[k] = A_unf[k][6];
+            bin3_Verr_unf[k] = Aerr_unf[k][6];
+            bin3_V_pull[k] = A_pull[k][6];
+            bin3_V_pullwidth[k] = A_pullwidth[k][6];
+            bin3_Verr_pull[k] = Aerr_pull[k][6];
+            bin3_Verr_pullwidth[k] = Aerr_pullwidth[k][6];
+
+            bin4_V_gen[k] = A_gen[k][7];
+            bin4_Verr_gen[k] = Aerr_gen[k][7];
+            bin4_V_unf[k] = A_unf[k][7];
+            bin4_Verr_unf[k] = Aerr_unf[k][7];
+            bin4_V_pull[k] = A_pull[k][7];
+            bin4_V_pullwidth[k] = A_pullwidth[k][7];
+            bin4_Verr_pull[k] = Aerr_pull[k][7];
+            bin4_Verr_pullwidth[k] = Aerr_pullwidth[k][7];
+
+            bin5_V_gen[k] = A_gen[k][8];
+            bin5_Verr_gen[k] = Aerr_gen[k][8];
+            bin5_V_unf[k] = A_unf[k][8];
+            bin5_Verr_unf[k] = Aerr_unf[k][8];
+            bin5_V_pull[k] = A_pull[k][8];
+            bin5_V_pullwidth[k] = A_pullwidth[k][8];
+            bin5_Verr_pull[k] = Aerr_pull[k][8];
+            bin5_Verr_pullwidth[k] = Aerr_pullwidth[k][8];
+
+            bin6_V_gen[k] = A_gen[k][9];
+            bin6_Verr_gen[k] = Aerr_gen[k][9];
+            bin6_V_unf[k] = A_unf[k][9];
+            bin6_Verr_unf[k] = Aerr_unf[k][9];
+            bin6_V_pull[k] = A_pull[k][9];
+            bin6_V_pullwidth[k] = A_pullwidth[k][9];
+            bin6_Verr_pull[k] = Aerr_pull[k][9];
+            bin6_Verr_pullwidth[k] = Aerr_pullwidth[k][9];
+
+
+
+
+            //cout << A_gen[k][0] << " " << Aerr_gen[k][0] << " " << A_unf[k][0] << " " << Aerr_unf[k][0] << " " << A_pull[k][0] << " " << A_pullwidth[k][0] << " " << Aerr_pull[k][0] << " " << Aerr_pullwidth[k][0] << endl;
+            //cout << A_gen[k][1] << " " << Aerr_gen[k][1] << " " << A_unf[k][1] << " " << Aerr_unf[k][1] << " " << A_pull[k][1] << " " << A_pullwidth[k][1] << " " << Aerr_pull[k][1] << " " << Aerr_pullwidth[k][1] << endl;
+            //cout << A_gen[k][2] << " " << Aerr_gen[k][2] << " " << A_unf[k][2] << " " << Aerr_unf[k][2] << " " << A_pull[k][2] << " " << A_pullwidth[k][2] << " " << Aerr_pull[k][2] << " " << Aerr_pullwidth[k][2] << endl;
+            //cout << A_gen[k][3] << " " << Aerr_gen[k][3] << " " << A_unf[k][3] << " " << Aerr_unf[k][3] << " " << A_pull[k][3] << " " << A_pullwidth[k][3] << " " << Aerr_pull[k][3] << " " << Aerr_pullwidth[k][3] << endl;
+            //cout << A_gen[k][4] << " " << Aerr_gen[k][4] << " " << A_unf[k][4] << " " << Aerr_unf[k][4] << " " << A_pull[k][4] << " " << A_pullwidth[k][4] << " " << Aerr_pull[k][4] << " " << Aerr_pullwidth[k][4] << endl;
+            //cout << A_gen[k][5] << " " << Aerr_gen[k][5] << " " << A_unf[k][5] << " " << Aerr_unf[k][5] << " " << A_pull[k][5] << " " << A_pullwidth[k][5] << " " << Aerr_pull[k][5] << " " << Aerr_pullwidth[k][5] << endl;
+            //cout << A_gen[k][6] << " " << Aerr_gen[k][6] << " " << A_unf[k][6] << " " << Aerr_unf[k][6] << " " << A_pull[k][6] << " " << A_pullwidth[k][6] << " " << Aerr_pull[k][6] << " " << Aerr_pullwidth[k][6] << endl;
+            //cout << A_gen[k][7] << " " << Aerr_gen[k][7] << " " << A_unf[k][7] << " " << Aerr_unf[k][7] << " " << A_pull[k][7] << " " << A_pullwidth[k][7] << " " << Aerr_pull[k][7] << " " << Aerr_pullwidth[k][7] << endl;
+            //cout << A_gen[k][8] << " " << Aerr_gen[k][8] << " " << A_unf[k][8] << " " << Aerr_unf[k][8] << " " << A_pull[k][8] << " " << A_pullwidth[k][8] << " " << Aerr_pull[k][8] << " " << Aerr_pullwidth[k][8] << endl;
+            //cout << A_gen[k][9] << " " << Aerr_gen[k][9] << " " << A_unf[k][9] << " " << Aerr_unf[k][9] << " " << A_pull[k][9] << " " << A_pullwidth[k][9] << " " << Aerr_pull[k][9] << " " << Aerr_pullwidth[k][9] << endl;
+
+
 
 
             /*
@@ -685,6 +791,35 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         TGraphErrors *Asym2D_TrueUnfbin3 = new TGraphErrors (Nlin, bin3_A_gen, bin3_A_unf, bin3_Aerr_gen, bin3_Aerr_unf);
         TGraphErrors *Asym2D_PullWidthbin3 = new TGraphErrors (Nlin, bin3_A_gen, bin3_A_pullwidth, bin3_Aerr_gen, bin3_Aerr_pullwidth);
         TGraphErrors *Asym2D_Pullbin3 = new TGraphErrors (Nlin, bin3_A_gen, bin3_A_pull, bin3_Aerr_gen, bin3_Aerr_pull);
+
+
+
+
+
+        TGraphErrors *Value_TrueUnfbin1 = new TGraphErrors (Nlin, bin1_V_gen, bin1_V_unf, bin1_Verr_gen, bin1_Verr_unf);
+        TGraphErrors *Value_PullWidthbin1 = new TGraphErrors (Nlin, bin1_V_gen, bin1_V_pullwidth, bin1_Verr_gen, bin1_Verr_pullwidth);
+        TGraphErrors *Value_Pullbin1 = new TGraphErrors (Nlin, bin1_V_gen, bin1_V_pull, bin1_Verr_gen, bin1_Verr_pull);
+
+        TGraphErrors *Value_TrueUnfbin2 = new TGraphErrors (Nlin, bin2_V_gen, bin2_V_unf, bin2_Verr_gen, bin2_Verr_unf);
+        TGraphErrors *Value_PullWidthbin2 = new TGraphErrors (Nlin, bin2_V_gen, bin2_V_pullwidth, bin2_Verr_gen, bin2_Verr_pullwidth);
+        TGraphErrors *Value_Pullbin2 = new TGraphErrors (Nlin, bin2_V_gen, bin2_V_pull, bin2_Verr_gen, bin2_Verr_pull);
+
+        TGraphErrors *Value_TrueUnfbin3 = new TGraphErrors (Nlin, bin3_V_gen, bin3_V_unf, bin3_Verr_gen, bin3_Verr_unf);
+        TGraphErrors *Value_PullWidthbin3 = new TGraphErrors (Nlin, bin3_V_gen, bin3_V_pullwidth, bin3_Verr_gen, bin3_Verr_pullwidth);
+        TGraphErrors *Value_Pullbin3 = new TGraphErrors (Nlin, bin3_V_gen, bin3_V_pull, bin3_Verr_gen, bin3_Verr_pull);
+
+        TGraphErrors *Value_TrueUnfbin4 = new TGraphErrors (Nlin, bin4_V_gen, bin4_V_unf, bin4_Verr_gen, bin4_Verr_unf);
+        TGraphErrors *Value_PullWidthbin4 = new TGraphErrors (Nlin, bin4_V_gen, bin4_V_pullwidth, bin4_Verr_gen, bin4_Verr_pullwidth);
+        TGraphErrors *Value_Pullbin4 = new TGraphErrors (Nlin, bin4_V_gen, bin4_V_pull, bin4_Verr_gen, bin4_Verr_pull);
+
+        TGraphErrors *Value_TrueUnfbin5 = new TGraphErrors (Nlin, bin5_V_gen, bin5_V_unf, bin5_Verr_gen, bin5_Verr_unf);
+        TGraphErrors *Value_PullWidthbin5 = new TGraphErrors (Nlin, bin5_V_gen, bin5_V_pullwidth, bin5_Verr_gen, bin5_Verr_pullwidth);
+        TGraphErrors *Value_Pullbin5 = new TGraphErrors (Nlin, bin5_V_gen, bin5_V_pull, bin5_Verr_gen, bin5_Verr_pull);
+
+        TGraphErrors *Value_TrueUnfbin6 = new TGraphErrors (Nlin, bin6_V_gen, bin6_V_unf, bin6_Verr_gen, bin6_Verr_unf);
+        TGraphErrors *Value_PullWidthbin6 = new TGraphErrors (Nlin, bin6_V_gen, bin6_V_pullwidth, bin6_Verr_gen, bin6_Verr_pullwidth);
+        TGraphErrors *Value_Pullbin6 = new TGraphErrors (Nlin, bin6_V_gen, bin6_V_pull, bin6_Verr_gen, bin6_Verr_pull);
+
 
 
 
@@ -760,6 +895,129 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.pdf");
         c_ttbar->SaveAs(acceptanceName + "_LinearityCheck.C");
+
+
+
+
+
+
+
+
+
+
+
+
+        TCanvas *c_LinearityBinByBin = new TCanvas("c_LinearityBinByBin", "c_LinearityBinByBin", 750, 500);
+        c_LinearityBinByBin->Divide(3, 2);
+
+        c_LinearityBinByBin->cd(1);
+        Value_TrueUnfbin1->SetTitle(asymlabel);
+        Value_TrueUnfbin1->SetMarkerStyle(23);
+        Value_TrueUnfbin1->SetMarkerColor(kGreen - 1);
+        Value_TrueUnfbin1->SetMarkerSize(0.6);
+        Value_TrueUnfbin1->GetXaxis()->SetTitle(asymlabel + " bin1 (true)");
+        Value_TrueUnfbin1->GetYaxis()->SetTitle(asymlabel + " bin1 (unfolded)");
+        Value_TrueUnfbin1->Draw("AP same");
+        //Value_TrueUnfbin1->Fit("pol1");
+        TFitResultPtr rVbin1 = Value_TrueUnfbin1->Fit("pol1", "S");
+        par1   = rVbin1->Parameter(1);
+        par0   = rVbin1->Parameter(0);
+        par1err   = rVbin1->ParError(1);
+        par0err   = rVbin1->ParError(0);
+        third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0Vbin1: " << par0 << " +/- " << par0err << " p1Vbin1: " << par1 << " +/- " << par1err <<  endl;
+
+        c_LinearityBinByBin->cd(2);
+        Value_TrueUnfbin2->SetTitle(asymlabel);
+        Value_TrueUnfbin2->SetMarkerStyle(23);
+        Value_TrueUnfbin2->SetMarkerColor(kGreen - 1);
+        Value_TrueUnfbin2->SetMarkerSize(0.6);
+        Value_TrueUnfbin2->GetXaxis()->SetTitle(asymlabel + " bin2 (true)");
+        Value_TrueUnfbin2->GetYaxis()->SetTitle(asymlabel + " bin2 (unfolded)");
+        Value_TrueUnfbin2->Draw("AP same");
+        //Value_TrueUnfbin2->Fit("pol1");
+        TFitResultPtr rVbin2 = Value_TrueUnfbin2->Fit("pol1", "S");
+        par1   = rVbin2->Parameter(1);
+        par0   = rVbin2->Parameter(0);
+        par1err   = rVbin2->ParError(1);
+        par0err   = rVbin2->ParError(0);
+        third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0Vbin2: " << par0 << " +/- " << par0err << " p1Vbin2: " << par1 << " +/- " << par1err <<  endl;
+
+        c_LinearityBinByBin->cd(3);
+        Value_TrueUnfbin3->SetTitle(asymlabel);
+        Value_TrueUnfbin3->SetMarkerStyle(23);
+        Value_TrueUnfbin3->SetMarkerColor(kGreen - 1);
+        Value_TrueUnfbin3->SetMarkerSize(0.6);
+        Value_TrueUnfbin3->GetXaxis()->SetTitle(asymlabel + " bin3 (true)");
+        Value_TrueUnfbin3->GetYaxis()->SetTitle(asymlabel + " bin3 (unfolded)");
+        Value_TrueUnfbin3->Draw("AP same");
+        //Value_TrueUnfbin3->Fit("pol1");
+        TFitResultPtr rVbin3 = Value_TrueUnfbin3->Fit("pol1", "S");
+        par1   = rVbin3->Parameter(1);
+        par0   = rVbin3->Parameter(0);
+        par1err   = rVbin3->ParError(1);
+        par0err   = rVbin3->ParError(0);
+        third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0Vbin3: " << par0 << " +/- " << par0err << " p1Vbin3: " << par1 << " +/- " << par1err <<  endl;
+
+        c_LinearityBinByBin->cd(4);
+        Value_TrueUnfbin4->SetTitle(asymlabel);
+        Value_TrueUnfbin4->SetMarkerStyle(23);
+        Value_TrueUnfbin4->SetMarkerColor(kGreen - 1);
+        Value_TrueUnfbin4->SetMarkerSize(0.6);
+        Value_TrueUnfbin4->GetXaxis()->SetTitle(asymlabel + " bin4 (true)");
+        Value_TrueUnfbin4->GetYaxis()->SetTitle(asymlabel + " bin4 (unfolded)");
+        Value_TrueUnfbin4->Draw("AP same");
+        //Value_TrueUnfbin4->Fit("pol1");
+        TFitResultPtr rVbin4 = Value_TrueUnfbin4->Fit("pol1", "S");
+        par1   = rVbin4->Parameter(1);
+        par0   = rVbin4->Parameter(0);
+        par1err   = rVbin4->ParError(1);
+        par0err   = rVbin4->ParError(0);
+        third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0Vbin4: " << par0 << " +/- " << par0err << " p1Vbin4: " << par1 << " +/- " << par1err <<  endl;
+
+        c_LinearityBinByBin->cd(5);
+        Value_TrueUnfbin5->SetTitle(asymlabel);
+        Value_TrueUnfbin5->SetMarkerStyle(23);
+        Value_TrueUnfbin5->SetMarkerColor(kGreen - 1);
+        Value_TrueUnfbin5->SetMarkerSize(0.6);
+        Value_TrueUnfbin5->GetXaxis()->SetTitle(asymlabel + " bin5 (true)");
+        Value_TrueUnfbin5->GetYaxis()->SetTitle(asymlabel + " bin5 (unfolded)");
+        Value_TrueUnfbin5->Draw("AP same");
+        //Value_TrueUnfbin5->Fit("pol1");
+        TFitResultPtr rVbin5 = Value_TrueUnfbin5->Fit("pol1", "S");
+        par1   = rVbin5->Parameter(1);
+        par0   = rVbin5->Parameter(0);
+        par1err   = rVbin5->ParError(1);
+        par0err   = rVbin5->ParError(0);
+        third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0Vbin5: " << par0 << " +/- " << par0err << " p1Vbin5: " << par1 << " +/- " << par1err <<  endl;
+
+        c_LinearityBinByBin->cd(6);
+        Value_TrueUnfbin6->SetTitle(asymlabel);
+        Value_TrueUnfbin6->SetMarkerStyle(23);
+        Value_TrueUnfbin6->SetMarkerColor(kGreen - 1);
+        Value_TrueUnfbin6->SetMarkerSize(0.6);
+        Value_TrueUnfbin6->GetXaxis()->SetTitle(asymlabel + " bin6 (true)");
+        Value_TrueUnfbin6->GetYaxis()->SetTitle(asymlabel + " bin6 (unfolded)");
+        Value_TrueUnfbin6->Draw("AP same");
+        //Value_TrueUnfbin6->Fit("pol1");
+        TFitResultPtr rVbin6 = Value_TrueUnfbin6->Fit("pol1", "S");
+        par1   = rVbin6->Parameter(1);
+        par0   = rVbin6->Parameter(0);
+        par1err   = rVbin6->ParError(1);
+        par0err   = rVbin6->ParError(0);
+        third_output_file << acceptanceName << " Linearity, f " << Nfunction << " p0Vbin6: " << par0 << " +/- " << par0err << " p1Vbin6: " << par1 << " +/- " << par1err <<  endl;
+
+        c_LinearityBinByBin->SaveAs(acceptanceName + "_LinearityCheck_binbybin.pdf");
+        c_LinearityBinByBin->SaveAs(acceptanceName + "_LinearityCheck_binbybin.C");
+
+
+
+
+
+
+
+
+
+
 
 
 
