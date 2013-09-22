@@ -127,6 +127,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         TMatrixD m_unfoldE (nbins1D, nbins1D);
         TMatrixD m_correctE(nbins1D, nbins1D);
+        TMatrixD m_unfoldcorr (nbins1D, nbins1D);
 
         //  Now test with data and with BKG subtraction
 
@@ -437,11 +438,13 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
             TH2D *ematrix = unfold_TUnfold.GetEmatrix("ematrix", "error matrix", 0, 0);
+            TH2D *cmatrix = unfold_TUnfold.GetRhoIJ("cmatrix", "correlation matrix", 0, 0);
             for (Int_t cmi = 0; cmi < nbins1D; cmi++)
             {
                 for (Int_t cmj = 0; cmj < nbins1D; cmj++)
                 {
                     m_unfoldE(cmi, cmj) = ematrix->GetBinContent(cmi + 1, cmj + 1);
+                    m_unfoldcorr(cmi, cmj) = cmatrix->GetBinContent(cmi + 1, cmj + 1);
                 }
             }
 
@@ -449,6 +452,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         }
         else cout << "Unfolding TYPE not Specified" << "\n";
 
+        //m_unfoldE.Print("f=%1.5g ");
+        //m_unfoldcorr.Print("f=%1.5g ");
 
         if (unfoldingType == 0)
         {
@@ -623,6 +628,10 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         //scale to total xsec with option "width",  so that differential xsec is plotted
         //hData_unfolded->Scale(xsection/hData_unfolded->Integral(),"width");
         //hTrue->Scale(xsection/hTrue->Integral(),"width");
+
+
+        hData_unfolded_clone = (TH1D *) hData_unfolded->Clone("hData_unfolded_clone");
+
         hData_unfolded->Scale(1. / hData_unfolded->Integral(), "width");
         hTrue->Scale(1. / hTrue->Integral(), "width");
 
@@ -630,7 +639,23 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         {
             cout << i << " bin = " << hData_unfolded->GetBinContent(i) << " +/- " << hData_unfolded->GetBinError(i) << endl;
             second_output_file << acceptanceName << " " << observablename << " bin" << i << ": " << hData_unfolded->GetBinContent(i) << " +/- " << hData_unfolded->GetBinError(i) << endl;
+            //second_output_file << acceptanceName << " " << observablename << " truthbin" << i << ": " << hTrue->GetBinContent(i) << " +/- " << hTrue->GetBinError(i) << endl;
         }
+
+        //calculate covariance matrix for normalised distribution
+        for (int l = 0; l < nbins1D; l++)
+        {
+            for (int j = 0; j < nbins1D; j++)
+            {
+                m_correctE(l, j) = m_correctE(l, j) * (hData_unfolded->GetBinWidth(l + 1) * hData_unfolded->GetBinContent(l + 1) / hData_unfolded_clone->GetBinContent(l + 1)) * (hData_unfolded->GetBinWidth(j + 1) * hData_unfolded->GetBinContent(j + 1) / hData_unfolded_clone->GetBinContent(j + 1));
+            }
+        }
+
+        m_correctE.Print("f=%1.5g ");
+
+        //confirm covariance matrix for normalised distribution is correct by re-calculating Afb
+        //GetCorrectedAfb_integratewidth(hData_unfolded, m_correctE, Afb, AfbErr);
+        //cout << " Unfolded_after_scaling: " << Afb << " +/-  " << AfbErr << "\n";
 
         TH1D *hData_unfolded_minussyst;
         TH1D *hData_unfolded_plussyst;
