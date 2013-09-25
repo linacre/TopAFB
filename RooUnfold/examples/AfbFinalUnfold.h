@@ -285,6 +285,48 @@ void GetCorrectedAfb_integratewidth(TH1D* histogram, TMatrixD &covarianceM, Floa
 }
 
 
+void GetCorrectedAfb_integratewidth_V(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float_t  &afberr){
+
+    //Need to calculate AFB and Error for the fully corrected distribution, m_correctE(j,i)
+
+    //Get histogram info
+  int nbins = histogram->GetNbinsX();
+  double n[16];
+  for(int i=0;i<nbins;i++){
+    n[i] = histogram->GetBinContent(i+1) * histogram->GetBinWidth(i+1);
+  }
+
+    //Setup Alpha Vector
+  double alpha[16], beta[16];
+  for(int i=0;i<nbins;i++) if(i < nbins/2 ){ alpha[i] = -1;}else{ alpha[i] = 1;}
+
+    //Components of the error calculation
+  double sum_n = 0.;
+  double sum_alpha_n = 0.;
+  for(int i=0;i<nbins;i++){
+    sum_n += n[i];
+    sum_alpha_n += alpha[i] * n[i];
+  }
+
+  double dfdn[16];
+  for(int i=0;i<nbins;i++){
+    dfdn[i] = ( alpha[i] * sum_n - sum_alpha_n ) / pow(sum_n,2);
+  }
+
+    //Error Calculation
+  afberr = 0.;
+  for(int i=0;i<nbins;i++){
+    for(int j=0;j<nbins;j++){
+      afberr += covarianceM(i,j) * dfdn[i] * dfdn[j] * histogram->GetBinWidth(i+1) * histogram->GetBinWidth(j+1);
+    }
+  }
+  afberr = sqrt(afberr);
+
+    //Calculate Afb
+  afb = sum_alpha_n / sum_n;
+
+    //    cout<<"AFB = "<<afb<<" "<<afberr<<endl;
+}
 
 
 void GetCorrectedAfbBinByBin(TH1D* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr, ofstream& second_output_file){
