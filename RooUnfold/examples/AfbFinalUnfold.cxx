@@ -647,15 +647,17 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         {
             for (int j = 0; j < nbins1D; j++)
             {
-                m_correctE(l, j) = m_correctE(l, j) * (hData_unfolded->GetBinWidth(l + 1) * hData_unfolded->GetBinContent(l + 1) / hData_unfolded_clone->GetBinContent(l + 1)) * (hData_unfolded->GetBinWidth(j + 1) * hData_unfolded->GetBinContent(j + 1) / hData_unfolded_clone->GetBinContent(j + 1));
+                m_correctE(l, j) = m_correctE(l, j) * (hData_unfolded->GetBinContent(l + 1) / hData_unfolded_clone->GetBinContent(l + 1)) * (hData_unfolded->GetBinContent(j + 1) / hData_unfolded_clone->GetBinContent(j + 1)); //this gives the covariance matrix for the bin values
+                //m_correctE(l, j) = m_correctE(l, j) * (hData_unfolded->GetBinWidth(l + 1) * hData_unfolded->GetBinContent(l + 1) / hData_unfolded_clone->GetBinContent(l + 1)) * (hData_unfolded->GetBinWidth(j + 1) * hData_unfolded->GetBinContent(j + 1) / hData_unfolded_clone->GetBinContent(j + 1)); //this gives the covariance matrix for the integrated bin contents
             }
         }
 
         m_correctE.Print("f=%1.5g ");
 
         //confirm covariance matrix for normalised distribution is correct by re-calculating Afb
-        //GetCorrectedAfb_integratewidth(hData_unfolded, m_correctE, Afb, AfbErr);
-        //cout << " Unfolded_after_scaling: " << Afb << " +/-  " << AfbErr << "\n";
+        GetCorrectedAfb_integratewidth_V(hData_unfolded, m_correctE, Afb, AfbErr); //uses covariance matrix for the bin values
+        //GetCorrectedAfb_integratewidth(hData_unfolded, m_correctE, Afb, AfbErr); //uses covariance matrix for the integrated bin contents
+        cout << " Unfolded_after_scaling: " << Afb << " +/-  " << AfbErr << "\n";
 
         TH1D *hData_unfolded_minussyst;
         TH1D *hData_unfolded_plussyst;
