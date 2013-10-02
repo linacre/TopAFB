@@ -353,7 +353,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         hData->Draw("E same");
 
-        TLegend *leg0 = new TLegend(0.58, 0.75, 0.9, 0.93, NULL, "brNDC");
+        TLegend *leg0 = new TLegend(0.59, 0.75, 0.89, 0.93, NULL, "brNDC");
         leg0->SetEntrySeparation(100);
         leg0->SetFillColor(0);
         leg0->SetLineColor(0);
@@ -525,8 +525,8 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
 
-        TProfile *theoryProfileCorr = new TProfile("thprofilecorrelated", "correlated data from theory file", nbins1D, xbins1D);
-        TProfile *theoryProfileUnCorr = new TProfile("thprofileuncorrelated", "uncorrelated data from theory file", nbins1D, xbins1D);
+        TProfile *theoryProfileCorr = new TProfile("thprofilecorrelated", "correlated theory", nbins1D, xbins1D);
+        TProfile *theoryProfileUnCorr = new TProfile("thprofileuncorrelated", "uncorrelated theory", nbins1D, xbins1D);
 
         if (observablename == "lep_azimuthal_asymmetry2")
         {
@@ -740,14 +740,14 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         }
 
         //TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");
-        TLegend *leg1 = new TLegend(0.58, 0.75, 0.9, 0.93, NULL, "brNDC");
+        TLegend *leg1 = new TLegend(0.59, 0.75, 0.89, 0.93, NULL, "brNDC");
         leg1->SetEntrySeparation(0.1);
         leg1->SetFillColor(0);
         leg1->SetLineColor(0);
         leg1->SetBorderSize(0);
         leg1->SetFillStyle(0);
         leg1->SetTextSize(0.032);
-        leg1->AddEntry(hData_unfolded, "( Data - BG ) unfolded");
+        leg1->AddEntry(hData_unfolded, "(#kern[-0.2]{ }Data#kern[-0.2]{ }-#kern[-0.2]{ }bkg.#kern[-0.2]{ }) unfolded");
         leg1->AddEntry(hData_unfolded_plussyst,    "Syst. uncertainty", "F");
         leg1->AddEntry(hTrue,    "MC@NLO parton level", "L");
 
@@ -755,15 +755,15 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
         {
-            TLegend *leg2 = new TLegend(0.18, 0.745, 0.45, 0.88, NULL, "brNDC");
+            TLegend *leg2 = new TLegend(0.17, 0.745, 0.45, 0.88, NULL, "brNDC");
             leg2->SetEntrySeparation(0.5);
             leg2->SetFillColor(0);
             leg2->SetLineColor(0);
             leg2->SetBorderSize(0);
             leg2->SetFillStyle(0);
             leg2->SetTextSize(0.032);
-            leg2->AddEntry(theoryProfileCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(SM, #mu=^{}m_{t})}", "L");
-            leg2->AddEntry(theoryProfileUnCorr,  "#splitline{W.Bernreuther & Z.G.Si}{(uncorrelated, #mu=^{}m_{t})}", "L");
+            leg2->AddEntry(theoryProfileCorr,  "#splitline{W.#kern[-0.2]{ }Bernreuther & Z.#kern[-0.2]{-}G.#kern[-0.2]{ }Si}{(SM, #mu=^{}m_{t})}", "L");
+            leg2->AddEntry(theoryProfileUnCorr,  "#splitline{W.#kern[-0.2]{ }Bernreuther & Z.#kern[-0.2]{-}G.#kern[-0.2]{ }Si}{(uncorrelated, #mu=^{}m_{t})}", "L");
             leg2->Draw();
         }
 
