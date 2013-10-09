@@ -1,0 +1,16 @@
+root -q -b 'examples/AfbUnfoldTests.cxx(0,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(1,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(2,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(3,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(4,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(5,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(6,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(7,"Pull")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(0,"Linearity")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(1,"Linearity")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(2,"Linearity")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(3,"Linearity")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(4,"Linearity")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(5,"Linearity")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(6,"Linearity")' &
+root -q -b 'examples/AfbUnfoldTests.cxx(7,"Linearity")' &
