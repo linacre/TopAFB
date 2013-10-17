@@ -81,8 +81,8 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
     double bkgSF[nBkg] = {scalettotr, scalewjets, scaleDY, scaleDY, scaleDY, scaletw, scaleVV};
 
 
-    Float_t asymmetry, asymmetry_gen, tmass; //"asymmetry" formerly known as "observable"
-    Float_t asymmetryMinus, asymmetryMinus_gen;
+    Float_t asymVar, asymVar_gen, tmass; //"asymVar" formerly known as "observable"
+    Float_t asymVarMinus, asymVarMinus_gen;
     Float_t obs2D, obs2D_gen; //Note: change the name of obs2D to be something like "secondary variable"
     Double_t weight;
     Int_t Nsolns;
@@ -165,8 +165,8 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         }
 
 		///// Load data from data chain, and fill hData //////////
-        ch_data->SetBranchAddress(observablename,    &asymmetry);
-        if ( combineLepMinus ) ch_data->SetBranchAddress("lepMinus_costheta_cms",    &asymmetryMinus);
+        ch_data->SetBranchAddress(observablename,    &asymVar);
+        if ( combineLepMinus ) ch_data->SetBranchAddress("lepMinus_costheta_cms",    &asymVarMinus);
         ch_data->SetBranchAddress("weight", &weight);
         ch_data->SetBranchAddress("Nsolns", &Nsolns);
         ch_data->SetBranchAddress("t_mass", &tmass);
@@ -182,16 +182,16 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
             obs2D = fabs(obs2D);
             if ( tmass > 0 )
             {
-			  fillUnderOverFlow(hData, asymmetry, obs2D, weight, Nsolns);
-			  if (combineLepMinus) fillUnderOverFlow(hData, asymmetryMinus, obs2D, weight, Nsolns);
+			  fillUnderOverFlow(hData, asymVar, obs2D, weight, Nsolns);
+			  if (combineLepMinus) fillUnderOverFlow(hData, asymVarMinus, obs2D, weight, Nsolns);
             }
         }
 
 		///// Load background MC from background chain, and fill h_bkg //////////
         for (int iBkg = 0; iBkg < nBkg; ++iBkg)
         {
-            ch_bkg[iBkg]->SetBranchAddress(observablename,    &asymmetry);
-            if ( combineLepMinus ) ch_bkg[iBkg]->SetBranchAddress("lepMinus_costheta_cms",    &asymmetryMinus);
+            ch_bkg[iBkg]->SetBranchAddress(observablename,    &asymVar);
+            if ( combineLepMinus ) ch_bkg[iBkg]->SetBranchAddress("lepMinus_costheta_cms",    &asymVarMinus);
             ch_bkg[iBkg]->SetBranchAddress("weight", &weight);
             ch_bkg[iBkg]->SetBranchAddress("Nsolns", &Nsolns);
             ch_bkg[iBkg]->SetBranchAddress("t_mass", &tmass);
@@ -207,17 +207,17 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
                 weight *= bkgSF[iBkg];
                 if ( tmass > 0 )
                 {
-				  fillUnderOverFlow(hBkg, asymmetry, obs2D, weight, Nsolns);
-				  if (combineLepMinus)  fillUnderOverFlow(hBkg, asymmetryMinus, obs2D, weight, Nsolns);
+				  fillUnderOverFlow(hBkg, asymVar, obs2D, weight, Nsolns);
+				  if (combineLepMinus)  fillUnderOverFlow(hBkg, asymVarMinus, obs2D, weight, Nsolns);
                 }
             }
         }
 
 		///// Load true top MC from top chain, and fill h_true and hTrue_vs_Meas ///////////
-        ch_top->SetBranchAddress(observablename,    &asymmetry);
-        ch_top->SetBranchAddress(observablename + "_gen", &asymmetry_gen);
-        if ( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms",    &asymmetryMinus);
-        if ( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms_gen",    &asymmetryMinus_gen);
+        ch_top->SetBranchAddress(observablename,    &asymVar);
+        ch_top->SetBranchAddress(observablename + "_gen", &asymVar_gen);
+        if ( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms",    &asymVarMinus);
+        if ( combineLepMinus ) ch_top->SetBranchAddress("lepMinus_costheta_cms_gen",    &asymVarMinus_gen);
         ch_top->SetBranchAddress("weight", &weight);
         ch_top->SetBranchAddress("Nsolns", &Nsolns);
         ch_top->SetBranchAddress("t_mass", &tmass);
@@ -249,19 +249,19 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
             weight *= scalettdil;
             if ( tmass > 0 )
             {
-			  measbin = getUnwrappedBin(hMeas, asymmetry, obs2D);
-			  genbin  = getUnwrappedBin(hTrue, asymmetry_gen, obs2D_gen);
+			  measbin = getUnwrappedBin(hMeas, asymVar, obs2D);
+			  genbin  = getUnwrappedBin(hTrue, asymVar_gen, obs2D_gen);
 
-			  fillUnderOverFlow(hMeas, asymmetry, obs2D, weight, Nsolns);
-			  fillUnderOverFlow(hTrue, asymmetry_gen, obs2D_gen, weight, Nsolns);
+			  fillUnderOverFlow(hMeas, asymVar, obs2D, weight, Nsolns);
+			  fillUnderOverFlow(hTrue, asymVar_gen, obs2D_gen, weight, Nsolns);
 			  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
 			  if ( combineLepMinus )
                 {
-				  measbin = getUnwrappedBin(hMeas, asymmetryMinus, obs2D);
-				  genbin  = getUnwrappedBin(hTrue, asymmetryMinus_gen, obs2D_gen);
+				  measbin = getUnwrappedBin(hMeas, asymVarMinus, obs2D);
+				  genbin  = getUnwrappedBin(hTrue, asymVarMinus_gen, obs2D_gen);
 
-				  fillUnderOverFlow(hMeas, asymmetryMinus, obs2D, weight, Nsolns);
-				  fillUnderOverFlow(hTrue, asymmetryMinus_gen, obs2D_gen, weight, Nsolns);
+				  fillUnderOverFlow(hMeas, asymVarMinus, obs2D, weight, Nsolns);
+				  fillUnderOverFlow(hTrue, asymVarMinus_gen, obs2D_gen, weight, Nsolns);
 				  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
                 }
             }
@@ -386,8 +386,9 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 		rewrap1dhisto(hData_bkgSub, hData_bkgSub_rewrapped);
 		// rewrap1dhisto(hData_unwrapped, hData_unwrapped_rewrapped);
 
-		// hData_unwrapped_rewrapped->Divide(hData);
-		// hData_unwrapped_rewrapped->Print("all");
+
+		/////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////// 4. Output a bunch of histograms and tables //////////////////////////////////
 
         TCanvas *c_data = new TCanvas("c_data", "c_data");
         gStyle->SetPalette(1);
@@ -420,9 +421,6 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 		c1->cd(3);
 		hTrue->Draw("COLZ");
 		c1->SaveAs("data_comparison_"+acceptanceName+"_"+Var2D+".pdf");
-
-		/////////////////////////////////////////////////////////////////////////////////////////////
-		/////////////// 4. Output a bunch of histograms and tables //////////////////////////////////
 
         if (unfoldingType == 0)
         {
@@ -529,10 +527,7 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
             {
 			  hData_unfolded->SetBinContent(x,y, hData_unfolded->GetBinContent(x,y) * 1.0 / acceptM_2d->GetBinContent(x,y));
 			  hData_unfolded->SetBinError  (x,y, hData_unfolded->GetBinError  (x,y) * 1.0 / acceptM_2d->GetBinContent(x,y));
-            }
 
-            if (acceptM_2d->GetBinContent(x,y) != 0)
-            {
 			  hTrue->SetBinContent(x,y, hTrue->GetBinContent(x,y) * 1.0 / acceptM_2d->GetBinContent(x,y));
 			  hTrue->SetBinError  (x,y, hTrue->GetBinError(x,y)  * 1.0 / acceptM_2d->GetBinContent(x,y));
             }
@@ -575,7 +570,9 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         vector<double> afb_merr;
         vector<double> afb_m_denom;
         vector<double> afb_merr_denom;
+		cout << "From unfolded data:" << endl;
         GetAvsY2d(hData_unfolded, afb_m, afb_merr, second_output_file);
+		cout << "From acceptance denominator:" << endl;
 		GetAvsY2d(denomM_2d, afb_m_denom, afb_merr_denom, second_output_file);
 
 		/*
@@ -588,10 +585,10 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 		*/
 
         TCanvas *c_afb = new TCanvas("c_afb", "c_afb", 500, 500);
-        //double xbins2D_positive[4] = {xbins2D[3], xbins2D[4], xbins2D[5], xbins2D[6]};
-        //if (Var2D == "mtt") xbins2D_positive[0] = 300.0;
-        TH1D *hAfbVsMtt = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, ybins2D);
-        TH1D *hAfbVsMtt_statonly = new TH1D ("AfbVsMtt_statonly",  "AfbVsMtt_statonly",  3, ybins2D);
+        double ybinsForHisto[4] = {ybins2D[0], ybins2D[1], ybins2D[2], ybins2D[3]};
+        if (Var2D == "mtt") ybinsForHisto[0] = 300.0;
+        TH1D *hAfbVsMtt = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, ybinsForHisto);
+        TH1D *hAfbVsMtt_statonly = new TH1D ("AfbVsMtt_statonly",  "AfbVsMtt_statonly",  3, ybinsForHisto);
         for (int nb = 0; nb < 3; nb++)
         {
             hAfbVsMtt->SetBinContent(nb + 1, afb_m[nb]);
@@ -613,7 +610,7 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 
         //  GetAvsY(hTrue, m_unfoldE, afb_m, afb_merr);
 
-        TH1D *hTop_AfbVsMtt = new TH1D ("Top_AfbVsMtt",  "Top_AfbVsMtt",  3, ybins2D);
+        TH1D *hTop_AfbVsMtt = new TH1D ("Top_AfbVsMtt",  "Top_AfbVsMtt",  3, ybinsForHisto);
         for (int nb = 0; nb < 3; nb++)
         {
             hTop_AfbVsMtt->SetBinContent(nb + 1, afb_m_denom[nb]);
