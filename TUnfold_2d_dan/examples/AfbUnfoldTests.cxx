@@ -25,14 +25,14 @@ using std::endl;
 //==============================================================================
 
 // 0=SVD, 1=TUnfold via RooUnfold, 2=TUnfold
-int unfoldingType = 0;
+int unfoldingType = 2;
 
 TString Region = "";
 
 
 Int_t kterm = 3;
 Double_t tau = 0.005;
-Int_t nPseudos = 10000;
+Int_t nPseudos = 1;   // Set to 1 to speed up test runs. Previously set to 10k
 Int_t includeSys = 0;
 
 Int_t lineWidth = 5;
@@ -42,7 +42,7 @@ bool plot_inclusive_only = false;
 
 //TestType: "Pull" or "Linearity"
 //slopeOption: 0 = continuous reweighting, 1 = 6-binned reweighting
-void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption = 0, Int_t Nfunction = 0)
+void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Linearity", Int_t slopeOption = 0, Int_t Nfunction = 0, TString Var2D = "mtt")
 {
 #ifdef __CINT__
     gSystem->Load("libRooUnfold");
@@ -79,8 +79,12 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     gStyle->SetOptStat("emr");
     cout.precision(3);
 
-    Initialize1DBinning(iVar);
+    //Initialize1DBinning(iVar);
+	if (Var2D == "mtt") Initialize2DBinning(iVar);
+	else if (Var2D == "ttrapidity2") Initialize2DBinningttrapidity2(iVar);
+	else if (Var2D == "ttpt") Initialize2DBinningttpt(iVar);
 
+	/*
     //use twice as many reco bins for TUnfold
     int recobinsmult = 2;
     if (unfoldingType == 0) recobinsmult = 1;
@@ -94,9 +98,11 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         //else xbins1Dreco[i] = xmin + double(i) / nbins1Dreco * (xmax - xmin); //uniform reco-level bins
         cout << xbins1Dreco[i] << endl;
     }
+	*/
 
     bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
-    const int nDiff = nbins1D + nbins1D / 2;
+    // const int nDiff = nbins1D + nbins1D / 2;
+    const int nDiff = nbinsy2D;
 
     ofstream myfile;
     //myfile.open ("summary_PEtest.txt");
@@ -130,8 +136,10 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     //cout<<"***** "<<fx_scaled->Eval(0.5)<<endl;
     double fscale = -9999;
 
+	///////////////////////////////////////////////////////////////////////////////////////////
+	/////////////// 1. Set up all our histograms //////////////////////////////////////////////
 
-
+	/*
     TH1D *hEmpty = new TH1D ("Empty", "Empty",    nbins1D, xbins1D);
 
     TH1D *hTrue_before = new TH1D ("trueBeforeScaling", "Truth",    nbins1D, xbins1D);
@@ -142,6 +150,30 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
     TH1D *hSmeared = new TH1D ("smeared", "Smeared", nbins1Dreco, xbins1Dreco);
     TH1D *hUnfolded = new TH1D ("unfolded", "Unfolded", nbins1D, xbins1D);
+	*/
+
+	// 2D versions of the old 1D histograms
+    TH2D *hEmpty = new TH2D ("Empty", "Empty",    nbinsx2D, xbins2D, nbinsy2D, ybins2D);
+
+    TH2D *hTrue_before = new TH2D ("trueBeforeScaling", "Truth",    nbinsx2D, xbins2D, nbinsy2D, ybins2D);
+    TH2D *hMeas_before = new TH2D ("measBeforeScaling", "Measured", nbinsx2D, xbins2D, nbinsy2D, ybins2D);
+
+    TH2D *hTrue_after = new TH2D ("trueAfterScaling", "Truth",    nbinsx2D, xbins2D, nbinsy2D, ybins2D);
+    TH2D *hMeas_after = new TH2D ("measAfterScaling", "Measured", nbinsx2D, xbins2D, nbinsy2D, ybins2D);
+
+    TH2D *hSmeared = new TH2D ("smeared", "Smeared", nbinsx2D, xbins2D, nbinsy2D, ybins2D);
+    TH2D *hUnfolded = new TH2D ("unfolded", "Unfolded", nbinsx2D, xbins2D, nbinsy2D, ybins2D);
+
+	// 1D histograms to store the unwrapped distributions
+    TH1D *hTrue_before_unwrapped = new TH1D ("trueBeforeScalingUnwr", "Truth Before Unwrapped",    nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5); //Bias distribution
+    TH1D *hSmeared_unwrapped = new TH1D ("smearedUnwr", "Smeared Unwrapped", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5); //Input to TUnfold
+	TH1D *hUnfolded_unwrapped = new TH1D ("unfoldedUnwr", "Unfolded Unwrapped", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5); //Output from TUnfold
+
+    // TH1D *hTrue_after_unwrapped = new TH1D ("trueAfterScalingUnwr", "Truth Unwrapped",    nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
+    // TH1D *hMeas_after_unwrapped = new TH1D ("measAfterScalingUnwr", "Measured Unwrapped", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
+
+	//truebefore, hsmeared
+
 
     double pullMax = 5;
     int pullBins = 50;
@@ -157,7 +189,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     }
 
 
-    TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1Dreco, xbins1Dreco, nbins1D, xbins1D);
+	TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5, nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
 
 
     hTrue_before->Sumw2();
@@ -167,11 +199,17 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     hSmeared->Sumw2();
     hUnfolded->Sumw2();
 
+	// hTrue_after_unwrapped->Sumw2();
+	// hMeas_after_unwrapped->Sumw2();
+	hUnfolded_unwrapped->Sumw2();
+	hSmeared_unwrapped->Sumw2();
+	hTrue_before_unwrapped->Sumw2();
+
     hTrue_vs_Meas->Sumw2();
 
-    TMatrixD m_unfoldE(nbins1D, nbins1D);
+    TMatrixD m_unfoldE(nbinsunwrapped, nbinsunwrapped);
 
-
+	/*
     TH1F *h_pulls[nbins1D];
     TH1F *h_resd[nbins1D];
     for (int i = 0; i < nbins1D; i++)
@@ -183,29 +221,51 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         name += i;
         h_resd[i] = new TH1F(name, name, 20, -1, 1);
     }
+	*/
 
+	/////////////////////////////////////////////////////////////////////////////////////////
+	///////////////////////// 2. Fill our histograms from the baby ntuples //////////////////
 
+	// Set up event tree /////////////////////
     TFile *file = new TFile("../ttdil.root");
     TTree *evtree = (TTree *) file->Get("tree");
     Int_t entries = (Int_t)evtree->GetEntries();
     cout << "RESPONSE: Number of Entries: " << entries << endl;
 
-    Float_t observable, observable_gen, ttmass, ttRapidity, tmass;
-    Float_t observableMinus, observableMinus_gen;
+    Float_t asymVar, asymVar_gen, tmass, ttmass, ttmass_gen;
+    Float_t asymVarMinus, asymVarMinus_gen;
+	Float_t obs2D, obs2D_gen;
     Double_t weight;
     Int_t Nsolns;
 
-    evtree->SetBranchAddress(observablename,    &observable);
-    evtree->SetBranchAddress(observablename + "_gen", &observable_gen);
-    //if (observablename == "lep_azimuthal_asymmetry2") evtree->SetBranchAddress("lep_azimuthal_asymmetry_gen2", &observable_gen);
-    if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms",    &observableMinus);
-    if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms_gen",    &observableMinus_gen);
+    evtree->SetBranchAddress(observablename,    &asymVar);
+    evtree->SetBranchAddress(observablename + "_gen", &asymVar_gen);
+    //if (observablename == "lep_azimuthal_asymmetry2") evtree->SetBranchAddress("lep_azimuthal_asymmetry_gen2", &asymVar_gen);
+    if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms",    &asymVarMinus);
+    if ( combineLepMinus ) evtree->SetBranchAddress("lepMinus_costheta_cms_gen",    &asymVarMinus_gen);
     evtree->SetBranchAddress("weight", &weight);
     evtree->SetBranchAddress("Nsolns", &Nsolns);
-    evtree->SetBranchAddress("tt_mass", &ttmass);
-    evtree->SetBranchAddress("ttRapidity", &ttRapidity);
     evtree->SetBranchAddress("t_mass", &tmass);
+	evtree->SetBranchAddress("tt_mass", &ttmass);
+	evtree->SetBranchAddress("tt_mass_gen", &ttmass_gen);
 
+	//We need to keep the values of ttmass and ttmass_gen, unaffected by the changes to obs2D and obs2D_gen.
+	//So, we'll treat the case Var2D==mtt specially.
+	if (Var2D == "ttrapidity2")
+	  {
+		evtree->SetBranchAddress("ttRapidity2", &obs2D);
+		evtree->SetBranchAddress("ttRapidity2_gen", &obs2D_gen);
+		evtree->SetBranchAddress("tt_mass", &ttmass);
+	  }
+	else if (Var2D == "ttpt")
+	  {
+		evtree->SetBranchAddress("ttPt", &obs2D);
+		evtree->SetBranchAddress("ttPt_gen", &obs2D_gen);
+		evtree->SetBranchAddress("tt_mass", &ttmass);
+	  }
+
+
+	// Set up stuff for the linearity and/or pull tests /////////////////////////////////
     Float_t slope = 0.0;
     const int Nlin = 7;
     //Float_t A_gen[Nlin], Aerr_gen[Nlin], A_unf[Nlin], Aerr_unf[Nlin], A_meas[Nlin], Aerr_meas[Nlin];
@@ -225,9 +285,10 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
     Aerr_pullwidth.clear();
 
 
-    TH1D *hTrue_after_array[Nlin];
-    TH1D *hMeas_after_array[Nlin];
+    TH2D *hTrue_after_array[Nlin];
+    TH2D *hMeas_after_array[Nlin];
 
+	// Reweight our events, and fill the histograms //////////////////////////////////
     for (int k = 0; k < Nlin; k++)
     {
 
@@ -253,19 +314,30 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             evtree->GetEntry(i);
             double orig_weight = weight;
 
+			if(Var2D == "mtt")
+		    {
+			  obs2D = ttmass;
+			  obs2D_gen = ttmass_gen;
+		    }
+
+			obs2D = fabs(obs2D);
+			obs2D_gen = fabs(obs2D_gen);
+
             if (slopeOption == 1)
             {
-                //fix the observable values to the bin centres so the acceptance function is unaffected by any reweighting
-                observable =  hEmpty->GetBinCenter( hEmpty->FindBin( observable ) );
-                observable_gen =  hEmpty->GetBinCenter( hEmpty->FindBin( observable_gen ) );
+			  //fix the observable values to the bin centres so the acceptance function is unaffected by any reweighting
+			  asymVar =  hEmpty->GetXaxis()->GetBinCenter( hEmpty->FindBin( asymVar, obs2D ) );
+			  asymVar_gen =  hEmpty->GetXaxis()->GetBinCenter( hEmpty->FindBin( asymVar_gen, obs2D_gen ) );
+			  obs2D =  hEmpty->GetYaxis()->GetBinCenter( hEmpty->FindBin( asymVar, obs2D ) );
+			  obs2D_gen =  hEmpty->GetYaxis()->GetBinCenter( hEmpty->FindBin( asymVar_gen, obs2D_gen ) );
                 if ( combineLepMinus )
                 {
-                    observableMinus =  hEmpty->GetBinCenter( hEmpty->FindBin( observableMinus ) );
-                    observableMinus_gen =  hEmpty->GetBinCenter( hEmpty->FindBin( observableMinus_gen ) );
+				  asymVarMinus =  hEmpty->GetBinCenter( hEmpty->FindBin( asymVarMinus, obs2D ) );
+				  asymVarMinus_gen =  hEmpty->GetBinCenter( hEmpty->FindBin( asymVarMinus_gen, obs2D_gen ) );
                 }
             }
 
-            double xval = (observable_gen - asym_centre) / fabs(xmax - asym_centre);
+            double xval = (asymVar_gen - asym_centre) / fabs(xmax - asym_centre);
             double xsign = sign(xval);
             //restrict range from -1 to +1
             if ( fabs(xval) > 1. ) xval = xsign;
@@ -275,50 +347,65 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
 
             if ( combineLepMinus )
             {
-                double xminusval = (observableMinus_gen - asym_centre) / fabs(xmax - asym_centre);
+                double xminusval = (asymVarMinus_gen - asym_centre) / fabs(xmax - asym_centre);
                 double xminussign = sign(xminusval);
                 //restrict range from -1 to +1
                 if ( fabs(xminusval) > 1. ) xminusval = xminussign;
             }
 
+			int measbin = 0;
+			int genbin = 0;
+
             //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
 
             if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
             {
-                fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
-                fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
-                fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-                //if (TestType == "Linearity") weight = weight * fx_scaled->Eval(observable_gen); //this is very slow for some reason
-                if (TestType == "Linearity") weight = weight * (1.0 + slope * xsign * ( fx->Eval(fabs(xval)) ) );
-                fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
-                fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
+			  measbin = getUnwrappedBin(hMeas_before, asymVar, obs2D);
+			  genbin  = getUnwrappedBin(hTrue_before, asymVar_gen, obs2D_gen);
+
+			  fillUnderOverFlow(hMeas_before, asymVar, obs2D, weight, Nsolns);
+			  fillUnderOverFlow(hTrue_before, asymVar_gen, obs2D, weight, Nsolns);
+			  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
+			  //if (TestType == "Linearity") weight = weight * fx_scaled->Eval(asymVar_gen); //this is very slow for some reason
+			  if (TestType == "Linearity") weight = weight * (1.0 + slope * xsign * ( fx->Eval(fabs(xval)) ) );
+			  fillUnderOverFlow(hMeas_after, asymVar, obs2D, weight, Nsolns);
+			  fillUnderOverFlow(hTrue_after, asymVar_gen, obs2D_gen, weight, Nsolns);
 
             }
             else if ( ttmass > 0 )
             {
-                fillUnderOverFlow(hMeas_before, observable, weight, Nsolns);
-                fillUnderOverFlow(hTrue_before, observable_gen, weight, Nsolns);
-                fillUnderOverFlow(hTrue_vs_Meas, observable, observable_gen, weight, Nsolns);
-                if ( combineLepMinus )
+			  measbin = getUnwrappedBin(hMeas_before, asymVar, obs2D);
+			  genbin  = getUnwrappedBin(hTrue_before, asymVar_gen, obs2D_gen);
+
+			  fillUnderOverFlow(hMeas_before, asymVar, obs2D, weight, Nsolns);
+			  fillUnderOverFlow(hTrue_before, asymVar_gen, obs2D_gen, weight, Nsolns);
+			  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
+			  if ( combineLepMinus )
                 {
-                    fillUnderOverFlow(hMeas_before, observableMinus, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_before, observableMinus_gen, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_vs_Meas, observableMinus, observableMinus_gen, weight, Nsolns);
+				  measbin = getUnwrappedBin(hMeas_before, asymVarMinus, obs2D);
+				  genbin  = getUnwrappedBin(hTrue_before, asymVarMinus_gen, obs2D_gen);
+
+				  fillUnderOverFlow(hMeas_before, asymVarMinus, obs2D, weight, Nsolns);
+				  fillUnderOverFlow(hTrue_before, asymVarMinus_gen, obs2D, weight, Nsolns);
+				  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
                 }
-                //if (TestType == "Linearity") weight = weight * fx_scaled->Eval(observable_gen); //this is very slow for some reason
-                if (TestType == "Linearity") weight = weight * (1.0 + slope * xsign * ( fx->Eval(fabs(xval)) ) );
-                fillUnderOverFlow(hMeas_after, observable, weight, Nsolns);
-                fillUnderOverFlow(hTrue_after, observable_gen, weight, Nsolns);
-                if ( combineLepMinus )
+			  //if (TestType == "Linearity") weight = weight * fx_scaled->Eval(asymVar_gen); //this is very slow for some reason
+			  if (TestType == "Linearity") weight = weight * (1.0 + slope * xsign * ( fx->Eval(fabs(xval)) ) );
+			  fillUnderOverFlow(hMeas_after, asymVar, obs2D, weight, Nsolns);
+			  fillUnderOverFlow(hTrue_after, asymVar_gen, obs2D_gen, weight, Nsolns);
+			  if ( combineLepMinus )
                 {
-                    //if (TestType == "Linearity") weight = orig_weight * fx_scaled->Eval(observableMinus_gen); //this is very slow for some reason
-                    if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * xminussign * ( fx->Eval(fabs(xminusval)) ) );
-                    fillUnderOverFlow(hMeas_after, observableMinus, weight, Nsolns);
-                    fillUnderOverFlow(hTrue_after, observableMinus_gen, weight, Nsolns);
+				  //if (TestType == "Linearity") weight = orig_weight * fx_scaled->Eval(asymVarMinus_gen); //this is very slow for some reason
+				  if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * xminussign * ( fx->Eval(fabs(xminusval)) ) );
+				  fillUnderOverFlow(hMeas_after, asymVarMinus, obs2D, weight, Nsolns);
+				  fillUnderOverFlow(hTrue_after, asymVarMinus_gen, obs2D, weight, Nsolns);
                 }
 
             }
         }
+
+		////////////////////////////////////////////////////////////////////////////////////////////
+		/////////////////// 3. Begin testing ///////////////////////////////////////////////////////
 
         RooUnfoldResponse response (hMeas_before, hTrue_before, hTrue_vs_Meas);
 
@@ -326,25 +413,27 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         hMeas_after->Scale( hMeas_before->Integral() / hMeas_after->Integral() );
         hTrue_after->Scale( hTrue_before->Integral() / hTrue_after->Integral() );
 
-        fscale = 0.65 * double(hTrue_before->Integral()) / double(nbins1D);
+        fscale = 0.65 * double(hTrue_before->Integral()) / double(nbinsx2D*nbinsy2D);
 
-        hTrue_after_array[k] = (TH1D *) hTrue_after->Clone();
-        hMeas_after_array[k] = (TH1D *) hMeas_after->Clone();
+        hTrue_after_array[k] = (TH2D *) hTrue_after->Clone();
+        hMeas_after_array[k] = (TH2D *) hMeas_after->Clone();
 
 
         TFile *accfile = new TFile("../acceptance/mcnlo/accept_" + acceptanceName + ".root");
-        TH1D *acceptM = (TH1D *) accfile->Get("accept_" + acceptanceName);
-        acceptM->Scale(1.0 / acceptM->Integral());
+        TH2D *acceptM_2d = (TH2D *) accfile->Get("accept_" + acceptanceName + "_" + Var2D);
+        acceptM_2d->Scale(1.0 / acceptM_2d->Integral());
 
-        for (Int_t accbin = 1; accbin <= nbins1D; accbin++)
+        for (Int_t x = 1; x <= nbinsx2D; x++)
         {
+		  for (Int_t y = 1; y <= nbinsy2D; y++)
+			{
 
-            if (acceptM->GetBinContent(accbin) != 0)
-            {
-                hTrue_after->SetBinContent(accbin, hTrue_after->GetBinContent(accbin) * 1.0 / acceptM->GetBinContent(accbin));
-                hTrue_after->SetBinError  (accbin, hTrue_after->GetBinError  (accbin) * 1.0 / acceptM->GetBinContent(accbin));
-
-            }
+			  if (acceptM_2d->GetBinContent(x,y) != 0)
+				{
+				  hTrue_after->SetBinContent(x, y, hTrue_after->GetBinContent(x,y) * 1.0 / acceptM_2d->GetBinContent(x,y));
+				  hTrue_after->SetBinError  (x, y, hTrue_after->GetBinError  (x,y) * 1.0 / acceptM_2d->GetBinContent(x,y));
+				}
+			}
         }
 
 
@@ -385,16 +474,22 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
             for (int i = 0; i < nPseudos; i++)
             {
 
-                for (int j = 1; j < hMeas_after->GetNbinsX() + 1; j++)
+                for (int x = 1; x <= hMeas_after->GetNbinsX(); x++)
                 {
-                    double fluct;
-                    if (nPseudos > 1) fluct = random->Poisson(hMeas_after->GetBinContent(j));
-                    else fluct = hMeas_after->GetBinContent(j);
-                    hSmeared->SetBinError(j, sqrt(fluct));
-                    hSmeared->SetBinContent(j, fluct);
+				  for (int y = 1; y < hMeas_after->GetNbinsY() + 1; y++)
+					{
+					  double fluct;
+					  if (nPseudos > 1) fluct = random->Poisson(hMeas_after->GetBinContent(x,y));
+					  else fluct = hMeas_after->GetBinContent(x,y);
+					  hSmeared->SetBinError(x, y, sqrt(fluct));
+					  hSmeared->SetBinContent(x, y, fluct);
+					}
                 }
 
+				unwrap2dhisto(hSmeared, hSmeared_unwrapped);
+				unwrap2dhisto(hTrue_before, hTrue_before_unwrapped);
 
+				// Unfold! /////////////////////////////
                 if (unfoldingType == 0)
                 {
                     RooUnfoldSvd unfold_svd (&response, hSmeared, kterm);
@@ -414,20 +509,21 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                 }
                 else if (unfoldingType == 2)
                 {
-                    TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);
+                    TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeNone);
                     Double_t biasScale = 1.0;
                     biasScale =  hSmeared->Integral() / hMeas_before->Integral() ;
                     cout << "bias scale for TUnfold: " << biasScale << endl;
-                    //  unfold_TUnfold.SetBias(hTrue_before);  //doesn't make any difference, because if not set the bias distribution is automatically determined from hTrue_vs_Meas, which gives exactly hTrue
-                    unfold_TUnfold.SetInput(hSmeared);
-                    unfold_TUnfold.DoUnfold(tau, hSmeared, biasScale);
-                    unfold_TUnfold.GetOutput(hUnfolded);
+                    unfold_TUnfold.SetBias(hTrue_before_unwrapped);  //doesn't make any difference, because if not set the bias distribution is automatically determined from hTrue_vs_Meas, which gives exactly hTrue
+                    unfold_TUnfold.SetInput(hSmeared_unwrapped);
+					unfold_TUnfold.RegularizeBins2D(1,1,nbinsx2D,nbinsx2D,nbinsy2D,TUnfold::kRegModeCurvature);
+                    unfold_TUnfold.DoUnfold(tau, hSmeared_unwrapped, biasScale);
+                    unfold_TUnfold.GetOutput(hUnfolded_unwrapped);
 
 
                     TH2D *ematrix = unfold_TUnfold.GetEmatrix("ematrix", "error matrix", 0, 0);
-                    for (Int_t cmi = 0; cmi < nbins1D; cmi++)
+                    for (Int_t cmi = 0; cmi < nbinsunwrapped; cmi++)
                     {
-                        for (Int_t cmj = 0; cmj < nbins1D; cmj++)
+                        for (Int_t cmj = 0; cmj < nbinsunwrapped; cmj++)
                         {
                             m_unfoldE(cmi, cmj) = ematrix->GetBinContent(cmi + 1, cmj + 1);
                         }
@@ -436,41 +532,46 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                 else cout << "Unfolding TYPE not Specified" << "\n";
 
 
-                for (int l = 0; l < nbins1D; l++)
+				rewrap1dhisto(hUnfolded_unwrapped, hUnfolded);
+
+				/*
+                for (int l = 1; l <= nbinsx2D; l++)
                 {
-                    for (int j = 0; j < nbins1D; j++)
+                    for (int j = 1; j <= nbinsy2D; j++)
                     {
                         double corr = 1.0 / ( acceptM->GetBinContent(l + 1) * acceptM->GetBinContent(j + 1) );
                         //corr = corr * pow(xsection / dataIntegral,2) ;
                         m_unfoldE(l, j) = m_unfoldE(l, j) * corr;
                     }
                 }
+				*/
 
-
-                for (Int_t accbin = 1; accbin <= nbins1D; accbin++)
+                for (Int_t x = 1; x <= nbinsx2D; x++)
                 {
+				  for (Int_t y = 1; y <= nbinsy2D; y++)
+				  {
 
-                    if (acceptM->GetBinContent(accbin) != 0)
+                    if (acceptM_2d->GetBinContent(x,y) != 0)
                     {
-                        hUnfolded->SetBinContent(accbin, hUnfolded->GetBinContent(accbin) * 1.0 / acceptM->GetBinContent(accbin));
-                        hUnfolded->SetBinError  (accbin, hUnfolded->GetBinError  (accbin) * 1.0 / acceptM->GetBinContent(accbin));
-
-                    }
+					  hUnfolded->SetBinContent(x, y, hUnfolded->GetBinContent(x,y) * 1.0 / acceptM_2d->GetBinContent(x,y));
+					  hUnfolded->SetBinError  (x, y, hUnfolded->GetBinError  (x,y) * 1.0 / acceptM_2d->GetBinContent(x,y));
+					}
+				  }
                 }
 
-                GetCorrectedAfb(hUnfolded, m_unfoldE, Afb, AfbErr);
+                GetAfb(hUnfolded, Afb, AfbErr); // Formerly GetCorrectedAfb
 
                 vector<double> afb2D;
                 vector<double> afb2Derr;
                 afb2D.clear();
                 afb2Derr.clear();
-                GetCorrectedAfbBinByBin(hUnfolded, m_unfoldE, afb2D, afb2Derr, second_output_file);
+                GetAvsY2d(hUnfolded, afb2D, afb2Derr, second_output_file);
 
                 vector<double> afbtrue2D;
                 vector<double> afbtrue2Derr;
                 afbtrue2D.clear();
                 afbtrue2Derr.clear();
-                GetCorrectedAfbBinByBin(hTrue_after, m_unfoldE, afbtrue2D, afbtrue2Derr, second_output_file);
+                GetAvsY2d(hTrue_after, afbtrue2D, afbtrue2Derr, second_output_file);
                 //true errors are much smaller (from denominator)
                 afbtrue2Derr[0] = 0.0;
                 afbtrue2Derr[1] = 0.0;
@@ -483,7 +584,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                 SumTrueErrAsym[0] + = Aerr_gen_k;
 
 
-                for (int iD = 1; iD < nbins1D / 2 + 1; ++iD)
+                for (int iD = 1; iD < nbinsy2D + 1; ++iD)
                 {
                     AfbPull[iD]->Fill( (afb2D[iD - 1] - afbtrue2D[iD - 1])  / afb2Derr[iD - 1] );
                     SumAsym[iD] + = afb2D[iD - 1];
@@ -492,13 +593,14 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                     SumTrueErrAsym[iD] + = afbtrue2Derr[iD - 1];
                 }
 
-                hUnfolded_clone = (TH1D *) hUnfolded->Clone("hUnfolded_clone");
-                hTrue_after_clone = (TH1D *) hTrue_after->Clone("hTrue_after_clone");
+                hUnfolded_clone = (TH2D *) hUnfolded->Clone("hUnfolded_clone");
+                hTrue_after_clone = (TH2D *) hTrue_after->Clone("hTrue_after_clone");
 
                 hUnfolded_clone->Scale(1. / hUnfolded_clone->Integral(), "width");
                 hTrue_after_clone->Scale(1. / hTrue_after_clone->Integral(), "width");
 
-
+				/*
+				  //For filling the bin-by-bin values
                 for (int iD = nbins1D / 2 + 1; iD < nDiff + 1; ++iD)
                 {
                     AfbPull[iD]->Fill( (hUnfolded_clone->GetBinContent(iD - nbins1D / 2) - hTrue_after_clone->GetBinContent(iD - nbins1D / 2)) / hUnfolded_clone->GetBinError(iD - nbins1D / 2) );
@@ -508,16 +610,18 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
                     //SumTrueErrAsym[iD] + = hTrue_after_clone->GetBinError(iD - nbins1D / 2);
                     SumTrueErrAsym[iD] + = 0.0;
                 }
+				*/
 
 
-
-                for (int j = 0; j < nbins1D; j++)
+				/*
+                for (int j = 0; j < nbinsunwrapped; j++)
                 {
                     double pull = (hUnfolded->GetBinContent(j + 1) - hTrue_after->GetBinContent(j + 1)) / hUnfolded->GetBinError(j + 1);
                     h_pulls[j]->Fill(pull);
                     double resd = (hUnfolded->GetBinContent(j + 1) - hTrue_after->GetBinContent(j + 1)) / hTrue_after->GetBinContent(j + 1);
                     h_resd[j]->Fill(resd);
                 }
+				*/
             }
 
             //cout << "Average Asymmetry =" << SumAsym / nPseudos << " +/-  " << SumErrAsym / (nPseudos) << "\n";
@@ -1322,13 +1426,15 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Pull", Int_t slopeOption
         c_pull->SaveAs(acceptanceName + "_Pull.C");
 
 
-
+		
         TFile *plots = new TFile(acceptanceName + "_plots.root", "RECREATE");
+		/*
         for (int i = 0; i < nbins2D; i++)
         {
             h_pulls[i] ->Write();
             h_resd[i] ->Write();
         }
+		*/
         AfbPull[0] ->Write();
         AfbPull[1] ->Write();
         AfbPull[2] ->Write();
