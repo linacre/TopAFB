@@ -40,8 +40,8 @@ Int_t kterm = 3;  //note we used 4 here for ICHEP
 Double_t tau = 3E-2;
 Int_t nVars = 8;
 Int_t includeSys = 0;
-Int_t checkErrors = 1;
-bool draw_truth_before_pT_reweighting = true;
+Int_t checkErrors = 0;
+bool draw_truth_before_pT_reweighting = false;
 
 
 void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1.)
@@ -118,6 +118,7 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         TH1D *hData_unfolded_unwrapped = new TH1D ("Data_Unfold_Unwr", "Data with background subtracted and unfolded, unwrapped", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
         TH1D *hTrue_unwrapped = new TH1D ("true_unwr", "Truth unwrapped",  nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
         TH1D *hMeas_unwrapped = new TH1D ("meas_unwr", "Measured unwrapped", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
+        TH1D *hAcc_unwrapped = new TH1D ("acc_unwr", "Acceptance unwrapped", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
 
 		//An n*n migration matrix, using the unwrapped binning on both axes
         TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5, nbinsunwrapped, 0.5, double(nbinsunwrapped)+0.5);
@@ -445,6 +446,7 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         TFile *file = new TFile("../acceptance/mcnlo/accept_" + acceptanceName + ".root");
 
         TH2D *acceptM_2d = (TH2D *) file->Get("accept_" + acceptanceName + "_" + Var2D);
+        unwrap2dhisto(acceptM_2d, hAcc_unwrapped);
 
         TH2D *denomM_2d = (TH2D *) file->Get("denominator_" + acceptanceName + "_" + Var2D);
 
@@ -534,18 +536,17 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 		  }
 		}
 
-		/*
+
 		// Fix me at some point, please!
-        for (int l = 0; l < nbins2D; l++)
+        for (int l = 0; l < nbinsunwrapped; l++)
         {
-            for (int j = 0; j < nbins2D; j++)
+            for (int j = 0; j < nbinsunwrapped; j++)
             {
-                double corr = 1.0 / ( acceptM->GetBinContent(l + 1) * acceptM->GetBinContent(j + 1) );
+                double corr = 1.0 / ( hAcc_unwrapped->GetBinContent(l + 1) * hAcc_unwrapped->GetBinContent(j + 1) );
                 //corr = corr * pow(xsection / dataIntegral,2) ;
                 m_correctE(l, j) = m_unfoldE(l, j) * corr;
             }
         }
-		*/
 
         //==================================================================
         // ============== Print the asymmetry =============================
@@ -572,6 +573,8 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         vector<double> afb_merr_denom;
 		cout << "From unfolded data:" << endl;
         GetAvsY2d(hData_unfolded, afb_m, afb_merr, second_output_file);
+        cout << " With corrected uncertainty: " << endl;  //this function fills the inclusive asymmetry at array index 0, and then the asym in each y bin
+        GetCorrectedAfb2d(hData_unfolded, m_correctE, afb_m, afb_merr, second_output_file);
 		cout << "From acceptance denominator:" << endl;
 		GetAvsY2d(denomM_2d, afb_m_denom, afb_merr_denom, second_output_file);
 
@@ -591,21 +594,21 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
         TH1D *hAfbVsMtt_statonly = new TH1D ("AfbVsMtt_statonly",  "AfbVsMtt_statonly",  3, ybinsForHisto);
         for (int nb = 0; nb < 3; nb++)
         {
-            hAfbVsMtt->SetBinContent(nb + 1, afb_m[nb]);
+            hAfbVsMtt->SetBinContent(nb + 1, afb_m[nb+1]);
             if (checkErrors)
             {
                 if (includeSys)
                 {
-                    cout << "Difference between calculated and hard-coded stat errors: " << afb_merr[nb] - stat_corr[nb] << endl;
+                    cout << "Difference between calculated and hard-coded stat errors: " << afb_merr[nb+1] - stat_corr[nb] << endl;
                 }
                 else
                 {
-                    cout << "Difference between calculated and hard-coded stat errors: " << afb_merr[nb] - stat_uncorr[nb] << endl;
+                    cout << "Difference between calculated and hard-coded stat errors: " << afb_merr[nb+1] - stat_uncorr[nb] << endl;
                 }
             }
-            hAfbVsMtt->SetBinError(nb + 1,  sqrt( pow(afb_merr[nb], 2) + pow(syst_corr[nb], 2) ) );
-            hAfbVsMtt_statonly->SetBinContent(nb + 1, afb_m[nb]);
-            hAfbVsMtt_statonly->SetBinError(nb + 1, afb_merr[nb]);
+            hAfbVsMtt->SetBinError(nb + 1,  sqrt( pow(afb_merr[nb+1], 2) + pow(syst_corr[nb], 2) ) );
+            hAfbVsMtt_statonly->SetBinContent(nb + 1, afb_m[nb+1]);
+            hAfbVsMtt_statonly->SetBinError(nb + 1, afb_merr[nb+1]);
         }
 
         //  GetAvsY(hTrue, m_unfoldE, afb_m, afb_merr);

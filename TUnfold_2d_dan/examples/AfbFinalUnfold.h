@@ -296,6 +296,95 @@ void GetCorrectedAfb(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float
 }
 
 
+
+void GetCorrectedAfb2d(TH2D* histogram, TMatrixD &covarianceM, vector<double> &myafb, vector<double> &myerr, ofstream& second_output_file){
+
+    //calculate AFB, using covariance matrix, m_correctE(j,i), for the uncertainty
+
+  myafb.clear();
+  myerr.clear();
+
+    //Get histogram info
+  Int_t nbinsx = histogram->GetNbinsX();
+  Int_t nbinsy = histogram->GetNbinsY();
+
+  const Int_t numbinsx = nbinsx;
+  const Int_t numbinsy = nbinsy;
+  const Int_t numbinsxy = numbinsx*numbinsy;
+
+  double afb[numbinsy+1] = {0.};
+  double afberr[numbinsy+1] = {0.};
+
+  double n[numbinsx][numbinsy];
+  for(int i=0;i<numbinsx;i++){
+    for(int j=0;j<numbinsy;j++){
+      n[i][j] = histogram->GetBinContent(i+1,j+1);
+    }
+  }
+
+    //Setup Alpha Vector
+  double alpha[16], beta[16];
+  for(int i=0;i<numbinsx;i++) if(i < numbinsx/2 ){ alpha[i] = -1;}else{ alpha[i] = 1;}
+
+    //Components of the error calculation
+  double sum_n[numbinsy] = {0.};
+  double sum_alpha_n[numbinsy] = {0.};
+  double sum_n_Inclusive = 0.;
+  double sum_alpha_n_Inclusive = 0.;
+  for(int i=0;i<numbinsx;i++){
+    for(int j=0;j<numbinsy;j++){
+      sum_n[j] += n[i][j];
+      sum_alpha_n[j] += alpha[i] * n[i][j];
+      sum_n_Inclusive += n[i][j];
+      sum_alpha_n_Inclusive += alpha[i] * n[i][j];
+    }
+  }
+    //AFB = SUM( n[i][j]*alpha[i] ) / SUM( n[i][j] )
+    //dAFB/dn_ij = [ SUM( n[i][j] ) * alpha[i] -  SUM( n[i][j]*alpha[i] ) * ( 1 ) ]  / SUM( n[i][j] )^2
+  double dfdn[numbinsx][numbinsy];
+  double dfdnInclusive[numbinsx][numbinsy];
+  for(int i=0;i<numbinsx;i++){
+    for(int j=0;j<numbinsy;j++){
+      dfdn[i][j] = ( alpha[i] * sum_n[j] - sum_alpha_n[j] ) / pow(sum_n[j],2);
+      dfdnInclusive[i][j] = ( alpha[i] * sum_n_Inclusive - sum_alpha_n_Inclusive ) / pow(sum_n_Inclusive,2);
+    }
+  }
+
+    //Error Calculation
+  for(int i=0;i<numbinsxy;i++){
+    for(int j=0;j<numbinsxy;j++){
+      int i_2di = i % numbinsx;
+      int i_2dj = i / numbinsx;
+      int j_2di = j % numbinsx;
+      int j_2dj = j / numbinsx;
+      //cout<<"i: "<<i<<" "<<i_2di<<" "<<i_2dj<<" j: "<<j<<" "<<j_2di<<" "<<j_2dj<<endl;
+      afberr[0] += covarianceM(i,j) * dfdnInclusive[i_2di][i_2dj] * dfdnInclusive[j_2di][j_2dj];
+      if(i_2dj==j_2dj) afberr[i_2dj+1] += covarianceM(i,j) * dfdn[i_2di][i_2dj] * dfdn[j_2di][j_2dj]; 
+    }
+  }
+
+    //Calculate Afb
+
+  afb[0] = sum_alpha_n_Inclusive / sum_n_Inclusive;
+
+  for (int j = 0; j < numbinsy+1; ++j)
+  {
+    afberr[j] = sqrt(afberr[j]);
+    if(j>0) afb[j] = sum_alpha_n[j-1] / sum_n[j-1];
+    myafb.push_back(afb[j]);
+    myerr.push_back(afberr[j]);
+
+    cout<<j<<" AFB = "<<afb[j]<<" +/- "<<afberr[j]<<endl;
+    second_output_file << acceptanceName << " " << observablename << " AFB" << j << ": " << afb[j] << " +/- " << afberr[j] << endl; 
+
+  }
+  
+}
+
+
+
+
+
 void GetCorrectedAfb_integratewidth(TH1D* histogram, TMatrixD &covarianceM, Float_t &afb, Float_t  &afberr){
 
     //Need to calculate AFB and Error for the fully corrected distribution, m_correctE(j,i)
