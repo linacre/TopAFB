@@ -32,7 +32,7 @@ TString Region = "";
 
 Int_t kterm = 3;
 Double_t tau = 0.005;
-Int_t nPseudos = 100;   // Set to 1 to speed up test runs. Previously set to 10k
+Int_t nPseudos = 10000;   // Set to 1 to speed up test runs. Previously set to 10k
 Int_t includeSys = 0;
 
 Int_t lineWidth = 5;
@@ -332,7 +332,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Linearity", Int_t slopeO
 			  asymVar_gen =  hEmpty->GetXaxis()->GetBinCenter( hEmpty->FindBin( asymVar_gen, obs2D_gen ) );
 			  obs2D =  hEmpty->GetYaxis()->GetBinCenter( hEmpty->FindBin( asymVar, obs2D ) );
 			  obs2D_gen =  hEmpty->GetYaxis()->GetBinCenter( hEmpty->FindBin( asymVar_gen, obs2D_gen ) );
-                if ( combineLepMinus )
+			  if ( combineLepMinus )
                 {
 				  asymVarMinus =  hEmpty->GetBinCenter( hEmpty->FindBin( asymVarMinus, obs2D ) );
 				  asymVarMinus_gen =  hEmpty->GetBinCenter( hEmpty->FindBin( asymVarMinus_gen, obs2D_gen ) );
@@ -360,21 +360,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Linearity", Int_t slopeO
 
             //if(i % 10000 == 0) cout<<i<<" "<<ch_top->GetEntries()<<endl;
 
-            if ( (acceptanceName == "lepChargeAsym") || (acceptanceName == "lepAzimAsym") || (acceptanceName == "lepAzimAsym2") )
-            {
-			  measbin = getUnwrappedBin(hMeas_before, asymVar, obs2D);
-			  genbin  = getUnwrappedBin(hTrue_before, asymVar_gen, obs2D_gen);
-
-			  fillUnderOverFlow(hMeas_before, asymVar, obs2D, weight, Nsolns);
-			  fillUnderOverFlow(hTrue_before, asymVar_gen, obs2D, weight, Nsolns);
-			  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
-			  //if (TestType == "Linearity") weight = weight * fx_scaled->Eval(asymVar_gen); //this is very slow for some reason
-			  if (TestType == "Linearity") weight = weight * (1.0 + slope * xsign * ( fx->Eval(fabs(xval)) ) );
-			  fillUnderOverFlow(hMeas_after, asymVar, obs2D, weight, Nsolns);
-			  fillUnderOverFlow(hTrue_after, asymVar_gen, obs2D_gen, weight, Nsolns);
-
-            }
-            else if ( ttmass > 0 )
+            if ( ttmass > 0 )
             {
 			  measbin = getUnwrappedBin(hMeas_before, asymVar, obs2D);
 			  genbin  = getUnwrappedBin(hTrue_before, asymVar_gen, obs2D_gen);
@@ -383,27 +369,27 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Linearity", Int_t slopeO
 			  fillUnderOverFlow(hTrue_before, asymVar_gen, obs2D_gen, weight, Nsolns);
 			  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
 			  if ( combineLepMinus )
-                {
-				  measbin = getUnwrappedBin(hMeas_before, asymVarMinus, obs2D);
-				  genbin  = getUnwrappedBin(hTrue_before, asymVarMinus_gen, obs2D_gen);
+              {
+				measbin = getUnwrappedBin(hMeas_before, asymVarMinus, obs2D);
+				genbin  = getUnwrappedBin(hTrue_before, asymVarMinus_gen, obs2D_gen);
 
-				  fillUnderOverFlow(hMeas_before, asymVarMinus, obs2D, weight, Nsolns);
-				  fillUnderOverFlow(hTrue_before, asymVarMinus_gen, obs2D, weight, Nsolns);
-				  fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
-                }
+				fillUnderOverFlow(hMeas_before, asymVarMinus, obs2D, weight, Nsolns);
+				fillUnderOverFlow(hTrue_before, asymVarMinus_gen, obs2D, weight, Nsolns);
+				fillUnderOverFlow(hTrue_vs_Meas, measbin, genbin, weight, Nsolns);
+              }
 			  //if (TestType == "Linearity") weight = weight * fx_scaled->Eval(asymVar_gen); //this is very slow for some reason
 			  if (TestType == "Linearity") weight = weight * (1.0 + slope * xsign * ( fx->Eval(fabs(xval)) ) );
 			  fillUnderOverFlow(hMeas_after, asymVar, obs2D, weight, Nsolns);
 			  fillUnderOverFlow(hTrue_after, asymVar_gen, obs2D_gen, weight, Nsolns);
 			  if ( combineLepMinus )
-                {
-				  //if (TestType == "Linearity") weight = orig_weight * fx_scaled->Eval(asymVarMinus_gen); //this is very slow for some reason
-				  if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * xminussign * ( fx->Eval(fabs(xminusval)) ) );
-				  fillUnderOverFlow(hMeas_after, asymVarMinus, obs2D, weight, Nsolns);
-				  fillUnderOverFlow(hTrue_after, asymVarMinus_gen, obs2D, weight, Nsolns);
-                }
-
+              {
+				//if (TestType == "Linearity") weight = orig_weight * fx_scaled->Eval(asymVarMinus_gen); //this is very slow for some reason
+				if (TestType == "Linearity") weight = orig_weight * (1.0 + slope * xminussign * ( fx->Eval(fabs(xminusval)) ) );
+				fillUnderOverFlow(hMeas_after, asymVarMinus, obs2D, weight, Nsolns);
+				fillUnderOverFlow(hTrue_after, asymVarMinus_gen, obs2D, weight, Nsolns);
+              }
             }
+
         }
 
 		////////////////////////////////////////////////////////////////////////////////////////////
@@ -606,7 +592,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Linearity", Int_t slopeO
 
                 hUnfolded_unwrapped_clone->Scale(1. / hUnfolded_unwrapped_clone->Integral());
                 hTrue_after_unwrapped_clone->Scale(1. / hTrue_after_unwrapped_clone->Integral());
-	cout << "Began filling asyms bin-by-bin" << endl;
+
 				// For filling the bin-by-bin values
                 for (int iD = nbinsy2D + 1; iD < nbinsy2D+nbinsunwrapped+1; ++iD)
                 {
@@ -631,7 +617,7 @@ void AfbUnfoldTests(Int_t iVar = 0, TString TestType = "Linearity", Int_t slopeO
             }
 
             //cout << "Average Asymmetry =" << SumAsym / nPseudos << " +/-  " << SumErrAsym / (nPseudos) << "\n";
-cout << "Crash happens before here.\n";
+
             vector<Float_t> temp_A_pull;
             vector<Float_t> temp_Aerr_pull;
             vector<Float_t> temp_A_pullwidth;
