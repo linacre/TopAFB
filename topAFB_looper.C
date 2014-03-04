@@ -4,6 +4,9 @@
 #include <exception>
 #include <set>
 #include <algorithm>
+
+
+#include "TPython.h"
 // ROOT includes
 #include "TSystem.h"
 #include "TChain.h"
@@ -789,6 +792,7 @@ topAFB_looper::topAFB_looper()
     jptL2L3ResidualCorr = NULL;
     pfL2L3ResidualCorr = NULL;
     d_llsol = new ttdilepsolve;
+    d_llsol_temp = new ttdilepsolve;
     //LHAPDF::setPDFPath("../CORE/topmass/pdfs");
     //LHAPDF::initPDFSetM(genset_, "cteq6mE.LHgrid");
     //LHAPDF::initPDFM(genset_, 0);
@@ -800,11 +804,16 @@ topAFB_looper::~topAFB_looper()
     delete babyFile_;
     delete babyTree_;
     delete d_llsol;
+    delete d_llsol_temp;
 }
 void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string prefix,
                               bool doFRestimation, float lumi , float kFactor , bool verbose , FREnum frmode, double AMWTmass )
 {
-
+  //TPython::LoadMacro("test4.py");
+  TPython::LoadMacro("loadBetchart.py");
+  bool useMaxCombo = false; //false seems to give slightly better resolution
+  bool useBetchart = true;
+  int ntaustotal[3] = {0, 0, 0};
 
   // reset JES scale variable in ScanChain
   globalJESRescale = 1.;
@@ -1064,11 +1073,21 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             float lepMinus_costheta_cms;
             float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity ,ttRapidity2, tt_mass , tt_mass_nojetsmear , tt_pT , tt_pT_nojetsmear, massllbb;
             float m_top = -999.0;
+            float m_top_S = -999.0;
+            float m_top_B = -999.0;
             float m_top_nojetsmear = -999.0;
             double mass_ltb, mass_llb;
 
             vector <float> AMWTweight, AMWTweight_nojetsmear;
             vector <TLorentzVector> top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4;
+                    vector <TLorentzVector> nu1_vecs , nu2_vecs;
+                    vector <TLorentzVector> top1_vecs , top2_vecs;
+                    vector <double> AMWT_weights;
+                    int imaxweight = -1;
+                    double maxweight = -1;
+                    int imaxweightcombos[2] = {-1,-1};
+                    double maxweightcombos[2] = {-1,-1};
+                    double avgweightcombos[2] = {0,0};
             TLorentzVector cms, cms_nojetsmear, lepPlus, lepMinus, jet1, jet2;
             int Nsolns = -999;
             int imaxAMWTweight = -999;
@@ -2624,6 +2643,78 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         massllbb = (lt_p4 + v_goodJets_cand_p4.at(i_ltbjet) + ll_p4 + v_goodJets_cand_p4.at(i_llbjet)).M();
                     }
 
+
+
+
+                        if ( hyp_lt_id()[hypIdx] < 0 )
+                        {
+                            lepPlus.SetXYZT(
+                                hyp_lt_p4()[hypIdx].x(),
+                                hyp_lt_p4()[hypIdx].y(),
+                                hyp_lt_p4()[hypIdx].z(),
+                                hyp_lt_p4()[hypIdx].t()
+                            );
+
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_lt_id()[hypIdx]) == 11) lepPlus*=leptonEnergyScaleFactor;
+
+                            lepMinus.SetXYZT(
+                                hyp_ll_p4()[hypIdx].x(),
+                                hyp_ll_p4()[hypIdx].y(),
+                                hyp_ll_p4()[hypIdx].z(),
+                                hyp_ll_p4()[hypIdx].t()
+                            );
+
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_ll_id()[hypIdx]) == 11) lepMinus*=leptonEnergyScaleFactor;
+
+                        }
+                        else
+                        {
+                            lepPlus.SetXYZT(
+                                hyp_ll_p4()[hypIdx].x(),
+                                hyp_ll_p4()[hypIdx].y(),
+                                hyp_ll_p4()[hypIdx].z(),
+                                hyp_ll_p4()[hypIdx].t()
+                            );
+
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_ll_id()[hypIdx]) == 11) lepPlus*=leptonEnergyScaleFactor;
+
+                            lepMinus.SetXYZT(
+                                hyp_lt_p4()[hypIdx].x(),
+                                hyp_lt_p4()[hypIdx].y(),
+                                hyp_lt_p4()[hypIdx].z(),
+                                hyp_lt_p4()[hypIdx].t()
+                            );
+
+                            // lepton energy scale systematic variation
+                            if (fabs(hyp_lt_id()[hypIdx]) == 11) lepMinus*=leptonEnergyScaleFactor;
+
+                        }
+
+
+                        jet1.SetXYZT(
+                            v_goodJets_cand_p4[0].x(),
+                            v_goodJets_cand_p4[0].y(),
+                            v_goodJets_cand_p4[0].z(),
+                            v_goodJets_cand_p4[0].t()
+                        );
+
+                        jet2.SetXYZT(
+                            v_goodJets_cand_p4[1].x(),
+                            v_goodJets_cand_p4[1].y(),
+                            v_goodJets_cand_p4[1].z(),
+                            v_goodJets_cand_p4[1].t()
+                        );   
+
+
+
+
+
+
+
+
                     //float m_top;
                     //vector <float> AMWTweight, AMWTweight_nojetsmear;
                     //vector <TLorentzVector> top1_p4, top2_p4, top1_nojetsmear_p4, top2_nojetsmear_p4;
@@ -2638,7 +2729,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     //cout<<AMWTweight_nojetsmear.size()<<endl;
 
                     //now repeat using jet smearing
-                    m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 100, top1_p4, top2_p4, AMWTweight, AMWTmass);
+                    m_top = getTopMassEstimate(d_llsol, hypIdx, v_goodJets_cand_p4, p_met.first, p_met.second, 1, top1_p4, top2_p4, AMWTweight, AMWTmass);
+                    m_top_S = m_top;
 
                     Nsolns = AMWTweight.size();
                     imaxAMWTweight = -999;
@@ -2660,6 +2752,170 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     if (useOnlyMaxWsoln) Nsolns = 1;
                     weight = weight / double(Nsolns);
                     aveAMWTweight = sumAMWTweight / double(Nsolns);
+
+
+
+                    double nusols[4][2][3];
+
+                    //create lines of python code to transmit the input values
+                    TString l0 = Form("l0 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",lepPlus.Pt(),lepPlus.Eta(),lepPlus.Phi(),lepPlus.E());
+                    TString l1 = Form("l1 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",lepMinus.Pt(),lepMinus.Eta(),lepMinus.Phi(),lepMinus.E());
+                    TString j0 = Form("j0 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",v_goodJets_cand_p4[0].Pt(),v_goodJets_cand_p4[0].Eta(),v_goodJets_cand_p4[0].Phi(),v_goodJets_cand_p4[0].E());
+                    TString j1 = Form("j1 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",v_goodJets_cand_p4[1].Pt(),v_goodJets_cand_p4[1].Eta(),v_goodJets_cand_p4[1].Phi(),v_goodJets_cand_p4[1].E());
+                    TString metxy = Form("metx, mety = %0.8f, %0.8f",p_met.first*cos(p_met.second),p_met.first*sin(p_met.second));
+
+                    //cout<<l0<<endl;
+                    //cout<<l1<<endl;
+                    //cout<<j0<<endl;
+                    //cout<<j1<<endl;
+                    //cout<<metxy<<endl;
+
+                    TPython::Exec(l0);
+                    TPython::Exec(l1);
+                    TPython::Exec(j0);
+                    TPython::Exec(j1);
+                    TPython::Exec(metxy);
+
+                    int ncombo0 = 0;
+                    int ncombo1 = 0;
+
+                    for (int icombo = 0; icombo < 2; ++icombo)
+                    {
+                        if(icombo == 0) TPython::Exec("dnsC = doubleNeutrinoSolutionsCheckLinAlg((j0, j1), (l0, l1), (metx, mety))");
+                        if(icombo == 1) TPython::Exec("dnsC = doubleNeutrinoSolutionsCheckLinAlg((j1, j0), (l0, l1), (metx, mety))");
+                        TPython::Exec("dns = dnsC.dns");
+                        //TPython::Exec("dns = doubleNeutrinoSolutions((j0, j1), (l0, l1), (metx, mety))");
+                        TPython::Exec("soltest = 1");
+                        TPython::Exec("if dns==0: soltest = 0");
+                        //TPython::Exec("print soltest");
+                        int soltest  = TPython::Eval("soltest");
+
+
+                        if(soltest) {
+
+
+                            TPython::Exec("solutions = dns.nunu_s");
+                            //TPython::Exec("print solutions");
+                            TPython::Exec("nSolB = len(solutions)");
+
+                            const int nSolB  = TPython::Eval("nSolB");
+                            //cout<<"nSolB: "<<nSolB<<endl;
+
+                            for (int is = 0; is < nSolB; ++is)
+                            {
+                                for (int inu = 0; inu < 2; ++inu)
+                                {
+                                    for (int ix = 0; ix < 3; ++ix)
+                                    {
+                                        TString sols = Form("solutions[%0d][%0d][%0d]",is,inu,ix);
+                                        //cout<<sols<<endl;
+                                        nusols[is][inu][ix]  = TPython::Eval(sols);
+                                        //if(nusols[is][inu][ix] == -1) cout<<nusols[is][inu][ix]<<endl;
+                                    }
+                                }
+                                TLorentzVector nu1_vec , nu2_vec, lvTop1, lvTop2;
+                                nu1_vec.SetXYZM( nusols[is][0][0] , nusols[is][0][1] , nusols[is][0][2] , 0 );
+                                nu1_vecs.push_back(nu1_vec);
+                                nu2_vec.SetXYZM( nusols[is][1][0] , nusols[is][1][1] , nusols[is][1][2] , 0 );
+                                nu1_vecs.push_back(nu2_vec);
+
+                                map<double, double >  mapJetPhi2Discr;
+                                double sol_weight = -1;
+                                //double sol_weight_check = -1;
+
+                                if(icombo==0) { 
+                                    lvTop1 = lepPlus + nu1_vec + jet1;
+                                    lvTop2 = lepMinus + nu2_vec + jet2;
+                                    sol_weight = d_llsol_temp->get_weight(jet1 , jet2, lepPlus, lepMinus, nu1_vec, nu2_vec, AMWTmass, mapJetPhi2Discr);
+                                    //sol_weight_check = d_llsol->get_weight(jet1 , jet2, lepPlus, lepMinus, nu1_vec, nu2_vec, AMWTmass, mapJetPhi2Discr);
+                                    ncombo0++;
+                                }
+                                if(icombo==1) {
+                                    lvTop1 = lepPlus + nu1_vec + jet2;
+                                    lvTop2 = lepMinus + nu2_vec + jet1;
+                                    sol_weight = d_llsol_temp->get_weight(jet2 , jet1, lepPlus, lepMinus, nu1_vec, nu2_vec, AMWTmass, mapJetPhi2Discr);
+                                    //sol_weight_check = d_llsol->get_weight(jet2 , jet1, lepPlus, lepMinus, nu1_vec, nu2_vec, AMWTmass, mapJetPhi2Discr);
+                                    ncombo1++;
+                                }
+
+
+                                TLorentzVector lvW1 = lepPlus + nu1_vec;
+                                TLorentzVector lvW2 = lepMinus + nu2_vec;
+                                //cout<<"combo "<<icombo<<" solution "<<is<<" weight "<<sol_weight<<" masses: "<<lvTop1.M()<<" "<<lvTop2.M()<<" "<<lvW1.M()<<" "<<lvW2.M()<<endl;
+
+                                top1_vecs.push_back(lvTop1);
+                                top2_vecs.push_back(lvTop2);
+                                AMWT_weights.push_back(sol_weight);
+                                //cout<<"w: "<<sol_weight<<endl;
+
+                            }
+
+                            //TPython::Exec("print 'found %d solutions'%len(solutions)");
+                            //TPython::Exec("for sol in solutions : print 'nu1: x %6.2f, y %6.2f, z %6.2f'%(sol[0][0], sol[0][1], sol[0][2])");
+                            //TPython::Exec("for sol in solutions : print 'nu2: x %6.2f, y %6.2f, z %6.2f'%(sol[1][0], sol[1][1], sol[1][2])");
+
+                            //double fddd  = TPython::Eval("sol[1][2]");
+
+                            //cout<<"back to C: "<<fddd<<endl;   //-1 is the null value
+
+                        }
+                    }//icombo
+
+                    //cout<<AMWT_weights.size()<<endl;
+                    //if(AMWT_weights.size() < 1) cout<<AMWT_weights.size()<<endl;
+
+                    for (int is = 0; is < AMWT_weights.size(); ++is)
+                    {
+                        //cout<<"w: "<<AMWT_weights[is]<<endl;
+                        if (AMWT_weights[is]>maxweight) {
+                            imaxweight = is;
+                            maxweight = AMWT_weights[is];
+                        }
+                        if( is < ncombo0 ) {
+                            avgweightcombos[0] += AMWT_weights[is];
+                            if (AMWT_weights[is]>maxweightcombos[0]) {
+                                imaxweightcombos[0] = is;
+                                maxweightcombos[0] = AMWT_weights[is];
+                            }
+                        }
+                        else {
+                            avgweightcombos[1] += AMWT_weights[is];
+                            if (AMWT_weights[is]>maxweightcombos[1]) {
+                                imaxweightcombos[1] = is;
+                                maxweightcombos[1] = AMWT_weights[is];
+                            }
+                        }
+                    }
+
+                    //using average instead of sum with useMaxCombo gives slightly worse resolution, so commented out
+                    //if(ncombo0>0) avgweightcombos[0] /= ncombo0;
+                    //if(ncombo1>0) avgweightcombos[1] /= ncombo1;
+
+                    //cout<<AMWT_weights.size() <<" "<<ncombo0<<" "<<ncombo1 <<" "<<imaxweight<<" "<<maxweight<<" "<<imaxweightcombos[0]<<" "<<maxweightcombos[0]<<" "<<avgweightcombos[0]<<" "<<imaxweightcombos[1]<<" "<<maxweightcombos[1]<<" "<<avgweightcombos[1]<<endl;
+
+                    if(useMaxCombo) imaxweight = (avgweightcombos[0] > avgweightcombos[1]) ? imaxweightcombos[0] : imaxweightcombos[1];
+                    
+                    //don't take "closest approach" solution if exact solutions are available
+                    if(ncombo0 == 1 && ncombo1 > 1) imaxweight = imaxweightcombos[1];
+                    if(ncombo1 == 1 && ncombo0 > 1) imaxweight = imaxweightcombos[0];
+
+                    //cout<<imaxweight<<endl;
+
+                    //if( AMWT_weights.size() > 0 && m_top > 0)  cout<<top1_p4[0].Vect().Dot(top1_vecs[imaxweight].Vect()) / ( top1_p4[0].Vect().Mag() * top1_vecs[imaxweight].Vect().Mag() )<< " " <<top2_p4[0].Vect().Dot(top2_vecs[imaxweight].Vect()) / ( top2_p4[0].Vect().Mag() * top2_vecs[imaxweight].Vect().Mag() )<<endl;;
+                    if( AMWT_weights.size() > 0) m_top_B = top1_vecs[imaxweight].M();
+
+                    if(useBetchart){
+                        //If there is no AMWT solution, fill the Betchart solution instead.
+                        if (m_top < 0 && m_top_B > 0) top1_p4.push_back(top1_vecs[imaxweight]);
+                        if (m_top < 0 && m_top_B > 0) top2_p4.push_back(top2_vecs[imaxweight]);
+                        //set m_top to the Betchart version since we are always going to use those solutions instead
+                        m_top = m_top_B;
+                    }
+
+
+
+
+
 
 
                 }//!applynocuts
@@ -2716,6 +2972,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
 
                 if ( applyLeptonPtWeighting && (prefix == "ttdil" || prefix == "ttotr") ){
+                  /*  
                   if ( hyp_lt_id()[hypIdx] < 0 )
                   {
                       lepPlus.SetXYZT(
@@ -2750,6 +3007,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                       );
 
                   }
+                  */
                   float lepPlus_Pt = lepPlus.Pt();
                   float lepMinus_Pt = lepMinus.Pt();
                   if ( useReweightingUncorrelated ) {
@@ -2777,6 +3035,14 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     if (!applyNoCuts)
                     {
                         if (useOnlyMaxWsoln) i_smear = ( imaxAMWTweight > 0 ? imaxAMWTweight : 0 );
+
+                        //if ( !(m_top_S > 0 && m_top_B > 0) ) continue; //to use only events where both solvers have a solution
+
+                        if(useBetchart) {
+                            //replace the AMWT solution with the Betchart solution. Note, when there is an AMWT solution there is always a Betchart solution.
+                            if (m_top_B > 0) top1_p4[i_smear] = top1_vecs[imaxweight];
+                            if (m_top_B > 0) top2_p4[i_smear] = top2_vecs[imaxweight];
+                        }
 
                         if ( m_top > 0 && (fabs(m_top - top1_p4[i_smear].M()) > 0.5 || fabs(m_top - top2_p4[i_smear].M()) > 0.5) ) cout << "*** mass solution mismatch *** " << m_top << " " << top1_p4[i_smear].M() << " " << top2_p4[i_smear].M() << endl;
                         tt_mass = -999.0;
@@ -2884,68 +3150,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         top_costheta_cms = -999.0;
                         if (m_top > 0) top_costheta_cms = top1_p4[i_smear].Vect().Dot(cms.Vect()) / (top1_p4[i_smear].Vect().Mag() * cms.Vect().Mag());
-
-                        if ( hyp_lt_id()[hypIdx] < 0 )
-                        {
-                            lepPlus.SetXYZT(
-                                hyp_lt_p4()[hypIdx].x(),
-                                hyp_lt_p4()[hypIdx].y(),
-                                hyp_lt_p4()[hypIdx].z(),
-                                hyp_lt_p4()[hypIdx].t()
-                            );
-
-                            // lepton energy scale systematic variation
-                            if (fabs(hyp_lt_id()[hypIdx]) == 11) lepPlus*=leptonEnergyScaleFactor;
-
-                            lepMinus.SetXYZT(
-                                hyp_ll_p4()[hypIdx].x(),
-                                hyp_ll_p4()[hypIdx].y(),
-                                hyp_ll_p4()[hypIdx].z(),
-                                hyp_ll_p4()[hypIdx].t()
-                            );
-
-                            // lepton energy scale systematic variation
-                            if (fabs(hyp_ll_id()[hypIdx]) == 11) lepMinus*=leptonEnergyScaleFactor;
-
-                        }
-                        else
-                        {
-                            lepPlus.SetXYZT(
-                                hyp_ll_p4()[hypIdx].x(),
-                                hyp_ll_p4()[hypIdx].y(),
-                                hyp_ll_p4()[hypIdx].z(),
-                                hyp_ll_p4()[hypIdx].t()
-                            );
-
-                            // lepton energy scale systematic variation
-                            if (fabs(hyp_ll_id()[hypIdx]) == 11) lepPlus*=leptonEnergyScaleFactor;
-
-                            lepMinus.SetXYZT(
-                                hyp_lt_p4()[hypIdx].x(),
-                                hyp_lt_p4()[hypIdx].y(),
-                                hyp_lt_p4()[hypIdx].z(),
-                                hyp_lt_p4()[hypIdx].t()
-                            );
-
-                            // lepton energy scale systematic variation
-                            if (fabs(hyp_lt_id()[hypIdx]) == 11) lepMinus*=leptonEnergyScaleFactor;
-
-                        }
-
-
-                        jet1.SetXYZT(
-                            v_goodJets_cand_p4[0].x(),
-                            v_goodJets_cand_p4[0].y(),
-                            v_goodJets_cand_p4[0].z(),
-                            v_goodJets_cand_p4[0].t()
-                        );
-
-                        jet2.SetXYZT(
-                            v_goodJets_cand_p4[1].x(),
-                            v_goodJets_cand_p4[1].y(),
-                            v_goodJets_cand_p4[1].z(),
-                            v_goodJets_cand_p4[1].t()
-                        );                      
+                   
 
                         lep_charge_asymmetry = -999.0;
                         lep_charge_asymmetry = abs(lepPlus.Eta()) - abs(lepMinus.Eta());
@@ -3506,6 +3711,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                     }//only for mc
 
+                    ntaustotal[ntaus]++;
+
                     // fill ntuples
                     if (createBabyNtuples && !applyNoCuts)
                     {
@@ -3563,6 +3770,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             }//good hypothesis loop
 
         } // closes loop over events
+
+        cout << "number of events with 0,1,2 taus =  " << ntaustotal[0] << "   " << ntaustotal[1] << "   " << ntaustotal[2] << endl;
 
         if (applyNoCuts) cout << "number of events (no cuts) before and after vertex weighting              =  " << nEvents_noCuts_novtxweight << "   " << nEvents_noCuts << endl;
         if (applyNoCuts) cout << "number of dilepton events (no cuts) before and after vertex weighting              =  " << nEvents_noCuts_novtxweight_dil << "   " << nEvents_noCuts_dil << endl;

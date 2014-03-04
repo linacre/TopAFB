@@ -135,6 +135,7 @@ class topAFB_looper
 	FactorizedJetCorrector *jptL2L3ResidualCorr;
 	FactorizedJetCorrector *pfL2L3ResidualCorr;
 	ttdilepsolve *d_llsol;
+	ttdilepsolve *d_llsol_temp;
 	
         // event identification
 
