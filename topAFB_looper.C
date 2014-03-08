@@ -4,6 +4,7 @@
 #include <exception>
 #include <set>
 #include <algorithm>
+#include <map>
 
 
 #include "TPython.h"
@@ -14,6 +15,9 @@
 #include "TChainElement.h"
 #include "TH1D.h"
 #include "TH2D.h"
+#include "TString.h"
+#include "TH1F.h"
+#include "TH2F.h"
 #include "TProfile.h"
 #include "TTreeCache.h"
 #include "Math/VectorUtil.h"
@@ -43,6 +47,8 @@
 #include "../Tools/bTagEff_BTV.cc"
 #include "../CORE/jetcorr/SimpleJetCorrectionUncertainty.icc"
 #include "../CORE/jetcorr/JetCorrectionUncertainty.icc"
+
+#include "PlotUtilities.cc"
 
 // // top mass
 // #include "../CORE/topmass/ttdilepsolve.cpp"
@@ -811,9 +817,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 {
   //TPython::LoadMacro("test4.py");
   TPython::LoadMacro("loadBetchart.py");
-  bool useMaxCombo = false; //false seems to give slightly better resolution
+  bool useMaxCombo = false; //use lepton-jet combo with maximum sum of weights. false seems to give slightly better resolution.
+  bool useClosestDeltaMET = true; //when both combos have only closest-approach solutions, take the one closest to the measured MET instead of the one with the highest weight. true seems to give slightly better resolution.
   bool useBetchart = true;
   int ntaustotal[3] = {0, 0, 0};
+
+  std::map<std::string, TH1F*> h_1d;
 
   // reset JES scale variable in ScanChain
   globalJESRescale = 1.;
@@ -1088,6 +1097,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     int imaxweightcombos[2] = {-1,-1};
                     double maxweightcombos[2] = {-1,-1};
                     double avgweightcombos[2] = {0,0};
+                    bool closestApproach = false;
+                    double closestDeltaMET_maxwcombo = -999;
+                    double closestDeltaMET_othercombo = -999;
+                    double closestDeltaMET_bestcombo = -999;
+                    TLorentzVector nusum;
             TLorentzVector cms, cms_nojetsmear, lepPlus, lepMinus, jet1, jet2;
             int Nsolns = -999;
             int imaxAMWTweight = -999;
@@ -2756,13 +2770,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
 
                     double nusols[4][2][3];
+                    double met_x = p_met.first*cos(p_met.second);
+                    double met_y = p_met.first*sin(p_met.second);
 
                     //create lines of python code to transmit the input values
                     TString l0 = Form("l0 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",lepPlus.Pt(),lepPlus.Eta(),lepPlus.Phi(),lepPlus.E());
                     TString l1 = Form("l1 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",lepMinus.Pt(),lepMinus.Eta(),lepMinus.Phi(),lepMinus.E());
                     TString j0 = Form("j0 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",v_goodJets_cand_p4[0].Pt(),v_goodJets_cand_p4[0].Eta(),v_goodJets_cand_p4[0].Phi(),v_goodJets_cand_p4[0].E());
                     TString j1 = Form("j1 = lv(%0.8f,%0.8f,%0.8f,%0.8f)",v_goodJets_cand_p4[1].Pt(),v_goodJets_cand_p4[1].Eta(),v_goodJets_cand_p4[1].Phi(),v_goodJets_cand_p4[1].E());
-                    TString metxy = Form("metx, mety = %0.8f, %0.8f",p_met.first*cos(p_met.second),p_met.first*sin(p_met.second));
+                    TString metxy = Form("metx, mety = %0.8f, %0.8f",met_x,met_y);
 
                     //cout<<l0<<endl;
                     //cout<<l1<<endl;
@@ -2817,7 +2833,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 nu1_vec.SetXYZM( nusols[is][0][0] , nusols[is][0][1] , nusols[is][0][2] , 0 );
                                 nu1_vecs.push_back(nu1_vec);
                                 nu2_vec.SetXYZM( nusols[is][1][0] , nusols[is][1][1] , nusols[is][1][2] , 0 );
-                                nu1_vecs.push_back(nu2_vec);
+                                nu2_vecs.push_back(nu2_vec);
 
                                 map<double, double >  mapJetPhi2Discr;
                                 double sol_weight = -1;
@@ -2893,16 +2909,37 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                     //cout<<AMWT_weights.size() <<" "<<ncombo0<<" "<<ncombo1 <<" "<<imaxweight<<" "<<maxweight<<" "<<imaxweightcombos[0]<<" "<<maxweightcombos[0]<<" "<<avgweightcombos[0]<<" "<<imaxweightcombos[1]<<" "<<maxweightcombos[1]<<" "<<avgweightcombos[1]<<endl;
 
-                    if(useMaxCombo) imaxweight = (avgweightcombos[0] > avgweightcombos[1]) ? imaxweightcombos[0] : imaxweightcombos[1];
+                    if(useMaxCombo && ncombo0 > 0 && ncombo1 > 0 ) imaxweight = (avgweightcombos[0] > avgweightcombos[1]) ? imaxweightcombos[0] : imaxweightcombos[1];
                     
                     //don't take "closest approach" solution if exact solutions are available
-                    if(ncombo0 == 1 && ncombo1 > 1) imaxweight = imaxweightcombos[1];
-                    if(ncombo1 == 1 && ncombo0 > 1) imaxweight = imaxweightcombos[0];
+                    if(ncombo0 == 1) {
+                        if(ncombo1 > 1) imaxweight = imaxweightcombos[1];
+                        else closestApproach = true;
+                    }
+                    if(ncombo1 == 1) {
+                        if(ncombo0 > 1) imaxweight = imaxweightcombos[0];
+                        else closestApproach = true;
+                    }
 
                     //cout<<imaxweight<<endl;
 
                     //if( AMWT_weights.size() > 0 && m_top > 0)  cout<<top1_p4[0].Vect().Dot(top1_vecs[imaxweight].Vect()) / ( top1_p4[0].Vect().Mag() * top1_vecs[imaxweight].Vect().Mag() )<< " " <<top2_p4[0].Vect().Dot(top2_vecs[imaxweight].Vect()) / ( top2_p4[0].Vect().Mag() * top2_vecs[imaxweight].Vect().Mag() )<<endl;;
-                    if( AMWT_weights.size() > 0) m_top_B = top1_vecs[imaxweight].M();
+                    if( AMWT_weights.size() > 0) {
+                        nusum = nu1_vecs[imaxweight]+nu2_vecs[imaxweight];
+                        closestDeltaMET_maxwcombo = sqrt( pow( nusum.Px() - met_x , 2 ) + pow( nusum.Py() - met_y , 2 ) );
+
+                        if(closestApproach && ncombo0 == 1 && ncombo1 == 1) {
+                            TLorentzVector nusum_othercombo = nu1_vecs[1-imaxweight]+nu2_vecs[1-imaxweight];
+                            closestDeltaMET_othercombo = sqrt( pow( nusum_othercombo.Px() - met_x , 2 ) + pow( nusum_othercombo.Py() - met_y , 2 ) );
+                            if(useClosestDeltaMET && closestDeltaMET_othercombo<closestDeltaMET_maxwcombo ) imaxweight = 1-imaxweight;
+                        }
+
+                        m_top_B = top1_vecs[imaxweight].M();
+                        nusum = nu1_vecs[imaxweight]+nu2_vecs[imaxweight];
+                        closestDeltaMET_bestcombo = sqrt( pow( nusum.Px() - met_x , 2 ) + pow( nusum.Py() - met_y , 2 ) );
+
+                    }
+
 
                     if(useBetchart){
                         //If there is no AMWT solution, fill the Betchart solution instead.
@@ -3441,7 +3478,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
 
 
-                        TLorentzVector topplus_genp_p4(0, 0, 0, 0), topminus_genp_p4(0, 0, 0, 0), cms_gen(0, 0, 0, 0), lepPlus_gen(0, 0, 0, 0), lepMinus_gen(0, 0, 0, 0), bPlus_gen(0, 0, 0, 0), bMinus_gen(0, 0, 0, 0);
+                        TLorentzVector topplus_genp_p4(0, 0, 0, 0), topminus_genp_p4(0, 0, 0, 0), cms_gen(0, 0, 0, 0), lepPlus_gen(0, 0, 0, 0), lepMinus_gen(0, 0, 0, 0), bPlus_gen(0, 0, 0, 0), bMinus_gen(0, 0, 0, 0), nuPlus_gen(0, 0, 0, 0), nuMinus_gen(0, 0, 0, 0);
 
                         bool from_gluon = true;
                         for (unsigned int i = 0; i < genps_p4().size(); i++)
@@ -3453,6 +3490,14 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                     if ( (genps_id()[i] == -11 || genps_id()[i] == -13 ||  genps_id()[i] == -15) )
                                     {
                                         lepPlus_gen.SetXYZT(genps_p4()[i].x(),
+                                                            genps_p4()[i].y(),
+                                                            genps_p4()[i].z(),
+                                                            genps_p4()[i].t()
+                                                           );
+                                    }
+                                    else if ( (genps_id()[i] == -12 || genps_id()[i] == -14 ||  genps_id()[i] == -16) )
+                                    {
+                                        nuPlus_gen.SetXYZT(genps_p4()[i].x(),
                                                             genps_p4()[i].y(),
                                                             genps_p4()[i].z(),
                                                             genps_p4()[i].t()
@@ -3473,6 +3518,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                     {
 
                                         lepMinus_gen.SetXYZT( genps_p4()[i].x(),
+                                                              genps_p4()[i].y(),
+                                                              genps_p4()[i].z(),
+                                                              genps_p4()[i].t()
+                                                            );
+                                    }
+                                    else if ( (genps_id()[i] == 12 || genps_id()[i] == 14 ||  genps_id()[i] == 16) )
+                                    {
+
+                                        nuMinus_gen.SetXYZT( genps_p4()[i].x(),
                                                               genps_p4()[i].y(),
                                                               genps_p4()[i].z(),
                                                               genps_p4()[i].t()
@@ -3524,6 +3578,94 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                             }
                         }
+
+
+                        if (!applyNoCuts && m_top > 0)
+                        {
+
+                            double top1dotgen = top1_vecs[imaxweight].Vect().Dot( topplus_genp_p4.Vect() ) / top1_vecs[imaxweight].Vect().Mag() / topplus_genp_p4.Vect().Mag();
+                            //double top2dotgent1 = top2_vecs[imaxweight].Vect().Dot( topplus_genp_p4.Vect() ) / top2_vecs[imaxweight].Vect().Mag() / topplus_genp_p4.Vect().Mag();
+                            double top2dotgen = top2_vecs[imaxweight].Vect().Dot( topminus_genp_p4.Vect() ) / top2_vecs[imaxweight].Vect().Mag() / topminus_genp_p4.Vect().Mag();
+
+                            double top1Pratio = ( top1_vecs[imaxweight].Vect().Mag() - topplus_genp_p4.Vect().Mag() ) / ( top1_vecs[imaxweight].Vect().Mag() + topplus_genp_p4.Vect().Mag() );
+                            double top2Pratio = ( top2_vecs[imaxweight].Vect().Mag() - topminus_genp_p4.Vect().Mag() ) / ( top2_vecs[imaxweight].Vect().Mag() + topminus_genp_p4.Vect().Mag() );
+
+                            TLorentzVector nusum_gen = nuPlus_gen + nuMinus_gen;
+
+                            double met_x = p_met.first*cos(p_met.second);
+                            double met_y = p_met.first*sin(p_met.second);
+
+                            double DeltaMETsol_gen = sqrt( pow( nusum.Px() - nusum_gen.Px() , 2 ) + pow( nusum.Py() - nusum_gen.Py() , 2 ) );
+                            double DeltaMETmeas_gen = sqrt( pow( met_x - nusum_gen.Px() , 2 ) + pow( met_y - nusum_gen.Py() , 2 ) );
+
+
+                            plot1D(prefix+"_top1dotgen", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_top2dotgen", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_top1Pratio", top1Pratio, 1., h_1d, 40, -1., 1.);
+                            plot1D(prefix+"_top2Pratio", top2Pratio, 1., h_1d, 40, -1., 1.);
+
+                            plot1D(prefix+"_DeltaMETsol_gen", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
+                            plot1D(prefix+"_DeltaMETmeas_gen", DeltaMETmeas_gen > 199.9 ? 199.9 : DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
+
+                            if(closestApproach) {
+                                plot1D(prefix+"_top1dotgen_closest_bestsol", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_top2dotgen_closest_bestsol", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_top1Pratio_closest_bestsol", top1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1D(prefix+"_top2Pratio_closest_bestsol", top2Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1D(prefix+"_closestDeltaMET_closest_maxwsol",     closestDeltaMET_maxwcombo > 199.9 ? 199.9 : closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
+                                plot1D(prefix+"_closestDeltaMET_closest_bestsol",     closestDeltaMET_bestcombo > 199.9 ? 199.9 : closestDeltaMET_bestcombo , 1., h_1d, 40, 0., 200.);
+                                if(closestDeltaMET_othercombo>0) plot1D(prefix+"_closestDeltaMET_closest_othersol",     closestDeltaMET_othercombo > 199.9 ? 199.9 : closestDeltaMET_othercombo , 1., h_1d, 40, 0., 200.);
+
+                                plot1D(prefix+"_DeltaMETsol_gen_closest", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
+                                plot1D(prefix+"_DeltaMETmeas_gen_closest", DeltaMETmeas_gen > 199.9 ? 199.9 : DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
+
+                                for (int i = 0; i < top1_vecs.size(); ++i)
+                                {
+                                    if (i!=imaxweight) {
+                                        double top1dotgen_i = top1_vecs[i].Vect().Dot( topplus_genp_p4.Vect() ) / top1_vecs[i].Vect().Mag() / topplus_genp_p4.Vect().Mag();
+                                        double top2dotgen_i = top2_vecs[i].Vect().Dot( topminus_genp_p4.Vect() ) / top2_vecs[i].Vect().Mag() / topminus_genp_p4.Vect().Mag();
+                                        double top1Pratio_i = ( top1_vecs[i].Vect().Mag() - topplus_genp_p4.Vect().Mag() ) / ( top1_vecs[i].Vect().Mag() + topplus_genp_p4.Vect().Mag() );
+                                        double top2Pratio_i = ( top2_vecs[i].Vect().Mag() - topminus_genp_p4.Vect().Mag() ) / ( top2_vecs[i].Vect().Mag() + topminus_genp_p4.Vect().Mag() );
+                                        plot1D(prefix+"_top1dotgen_closest_othersol", acos(top1dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1D(prefix+"_top2dotgen_closest_othersol", acos(top2dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1D(prefix+"_top1Pratio_closest_othersol", top1Pratio_i, 1., h_1d, 40, -1., 1.);
+                                        plot1D(prefix+"_top2Pratio_closest_othersol", top2Pratio_i, 1., h_1d, 40, -1., 1.);
+                                    }
+                                }
+
+
+                            }
+                            else {
+                                plot1D(prefix+"_top1dotgen_max", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_top2dotgen_max", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_top1Pratio_max", top1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1D(prefix+"_top2Pratio_max", top2Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1D(prefix+"_closestDeltaMET_max",     closestDeltaMET_maxwcombo > 199.9 ? 199.9 : closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
+
+                                plot1D(prefix+"_DeltaMETsol_gen_max", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
+                                plot1D(prefix+"_DeltaMETmeas_gen_max", DeltaMETmeas_gen > 199.9 ? 199.9 : DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
+
+                                for (int i = 0; i < top1_vecs.size(); ++i)
+                                {
+                                    if (i!=imaxweight) {
+                                        double top1dotgen_i = top1_vecs[i].Vect().Dot( topplus_genp_p4.Vect() ) / top1_vecs[i].Vect().Mag() / topplus_genp_p4.Vect().Mag();
+                                        double top2dotgen_i = top2_vecs[i].Vect().Dot( topminus_genp_p4.Vect() ) / top2_vecs[i].Vect().Mag() / topminus_genp_p4.Vect().Mag();
+                                        double top1Pratio_i = ( top1_vecs[i].Vect().Mag() - topplus_genp_p4.Vect().Mag() ) / ( top1_vecs[i].Vect().Mag() + topplus_genp_p4.Vect().Mag() );
+                                        double top2Pratio_i = ( top2_vecs[i].Vect().Mag() - topminus_genp_p4.Vect().Mag() ) / ( top2_vecs[i].Vect().Mag() + topminus_genp_p4.Vect().Mag() );
+                                        plot1D(prefix+"_top1dotgen_othersols", acos(top1dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1D(prefix+"_top2dotgen_othersols", acos(top2dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1D(prefix+"_top1Pratio_othersols", top1Pratio_i, 1., h_1d, 40, -1., 1.);
+                                        plot1D(prefix+"_top2Pratio_othersols", top2Pratio_i, 1., h_1d, 40, -1., 1.);
+                                    }
+                                }
+
+
+
+                            }
+
+                        }
+
+
                         massllbb_gen = (lepPlus_gen + bPlus_gen + lepMinus_gen + bMinus_gen).M();
 
                         float m_topminus_gen = topminus_genp_p4.M();
@@ -3597,8 +3739,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 fillHistos( htopPCM_diff_plus, top_p_diff_plus,  weight, myType, jetBin, Nsolns);
                                 fillHistos( htopPCM_diff_minus, top_p_diff_minus,  weight, myType, jetBin, Nsolns);
                             }
-
-
 
                         }
                         fillHistos( htopMass_plus_gen, m_topplus_gen ,  weight, myType, jetBin, Nsolns);
@@ -3779,10 +3919,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
         //float nEvents_primary = cms2.evt_nEvts();
         //cout << "acceptance                       =  " << (1.0*nSelectedEvents)/(nEvents_primary*kFactor * evt_scale1fb() * lumi) <<endl;
 
+        savePlots(h_1d,Form("%s_histograms.root",prefix.c_str()));
 
     }  // closes loop over files
 
     if (createBabyNtuples && !applyNoCuts)CloseBabyNtuple();
+
     return;
 
 } // closes myLooper function
