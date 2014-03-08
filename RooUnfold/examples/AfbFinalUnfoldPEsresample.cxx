@@ -36,11 +36,12 @@ using std::endl;
 //==============================================================================
 
 // 0=SVD, 1=TUnfold via RooUnfold, 2=TUnfold
-int unfoldingType = 0;
+int unfoldingType = 2;
 
 TString Region = "";
-Int_t kterm = 3;
-Double_t tau = 1E-4;
+Int_t kterm = 3; //for SVD
+Double_t tau = 0.005; //for TUnfold - this is a more reasonable default (1E-4 gives very little regularisation)
+
 Int_t nVars = 8;
 Int_t includeSys = 0;
 
@@ -48,9 +49,11 @@ Int_t includeSys = 0;
 void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double scalettotr = 1., double scalewjets = 1., double scaleDY = 1., double scaletw = 1., double scaleVV = 1. )
 {
 
-    const int NPEs = 3000;
-    Int_t PEsize = 9081;
-    bool split_sample = false;
+    const int NPEs = 1000;
+    Int_t lumiSF = 1;  //to simulate an integrated luminosity lumiSF times larger: multiplies number of events per PE and weights of ttdil events used for smearing matrix by lumiSF
+    Int_t PEsize = 9084;
+    PEsize*=lumiSF;
+    bool split_sample = true;
     Double_t sample_split_factor = 2.;
     if (!split_sample) sample_split_factor = 1.;
 
@@ -94,17 +97,32 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
     //for (Int_t iVar = 0; iVar < nVars; iVar++)
     //{
         //Initialize1DBinning(iVar);
+
+        //use twice as many reco bins for TUnfold
+        int recobinsmult = 2;
+        if (unfoldingType == 0) recobinsmult = 1;
+        const int nbins1Dreco = nbins1D * recobinsmult;
+        double xbins1Dreco[nbins1Dreco + 1];
+
+        for (int i = 0; i < nbins1Dreco + 1; ++i)
+        {
+            if (unfoldingType == 0) xbins1Dreco[i] = xbins1D[i];
+            else xbins1Dreco[i] = (xbins1D[int(i / 2)] + xbins1D[int((i + 1) / 2)]) / 2.;  //reco-level bins from dividing gen-level bins in 2
+            //else xbins1Dreco[i] = xmin + double(i) / nbins1Dreco * (xmax - xmin); //uniform reco-level bins
+            //cout << xbins1Dreco[i] << endl;
+        }
+
         bool combineLepMinus = acceptanceName == "lepCosTheta" ? true : false;
 
-        TH1D *hData = new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1D, xbins1D);
-        TH1D *hBkg = new TH1D ("Background",  "Background",    nbins1D, xbins1D);
+        TH1D *hData = new TH1D ("Data_BkgSub", "Data with background subtracted",    nbins1Dreco, xbins1Dreco);
+        TH1D *hBkg = new TH1D ("Background",  "Background",    nbins1Dreco, xbins1Dreco);
         TH1D *hData_unfolded = new TH1D ("Data_Unfold", "Data with background subtracted and unfolded", nbins1D, xbins1D);
 
         TH1D *hTrue = new TH1D ("true", "Truth",    nbins1D, xbins1D);
         TH1D *hTrue_PEs = new TH1D ("true_PEs", "Truth in PEs subsample", nbins1D, xbins1D);
-        TH1D *hMeas = new TH1D ("meas", "Measured", nbins1D, xbins1D);
+        TH1D *hMeas = new TH1D ("meas", "Measured", nbins1Dreco, xbins1Dreco);
 
-        TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1D, xbins1D, nbins1D, xbins1D);
+        TH2D *hTrue_vs_Meas = new TH2D ("true_vs_meas", "True vs Measured", nbins1Dreco, xbins1Dreco, nbins1D, xbins1D);
 
         TH1D *hData_bkgSub;
 
@@ -115,7 +133,7 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
 
         for (int iPE = 0; iPE < NPEs; ++iPE)
         {
-            hPseudoData[iPE] = new TH1D ("", "", nbins1D, xbins1D);
+            hPseudoData[iPE] = new TH1D ("", "", nbins1Dreco, xbins1Dreco);
             hPseudoData_unfolded[iPE] = new TH1D ("", "", nbins1D, xbins1D);
             m_unfoldE_PEs[iPE] = new TMatrixD(nbins1D, nbins1D);
             m_correctE_PEs[iPE] = new TMatrixD(nbins1D, nbins1D);
@@ -131,6 +149,7 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
 
         TMatrixD m_unfoldE (nbins1D, nbins1D);
         TMatrixD m_correctE(nbins1D, nbins1D);
+        TMatrixD m_unfoldcorr (nbins1D, nbins1D);
 
 
         //  Now test with data and with BKG subtraction
@@ -383,6 +402,8 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
 
             }
 
+            weight*=lumiSF;
+            if(split_sample) weight /= 1. - 1./sample_split_factor;
             if (!split_sample || i_ev >= Nevts )
             {
 
@@ -429,6 +450,9 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
         hData_bkgSub = (TH1D *) hData->Clone();
         hData_bkgSub->Add(hBkg, -1.0);
 
+        Double_t biasScale =  hData_bkgSub->Integral() / hMeas->Integral() ;
+        hMeas->Scale(biasScale);
+
         if (unfoldingType == 0)
         {
             RooUnfoldSvd unfold_svd (&response, hData_bkgSub, kterm);
@@ -439,11 +463,11 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
 
             for (int iPE = 0; iPE < lastPE; ++iPE)
             {
-                RooUnfoldSvd unfold_svd (&response, hPseudoData[iPE], kterm);
-                unfold_svd.Setup(&response, hPseudoData[iPE]);
-                unfold_svd.IncludeSystematics(includeSys);
-                hPseudoData_unfolded[iPE] = (TH1D *) unfold_svd.Hreco();
-                m_unfoldE_PEs[iPE] = unfold_svd.Ereco();
+                RooUnfoldSvd unfold_svd_PEs (&response, hPseudoData[iPE], kterm);
+                unfold_svd_PEs.Setup(&response, hPseudoData[iPE]);
+                unfold_svd_PEs.IncludeSystematics(includeSys);
+                hPseudoData_unfolded[iPE] = (TH1D *) unfold_svd_PEs.Hreco();
+                m_unfoldE_PEs[iPE] = unfold_svd_PEs.Ereco();
             }
         }
         else if (unfoldingType == 1)
@@ -457,22 +481,95 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
         }
         else if (unfoldingType == 2)
         {
+
             TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);
-            unfold_TUnfold.SetInput(hMeas);
-            //Double_t biasScale=1.0;
-            unfold_TUnfold.SetBias(hTrue);
-            unfold_TUnfold.DoUnfold(tau);
+            //TUnfold unfold_TUnfold (hTrue_vs_Meas, TUnfold::kHistMapOutputVert);
+            unfold_TUnfold.SetInput(hData_bkgSub);
+            //unfold_TUnfold.SetBias(hTrue);  //doesn't make any difference, because if not set the bias distribution is automatically determined from hTrue_vs_Meas, which gives exactly hTrue
+
+            /*if (doScanLCurve)
+            {
+
+                Int_t nScan = 3000;
+                Int_t iBest;
+                TSpline *logTauX, *logTauY;
+                TGraph *lCurve;
+
+                //restrict scan range to observed useful range of tau (5E-4 gives very weak regularisation, 2E-2 very strong)
+                iBest = unfold_TUnfold.ScanLcurve(nScan, 5E-4, 2E-2, &lCurve, &logTauX, &logTauY);
+
+                TCanvas *c_l = new TCanvas("c_l", "c_l", 1200, 600);
+                c_l->Divide(3, 1);
+                c_l->cd(1);
+                logTauX->Draw("L");
+                c_l->cd(2);
+                logTauY->Draw("L");
+                c_l->cd(3);
+                lCurve->Draw("AC");
+                c_l->SaveAs("Lcurve_" + acceptanceName + Region + ".pdf");
+
+
+                std::cout << "tau=" << unfold_TUnfold.GetTau() << " iBest=" <<   iBest << "\n";
+
+                tau = unfold_TUnfold.GetTau();
+
+                //when an extreme value is chosen, normally it means scanLcurve didn't work very well, so reset tau to a reasonable value
+                if (tau > 1E-2 || tau < 1E-3)
+                {
+                    tau = 0.005;
+                    cout << "setting tau to 0.005" << endl;
+                }
+
+            }*/
+
+
+            //biasScale = 0.0; //set biasScale to 0 when using kRegModeSize, or to compare with unfoldingType == 1
+            //do the unfolding with calculated bias scale (N_data/N_MC), and tau from ScanLcurve if doScanLCurve=true. Note that the results will only be the same as unfoldingType == 1 with biasScale=0 and the same value of tau.
+            cout << "bias scale for TUnfold: " << biasScale << endl;
+            unfold_TUnfold.DoUnfold(tau, hData_bkgSub, biasScale);
+            //unfold_TUnfold.DoUnfold(0.005,hData_bkgSub,biasScale);
+
+
             unfold_TUnfold.GetOutput(hData_unfolded);
 
 
             TH2D *ematrix = unfold_TUnfold.GetEmatrix("ematrix", "error matrix", 0, 0);
+            TH2D *cmatrix = unfold_TUnfold.GetRhoIJ("cmatrix", "correlation matrix", 0, 0);
             for (Int_t cmi = 0; cmi < nbins1D; cmi++)
             {
                 for (Int_t cmj = 0; cmj < nbins1D; cmj++)
                 {
                     m_unfoldE(cmi, cmj) = ematrix->GetBinContent(cmi + 1, cmj + 1);
+                    m_unfoldcorr(cmi, cmj) = cmatrix->GetBinContent(cmi + 1, cmj + 1);
                 }
             }
+
+            for (int iPE = 0; iPE < lastPE; ++iPE)
+            {
+                TUnfold unfold_TUnfold_PEs (hTrue_vs_Meas, TUnfold::kHistMapOutputVert, TUnfold::kRegModeCurvature);
+                unfold_TUnfold_PEs.SetInput(hPseudoData[iPE]);
+                biasScale =  hPseudoData[iPE]->Integral() / hMeas->Integral() ;
+                //cout<<"biasScale PE "<<iPE<<": "<<biasScale<<endl;
+                hPseudoData[iPE]->Scale(1./biasScale);
+                biasScale = 1.;
+                unfold_TUnfold_PEs.DoUnfold(tau, hPseudoData[iPE], biasScale);
+                unfold_TUnfold_PEs.GetOutput(hPseudoData_unfolded[iPE]);
+
+                TH2D *ematrixPE = unfold_TUnfold_PEs.GetEmatrix("ematrix", "error matrix", 0, 0);
+                //TH2D *cmatrixPE = unfold_TUnfold_PEs.GetRhoIJ("cmatrix", "correlation matrix", 0, 0);
+                TMatrixD m_unfoldE_temp =  m_unfoldE_PEs[iPE];
+                for (Int_t cmi = 0; cmi < nbins1D; cmi++)
+                {
+                    for (Int_t cmj = 0; cmj < nbins1D; cmj++)
+                    {
+                        m_unfoldE_temp(cmi, cmj) = ematrixPE->GetBinContent(cmi + 1, cmj + 1);
+                    }
+                }
+                m_unfoldE_PEs[iPE] = m_unfoldE_temp;
+
+            }
+
+
         }
         else cout << "Unfolding TYPE not Specified" << "\n";
 
@@ -637,10 +734,13 @@ void AfbFinalUnfoldPEsresample(Int_t iVar = 0, double scalettdil = 1., double sc
         hAfb->SetMaximum(1.3 * hAfb->GetMaximum());
         hAfb->Draw();
         hAfb->Fit("gaus", "LEMV");
+        cout<<"mean value: "<<hAfb->GetMean()<<" "<<hAfb->GetMeanError()<<endl;
+        cout<<"mean RMS: "<<hAfb->GetRMS()<<" "<<hAfb->GetRMSError()<<endl;
         c_pull->cd(4);
         hErr->SetMaximum(1.3 * hErr->GetMaximum());
         hErr->Draw();
         hErr->Fit("gaus", "LEMV");
+        cout<<"mean error: "<<hErr->GetMean()<<" "<<hErr->GetMeanError()<<endl;
         c_pull->SaveAs("Pull_" + acceptanceName + Region + ".pdf");
         c_pull->SaveAs("Pull_" + acceptanceName + Region + ".root");
         c_pull->SaveAs("Pull_" + acceptanceName + Region + ".C");
