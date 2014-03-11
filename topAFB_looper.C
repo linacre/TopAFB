@@ -3580,7 +3580,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         }
 
 
-                        if (!applyNoCuts && m_top > 0)
+                        if (!applyNoCuts && prefix == "ttdil" && m_top > 0)
                         {
 
                             double top1dotgen = top1_vecs[imaxweight].Vect().Dot( topplus_genp_p4.Vect() ) / top1_vecs[imaxweight].Vect().Mag() / topplus_genp_p4.Vect().Mag();
@@ -3919,7 +3919,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
         //float nEvents_primary = cms2.evt_nEvts();
         //cout << "acceptance                       =  " << (1.0*nSelectedEvents)/(nEvents_primary*kFactor * evt_scale1fb() * lumi) <<endl;
 
-        savePlots(h_1d,Form("%s_histograms.root",prefix.c_str()));
+        if (!applyNoCuts && prefix == "ttdil") savePlots(h_1d,Form("%s_histograms.root",prefix.c_str()));
 
     }  // closes loop over files
 
