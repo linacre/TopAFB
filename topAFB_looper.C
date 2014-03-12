@@ -820,7 +820,10 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
   bool useMaxCombo = false; //use lepton-jet combo with maximum sum of weights. false seems to give slightly better resolution.
   bool useClosestDeltaMET = true; //when both combos have only closest-approach solutions, take the one closest to the measured MET instead of the one with the highest weight. true seems to give slightly better resolution.
   bool useBetchart = true;
+  bool doParticleLevel = false;
   int ntaustotal[3] = {0, 0, 0};
+  double mWPDG = 80.4;
+  double mtopPDG = 172.5;
 
   std::map<std::string, TH1F*> h_1d;
 
@@ -1124,6 +1127,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             int nleps = 0;
             if (!isData)
                 nleps = leptonGenpCount_lepTauDecays(nels, nmus, ntaus);
+
+            if (doParticleLevel && ntaus!= 0 ) nleps = -999; //hack so that events with taus are not considered ttdil signal for particle level tops
+
             if (!applyNoCuts)
             {
                 if (prefix == "ttdil"    &&  nleps != 2) continue;
@@ -1643,6 +1649,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                 }//if(hypDisamb)
 
             }//!applyNoCuts
+
+            //cout<<"hyps: "<<hyp_p4().size()<<" "<<v_goodHyps.size()<<endl;
 
 
             //now loop over the good hypotheses. If we require hypothesis disambiguation,
@@ -2938,6 +2946,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         nusum = nu1_vecs[imaxweight]+nu2_vecs[imaxweight];
                         closestDeltaMET_bestcombo = sqrt( pow( nusum.Px() - met_x , 2 ) + pow( nusum.Py() - met_y , 2 ) );
 
+                        //cut on deltaMET (measured vs closest solution)
+                        //if(closestDeltaMET_bestcombo > 50.) m_top_B = -999.;
+
                     }
 
 
@@ -3073,10 +3084,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     {
                         if (useOnlyMaxWsoln) i_smear = ( imaxAMWTweight > 0 ? imaxAMWTweight : 0 );
 
-                        //if ( !(m_top_S > 0 && m_top_B > 0) ) continue; //to use only events where both solvers have a solution
+                        //if ( !(m_top_S > 0 && m_top_B > 0) ) continue; //to use only events where both solvers have a solution. Note, when there is an AMWT solution there is always a Betchart solution.
+                        if ( m_top_S > 0 && m_top_B < 0 ) cout<<"***S not B***, closestDeltaMET_bestcombo = "<<closestDeltaMET_bestcombo<<endl;
+                        //if ( m_top_S < 0 && m_top_B > 0 ) cout<<"***B not S***, closestDeltaMET_bestcombo = "<<closestDeltaMET_bestcombo<<endl;
 
                         if(useBetchart) {
-                            //replace the AMWT solution with the Betchart solution. Note, when there is an AMWT solution there is always a Betchart solution.
+                            //replace the AMWT solution with the Betchart solution.
                             if (m_top_B > 0) top1_p4[i_smear] = top1_vecs[imaxweight];
                             if (m_top_B > 0) top2_p4[i_smear] = top2_vecs[imaxweight];
                         }
@@ -3479,6 +3492,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
 
                         TLorentzVector topplus_genp_p4(0, 0, 0, 0), topminus_genp_p4(0, 0, 0, 0), cms_gen(0, 0, 0, 0), lepPlus_gen(0, 0, 0, 0), lepMinus_gen(0, 0, 0, 0), bPlus_gen(0, 0, 0, 0), bMinus_gen(0, 0, 0, 0), nuPlus_gen(0, 0, 0, 0), nuMinus_gen(0, 0, 0, 0);
+                        TLorentzVector topPlus_status1(0, 0, 0, 0), topMinus_status1(0, 0, 0, 0), WPlus_status1(0, 0, 0, 0), WMinus_status1(0, 0, 0, 0), lepPlus_status1(0, 0, 0, 0), lepMinus_status1(0, 0, 0, 0), bPlus_status1(0, 0, 0, 0), bMinus_status1(0, 0, 0, 0), nuPlus_status1(0, 0, 0, 0), nuMinus_status1(0, 0, 0, 0);
 
                         bool from_gluon = true;
                         for (unsigned int i = 0; i < genps_p4().size(); i++)
@@ -3494,14 +3508,45 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                                             genps_p4()[i].z(),
                                                             genps_p4()[i].t()
                                                            );
+
+                                        //status = 1 lepton
+                                        if ( genps_id()[i] != -15 )
+                                        {
+                                            for (unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++)
+                                            {
+                                                int daughterID = genps_lepdaughter_id()[i][kk];
+                                                if ( daughterID == genps_id()[i] )
+                                                {
+                                                    lepPlus_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                                                    continue;
+                                                }
+                                                //need to add all status=1 photons in a DR<0.1 cone around the lepton.
+                                            }
+                                        }
+
                                     }
-                                    else if ( (genps_id()[i] == -12 || genps_id()[i] == -14 ||  genps_id()[i] == -16) )
+                                    else if ( (genps_id()[i] == 12 || genps_id()[i] == 14 ||  genps_id()[i] == 16) )
                                     {
                                         nuPlus_gen.SetXYZT(genps_p4()[i].x(),
                                                             genps_p4()[i].y(),
                                                             genps_p4()[i].z(),
                                                             genps_p4()[i].t()
                                                            );
+
+                                        //status = 1 neutrino
+                                        if ( genps_id()[i] != 16 ) 
+                                        {
+                                            for (unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++)
+                                            {
+                                                int daughterID = genps_lepdaughter_id()[i][kk];
+                                                if ( daughterID == genps_id()[i] )
+                                                {
+                                                    nuPlus_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                                                    continue;
+                                                }
+                                            }
+                                        }
+
                                     }
                                     else if ( genps_id()[i] == 5)
                                     {
@@ -3522,8 +3567,24 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                                               genps_p4()[i].z(),
                                                               genps_p4()[i].t()
                                                             );
+
+                                        //status = 1 lepton
+                                        if ( genps_id()[i] != 15 )
+                                        {
+                                            for (unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++)
+                                            {
+                                                int daughterID = genps_lepdaughter_id()[i][kk];
+                                                if ( daughterID == genps_id()[i] )
+                                                {
+                                                    lepMinus_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                                                    continue;
+                                                }
+                                                //need to add all status=1 photons in a DR<0.1 cone around the lepton.
+                                            }
+                                        }
+
                                     }
-                                    else if ( (genps_id()[i] == 12 || genps_id()[i] == 14 ||  genps_id()[i] == 16) )
+                                    else if ( (genps_id()[i] == -12 || genps_id()[i] == -14 ||  genps_id()[i] == -16) )
                                     {
 
                                         nuMinus_gen.SetXYZT( genps_p4()[i].x(),
@@ -3531,6 +3592,21 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                                               genps_p4()[i].z(),
                                                               genps_p4()[i].t()
                                                             );
+
+                                        //status = 1 neutrino
+                                        if ( genps_id()[i] != -16 ) 
+                                        {
+                                            for (unsigned int kk = 0; kk < genps_lepdaughter_id()[i].size(); kk++)
+                                            {
+                                                int daughterID = genps_lepdaughter_id()[i][kk];
+                                                if ( daughterID == genps_id()[i] )
+                                                {
+                                                    nuMinus_status1.SetXYZT( genps_lepdaughter_p4()[i][kk].x(), genps_lepdaughter_p4()[i][kk].y(), genps_lepdaughter_p4()[i][kk].z(), genps_lepdaughter_p4()[i][kk].t() );
+                                                    continue;
+                                                }
+                                            }
+                                        }
+
                                     }
                                     else if ( genps_id()[i] == -5)
                                     {
@@ -3576,7 +3652,63 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                                 }
 
+                            } //status = 3
+
+                        } //genparticles loop
+
+                        //temporary (need to cluster jets, anti-KT, R = 0.5, excluding photons used in the lepton definition and neutrinos)
+                        bPlus_status1 = bPlus_gen;
+                        bMinus_status1 = bMinus_gen;
+
+
+                        //determine pseudotop if no taus
+                        if( ntaus == 0 ) {
+
+                            double deltamW11 = fabs ( mWPDG - (lepPlus_status1 + nuPlus_status1).M() );
+                            double deltamW12 = fabs ( mWPDG - (lepPlus_status1 + nuMinus_status1).M() );
+                            double deltamW21 = fabs ( mWPDG - (lepMinus_status1 + nuPlus_status1).M() );
+                            double deltamW22 = fabs ( mWPDG - (lepMinus_status1 + nuMinus_status1).M() );
+
+                            //should really use two highest pT neutrinos (not just the two from top)
+                            if(  deltamW12 + deltamW21 < deltamW11 + deltamW22  ) {
+                                WPlus_status1 = lepPlus_status1 + nuMinus_status1;
+                                WMinus_status1 = lepMinus_status1 + nuPlus_status1;
+                                if(doParticleLevel) nuPlus_gen = nuMinus_status1;
+                                if(doParticleLevel) nuMinus_gen = nuPlus_status1;
                             }
+                            else {
+                                WPlus_status1 = lepPlus_status1 + nuPlus_status1;
+                                WMinus_status1 = lepMinus_status1 + nuMinus_status1;
+                                if(doParticleLevel) nuPlus_gen = nuPlus_status1;
+                                if(doParticleLevel) nuMinus_gen = nuMinus_status1;
+                            }
+
+                            double deltamt11 = fabs ( mtopPDG - (WPlus_status1 + bPlus_status1).M() );
+                            double deltamt12 = fabs ( mtopPDG - (WPlus_status1 + bMinus_status1).M() );
+                            double deltamt21 = fabs ( mtopPDG - (WMinus_status1 + bPlus_status1).M() );
+                            double deltamt22 = fabs ( mtopPDG - (WMinus_status1 + bMinus_status1).M() );
+
+                            //should really loop over all bs (not just the two from top)
+                            if(  deltamt12 + deltamt21 < deltamt11 + deltamt22  ) {
+                                topPlus_status1 = bMinus_status1 + WPlus_status1;
+                                topMinus_status1 = bPlus_status1 + WMinus_status1;
+                                if(doParticleLevel) bPlus_gen = bMinus_status1;
+                                if(doParticleLevel) bMinus_gen = bPlus_status1;
+                            }
+                            else {
+                                topPlus_status1 = bPlus_status1 + WPlus_status1;
+                                topMinus_status1 = bMinus_status1 + WMinus_status1;
+                                if(doParticleLevel) bPlus_gen = bPlus_status1;
+                                if(doParticleLevel) bMinus_gen = bMinus_status1;
+                            }
+
+                            if(doParticleLevel){
+                                lepPlus_gen = lepPlus_status1;
+                                lepMinus_gen = lepMinus_status1;
+                                topplus_genp_p4 = topPlus_status1;
+                                topminus_genp_p4 = topMinus_status1;
+                            }
+
                         }
 
 
@@ -3584,11 +3716,20 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         {
 
                             double top1dotgen = top1_vecs[imaxweight].Vect().Dot( topplus_genp_p4.Vect() ) / top1_vecs[imaxweight].Vect().Mag() / topplus_genp_p4.Vect().Mag();
-                            //double top2dotgent1 = top2_vecs[imaxweight].Vect().Dot( topplus_genp_p4.Vect() ) / top2_vecs[imaxweight].Vect().Mag() / topplus_genp_p4.Vect().Mag();
+                            double top1dotgent2 = top1_vecs[imaxweight].Vect().Dot( topminus_genp_p4.Vect() ) / top1_vecs[imaxweight].Vect().Mag() / topminus_genp_p4.Vect().Mag();
+                            double top2dotgent1 = top2_vecs[imaxweight].Vect().Dot( topplus_genp_p4.Vect() ) / top2_vecs[imaxweight].Vect().Mag() / topplus_genp_p4.Vect().Mag();
                             double top2dotgen = top2_vecs[imaxweight].Vect().Dot( topminus_genp_p4.Vect() ) / top2_vecs[imaxweight].Vect().Mag() / topminus_genp_p4.Vect().Mag();
-
                             double top1Pratio = ( top1_vecs[imaxweight].Vect().Mag() - topplus_genp_p4.Vect().Mag() ) / ( top1_vecs[imaxweight].Vect().Mag() + topplus_genp_p4.Vect().Mag() );
                             double top2Pratio = ( top2_vecs[imaxweight].Vect().Mag() - topminus_genp_p4.Vect().Mag() ) / ( top2_vecs[imaxweight].Vect().Mag() + topminus_genp_p4.Vect().Mag() );
+
+
+                            double nu1dotgen = nu1_vecs[imaxweight].Vect().Dot( nuPlus_gen.Vect() ) / nu1_vecs[imaxweight].Vect().Mag() / nuPlus_gen.Vect().Mag();
+                            double nu1dotgennu2 = nu1_vecs[imaxweight].Vect().Dot( nuMinus_gen.Vect() ) / nu1_vecs[imaxweight].Vect().Mag() / nuMinus_gen.Vect().Mag();
+                            double nu2dotgennu1 = nu2_vecs[imaxweight].Vect().Dot( nuPlus_gen.Vect() ) / nu2_vecs[imaxweight].Vect().Mag() / nuPlus_gen.Vect().Mag();
+                            double nu2dotgen = nu2_vecs[imaxweight].Vect().Dot( nuMinus_gen.Vect() ) / nu2_vecs[imaxweight].Vect().Mag() / nuMinus_gen.Vect().Mag();
+                            double nu1Pratio = ( nu1_vecs[imaxweight].Vect().Mag() - nuPlus_gen.Vect().Mag() ) / ( nu1_vecs[imaxweight].Vect().Mag() + nuPlus_gen.Vect().Mag() );
+                            double nu2Pratio = ( nu2_vecs[imaxweight].Vect().Mag() - nuMinus_gen.Vect().Mag() ) / ( nu2_vecs[imaxweight].Vect().Mag() + nuMinus_gen.Vect().Mag() );
+
 
                             TLorentzVector nusum_gen = nuPlus_gen + nuMinus_gen;
 
@@ -3601,8 +3742,17 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                             plot1D(prefix+"_top1dotgen", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
                             plot1D(prefix+"_top2dotgen", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_top2dotgent1", acos(top2dotgent1), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_top1dotgent2", acos(top1dotgent2), 1., h_1d, 40, 0., 3.1415926536);
                             plot1D(prefix+"_top1Pratio", top1Pratio, 1., h_1d, 40, -1., 1.);
                             plot1D(prefix+"_top2Pratio", top2Pratio, 1., h_1d, 40, -1., 1.);
+
+                            plot1D(prefix+"_nu1dotgen", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_nu2dotgen", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_nu2dotgennu1", acos(nu2dotgennu1), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_nu1dotgennu2", acos(nu1dotgennu2), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1D(prefix+"_nu1Pratio", nu1Pratio, 1., h_1d, 40, -1., 1.);
+                            plot1D(prefix+"_nu2Pratio", nu2Pratio, 1., h_1d, 40, -1., 1.);
 
                             plot1D(prefix+"_DeltaMETsol_gen", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
                             plot1D(prefix+"_DeltaMETmeas_gen", DeltaMETmeas_gen > 199.9 ? 199.9 : DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
@@ -3612,6 +3762,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 plot1D(prefix+"_top2dotgen_closest_bestsol", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
                                 plot1D(prefix+"_top1Pratio_closest_bestsol", top1Pratio, 1., h_1d, 40, -1., 1.);
                                 plot1D(prefix+"_top2Pratio_closest_bestsol", top2Pratio, 1., h_1d, 40, -1., 1.);
+
+                                plot1D(prefix+"_nu1dotgen_closest_bestsol", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_nu2dotgen_closest_bestsol", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_nu1Pratio_closest_bestsol", nu1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1D(prefix+"_nu2Pratio_closest_bestsol", nu2Pratio, 1., h_1d, 40, -1., 1.);
+
                                 plot1D(prefix+"_closestDeltaMET_closest_maxwsol",     closestDeltaMET_maxwcombo > 199.9 ? 199.9 : closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
                                 plot1D(prefix+"_closestDeltaMET_closest_bestsol",     closestDeltaMET_bestcombo > 199.9 ? 199.9 : closestDeltaMET_bestcombo , 1., h_1d, 40, 0., 200.);
                                 if(closestDeltaMET_othercombo>0) plot1D(prefix+"_closestDeltaMET_closest_othersol",     closestDeltaMET_othercombo > 199.9 ? 199.9 : closestDeltaMET_othercombo , 1., h_1d, 40, 0., 200.);
@@ -3640,6 +3796,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 plot1D(prefix+"_top2dotgen_max", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
                                 plot1D(prefix+"_top1Pratio_max", top1Pratio, 1., h_1d, 40, -1., 1.);
                                 plot1D(prefix+"_top2Pratio_max", top2Pratio, 1., h_1d, 40, -1., 1.);
+
+                                plot1D(prefix+"_nu1dotgen_max", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_nu2dotgen_max", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1D(prefix+"_nu1Pratio_max", nu1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1D(prefix+"_nu2Pratio_max", nu2Pratio, 1., h_1d, 40, -1., 1.);
+
                                 plot1D(prefix+"_closestDeltaMET_max",     closestDeltaMET_maxwcombo > 199.9 ? 199.9 : closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
 
                                 plot1D(prefix+"_DeltaMETsol_gen_max", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
