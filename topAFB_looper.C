@@ -820,8 +820,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
   bool useMaxCombo = false; //use lepton-jet combo with maximum sum of weights. false seems to give slightly better resolution.
   bool useClosestDeltaMET = true; //when both combos have only closest-approach solutions, take the one closest to the measured MET instead of the one with the highest weight. true seems to give slightly better resolution.
   bool useBetchart = true;
-  bool doParticleLevel = false;
   int ntaustotal[3] = {0, 0, 0};
+  bool doDeltaMETcut = true; //reject events where the difference between the solved MET and measured MET exceeds the cut below
+  double deltaMETcut = 50.;
+
+  bool doParticleLevel = false; //preliminary implementation (only partly working) 
   double mWPDG = 80.4;
   double mtopPDG = 172.5;
 
@@ -2802,6 +2805,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                     int ncombo0 = 0;
                     int ncombo1 = 0;
+                    int num_err_sols[2] = {0,0};
 
                     for (int icombo = 0; icombo < 2; ++icombo)
                     {
@@ -2839,9 +2843,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 }
                                 TLorentzVector nu1_vec , nu2_vec, lvTop1, lvTop2;
                                 nu1_vec.SetXYZM( nusols[is][0][0] , nusols[is][0][1] , nusols[is][0][2] , 0 );
-                                nu1_vecs.push_back(nu1_vec);
                                 nu2_vec.SetXYZM( nusols[is][1][0] , nusols[is][1][1] , nusols[is][1][2] , 0 );
-                                nu2_vecs.push_back(nu2_vec);
 
                                 map<double, double >  mapJetPhi2Discr;
                                 double sol_weight = -1;
@@ -2866,6 +2868,15 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 TLorentzVector lvW1 = lepPlus + nu1_vec;
                                 TLorentzVector lvW2 = lepMinus + nu2_vec;
                                 //cout<<"combo "<<icombo<<" solution "<<is<<" weight "<<sol_weight<<" masses: "<<lvTop1.M()<<" "<<lvTop2.M()<<" "<<lvW1.M()<<" "<<lvW2.M()<<endl;
+
+                                //don't use solutions with numerical error in solution (output masses don't match input)
+                                if (  (fabs(AMWTmass - lvTop1.M()) > 1.0 || fabs(AMWTmass - lvTop2.M()) > 1.0) ) {
+                                    num_err_sols[icombo]++;
+                                    continue;
+                                }
+
+                                nu1_vecs.push_back(nu1_vec);
+                                nu2_vecs.push_back(nu2_vec);
 
                                 top1_vecs.push_back(lvTop1);
                                 top2_vecs.push_back(lvTop2);
@@ -2918,8 +2929,10 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     //cout<<AMWT_weights.size() <<" "<<ncombo0<<" "<<ncombo1 <<" "<<imaxweight<<" "<<maxweight<<" "<<imaxweightcombos[0]<<" "<<maxweightcombos[0]<<" "<<avgweightcombos[0]<<" "<<imaxweightcombos[1]<<" "<<maxweightcombos[1]<<" "<<avgweightcombos[1]<<endl;
 
                     if(useMaxCombo && ncombo0 > 0 && ncombo1 > 0 ) imaxweight = (avgweightcombos[0] > avgweightcombos[1]) ? imaxweightcombos[0] : imaxweightcombos[1];
-                    
+
                     //don't take "closest approach" solution if exact solutions are available
+                    ncombo0 += num_err_sols[0];
+                    ncombo1 += num_err_sols[1];
                     if(ncombo0 == 1) {
                         if(ncombo1 > 1) imaxweight = imaxweightcombos[1];
                         else closestApproach = true;
@@ -2940,6 +2953,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             TLorentzVector nusum_othercombo = nu1_vecs[1-imaxweight]+nu2_vecs[1-imaxweight];
                             closestDeltaMET_othercombo = sqrt( pow( nusum_othercombo.Px() - met_x , 2 ) + pow( nusum_othercombo.Py() - met_y , 2 ) );
                             if(useClosestDeltaMET && closestDeltaMET_othercombo<closestDeltaMET_maxwcombo ) imaxweight = 1-imaxweight;
+                            if(doDeltaMETcut && !useClosestDeltaMET && closestDeltaMET_maxwcombo > deltaMETcut && closestDeltaMET_othercombo<closestDeltaMET_maxwcombo ) imaxweight = 1-imaxweight;
                         }
 
                         m_top_B = top1_vecs[imaxweight].M();
@@ -2947,7 +2961,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         closestDeltaMET_bestcombo = sqrt( pow( nusum.Px() - met_x , 2 ) + pow( nusum.Py() - met_y , 2 ) );
 
                         //cut on deltaMET (measured vs closest solution)
-                        //if(closestDeltaMET_bestcombo > 50.) m_top_B = -999.;
+                        if(doDeltaMETcut && closestDeltaMET_bestcombo > deltaMETcut) m_top_B = -999.;
 
                     }
 
@@ -3084,7 +3098,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     {
                         if (useOnlyMaxWsoln) i_smear = ( imaxAMWTweight > 0 ? imaxAMWTweight : 0 );
 
-                        //if ( !(m_top_S > 0 && m_top_B > 0) ) continue; //to use only events where both solvers have a solution. Note, when there is an AMWT solution there is always a Betchart solution.
+                        //if ( !(m_top_S > 0 && m_top_B > 0) ) continue; //to use only events where both solvers have a solution. Note, when there is an AMWT solution there is always a Betchart solution (although very occasionally we don't use it because the numerical error is too large).
                         if ( m_top_S > 0 && m_top_B < 0 ) cout<<"***S not B***, closestDeltaMET_bestcombo = "<<closestDeltaMET_bestcombo<<endl;
                         //if ( m_top_S < 0 && m_top_B > 0 ) cout<<"***B not S***, closestDeltaMET_bestcombo = "<<closestDeltaMET_bestcombo<<endl;
 
@@ -3094,7 +3108,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             if (m_top_B > 0) top2_p4[i_smear] = top2_vecs[imaxweight];
                         }
 
-                        if ( m_top > 0 && (fabs(m_top - top1_p4[i_smear].M()) > 0.5 || fabs(m_top - top2_p4[i_smear].M()) > 0.5) ) cout << "*** mass solution mismatch *** " << m_top << " " << top1_p4[i_smear].M() << " " << top2_p4[i_smear].M() << endl;
+                        if ( m_top > 0 && (fabs(m_top - top1_p4[i_smear].M()) > 1.0 || fabs(m_top - top2_p4[i_smear].M()) > 1.0) ) cout << "*** mass solution mismatch *** " << m_top << " " << top1_p4[i_smear].M() << " " << top2_p4[i_smear].M() << endl;
                         tt_mass = -999.0;
                         if (m_top > 0) tt_mass = (top1_p4[i_smear] + top2_p4[i_smear]).M();
 
