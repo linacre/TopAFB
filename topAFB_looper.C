@@ -2896,6 +2896,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         }
                     }//icombo
 
+                    int ncombo0_filled = ncombo0 - num_err_sols[0];
+                    int ncombo1_filled = ncombo1 - num_err_sols[1];
+
                     //cout<<AMWT_weights.size()<<endl;
                     //if(AMWT_weights.size() < 1) cout<<AMWT_weights.size()<<endl;
 
@@ -2906,7 +2909,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             imaxweight = is;
                             maxweight = AMWT_weights[is];
                         }
-                        if( is < ncombo0 ) {
+                        if( is < ncombo0_filled ) {
                             avgweightcombos[0] += AMWT_weights[is];
                             if (AMWT_weights[is]>maxweightcombos[0]) {
                                 imaxweightcombos[0] = is;
@@ -2923,22 +2926,22 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     }
 
                     //using average instead of sum with useMaxCombo gives slightly worse resolution, so commented out
-                    //if(ncombo0>0) avgweightcombos[0] /= ncombo0;
-                    //if(ncombo1>0) avgweightcombos[1] /= ncombo1;
+                    //if(ncombo0_filled>0) avgweightcombos[0] /= ncombo0_filled;
+                    //if(ncombo1_filled>0) avgweightcombos[1] /= ncombo1_filled;
 
-                    //cout<<AMWT_weights.size() <<" "<<ncombo0<<" "<<ncombo1 <<" "<<imaxweight<<" "<<maxweight<<" "<<imaxweightcombos[0]<<" "<<maxweightcombos[0]<<" "<<avgweightcombos[0]<<" "<<imaxweightcombos[1]<<" "<<maxweightcombos[1]<<" "<<avgweightcombos[1]<<endl;
+                    //cout<<AMWT_weights.size() <<" "<<ncombo0_filled <<" "<<ncombo1_filled <<" "<<imaxweight<<" "<<maxweight<<" "<<imaxweightcombos[0]<<" "<<maxweightcombos[0]<<" "<<avgweightcombos[0]<<" "<<imaxweightcombos[1]<<" "<<maxweightcombos[1]<<" "<<avgweightcombos[1]<<endl;
 
-                    if(useMaxCombo && ncombo0 > 0 && ncombo1 > 0 ) imaxweight = (avgweightcombos[0] > avgweightcombos[1]) ? imaxweightcombos[0] : imaxweightcombos[1];
+                    if(useMaxCombo && ncombo0_filled > 0 && ncombo1_filled > 0 ) imaxweight = (avgweightcombos[0] > avgweightcombos[1]) ? imaxweightcombos[0] : imaxweightcombos[1];
+
+                    //if( (ncombo0 == 1 || ncombo1 == 1) && (ncombo0 > 1 || ncombo1 > 1) && (ncombo0 - num_err_sols[0] == 0 || ncombo1 - num_err_sols[1] == 0)  )  cout<<"all exact solutions have numerr: "<<ncombo0<<" "<<num_err_sols[0]<<" "<<ncombo1<<" "<<num_err_sols[1]<<" imax: "<<imaxweight<<" "<<imaxweightcombos[0]<<" "<<imaxweightcombos[1]<<endl;
 
                     //don't take "closest approach" solution if exact solutions are available
-                    ncombo0 += num_err_sols[0];
-                    ncombo1 += num_err_sols[1];
                     if(ncombo0 == 1) {
-                        if(ncombo1 > 1) imaxweight = imaxweightcombos[1];
+                        if(ncombo1 > 1 && ncombo1_filled > 0) imaxweight = imaxweightcombos[1];
                         else closestApproach = true;
                     }
                     if(ncombo1 == 1) {
-                        if(ncombo0 > 1) imaxweight = imaxweightcombos[0];
+                        if(ncombo0 > 1 && ncombo0_filled > 0) imaxweight = imaxweightcombos[0];
                         else closestApproach = true;
                     }
 
@@ -2962,6 +2965,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         //cut on deltaMET (measured vs closest solution)
                         if(doDeltaMETcut && closestDeltaMET_bestcombo > deltaMETcut) m_top_B = -999.;
+
+                        if(imaxweight < 0) cout<<"something went wrong choosing the best solution"<<endl;
 
                     }
 
