@@ -828,7 +828,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
   double mWPDG = 80.4;
   double mtopPDG = 172.5;
 
-  std::map<std::string, TH1F*> h_1d;
+  //std::map<std::string, TH1F*> h_1d_all;
+  //std::map<std::string, TH2F*> h_2d_all;
 
   // reset JES scale variable in ScanChain
   globalJESRescale = 1.;
@@ -1048,6 +1049,12 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     map<int, int> m_events;
     while (TChainElement *currentFile = (TChainElement *)fileIter.Next() )
     {
+
+        //std::map<std::string, TH1F*> h_1d = h_1d_all;
+        //std::map<std::string, TH2F*> h_2d = h_2d_all;
+        std::map<std::string, TH1F*> h_1d;
+        std::map<std::string, TH2F*> h_2d;
+
         TString filename = currentFile->GetTitle();
 
         TFile f(filename.Data());
@@ -2869,8 +2876,14 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                 TLorentzVector lvW2 = lepMinus + nu2_vec;
                                 //cout<<"combo "<<icombo<<" solution "<<is<<" weight "<<sol_weight<<" masses: "<<lvTop1.M()<<" "<<lvTop2.M()<<" "<<lvW1.M()<<" "<<lvW2.M()<<endl;
 
-                                //don't use solutions with numerical error in solution (output masses don't match input)
-                                if (  (fabs(AMWTmass - lvTop1.M()) > 1.0 || fabs(AMWTmass - lvTop2.M()) > 1.0) ) {
+                                //don't use solutions with numerical error in solution (output masses don't match input). The input masses used are hard-coded in nuSolutions.py.
+                                if (  (fabs(172.5 - lvTop1.M()) > 1.0 || fabs(172.5 - lvTop2.M()) > 1.0) ) {
+                                    num_err_sols[icombo]++;
+                                    continue;
+                                }
+
+                                if (  (fabs(80.385 - lvW1.M()) > 1.0 || fabs(80.385 - lvW2.M()) > 1.0) ) {
+                                    //cout<<"mW error: "<<lvW1.M()<<" "<<lvW2.M()<<" mt: "<<lvTop1.M()<<" "<<lvTop2.M()<<endl;
                                     num_err_sols[icombo]++;
                                     continue;
                                 }
@@ -3758,41 +3771,59 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             double DeltaMETsol_gen = sqrt( pow( nusum.Px() - nusum_gen.Px() , 2 ) + pow( nusum.Py() - nusum_gen.Py() , 2 ) );
                             double DeltaMETmeas_gen = sqrt( pow( met_x - nusum_gen.Px() , 2 ) + pow( met_y - nusum_gen.Py() , 2 ) );
 
+                            //cout<<"about to plot2D"<<endl;
 
-                            plot1D(prefix+"_top1dotgen", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_top2dotgen", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_top2dotgent1", acos(top2dotgent1), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_top1dotgent2", acos(top1dotgent2), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_top1Pratio", top1Pratio, 1., h_1d, 40, -1., 1.);
-                            plot1D(prefix+"_top2Pratio", top2Pratio, 1., h_1d, 40, -1., 1.);
+                            if(myType == 0 ) {
+                                plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET_ee", acos(top1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET_ee", acos(top2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);                                
+                            }
+                            if(myType == 1 ) {
+                                plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET_mm", acos(top1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET_mm", acos(top2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);                                
+                            }
+                            if(myType == 2 ) {
+                                plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET_em", acos(top1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET_em", acos(top2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);                                
+                            }
 
-                            plot1D(prefix+"_nu1dotgen", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_nu2dotgen", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_nu2dotgennu1", acos(nu2dotgennu1), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_nu1dotgennu2", acos(nu1dotgennu2), 1., h_1d, 40, 0., 3.1415926536);
-                            plot1D(prefix+"_nu1Pratio", nu1Pratio, 1., h_1d, 40, -1., 1.);
-                            plot1D(prefix+"_nu2Pratio", nu2Pratio, 1., h_1d, 40, -1., 1.);
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET", acos(top1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET", acos(top2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
 
-                            plot1D(prefix+"_DeltaMETsol_gen", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
-                            plot1D(prefix+"_DeltaMETmeas_gen", DeltaMETmeas_gen > 199.9 ? 199.9 : DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
+
+                            plot1DUnderOverFlow(prefix+"_top1dotgen", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_top2dotgen", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_top2dotgent1", acos(top2dotgent1), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_top1dotgent2", acos(top1dotgent2), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_top1Pratio", top1Pratio, 1., h_1d, 40, -1., 1.);
+                            plot1DUnderOverFlow(prefix+"_top2Pratio", top2Pratio, 1., h_1d, 40, -1., 1.);
+
+                            plot1DUnderOverFlow(prefix+"_nu1dotgen", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_nu2dotgen", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_nu2dotgennu1", acos(nu2dotgennu1), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_nu1dotgennu2", acos(nu1dotgennu2), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_nu1Pratio", nu1Pratio, 1., h_1d, 40, -1., 1.);
+                            plot1DUnderOverFlow(prefix+"_nu2Pratio", nu2Pratio, 1., h_1d, 40, -1., 1.);
+
+                            plot1DUnderOverFlow(prefix+"_DeltaMETsol_gen",  DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
+                            plot1DUnderOverFlow(prefix+"_DeltaMETmeas_gen",  DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
 
                             if(closestApproach) {
-                                plot1D(prefix+"_top1dotgen_closest_bestsol", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_top2dotgen_closest_bestsol", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_top1Pratio_closest_bestsol", top1Pratio, 1., h_1d, 40, -1., 1.);
-                                plot1D(prefix+"_top2Pratio_closest_bestsol", top2Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_top1dotgen_closest_bestsol", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_top2dotgen_closest_bestsol", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_top1Pratio_closest_bestsol", top1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_top2Pratio_closest_bestsol", top2Pratio, 1., h_1d, 40, -1., 1.);
 
-                                plot1D(prefix+"_nu1dotgen_closest_bestsol", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_nu2dotgen_closest_bestsol", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_nu1Pratio_closest_bestsol", nu1Pratio, 1., h_1d, 40, -1., 1.);
-                                plot1D(prefix+"_nu2Pratio_closest_bestsol", nu2Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_nu1dotgen_closest_bestsol", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_nu2dotgen_closest_bestsol", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_nu1Pratio_closest_bestsol", nu1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_nu2Pratio_closest_bestsol", nu2Pratio, 1., h_1d, 40, -1., 1.);
 
-                                plot1D(prefix+"_closestDeltaMET_closest_maxwsol",     closestDeltaMET_maxwcombo > 199.9 ? 199.9 : closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
-                                plot1D(prefix+"_closestDeltaMET_closest_bestsol",     closestDeltaMET_bestcombo > 199.9 ? 199.9 : closestDeltaMET_bestcombo , 1., h_1d, 40, 0., 200.);
-                                if(closestDeltaMET_othercombo>0) plot1D(prefix+"_closestDeltaMET_closest_othersol",     closestDeltaMET_othercombo > 199.9 ? 199.9 : closestDeltaMET_othercombo , 1., h_1d, 40, 0., 200.);
+                                plot1DUnderOverFlow(prefix+"_closestDeltaMET_closest_maxwsol",      closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
+                                plot1DUnderOverFlow(prefix+"_closestDeltaMET_closest_bestsol",      closestDeltaMET_bestcombo , 1., h_1d, 40, 0., 200.);
+                                if(closestDeltaMET_othercombo>0) plot1DUnderOverFlow(prefix+"_closestDeltaMET_closest_othersol",      closestDeltaMET_othercombo , 1., h_1d, 40, 0., 200.);
 
-                                plot1D(prefix+"_DeltaMETsol_gen_closest", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
-                                plot1D(prefix+"_DeltaMETmeas_gen_closest", DeltaMETmeas_gen > 199.9 ? 199.9 : DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
+                                plot1DUnderOverFlow(prefix+"_DeltaMETsol_gen_closest",  DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
+                                plot1DUnderOverFlow(prefix+"_DeltaMETmeas_gen_closest",  DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
 
                                 for (int i = 0; i < top1_vecs.size(); ++i)
                                 {
@@ -3801,30 +3832,30 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                         double top2dotgen_i = top2_vecs[i].Vect().Dot( topminus_genp_p4.Vect() ) / top2_vecs[i].Vect().Mag() / topminus_genp_p4.Vect().Mag();
                                         double top1Pratio_i = ( top1_vecs[i].Vect().Mag() - topplus_genp_p4.Vect().Mag() ) / ( top1_vecs[i].Vect().Mag() + topplus_genp_p4.Vect().Mag() );
                                         double top2Pratio_i = ( top2_vecs[i].Vect().Mag() - topminus_genp_p4.Vect().Mag() ) / ( top2_vecs[i].Vect().Mag() + topminus_genp_p4.Vect().Mag() );
-                                        plot1D(prefix+"_top1dotgen_closest_othersol", acos(top1dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
-                                        plot1D(prefix+"_top2dotgen_closest_othersol", acos(top2dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
-                                        plot1D(prefix+"_top1Pratio_closest_othersol", top1Pratio_i, 1., h_1d, 40, -1., 1.);
-                                        plot1D(prefix+"_top2Pratio_closest_othersol", top2Pratio_i, 1., h_1d, 40, -1., 1.);
+                                        plot1DUnderOverFlow(prefix+"_top1dotgen_closest_othersol", acos(top1dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1DUnderOverFlow(prefix+"_top2dotgen_closest_othersol", acos(top2dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1DUnderOverFlow(prefix+"_top1Pratio_closest_othersol", top1Pratio_i, 1., h_1d, 40, -1., 1.);
+                                        plot1DUnderOverFlow(prefix+"_top2Pratio_closest_othersol", top2Pratio_i, 1., h_1d, 40, -1., 1.);
                                     }
                                 }
 
 
                             }
                             else {
-                                plot1D(prefix+"_top1dotgen_max", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_top2dotgen_max", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_top1Pratio_max", top1Pratio, 1., h_1d, 40, -1., 1.);
-                                plot1D(prefix+"_top2Pratio_max", top2Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_top1dotgen_max", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_top2dotgen_max", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_top1Pratio_max", top1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_top2Pratio_max", top2Pratio, 1., h_1d, 40, -1., 1.);
 
-                                plot1D(prefix+"_nu1dotgen_max", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_nu2dotgen_max", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
-                                plot1D(prefix+"_nu1Pratio_max", nu1Pratio, 1., h_1d, 40, -1., 1.);
-                                plot1D(prefix+"_nu2Pratio_max", nu2Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_nu1dotgen_max", acos(nu1dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_nu2dotgen_max", acos(nu2dotgen), 1., h_1d, 40, 0., 3.1415926536);
+                                plot1DUnderOverFlow(prefix+"_nu1Pratio_max", nu1Pratio, 1., h_1d, 40, -1., 1.);
+                                plot1DUnderOverFlow(prefix+"_nu2Pratio_max", nu2Pratio, 1., h_1d, 40, -1., 1.);
 
-                                plot1D(prefix+"_closestDeltaMET_max",     closestDeltaMET_maxwcombo > 199.9 ? 199.9 : closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
+                                plot1DUnderOverFlow(prefix+"_closestDeltaMET_max",      closestDeltaMET_maxwcombo , 1., h_1d, 40, 0., 200.);
 
-                                plot1D(prefix+"_DeltaMETsol_gen_max", DeltaMETsol_gen > 199.9 ? 199.9 : DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
-                                plot1D(prefix+"_DeltaMETmeas_gen_max", DeltaMETmeas_gen > 199.9 ? 199.9 : DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
+                                plot1DUnderOverFlow(prefix+"_DeltaMETsol_gen_max",  DeltaMETsol_gen , 1., h_1d, 40, 0., 200.);
+                                plot1DUnderOverFlow(prefix+"_DeltaMETmeas_gen_max",  DeltaMETmeas_gen , 1., h_1d, 40, 0., 200.);
 
                                 for (int i = 0; i < top1_vecs.size(); ++i)
                                 {
@@ -3833,10 +3864,10 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                                         double top2dotgen_i = top2_vecs[i].Vect().Dot( topminus_genp_p4.Vect() ) / top2_vecs[i].Vect().Mag() / topminus_genp_p4.Vect().Mag();
                                         double top1Pratio_i = ( top1_vecs[i].Vect().Mag() - topplus_genp_p4.Vect().Mag() ) / ( top1_vecs[i].Vect().Mag() + topplus_genp_p4.Vect().Mag() );
                                         double top2Pratio_i = ( top2_vecs[i].Vect().Mag() - topminus_genp_p4.Vect().Mag() ) / ( top2_vecs[i].Vect().Mag() + topminus_genp_p4.Vect().Mag() );
-                                        plot1D(prefix+"_top1dotgen_othersols", acos(top1dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
-                                        plot1D(prefix+"_top2dotgen_othersols", acos(top2dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
-                                        plot1D(prefix+"_top1Pratio_othersols", top1Pratio_i, 1., h_1d, 40, -1., 1.);
-                                        plot1D(prefix+"_top2Pratio_othersols", top2Pratio_i, 1., h_1d, 40, -1., 1.);
+                                        plot1DUnderOverFlow(prefix+"_top1dotgen_othersols", acos(top1dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1DUnderOverFlow(prefix+"_top2dotgen_othersols", acos(top2dotgen_i), 1., h_1d, 40, 0., 3.1415926536);
+                                        plot1DUnderOverFlow(prefix+"_top1Pratio_othersols", top1Pratio_i, 1., h_1d, 40, -1., 1.);
+                                        plot1DUnderOverFlow(prefix+"_top2Pratio_othersols", top2Pratio_i, 1., h_1d, 40, -1., 1.);
                                     }
                                 }
 
@@ -4100,7 +4131,10 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
         //float nEvents_primary = cms2.evt_nEvts();
         //cout << "acceptance                       =  " << (1.0*nSelectedEvents)/(nEvents_primary*kFactor * evt_scale1fb() * lumi) <<endl;
 
-        if (!applyNoCuts && prefix == "ttdil") savePlots(h_1d,Form("%s_histograms.root",prefix.c_str()));
+        //h_1d_all = h_1d; //this causes a crash
+        //h_2d_all = h_2d; //this causes a crash
+        //cout<<"about to save plots"<<endl;
+        if (!applyNoCuts && prefix == "ttdil") savePlots12(h_1d,h_2d,Form("%s_histograms.root",prefix.c_str()));
 
     }  // closes loop over files
 
