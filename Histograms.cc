@@ -542,11 +542,6 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopMass_minus_gen[i][j]->Sumw2();
 
 
-      hllbbMass[i][j] = new TH1D(Form("%s_hllbbMass_%s",prefix,suffix),Form("%s_llbbMass_%s",prefix,suffix),100,100.,1100.);
-      hllbbMass[i][j]->GetXaxis()->SetTitle("Mass(llbb) Estimate (GeV/c^{2})");
-      hllbbMass[i][j]->Sumw2();
-      
-
       httRapidity[i][j] = new TH1D(Form("%s_httRapidity_%s",prefix,suffix),Form("%s_ttRapidity_%s",prefix,suffix),120,-6,6);
       httRapidity[i][j]->GetXaxis()->SetTitle("y_{t} + y_{#bar{t}} estimate");
       httRapidity[i][j]->Sumw2();
@@ -646,103 +641,8 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       httRapidityQuarkgenp[i][j]->GetXaxis()->SetTitle("ttRapidityQuarkgenp ");
       httRapidityQuarkgenp[i][j]->Sumw2();
 
-      hllbbRapidityGluongenp[i][j] = new TH1D(Form("%s_hllbbRapidityGluongenp_%s",prefix,suffix),Form("%s_llbbRapidityGluongenp_%s",prefix,suffix),200, -10, 10);
-      hllbbRapidityGluongenp[i][j]->GetXaxis()->SetTitle("llbbRapidityGluongenp ");
-      hllbbRapidityGluongenp[i][j]->Sumw2();
-      
-      hllbbRapidityQuarkgenp[i][j] = new TH1D(Form("%s_hllbbRapidityQuarkgenp_%s",prefix,suffix),Form("%s_llbbRapidityQuarkgenp_%s",prefix,suffix),200,-10, 10);
-      hllbbRapidityQuarkgenp[i][j]->GetXaxis()->SetTitle("llbbRapidityQuarkgenp ");
-      hllbbRapidityQuarkgenp[i][j]->Sumw2();
 
 
-      htheSumBtagJetPtgenp[i][j] =  new TH1D(Form("%s_theSumBtagJetPtgenp_%s",prefix,suffix),Form("%s_theSumBtagJetPtgenp_%s",prefix,suffix),100,0.,500.);
-      htheSumBtagJetPtgenp[i][j]->GetXaxis()->SetTitle("SumBtagJetPtgenp (GeV/c)");
-      htheSumBtagJetPtgenp[i][j]->Sumw2();
-
-      hthefirstBtagJetPtgenp[i][j] =  new TH1D(Form("%s_thefirstBtagJetPtgenp_%s",prefix,suffix),Form("%s_thefirstBtagJetPtgenp_%s",prefix,suffix),100,0.,500.);
-      hthefirstBtagJetPtgenp[i][j]->GetXaxis()->SetTitle("firstBtagJetPtgenp (GeV/c)");
-      hthefirstBtagJetPtgenp[i][j]->Sumw2();
-
-      hthesecondBtagJetPtgenp[i][j] =  new TH1D(Form("%s_thesecondBtagJetPtgenp_%s",prefix,suffix),Form("%s_thesecondBtagJetPtgenp_%s",prefix,suffix),100,0.,500.);
-      hthesecondBtagJetPtgenp[i][j]->GetXaxis()->SetTitle("secondBtagJetPtgenp (GeV/c)");
-      hthesecondBtagJetPtgenp[i][j]->Sumw2();
-      
-      htheleadinglepPtgenp[i][j] = new TH1D(Form("%s_htheleadinglepPtgenp_%s",prefix,suffix),Form("%s_theleadinglepPtgenp_%s",prefix,suffix),50,0.,250.);
-      htheleadinglepPtgenp[i][j]->GetXaxis()->SetTitle("leadingLeptongenp p_{T} (GeV/c)");
-      htheleadinglepPtgenp[i][j]->Sumw2();
-
-      hthesecondlepPtgenp[i][j] = new TH1D(Form("%s_hthesecondlepPtgenp_%s",prefix,suffix),Form("%s_thesecondlepPtgenp_%s",prefix,suffix),50,0.,250.);
-      hthesecondlepPtgenp[i][j]->GetXaxis()->SetTitle("secondLeptongenp p_{T} (GeV/c)");
-      hthesecondlepPtgenp[i][j]->Sumw2();
-
-      htheSumLepPtgenp[i][j] =  new TH1D(Form("%s_theSumLepPtgenp_%s",prefix,suffix),Form("%s_theSumLepPtgenp_%s",prefix,suffix),100,0.,500.);
-      htheSumLepPtgenp[i][j]->GetXaxis()->SetTitle("SumLepPtgenp (GeV/c)");
-      htheSumLepPtgenp[i][j]->Sumw2();
-
-      htheleadingNuPtgenp[i][j] = new TH1D(Form("%s_htheleadingNuPtgenp_%s",prefix,suffix),Form("%s_theleadingNuPtgenp_%s",prefix,suffix),50,0.,250.);
-      htheleadingNuPtgenp[i][j]->GetXaxis()->SetTitle("leadingNugenp p_{T} (GeV/c)");
-      htheleadingNuPtgenp[i][j]->Sumw2();
-
-      hthesecondNuPtgenp[i][j] = new TH1D(Form("%s_hthesecondNuPtgenp_%s",prefix,suffix),Form("%s_thesecondNuPtgenp_%s",prefix,suffix),50,0.,250.);
-      hthesecondNuPtgenp[i][j]->GetXaxis()->SetTitle("secondNugenp p_{T} (GeV/c)");
-      hthesecondNuPtgenp[i][j]->Sumw2();
-
-      hMETgenp[i][j] = new TH1D(Form("%s_hMETgenp_%s",prefix,suffix),Form("%s_METgenp_%s",prefix,suffix),50,0.,250.);
-      hMETgenp[i][j]->GetXaxis()->SetTitle("METgenp (GeV)");
-      hMETgenp[i][j]->Sumw2();
-
-      htheSumLBPtgenp[i][j] =  new TH1D(Form("%s_theSumLBPtgenp_%s",prefix,suffix),Form("%s_theSumLBPtgenp_%s",prefix,suffix),100,0.,500.);
-      htheSumLBPtgenp[i][j]->GetXaxis()->SetTitle("SumLBPtgenp (GeV/c)");
-      htheSumLBPtgenp[i][j]->Sumw2();
-
-      htheSumLBNPtgenp[i][j] =  new TH1D(Form("%s_theSumLBNPtgenp_%s",prefix,suffix),Form("%s_theSumLBNPtgenp_%s",prefix,suffix),100,0.,500.);
-      htheSumLBNPtgenp[i][j]->GetXaxis()->SetTitle("SumLBNPtgenp (GeV/c)");
-      htheSumLBNPtgenp[i][j]->Sumw2();
-
-
-      hdRlbtruegenp[i][j] = new TH1D(Form("%s_hdRlbtruegenp_%s",prefix,suffix),Form("%s_dRlbtruegenp_%s",prefix,suffix),35,0.,3.5);
-      hdRlbtruegenp[i][j]->GetXaxis()->SetTitle("dRlbtruegenp ");
-      hdRlbtruegenp[i][j]->Sumw2();
-
-      
-      hdRlbfalsegenp[i][j] = new TH1D(Form("%s_hdRlbfalsegenp_%s",prefix,suffix),Form("%s_dRlbfalsegenp_%s",prefix,suffix),35,0.,3.5);
-      hdRlbfalsegenp[i][j]->GetXaxis()->SetTitle("dRlbfalsegenp ");
-      hdRlbfalsegenp[i][j]->Sumw2();
-
-      hdRlbratiogenp[i][j] = new TH1D(Form("%s_hdRlbratiogenp_%s",prefix,suffix),Form("%s_dRlbratiogenp_%s",prefix,suffix),40,-2.,2);
-      hdRlbratiogenp[i][j]->GetXaxis()->SetTitle("dRlbratiogenp ");
-      hdRlbratiogenp[i][j]->Sumw2();
-      
-      htopptgenp[i][j] = new TH1D(Form("%s_htopptgenp_%s",prefix,suffix),Form("%s_topptgenp_%s",prefix,suffix),100, 0 , 500);
-      htopptgenp[i][j]->GetXaxis()->SetTitle("topptgenp ");
-      htopptgenp[i][j]->Sumw2();
-
-      htopMassgenp[i][j] = new TH1D(Form("%s_htopMassgenp_%s",prefix,suffix),Form("%s_topMassgenp_%s",prefix,suffix),500, 0 , 500);
-      htopMassgenp[i][j]->GetXaxis()->SetTitle("topMassgenp ");
-      htopMassgenp[i][j]->Sumw2();
-      
-      htopptdrgenp_2d[i][j] = new TH2D(Form("%s_htopptdrgenp2d_%s",prefix,suffix), Form("%s_htopptdrgenp2d_%s" ,prefix,suffix),100,0,500,35,0,3.5);
-      htopptdrgenp_2d[i][j]->GetXaxis()->SetTitle("top p_{T} (GeV/c)");
-      htopptdrgenp_2d[i][j]->GetYaxis()->SetTitle("DR_lb");
-      htopptdrgenp_2d[i][j]->Sumw2();
-    
-        
-      hmasslbgenp_2d[i][j] = new TH2D(Form("%s_hmasslbgenp2d_%s",prefix,suffix), Form("%s_masslbgenp2d_%s" ,prefix,suffix),100,0,500,100,0,500);
-      hmasslbgenp_2d[i][j]->GetXaxis()->SetTitle("Gen M_{l2b2}(GeV/c^{2})");
-      hmasslbgenp_2d[i][j]->GetYaxis()->SetTitle("Gen M_{l1b1}(GeV/c^{2})");
-      hmasslbgenp_2d[i][j]->Sumw2();
-
-      hmasslbgenmatch1_2d[i][j] = new TH2D(Form("%s_hmasslbgenmatch12d_%s",prefix,suffix), Form("%s_masslbgenmatch12d_%s" ,prefix,suffix),100,0,500,100,0,500);
-      hmasslbgenmatch1_2d[i][j]->GetXaxis()->SetTitle("Gen M_{l2b2}(GeV/c^{2})");
-      hmasslbgenmatch1_2d[i][j]->GetYaxis()->SetTitle("Gen M_{l1b1}(GeV/c^{2})");
-      hmasslbgenmatch1_2d[i][j]->Sumw2();
-     
-      hmasslbgenmatch_2d[i][j] = new TH2D(Form("%s_hmasslbgenmatch2d_%s",prefix,suffix), Form("%s_masslbgenmatch2d_%s" ,prefix,suffix),100,0,500,100,0,500);
-      hmasslbgenmatch_2d[i][j]->GetXaxis()->SetTitle("Gen M_{l2b2}(GeV/c^{2})");
-      hmasslbgenmatch_2d[i][j]->GetYaxis()->SetTitle("Gen M_{l1b1}(GeV/c^{2})");
-      hmasslbgenmatch_2d[i][j]->Sumw2();
-      
-      
       //daughter lepton angle in tau rest frame to check if MC is correctly using the tau polarisation
       hlepPlusCosThetaTau_gen[i][j] = new TH1D(Form("%s_hlepPlusCosThetaTauGen_%s",prefix,suffix),Form("%s_lepPlusCosThetaTauGen_%s",prefix,suffix),80,-1,1);
       hlepPlusCosThetaTau_gen[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{#tau})");

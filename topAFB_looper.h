@@ -175,10 +175,7 @@ class topAFB_looper
 	float top_rapiditydiff_cms_gen_    ;
 	float top_rapiditydiff_Marco_gen_    ;
 	float top_pseudorapiditydiff_cms_gen_;  
-	float massllbb_ ;
-	float massllbb_gen_;
-	//	float llbbRapidityQuark_gen_;
-	//	float llbbRapidityGluon_gen_;
+
 	TH1D* hnJet[4][4];                   // Njet distributions                                                                                                          
 	TH1D* hnBtagJet[4][4];                   // NBTagjet distributions  
 	TH1D* hnVtx[4][4];
@@ -186,8 +183,6 @@ class topAFB_looper
 	//Top Mass Plots
 	TH1D *httRapidity[4][4];
 	TH1D *httRapidity2[4][4];     
-	TH1D *hllbbMass[4][4];
-	TH1D *hllbbMass_gen[4][4];
 	TH1D *httpT[4][4]; 
 	TH1D *httMass[4][4]; 
 	TH1D *httMass_pull[4][4]; 
@@ -325,35 +320,11 @@ class topAFB_looper
 	TH2D *hmasslb_2d[4][4];
 
 
-	TH1D *hdRlbtruegenp[4][4];
-	TH1D *hdRlbfalsegenp[4][4];
-	TH1D *hdRlbratiogenp[4][4];
-	TH1D *htopptgenp[4][4];
-	
-	TH1D *htopMassgenp[4][4];
-	TH1D *htheSumBtagJetPtgenp[4][4];
-	TH1D *hthefirstBtagJetPtgenp[4][4];
-	TH1D *hthesecondBtagJetPtgenp[4][4];
-	TH1D *htheleadinglepPtgenp[4][4];
-	TH1D *hthesecondlepPtgenp[4][4];
-	TH1D *htheSumLepPtgenp[4][4];
-	TH1D *htheleadingNuPtgenp[4][4];
-	TH1D *hthesecondNuPtgenp[4][4];
-	TH1D *hMETgenp[4][4];
-	TH1D *htheSumLBPtgenp[4][4];
-	TH1D *htheSumLBNPtgenp[4][4];
 	TH1D *httMassGluongenp[4][4];
 	TH1D *httMassQuarkgenp[4][4];
 	TH1D *httRapidityGluongenp[4][4];
 	TH1D *httRapidityQuarkgenp[4][4];
-	TH1D *hllbbRapidityGluongenp[4][4];
-	TH1D *hllbbRapidityQuarkgenp[4][4];
-	
 
-	TH2D *hmasslbgenp_2d[4][4];
-	TH2D *hmasslbgenmatch1_2d[4][4];
-	TH2D *hmasslbgenmatch_2d[4][4];
-	TH2D *htopptdrgenp_2d[4][4];
 	
 	TH1D *hlepPlusCosThetaTau_gen[4][4];
 	TH1D *hlepMinusCosThetaTau_gen[4][4];

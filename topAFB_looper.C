@@ -954,7 +954,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             double weight = 1.0;
             float lepPlus_costheta_cms , lep_azimuthal_asymmetry , lep_azimuthal_asymmetry_2 , lep_charge_asymmetry , lep_pseudorap_diff , top_costheta_cms;
             float lepMinus_costheta_cms;
-            float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity ,ttRapidity2, tt_mass , tt_mass_nojetsmear , tt_pT , massllbb;
+            float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity ,ttRapidity2, tt_mass , tt_mass_nojetsmear , tt_pT;
             double top1sdp = -999.;
             double top2sdp = -999.;
             float m_top = -999.0;
@@ -2480,7 +2480,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         thefirstJet_pt = v_goodJets_cand_p4.at(i_ltbjet).Pt();
                         thesecondJet_pt = v_goodJets_cand_p4.at(i_llbjet).Pt();
-                        massllbb = (lt_p4 + v_goodJets_cand_p4.at(i_ltbjet) + ll_p4 + v_goodJets_cand_p4.at(i_llbjet)).M();
                     }
 
 
@@ -3110,7 +3109,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     float tt_mass_gen;
                     float tt_pT_gen;
                     float ttRapidity_gen;
-		    float ttRapidity2_gen;
+                    float ttRapidity2_gen;
                     float top_costheta_cms_gen;
                     float lep_charge_asymmetry_gen;
                     float lep_azimuthal_asymmetry_gen;
@@ -3118,9 +3117,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     float top_spin_correlation_gen;
                     float lepPlus_costheta_cms_gen;
                     float lepMinus_costheta_cms_gen;
-                    float massllbb_gen;
-                    float llbbRapidityQuark_gen;
-                    float llbbRapidityGluon_gen;
                     float top_rapiditydiff_cms_gen;
                     float top_rapiditydiff_Marco_gen;
                     float top_pseudorapiditydiff_cms_gen;
@@ -3589,9 +3585,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         }
 
-
-                        massllbb_gen = (lepPlus_gen + bPlus_gen + lepMinus_gen + bMinus_gen).M();
-
                         float m_topminus_gen = topminus_genp_p4.M();
                         float m_topplus_gen = topplus_genp_p4.M();
 
@@ -3751,15 +3744,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         {
                             fillHistos( httMassGluongenp, tt_mass_gen  ,  weight, myType, jetBin, Nsolns);
                             fillHistos( httRapidityGluongenp, ttRapidity_gen  ,  weight, myType, jetBin, Nsolns);
-                            llbbRapidityGluon_gen =  (lepPlus_gen + bPlus_gen).Rapidity() + (lepMinus_gen + bMinus_gen).Rapidity();
-                            fillHistos( hllbbRapidityGluongenp, llbbRapidityGluon_gen  ,  weight, myType, jetBin, Nsolns);
                         }
                         else
                         {
                             fillHistos( httMassQuarkgenp, tt_mass_gen  ,  weight, myType, jetBin, Nsolns);
                             fillHistos( httRapidityQuarkgenp, ttRapidity_gen  ,  weight, myType, jetBin, Nsolns);
-                            llbbRapidityQuark_gen =  (lepPlus_gen + bPlus_gen).Rapidity() + (lepMinus_gen + bMinus_gen).Rapidity();
-                            fillHistos( hllbbRapidityQuarkgenp,  llbbRapidityQuark_gen ,  weight, myType, jetBin, Nsolns);
                         }
 
                     }//only for mc
@@ -3810,10 +3799,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         top_costheta_cms_gen_     = top_costheta_cms_gen;
                         lepPlus_costheta_cms_gen_ = lepPlus_costheta_cms_gen;
                         lepMinus_costheta_cms_gen_ = lepMinus_costheta_cms_gen;
-                        massllbb_ = massllbb;
-                        massllbb_gen_ = massllbb_gen;
-                        //llbbRapidityQuark_gen_=llbbRapidityQuark_gen;
-                        //  llbbRapidityGluon_gen_=llbbRapidityGluon_gen;
                         babyTree_->Fill();
 
                     }
@@ -3891,11 +3876,6 @@ void topAFB_looper::InitBabyNtuple ()
     top_costheta_cms_gen_     = -999.0;
     lepPlus_costheta_cms_gen_ = -999.0;
     lepMinus_costheta_cms_gen_ = -999.0;
-    massllbb_gen_ = -999.0;
-    //  llbbRapidityQuark_gen_=-999.0;
-    // llbbRapidityGluon_gen_=-999.0;
-    massllbb_ = -999.0;
-
 }
 //-------------------------------------
 // Book the baby ntuple
@@ -3948,12 +3928,6 @@ void topAFB_looper::MakeBabyNtuple(const char *babyFilename)
     babyTree_->Branch("top_costheta_cms_gen",      &top_costheta_cms_gen_,    "top_costheta_cms_gen/F"      );
     babyTree_->Branch("lep_costheta_cms_gen",      &lepPlus_costheta_cms_gen_, "lep_costheta_cms_gen/F"      );
     babyTree_->Branch("lepMinus_costheta_cms_gen",      &lepMinus_costheta_cms_gen_, "lepMinus_costheta_cms_gen/F"      );
-    babyTree_->Branch("massllbb",               &massllbb_,             "massllbb/F"              );
-    babyTree_->Branch("massllbb_gen",               &massllbb_gen_,             "massllbb_gen/F"              );
-    //  babyTree_->Branch("llbbRapidityQuark_gen",      &llbbRapidityQuark_gen_,    "llbbRapidityQuark_gen/F"     );
-    // babyTree_->Branch("llbbRapidityGluon_gen",      &llbbRapidityGluon_gen_,    "llbbRapidityGluon_gen/F"     );
-
-
 }
 //----------------------------------
 // Fill the baby
