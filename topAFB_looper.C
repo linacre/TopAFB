@@ -955,6 +955,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             float lepPlus_costheta_cms , lep_azimuthal_asymmetry , lep_azimuthal_asymmetry_2 , lep_charge_asymmetry , lep_pseudorap_diff , top_costheta_cms;
             float lepMinus_costheta_cms;
             float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity ,ttRapidity2, tt_mass , tt_mass_nojetsmear , tt_pT;
+            float lep_cos_opening_angle;
             double top1sdp = -999.;
             double top2sdp = -999.;
             float m_top = -999.0;
@@ -1533,6 +1534,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                 unsigned int hypIdx = 999;
                 vector<LorentzVector>  v_goodJets_cand_p4;
                 vector<unsigned int> v_goodJets;
+                unsigned int nJets = 0;
                 int nBtagJets = -1;
                 LorentzVector lt_p4;
                 LorentzVector ll_p4;
@@ -2953,6 +2955,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
                         top_spin_correlation = -999.0;
                         if (m_top > 0) top_spin_correlation = lepPlus_costheta_cms * lepMinus_costheta_cms;
+
+                        lep_cos_opening_angle = -999.0;
+                        if (m_top > 0) lep_cos_opening_angle = cos(acos(lepPlus_costheta_cms) - acos(lepMinus_costheta_cms));
+
+
                         //if we have gotten here, then all cuts have been passed
                         
                         nSelectedEvents = nSelectedEvents + 1.0 * weight;
@@ -2981,7 +2988,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         //cout << "ndavtx = " << ndavtx <<endl;
                         //unsigned int jetBin = v_goodJets.size();
                         jetBin = v_goodJets.size();
-                        unsigned int nJets  = v_goodJets.size();
+                        nJets  = v_goodJets.size();
                         if (jetBin > 2)
                             jetBin = 2;
 
@@ -3396,6 +3403,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             plot2DUnderOverFlow(prefix+"_topdotgen_vs_closestDeltaMET", acos(top1dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
                             plot2DUnderOverFlow(prefix+"_topdotgen_vs_closestDeltaMET", acos(top2dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
 
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_njets", acos(top1dotgen), nJets, 1., h_2d, 40, 0., 3.1415926536, 8, 0., 8.);
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_njets", acos(top2dotgen), nJets, 1., h_2d, 40, 0., 3.1415926536, 8, 0., 8.);
                             plot2DUnderOverFlow(prefix+"_topdotgen_vs_nbtag", acos(top1dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
                             plot2DUnderOverFlow(prefix+"_topdotgen_vs_nbtag", acos(top2dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
 
@@ -3424,6 +3433,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             plot2DUnderOverFlow(prefix+"_topPratio_vs_closestDeltaMET", fabs(top1Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
                             plot2DUnderOverFlow(prefix+"_topPratio_vs_closestDeltaMET", fabs(top2Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
 
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_njets", fabs(top1Pratio), nJets, 1., h_2d, 40, 0., 1., 8, 0., 8.);
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_njets", fabs(top2Pratio), nJets, 1., h_2d, 40, 0., 1., 8, 0., 8.);
                             plot2DUnderOverFlow(prefix+"_topPratio_vs_nbtag", fabs(top1Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
                             plot2DUnderOverFlow(prefix+"_topPratio_vs_nbtag", fabs(top2Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
 
@@ -3454,6 +3465,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             plot2DUnderOverFlow(prefix+"_nudotgen_vs_closestDeltaMET", acos(nu1dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
                             plot2DUnderOverFlow(prefix+"_nudotgen_vs_closestDeltaMET", acos(nu2dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
 
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_njets", acos(nu1dotgen), nJets, 1., h_2d, 40, 0., 3.1415926536, 8, 0., 8.);
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_njets", acos(nu2dotgen), nJets, 1., h_2d, 40, 0., 3.1415926536, 8, 0., 8.);
                             plot2DUnderOverFlow(prefix+"_nudotgen_vs_nbtag", acos(nu1dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
                             plot2DUnderOverFlow(prefix+"_nudotgen_vs_nbtag", acos(nu2dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
 
@@ -3482,6 +3495,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             plot2DUnderOverFlow(prefix+"_nuPratio_vs_closestDeltaMET", fabs(nu1Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
                             plot2DUnderOverFlow(prefix+"_nuPratio_vs_closestDeltaMET", fabs(nu2Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
 
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_njets", fabs(nu1Pratio), nJets, 1., h_2d, 40, 0., 1., 8, 0., 8.);
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_njets", fabs(nu2Pratio), nJets, 1., h_2d, 40, 0., 1., 8, 0., 8.);
                             plot2DUnderOverFlow(prefix+"_nuPratio_vs_nbtag", fabs(nu1Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
                             plot2DUnderOverFlow(prefix+"_nuPratio_vs_nbtag", fabs(nu2Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
 
@@ -3582,6 +3597,9 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
 
 
                             }
+
+                            plot1DUnderOverFlow(prefix+"_lepOpeningAngle", acos(lep_cos_opening_angle), 1., h_1d, 40, 0., 3.1415926536);
+                            plot1DUnderOverFlow(prefix+"_lepCosOpeningAngle", lep_cos_opening_angle, 1., h_1d, 40, -1., 1.);
 
                         }
 
