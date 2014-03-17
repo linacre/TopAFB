@@ -33,11 +33,8 @@ class topAFB_looper
         void ScanChain (TChain*, vector<TString> , string, 
 			bool, float, float, bool, FREnum frmode = e_wjets, double AMWTmass = 172.5);
 	void bookHistos(const char* sample, int nchannels, int nhistsets);
-	void FillHistograms(const unsigned int hypIdx, const vector<unsigned int> v_jets, const vector<unsigned int> v_jetsNoEtaCut,
-					 const pair<float, float> p_met, const float weight, const string prefix) ;
 	bool passbTagging(const unsigned int jet_idx, const string jetAlgo, const string bTagDiscriminator) ;
 	double getFRWeight(const int hypIdx, SimpleFakeRate *mufr, SimpleFakeRate *elfr, FREnum frmode, bool isData);
-	double getBFRWeight(const int hypIdx, 	vector<LorentzVector> & v_goodNonBtagJets_p4,vector<LorentzVector> & v_goodBtagJets_p4, bool isData);
 	double TopPtWeight(double topPt);
 	double LeptonPtWeight(double leptonPt);
 	double JetPtWeight(double jetPt);
@@ -135,7 +132,6 @@ class topAFB_looper
 	FactorizedJetCorrector *jptL2L3ResidualCorr;
 	FactorizedJetCorrector *pfL2L3ResidualCorr;
 	ttdilepsolve *d_llsol;
-	ttdilepsolve *d_llsol_temp;
 	
         // event identification
 
@@ -186,10 +182,6 @@ class topAFB_looper
 	TH1D* hnJet[4][4];                   // Njet distributions                                                                                                          
 	TH1D* hnBtagJet[4][4];                   // NBTagjet distributions  
 	TH1D* hnVtx[4][4];
-	TH1D* hNsolns[4][4];
-	TH1D* hmaxAMWTweight[4][4];
-	TH1D* haveAMWTweight[4][4];
-	TH1D* hsumAMWTweight[4][4];
 	TH1D* hAMWTweightnojetsmear[4][4];          
 	//Top Mass Plots
 	TH1D *httRapidity[4][4];
@@ -206,13 +198,6 @@ class topAFB_looper
 	TH1D *htopPCM_diff_minus[4][4];    
 
 	TH1D *htopMass[4][4];
-	TH1D *httpT_nojetsmear[4][4]; 
-	TH1D *httMass_nojetsmear[4][4]; 
-	TH1D *httMass_nojetsmear_pull[4][4]; 
-	TH1D *httMass_nojetsmear_diff[4][4];                                                                                                                                            
-	TH1D *htopMass_nojetsmear_diff_plus[4][4];
-	TH1D *htopMass_nojetsmear_diff_minus[4][4];   
-	TH1D *htopMass_nojetsmear[4][4];
 	TH1D *httpT_gen[4][4]; 
 	TH1D *httMass_gen[4][4]; 
 	TH1D *htopMass_plus_gen[4][4]; 
@@ -334,27 +319,10 @@ class topAFB_looper
 	TH2D *hlepAzimAsym_2d[4][4];
 	TH2D *htopSpinCorr_2d[4][4];
 	TH2D *httMass_2d[4][4];
-	TH2D *httMass_nojetsmear_2d[4][4];
 	TH2D *httpT_2d[4][4];
-	TH2D *httpT_nojetsmear_2d[4][4];
 	TH2D *htopP_2d[4][4];
-	TH2D *htopP_nojetsmear_2d[4][4];
 	
 	TH2D *hmasslb_2d[4][4];
-	TH2D *habcd_2d[4][4];
-
-	TH2D *httmasssm_2d[4][4];
-	TH2D *htopmasssm_2d[4][4];
-
-	TH2D *htop1pCMsm_2d[4][4];
-	TH2D *htop2pCMsm_2d[4][4];
-
-	TH2D *htop1pTsm_2d[4][4];
-	TH2D *htop1etasm_2d[4][4];
-	TH2D *htop1phism_2d[4][4];
-	TH2D *htop2pTsm_2d[4][4];
-	TH2D *htop2etasm_2d[4][4];
-	TH2D *htop2phism_2d[4][4];
 
 
 	TH1D *hdRlbtruegenp[4][4];
