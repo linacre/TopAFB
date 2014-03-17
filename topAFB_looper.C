@@ -1094,6 +1094,8 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             float lepPlus_costheta_cms , lep_azimuthal_asymmetry , lep_azimuthal_asymmetry_2 , lep_charge_asymmetry , lep_pseudorap_diff , top_costheta_cms;
             float lepMinus_costheta_cms;
             float top_pseudorapiditydiff_cms , top_rapiditydiff_Marco , top_rapiditydiff_cms , top_spin_correlation , ttRapidity ,ttRapidity2, tt_mass , tt_mass_nojetsmear , tt_pT , tt_pT_nojetsmear, massllbb;
+            double top1sdp = -999.;
+            double top2sdp = -999.;
             float m_top = -999.0;
             float m_top_S = -999.0;
             float m_top_B = -999.0;
@@ -3120,6 +3122,11 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         if ( m_top_S > 0 && m_top_B < 0 ) cout<<"***S not B***, closestDeltaMET_bestcombo = "<<closestDeltaMET_bestcombo<<endl;
                         //if ( m_top_S < 0 && m_top_B > 0 ) cout<<"***B not S***, closestDeltaMET_bestcombo = "<<closestDeltaMET_bestcombo<<endl;
 
+                        if ( (m_top_S > 0 && m_top_B > 0) ) {
+                            top1sdp = top1_vecs[imaxweight].Vect().Dot( top1_p4[i_smear].Vect() ) / top1_vecs[imaxweight].Vect().Mag() / top1_p4[i_smear].Vect().Mag();
+                            top2sdp = top2_vecs[imaxweight].Vect().Dot( top2_p4[i_smear].Vect() ) / top2_vecs[imaxweight].Vect().Mag() / top2_p4[i_smear].Vect().Mag();
+                        }
+
                         if(useBetchart) {
                             //replace the AMWT solution with the Betchart solution.
                             if (m_top_B > 0) top1_p4[i_smear] = top1_vecs[imaxweight];
@@ -3789,6 +3796,110 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                             plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET", acos(top1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
                             plot2DUnderOverFlow(prefix+"_topdotgen_vs_MET", acos(top2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
 
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_closestDeltaMET", acos(top1dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_closestDeltaMET", acos(top2dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
+
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_nbtag", acos(top1dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_nbtag", acos(top2dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
+
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_ntaugen", acos(top1dotgen), ntaus, 1., h_2d, 40, 0., 3.1415926536, 3, 0., 3.);
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_ntaugen", acos(top2dotgen), ntaus, 1., h_2d, 40, 0., 3.1415926536, 3, 0., 3.);
+
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_mttgen", acos(top1dotgen), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 3.1415926536, 40, 285., 1485.);
+                            plot2DUnderOverFlow(prefix+"_topdotgen_vs_mttgen", acos(top2dotgen), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 3.1415926536, 40, 285., 1485.);
+
+                            if(myType == 0 ) {
+                                plot2DUnderOverFlow(prefix+"_topPratio_vs_MET_ee", fabs(top1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_topPratio_vs_MET_ee", fabs(top2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);                                
+                            }
+                            if(myType == 1 ) {
+                                plot2DUnderOverFlow(prefix+"_topPratio_vs_MET_mm", fabs(top1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_topPratio_vs_MET_mm", fabs(top2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);                                
+                            }
+                            if(myType == 2 ) {
+                                plot2DUnderOverFlow(prefix+"_topPratio_vs_MET_em", fabs(top1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_topPratio_vs_MET_em", fabs(top2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);                                
+                            }
+
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_MET", fabs(top1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_MET", fabs(top2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_closestDeltaMET", fabs(top1Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_closestDeltaMET", fabs(top2Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
+
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_nbtag", fabs(top1Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_nbtag", fabs(top2Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
+
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_ntaugen", fabs(top1Pratio), ntaus, 1., h_2d, 40, 0., 1., 3, 0., 3.);
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_ntaugen", fabs(top2Pratio), ntaus, 1., h_2d, 40, 0., 1., 3, 0., 3.);
+
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_mttgen", fabs(top1Pratio), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 1., 40, 285., 1485.);
+                            plot2DUnderOverFlow(prefix+"_topPratio_vs_mttgen", fabs(top2Pratio), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 1., 40, 285., 1485.);
+
+
+
+                            if(myType == 0 ) {
+                                plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET_ee", acos(nu1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET_ee", acos(nu2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);                                
+                            }
+                            if(myType == 1 ) {
+                                plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET_mm", acos(nu1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET_mm", acos(nu2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);                                
+                            }
+                            if(myType == 2 ) {
+                                plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET_em", acos(nu1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET_em", acos(nu2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);                                
+                            }
+
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET", acos(nu1dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_MET", acos(nu2dotgen), p_met.first, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 200);
+
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_closestDeltaMET", acos(nu1dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_closestDeltaMET", acos(nu2dotgen), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 3.1415926536, 40, 0., 100);
+
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_nbtag", acos(nu1dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_nbtag", acos(nu2dotgen), nBtagJets, 1., h_2d, 40, 0., 3.1415926536, 4, 0., 4.);
+
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_ntaugen", acos(nu1dotgen), ntaus, 1., h_2d, 40, 0., 3.1415926536, 3, 0., 3.);
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_ntaugen", acos(nu2dotgen), ntaus, 1., h_2d, 40, 0., 3.1415926536, 3, 0., 3.);
+
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_mttgen", acos(nu1dotgen), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 3.1415926536, 40, 285., 1485.);
+                            plot2DUnderOverFlow(prefix+"_nudotgen_vs_mttgen", acos(nu2dotgen), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 3.1415926536, 40, 285., 1485.);
+
+                            if(myType == 0 ) {
+                                plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET_ee", fabs(nu1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET_ee", fabs(nu2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);                                
+                            }
+                            if(myType == 1 ) {
+                                plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET_mm", fabs(nu1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET_mm", fabs(nu2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);                                
+                            }
+                            if(myType == 2 ) {
+                                plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET_em", fabs(nu1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                                plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET_em", fabs(nu2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);                                
+                            }
+
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET", fabs(nu1Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_MET", fabs(nu2Pratio), p_met.first, 1., h_2d, 40, 0., 1., 40, 0., 200);
+
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_closestDeltaMET", fabs(nu1Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_closestDeltaMET", fabs(nu2Pratio), closestDeltaMET_bestcombo, 1., h_2d, 40, 0., 1., 40, 0., 100);
+
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_nbtag", fabs(nu1Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_nbtag", fabs(nu2Pratio), nBtagJets, 1., h_2d, 40, 0., 1., 4, 0., 4.);
+
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_ntaugen", fabs(nu1Pratio), ntaus, 1., h_2d, 40, 0., 1., 3, 0., 3.);
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_ntaugen", fabs(nu2Pratio), ntaus, 1., h_2d, 40, 0., 1., 3, 0., 3.);
+
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_mttgen", fabs(nu1Pratio), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 1., 40, 285., 1485.);
+                            plot2DUnderOverFlow(prefix+"_nuPratio_vs_mttgen", fabs(nu2Pratio), (topplus_genp_p4 + topminus_genp_p4).M(), 1., h_2d, 40, 0., 1., 40, 285., 1485.);
+
+
+
+
+
+                            if (top1sdp > -998) plot1DUnderOverFlow(prefix+"_top1sdp", acos(top1sdp), 1., h_1d, 40, 0., 3.1415926536);
+                            if (top2sdp > -998) plot1DUnderOverFlow(prefix+"_top2sdp", acos(top2sdp), 1., h_1d, 40, 0., 3.1415926536);
 
                             plot1DUnderOverFlow(prefix+"_top1dotgen", acos(top1dotgen), 1., h_1d, 40, 0., 3.1415926536);
                             plot1DUnderOverFlow(prefix+"_top2dotgen", acos(top2dotgen), 1., h_1d, 40, 0., 3.1415926536);
