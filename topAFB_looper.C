@@ -980,7 +980,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             double closestDeltaMET_bestcombo = -999;
             TLorentzVector nusum;
             TLorentzVector cms, lepPlus, lepMinus, jet1, jet2;
-            int Nsolns = -999;
+            int Nsolns = 1;
 
             float ndavtxweight = 1.;
             if ( !noVertexReweighting ) {
@@ -2562,7 +2562,6 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                     m_top_S = m_top_nojetsmear;
 
                     //now repeat using the Betchart solver
-                    Nsolns = 1;  //no longer integrate over jet smearing iterations so we only have 1 solution
                     double nusols[4][2][3];
                     double met_x = p_met.first*cos(p_met.second);
                     double met_y = p_met.first*sin(p_met.second);
@@ -3355,7 +3354,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
                         }
 
 
-                        if (!applyNoCuts && prefix == "ttdil" && m_top > 0)
+                        if (!applyNoCuts && prefix == "ttdil" && m_top > 0 && m_top_B > 0)
                         { //top reconstruction resolution histograms
 
                             double top1dotgen = top1_vecs[imaxweight].Vect().Dot( topplus_genp_p4.Vect() ) / top1_vecs[imaxweight].Vect().Mag() / topplus_genp_p4.Vect().Mag();
