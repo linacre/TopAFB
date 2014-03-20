@@ -155,6 +155,7 @@ class topAFB_looper
 	float lep_azimuthal_asymmetry_ ;
 	float lep_azimuthal_asymmetry2_ ;
 	float top_spin_correlation_ ;
+	float lep_cos_opening_angle_ ;
 	float top_costheta_cms_    ;
 	float top_rapiditydiff_cms_    ;
 	float top_rapiditydiff_Marco_    ;
@@ -169,7 +170,8 @@ class topAFB_looper
 	float lep_azimuthal_asymmetry_gen_ ;
 	float lep_azimuthal_asymmetry2_gen_ ;
 	float top_spin_correlation_gen_ ;
-	float  top_costheta_cms_gen_    ;
+	float lep_cos_opening_angle_gen_ ;
+	float top_costheta_cms_gen_    ;
 	float lepPlus_costheta_cms_gen_ ;
 	float lepMinus_costheta_cms_gen_ ;
 	float top_rapiditydiff_cms_gen_    ;
@@ -208,10 +210,11 @@ class topAFB_looper
 	TH1D *htheleadinglepPt[4][4];
 	TH1D *hthesecondlepPt[4][4];
 	TH1D *hthesumlepPt[4][4];
-        TH1D *hlepEta[4][4];
+    TH1D *hlepEta[4][4];
 	TH1D *hjetPt[4][4];
 	TH1D *hjetEta[4][4];
 	TH1D *hMET[4][4];
+	TH1D *hdMET[4][4];
 	TH1D *htheSumLepPt[4][4];
 	TH1D *htopCosTheta[4][4];
 	TH1D *hpseudorapiditydiff[4][4];
@@ -221,12 +224,14 @@ class topAFB_looper
 	TH1D *hlepAzimAsym[4][4];
 	TH1D *hlepAzimAsym2[4][4];
 	TH1D *htopSpinCorr[4][4];
+	TH1D *hlepCosOpeningAngle[4][4];
 	TH1D *htopCosTheta_gen[4][4];
 	TH1D *hlepCosTheta_gen[4][4];
 	TH1D *hlepChargeAsym_gen[4][4];
 	TH1D *hlepAzimAsym_gen[4][4];
 	TH1D *hlepAzimAsym2_gen[4][4];
 	TH1D *htopSpinCorr_gen[4][4];
+	TH1D *hlepCosOpeningAngle_gen[4][4];
 	
 	TH1D *hlepRapDiff[4][4];
 	TH1D *hlepAngleBetween[4][4];
@@ -261,6 +266,7 @@ class topAFB_looper
 	TH2D *hlepAzimAsym_gen2d[4][4];
 	TH2D *hlepAzimAsym2_gen2d[4][4];
 	TH2D *htopSpinCorr_gen2d[4][4];
+	TH2D *hlepCosOpeningAngle_gen2d[4][4];
 	TH2D *htopCosTheta_gen2d[4][4];
 	TH2D *hlepCosTheta_gen2d[4][4];
 	TH2D *hlepPlusCosTheta_gen2d[4][4];
@@ -273,6 +279,7 @@ class topAFB_looper
 	TH2D *hlepAzimAsym_ttpT_gen2d[4][4];
 	TH2D *hlepAzimAsym2_ttpT_gen2d[4][4];
 	TH2D *htopSpinCorr_ttpT_gen2d[4][4];
+	TH2D *hlepCosOpeningAngle_ttpT_gen2d[4][4];
 	TH2D *htopCosTheta_ttpT_gen2d[4][4];
 	TH2D *hlepCosTheta_ttpT_gen2d[4][4];
 	TH2D *hlepPlusCosTheta_ttpT_gen2d[4][4];
@@ -286,6 +293,7 @@ class topAFB_looper
 	TH2D *hlepAzimAsym_ttRapidity2_gen2d[4][4];
 	TH2D *hlepAzimAsym2_ttRapidity2_gen2d[4][4];
 	TH2D *htopSpinCorr_ttRapidity2_gen2d[4][4];
+	TH2D *hlepCosOpeningAngle_ttRapidity2_gen2d[4][4];
 	TH2D *htopCosTheta_ttRapidity2_gen2d[4][4];
 	TH2D *hlepCosTheta_ttRapidity2_gen2d[4][4];
 	TH2D *hlepPlusCosTheta_ttRapidity2_gen2d[4][4];
@@ -299,6 +307,7 @@ class topAFB_looper
 	TH1D *hlepAzimAsymGenDiff[4][4];
 	TH1D *hlepAzimAsym2GenDiff[4][4];
 	TH1D *htopSpinCorrGenDiff[4][4];
+	TH1D *hlepCosOpeningAngleGenDiff[4][4];
 	TH1D *htopCosThetaGenDiff[4][4];
 	TH1D *hlepCosThetaGenDiff[4][4];
 	TH1D *hlepPlusCosThetaGenDiff[4][4];
@@ -313,6 +322,7 @@ class topAFB_looper
 	TH2D *hlepChargeAsym_2d[4][4];
 	TH2D *hlepAzimAsym_2d[4][4];
 	TH2D *htopSpinCorr_2d[4][4];
+	TH2D *hlepCosOpeningAngle_2d[4][4];
 	TH2D *httMass_2d[4][4];
 	TH2D *httpT_2d[4][4];
 	TH2D *htopP_2d[4][4];

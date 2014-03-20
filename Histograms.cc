@@ -67,6 +67,11 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopSpinCorr_2d[i][j]->GetXaxis()->SetTitle("Spin_Correlation_top_gen");
       htopSpinCorr_2d[i][j]->GetYaxis()->SetTitle("Spin_Correlation_top_rec");
       htopSpinCorr_2d[i][j]->Sumw2();
+
+      hlepCosOpeningAngle_2d[i][j] = new TH2D(Form("%s_hlepCosOpeningAngle2d_%s",prefix,suffix),Form("%s_lepCosOpeningAngle2d_%s",prefix,suffix),80,-1,1,80,-1,1);
+      hlepCosOpeningAngle_2d[i][j]->GetXaxis()->SetTitle("cos(#phi) gen");
+      hlepCosOpeningAngle_2d[i][j]->GetYaxis()->SetTitle("cos(#phi) reco");
+      hlepCosOpeningAngle_2d[i][j]->Sumw2();
       
       htopCosTheta_2d[i][j] = new TH2D(Form("%s_htopCosTheta2d_%s",prefix,suffix),Form("%s_topCosTheta2d_%s",prefix,suffix),80,-1,1, 80,-1,1);
       htopCosTheta_2d[i][j]->GetXaxis()->SetTitle("Cos(theta)_top_gen");
@@ -95,6 +100,10 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopSpinCorr_gen[i][j] = new TH1D(Form("%s_htopSpinCorrGen_%s",prefix,suffix),Form("%s_topSpinCorrGen_%s",prefix,suffix),80,-1,1);
       htopSpinCorr_gen[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} )");
       htopSpinCorr_gen[i][j]->Sumw2();
+
+      hlepCosOpeningAngle_gen[i][j] = new TH1D(Form("%s_hlepCosOpeningAngleGen_%s",prefix,suffix),Form("%s_lepCosOpeningAngleGen_%s",prefix,suffix),80,-1,1);
+      hlepCosOpeningAngle_gen[i][j]->GetXaxis()->SetTitle("cos(#phi)");
+      hlepCosOpeningAngle_gen[i][j]->Sumw2();
       
       htopCosTheta_gen[i][j] = new TH1D(Form("%s_htopCosThetaGen_%s",prefix,suffix),Form("%s_topCosThetaGen_%s",prefix,suffix),80,-1,1);
       htopCosTheta_gen[i][j]->GetXaxis()->SetTitle("cos(#theta_{t}^{t#bar{t}})");
@@ -147,6 +156,11 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopSpinCorr_gen2d[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} )");
       htopSpinCorr_gen2d[i][j]->GetYaxis()->SetTitle("M_{t#bar{t}} (GeV/c^{2})");
       htopSpinCorr_gen2d[i][j]->Sumw2();
+
+      hlepCosOpeningAngle_gen2d[i][j] = new TH2D(Form("%s_hlepCosOpeningAngleGen2d_%s",prefix,suffix),Form("%s_lepCosOpeningAngleGen2d_%s",prefix,suffix),80,-1,1,120,0.,1200.);
+      hlepCosOpeningAngle_gen2d[i][j]->GetXaxis()->SetTitle("cos(#phi)");
+      hlepCosOpeningAngle_gen2d[i][j]->GetYaxis()->SetTitle("M_{t#bar{t}} (GeV/c^{2})");
+      hlepCosOpeningAngle_gen2d[i][j]->Sumw2();
       
       htopCosTheta_gen2d[i][j] = new TH2D(Form("%s_htopCosThetaGen2d_%s",prefix,suffix),Form("%s_topCosThetaGen2d_%s",prefix,suffix),80,-1,1,120,0.,1200.);
       htopCosTheta_gen2d[i][j]->GetXaxis()->SetTitle("cos(#theta_{t}^{t#bar{t}})");
@@ -204,6 +218,11 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopSpinCorr_ttpT_gen2d[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} )");
       htopSpinCorr_ttpT_gen2d[i][j]->GetYaxis()->SetTitle("pT_{t#bar{t}} (GeV/c^{2})");
       htopSpinCorr_ttpT_gen2d[i][j]->Sumw2();
+
+      hlepCosOpeningAngle_ttpT_gen2d[i][j] = new TH2D(Form("%s_hlepCosOpeningAnglettpTGen2d_%s",prefix,suffix),Form("%s_lepCosOpeningAnglettpTGen2d_%s",prefix,suffix),80,-1,1,300.,0.,300.);
+      hlepCosOpeningAngle_ttpT_gen2d[i][j]->GetXaxis()->SetTitle("cos(#phi)");
+      hlepCosOpeningAngle_ttpT_gen2d[i][j]->GetYaxis()->SetTitle("pT_{t#bar{t}} (GeV/c^{2})");
+      hlepCosOpeningAngle_ttpT_gen2d[i][j]->Sumw2();
       
       htopCosTheta_ttpT_gen2d[i][j] = new TH2D(Form("%s_htopCosThetattpTGen2d_%s",prefix,suffix),Form("%s_topCosThetattpTGen2d_%s",prefix,suffix),80,-1,1,300.,0.,300.);
       htopCosTheta_ttpT_gen2d[i][j]->GetXaxis()->SetTitle("cos(#theta_{t}^{t#bar{t}})");
@@ -261,6 +280,11 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopSpinCorr_ttRapidity2_gen2d[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} )");
       htopSpinCorr_ttRapidity2_gen2d[i][j]->GetYaxis()->SetTitle("|y_{t#bar{t}}|");
       htopSpinCorr_ttRapidity2_gen2d[i][j]->Sumw2();
+
+      hlepCosOpeningAngle_ttRapidity2_gen2d[i][j] = new TH2D(Form("%s_hlepCosOpeningAnglettRapidity2Gen2d_%s",prefix,suffix),Form("%s_lepCosOpeningAnglettRapidity2Gen2d_%s",prefix,suffix),80,-1,1,300,0.,3.0);
+      hlepCosOpeningAngle_ttRapidity2_gen2d[i][j]->GetXaxis()->SetTitle("cos(#phi)");
+      hlepCosOpeningAngle_ttRapidity2_gen2d[i][j]->GetYaxis()->SetTitle("|y_{t#bar{t}}|");
+      hlepCosOpeningAngle_ttRapidity2_gen2d[i][j]->Sumw2();
       
       htopCosTheta_ttRapidity2_gen2d[i][j] = new TH2D(Form("%s_htopCosThetattRapidity2Gen2d_%s",prefix,suffix),Form("%s_topCosThetattRapidity2Gen2d_%s",prefix,suffix),80,-1,1,300,0.,3.0);
       htopCosTheta_ttRapidity2_gen2d[i][j]->GetXaxis()->SetTitle("cos(#theta_{t}^{t#bar{t}})");
@@ -317,6 +341,10 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopSpinCorrGenDiff[i][j] = new TH1D(Form("%s_htopSpinCorrGenDiff_%s",prefix,suffix),Form("%s_topSpinCorrGenDiff_%s",prefix,suffix),80,-2,2);
       htopSpinCorrGenDiff[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} ) (reco-gen)");
       htopSpinCorrGenDiff[i][j]->Sumw2();
+
+      hlepCosOpeningAngleGenDiff[i][j] = new TH1D(Form("%s_hlepCosOpeningAngleGenDiff_%s",prefix,suffix),Form("%s_lepCosOpeningAngleGenDiff_%s",prefix,suffix),80,-2,2);
+      hlepCosOpeningAngleGenDiff[i][j]->GetXaxis()->SetTitle("cos(#phi)");
+      hlepCosOpeningAngleGenDiff[i][j]->Sumw2();
       
       htopCosThetaGenDiff[i][j] = new TH1D(Form("%s_htopCosThetaGenDiff_%s",prefix,suffix),Form("%s_topCosThetaGenDiff_%s",prefix,suffix),80,-2,2);
       htopCosThetaGenDiff[i][j]->GetXaxis()->SetTitle("cos(#theta_{t}^{t#bar{t}}) (reco-gen)");
@@ -451,6 +479,10 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       htopSpinCorr[i][j] = new TH1D(Form("%s_htopSpinCorr_%s",prefix,suffix),Form("%s_topSpinCorr_%s",prefix,suffix),80,-1,1);
       htopSpinCorr[i][j]->GetXaxis()->SetTitle("cos(#theta_{l^{+}}^{t}) #times cos(#theta_{l^{-}}^{#bar{t}} )");
       htopSpinCorr[i][j]->Sumw2();
+
+      hlepCosOpeningAngle[i][j] = new TH1D(Form("%s_hlepCosOpeningAngle_%s",prefix,suffix),Form("%s_lepCosOpeningAngle_%s",prefix,suffix),80,-1,1);
+      hlepCosOpeningAngle[i][j]->GetXaxis()->SetTitle("cos(#phi)");
+      hlepCosOpeningAngle[i][j]->Sumw2();
       
       htopCosTheta[i][j] = new TH1D(Form("%s_htopCosTheta_%s",prefix,suffix),Form("%s_topCosTheta_%s",prefix,suffix),80,-1,1);
       htopCosTheta[i][j]->GetXaxis()->SetTitle("cos(#theta_{t}^{t#bar{t}})");
@@ -614,6 +646,10 @@ void topAFB_looper::bookHistos(const char *prefix, int nchannel, int nhists) {
       hMET[i][j] = new TH1D(Form("%s_hMET_%s",prefix,suffix),Form("%s_MET_%s",prefix,suffix),100,0.,400.);
       hMET[i][j]->GetXaxis()->SetTitle("E_{T}^{miss} (GeV)");
       hMET[i][j]->Sumw2();
+
+      hdMET[i][j] = new TH1D(Form("%s_hdMET_%s",prefix,suffix),Form("%s_dMET_%s",prefix,suffix),100,0.,400.);
+      hdMET[i][j]->GetXaxis()->SetTitle("#DeltaMET (GeV)");
+      hdMET[i][j]->Sumw2();
 
        
       hmasslb_2d[i][j] = new TH2D(Form("%s_hmasslb2d_%s",prefix,suffix),  Form("%s_masslb2d_%s" ,prefix,suffix),100,0,500,100,0,500);
