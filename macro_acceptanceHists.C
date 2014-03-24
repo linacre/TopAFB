@@ -7,6 +7,7 @@ acceptanceplots("topCosTheta",false,Form("results/%s",rootfile));
 acceptanceplots("lepPlusCosTheta",false,Form("results/%s",rootfile));
 acceptanceplots("lepMinusCosTheta",false,Form("results/%s",rootfile));
 acceptanceplots("topSpinCorr",false,Form("results/%s",rootfile));
+acceptanceplots("lepCosOpeningAngle",false,Form("results/%s",rootfile));
 acceptanceplots("rapiditydiff",false,Form("results/%s",rootfile));
 acceptanceplots("pseudorapiditydiff",false,Form("results/%s",rootfile));
 acceptanceplots("rapiditydiffMarco",false,Form("results/%s",rootfile));

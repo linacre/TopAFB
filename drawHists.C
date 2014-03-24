@@ -65,6 +65,7 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   //hist::loadHist(FName.Data(),0,"*hthesecondlepPt_allj*");
 
   hist::loadHist(FName.Data(),0,"*hMET_allj*");
+  hist::loadHist(FName.Data(),0,"*hdMET_allj*");
   //hist::loadHist(FName.Data(),0,"*hmassltb_allj*");
   //hist::loadHist(FName.Data(),0,"*hmassllb_allj*");
 
@@ -91,6 +92,7 @@ void makePSFile(const TString FName="results/hist_usePtGt2020_applyTriggers_hypD
   hist::loadHist(FName.Data(),0,"*hlepMinusCosTheta_allj*");
   hist::loadHist(FName.Data(),0,"*hlepCosTheta_allj*");
   hist::loadHist(FName.Data(),0,"*htopSpinCorr_allj*");
+  hist::loadHist(FName.Data(),0,"*hlepCosOpeningAngle_allj*");
 
   //hist::loadHist(FName.Data(),0,"*hpseudorapiditydiff2_allj*");
   //hist::loadHist(FName.Data(),0,"*hrapiditydiff2_allj*");

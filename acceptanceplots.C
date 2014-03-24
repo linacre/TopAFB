@@ -97,6 +97,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   Double_t bins_rapiditydiffMarco[] =  { -2., -0.7, -0.3, 0., 0.3, 0.7, 2.}; 
   Double_t bins_lepCosTheta[] = {-1., -0.6, -0.3, 0., 0.3, 0.6, 1.}; 
   Double_t bins_topSpinCorr[] = {-1., -0.5, -0.2, 0., 0.2, 0.5, 1.}; 
+  Double_t bins_lepCosOpeningAngle[] = {-1., -0.6, -0.3, 0., 0.3, 0.6, 1.}; 
 
   Double_t bins_lepChargeAsym_for2D[] =  { -2., 0., 2.};
   Double_t bins_lepAzimAsym_for2D[] = {-1., 0., 1.};
@@ -107,6 +108,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   Double_t bins_rapiditydiffMarco_for2D[] =  { -2., 0., 2.};
   Double_t bins_lepCosTheta_for2D[] = {-1., 0., 1.};
   Double_t bins_topSpinCorr_for2D[] = {-1., 0., 1.};
+  Double_t bins_lepCosOpeningAngle_for2D[] = {-1., 0., 1.};
 
   Double_t binsmtt[] = {0., 410., 510., 1200.}; 
   Double_t binsttpt[] = {0., 24., 52., 300}; 
@@ -124,6 +126,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   if(histname == "rapiditydiffMarco") memcpy(bins,bins_rapiditydiffMarco,7*8);
   if(histname == "lepCosTheta" || histname == "lepPlusCosTheta" || histname == "lepMinusCosTheta") memcpy(bins,bins_lepCosTheta,7*8);
   if(histname == "topSpinCorr") memcpy(bins,bins_topSpinCorr,7*8);
+  if(histname == "lepCosOpeningAngle") memcpy(bins,bins_lepCosOpeningAngle,7*8);
 
   if(histname == "lepChargeAsym") memcpy(binsfor2D,bins_lepChargeAsym_for2D,3*8);
   if(histname == "lepAzimAsym") memcpy(binsfor2D,bins_lepAzimAsym_for2D,3*8);
@@ -134,6 +137,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   if(histname == "rapiditydiffMarco") memcpy(binsfor2D,bins_rapiditydiffMarco_for2D,3*8);
   if(histname == "lepCosTheta" || histname == "lepPlusCosTheta" || histname == "lepMinusCosTheta") memcpy(binsfor2D,bins_lepCosTheta_for2D,3*8);
   if(histname == "topSpinCorr") memcpy(binsfor2D,bins_topSpinCorr_for2D,3*8);
+  if(histname == "lepCosOpeningAngle") memcpy(binsfor2D,bins_lepCosOpeningAngle_for2D,3*8);
 
   hnumerator = (TH1D*) hnumerator->Rebin(6,Form("numerator_%s", histname.Data()),bins);
   hdenominator = (TH1D*) hdenominator->Rebin(6,Form("denominator_%s", histname.Data()),bins);
@@ -256,6 +260,9 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   }
   if(histname.Contains("topSpinCorr") ) {
     hacceptance->GetXaxis()->SetTitle("cos(#theta_{l+})cos(#theta_{l-})");
+  }
+  if(histname.Contains("lepCosOpeningAngle") ) {
+    hacceptance->GetXaxis()->SetTitle("cos(#phi)");
   }
   if(histname.Contains("rapiditydiffMarco") ) {
     hacceptance->GetXaxis()->SetTitle("#Delta|y_{t}|");

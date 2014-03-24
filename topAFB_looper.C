@@ -680,7 +680,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
     bool useMaxCombo = false; //use lepton-jet combo with maximum sum of weights. false seems to give slightly better resolution.
     bool useClosestDeltaMET = true; //when both combos have only closest-approach solutions, take the one closest to the measured MET instead of the one with the highest weight. true seems to give slightly better resolution.
     bool useBetchart = true;
-    bool doDeltaMETcut = false; //reject events where the difference between the solved MET and measured MET exceeds the cut below
+    bool doDeltaMETcut = true; //reject events where the difference between the solved MET and measured MET exceeds the cut below
     double deltaMETcut = 80.;
 
     bool doParticleLevel = false; //preliminary implementation (only partly working) 

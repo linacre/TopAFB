@@ -57,7 +57,7 @@ void AfbRecoLevel2Dttrapidity2()
   Double_t weight;
   Int_t Nsolns;
 
-  int nVars = 8;
+  int nVars = 9;
 
   for (Int_t iVar= 0; iVar < nVars; iVar++) {
     Initialize2DBinningttrapidity2(iVar);

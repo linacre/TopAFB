@@ -559,11 +559,11 @@ syst_corr[5] =  0.016122  ; stat_corr[5] =  0.032788  ; stat_uncorr[5] =  0.0245
     //   Lepton Azimuthal Asymmetry
     case 8:
     {
-      observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
-      acceptanceName="lepAzimAsym";
-      asymlabel="A_{#Delta#phi}";
-      xbins1D[0]=-1.0; xbins1D[1]=-0.8; xbins1D[2]=-0.4; xbins1D[3]=0.0; xbins1D[4]=0.4; xbins1D[5]=0.8; xbins1D[6]=1.0;
+      observablename="lep_cos_opening_angle";
+      xaxislabel="cos(#phi)";
+      acceptanceName="lepCosOpeningAngle";
+      asymlabel="A_{cos(#phi)}";
+      xbins1D[0]=-1.0; xbins1D[1]=-0.6; xbins1D[2]=-0.3; xbins1D[3]=0.0; xbins1D[4]=0.3; xbins1D[5]=0.6; xbins1D[6]=1.0;
       stat_corr[0] = 0.01; stat_corr [1] = 0.01;  stat_corr [2] = 0.01;  stat_corr [3] = 0.01; stat_corr [4] = 0.01;  stat_corr [5] = 0.01;  stat_corr [6] = 0.01; 
       stat_uncorr[0] = 0.00; stat_uncorr[1] = 0.00; stat_uncorr[2] = 0.00; stat_uncorr[3] = 0.00; stat_uncorr[4] = 0.00; stat_uncorr[5] = 0.00; stat_uncorr[6] = 0.00;
       syst_corr[0] = 0.02; syst_corr [1] = 0.02;  syst_corr [2] = 0.02;  syst_corr [3] = 0.02; syst_corr [4] = 0.02;  syst_corr [5] = 0.02;  syst_corr [6] = 0.02; 
@@ -746,11 +746,11 @@ syst_corr[2] =  0.009654  ; stat_corr[2] =  0.033674  ; stat_uncorr[2] =  0.0237
     //   Lepton Azimuthal Asymmetry
     case 8:
     {
-      observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
+      observablename="lep_cos_opening_angle";
+      xaxislabel="cos(#phi)";
       yaxislabel="M_{t#bar t}";
-      acceptanceName="lepAzimAsym";
-      asymlabel="A_{#Delta#phi}";
+      acceptanceName="lepCosOpeningAngle";
+      asymlabel="A_{cos(#phi)}";
       xbins2D[0]=-800.0; xbins2D[1]=-510.0; xbins2D[2]=-410.0; xbins2D[3]=0.0; xbins2D[4]=410; xbins2D[5]=510.0; xbins2D[6]=800.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
@@ -927,11 +927,11 @@ syst_corr[2] =  0.012402  ; stat_corr[2] =  0.037342  ; stat_uncorr[2] =  0.0268
     //   Lepton Azimuthal Asymmetry
     case 8:
     {
-      observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
+      observablename="lep_cos_opening_angle";
+      xaxislabel="cos(#phi)";
       yaxislabel="p_{T,t#bar{t}}";
-      acceptanceName="lepAzimAsym";
-      asymlabel="A_{#Delta#phi}";
+      acceptanceName="lepCosOpeningAngle";
+      asymlabel="A_{cos(#phi)}";
       xbins2D[0]=-100.0; xbins2D[1]=-52.0; xbins2D[2]=-24.0; xbins2D[3]=0.0; xbins2D[4]=24; xbins2D[5]=52.0; xbins2D[6]=100.0;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
@@ -1108,11 +1108,11 @@ syst_corr[2] =  0.013820  ; stat_corr[2] =  0.036253  ; stat_uncorr[2] =  0.0252
     //   Lepton Azimuthal Asymmetry
     case 8:
     {
-      observablename="lep_azimuthal_asymmetry";
-      xaxislabel="cos(#Delta#phi_{l+l-})";
+      observablename="lep_cos_opening_angle";
+      xaxislabel="cos(#phi)";
       yaxislabel="|y_{t#bar{t}}|";
-      acceptanceName="lepAzimAsym";
-      asymlabel="A_{#Delta#phi}";
+      acceptanceName="lepCosOpeningAngle";
+      asymlabel="A_{cos(#phi)}";
       xbins2D[0]=-1.5; xbins2D[1]=-0.7; xbins2D[2]=-0.3; xbins2D[3]=0.0; xbins2D[4]=0.3; xbins2D[5]=0.7; xbins2D[6]=1.5;
       xmin=xbins2D[0];
       xmax=xbins2D[6];
