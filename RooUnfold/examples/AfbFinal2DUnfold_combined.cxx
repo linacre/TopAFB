@@ -58,9 +58,11 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
     else if (Var2D == "ttpt") summary_name = "summary_2Dunfolding_ttpt";
 
     TString yaxisunit;
-    if (Var2D == "mtt") yaxisunit = " (GeV/c^{2})";
+    //if (Var2D == "mtt") yaxisunit = " (GeV/c^{2})";
+    if (Var2D == "mtt") yaxisunit = " (GeV)";
     else if (Var2D == "ttrapidity2") yaxisunit = "";
-    else if (Var2D == "ttpt") yaxisunit = " (GeV/c)";
+    //else if (Var2D == "ttpt") yaxisunit = " (GeV/c)";
+    else if (Var2D == "ttpt") yaxisunit = " (GeV)";
 
     if (!(scalettotr == 1. && scalewjets == 1. && scaleDY == 1. && scaletw == 1. && scaleVV == 1.))  summary_name = summary_name + Form("_%i_%i_%i_%i_%i", int(10.*scalettotr + 0.5), int(10.*scalewjets + 0.5), int(10.*scaleDY + 0.5), int(10.*scaletw + 0.5), int(10.*scaleVV + 0.5));
 
@@ -510,8 +512,11 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
 
 
         TCanvas *c_afb = new TCanvas("c_afb", "c_afb", 500, 500);
+        c_afb->SetLeftMargin(0.175);
+        c_afb->SetRightMargin(0.04);
         double xbins2D_positive[4] = {xbins2D[3], xbins2D[4], xbins2D[5], xbins2D[6]};
         if (Var2D == "mtt") xbins2D_positive[0] = 300.0;
+        if (Var2D == "mtt") xbins2D_positive[3] = 700.0;
         TH1D *hAfbVsMtt = new TH1D ("AfbVsMtt",  "AfbVsMtt",  3, xbins2D_positive);
         TH1D *hAfbVsMtt_statonly = new TH1D ("AfbVsMtt_statonly",  "AfbVsMtt_statonly",  3, xbins2D_positive);
         for (int nb = 0; nb < 3; nb++)
@@ -542,41 +547,52 @@ void AfbUnfoldExample(TString Var2D = "mtt", double scalettdil = 1., double scal
             hTop_AfbVsMtt->SetBinError(nb + 1, 0);
         }
 
-        tdrStyle->SetErrorX(0.5);
-        hAfbVsMtt->SetMinimum( hAfbVsMtt->GetMinimum() - 0.1 );
-        hAfbVsMtt->SetMaximum( hAfbVsMtt->GetMaximum() + 0.1 );
+        //tdrStyle->SetErrorX(0.5);
+        tdrStyle->SetEndErrorSize(4);
+        hAfbVsMtt->SetMinimum( hAfbVsMtt->GetMinimum() - 0.04 );
+        hAfbVsMtt->SetMaximum( hAfbVsMtt->GetMaximum() + 0.06 );
+        hAfbVsMtt->GetXaxis()->SetNdivisions(505);
+        hAfbVsMtt->GetYaxis()->SetNdivisions(508);
+        //hAfbVsMtt->GetXaxis()->SetNdivisions(507);
+        if (Var2D == "mtt") hAfbVsMtt->GetXaxis()->SetNdivisions(1005);
+        if (Var2D == "ttpt") hAfbVsMtt->GetXaxis()->SetNdivisions(505,0);
+        //if (Var2D == "ttrapidity2") hAfbVsMtt->GetXaxis()->SetNdivisions(505);
         hAfbVsMtt->SetLineWidth( 2.0 );
-        hAfbVsMtt->Draw("E");
-        hAfbVsMtt_statonly->Draw("E1 same");
+        hAfbVsMtt_statonly->SetLineWidth( 2.0 );
+        hAfbVsMtt->Draw("E1X0");
+        hAfbVsMtt_statonly->Draw("E1X0 same");
         hTop_AfbVsMtt->SetLineColor(TColor::GetColorDark(kRed));
         hTop_AfbVsMtt->SetMarkerColor(TColor::GetColorDark(kRed));
         hTop_AfbVsMtt->SetMarkerSize(0);
         hTop_AfbVsMtt->SetLineWidth( 2.0 );
         hAfbVsMtt->GetYaxis()->SetTitle(asymlabel);
-        hAfbVsMtt->GetYaxis()->SetTitleOffset(1.2);
+        hAfbVsMtt->GetYaxis()->SetTitleOffset(1.4);
         hAfbVsMtt->GetXaxis()->SetTitle(yaxislabel + yaxisunit);
         hTop_AfbVsMtt->Draw("E same");
 
-        leg1 = new TLegend(0.6, 0.72, 0.9, 0.938, NULL, "brNDC");
+        //leg1 = new TLegend(0.6, 0.72, 0.9, 0.938, NULL, "brNDC");
+        leg1 = new TLegend(0.18, 0.77, 0.89, 0.92, NULL, "brNDC");
         leg1->SetEntrySeparation(100);
         leg1->SetFillColor(0);
         leg1->SetLineColor(0);
         leg1->SetBorderSize(0);
-        leg1->SetTextSize(0.03);
+        leg1->SetTextSize(0.036);
         leg1->SetFillStyle(0);
-        leg1->AddEntry(hAfbVsMtt, "data");
+        //leg1->AddEntry(hAfbVsMtt, "Data");
+        leg1->AddEntry(hAfbVsMtt, "(#kern[-0.2]{ }Data#kern[-0.2]{ }-#kern[-0.2]{ }#kern[-0.1]{b}ackground#kern[-0.2]{ }), unfolded", "P");
         leg1->AddEntry(hTop_AfbVsMtt,    "MC@NLO parton level");
         leg1->Draw();
 
-        TPaveText *pt1 = new TPaveText(0.18, 0.88, 0.41, 0.91, "brNDC");
+        //TPaveText *pt1 = new TPaveText(0.18, 0.88, 0.41, 0.91, "brNDC");
+        TPaveText *pt1 = new TPaveText(0.155, 0.94, 0.41, 0.98, "brNDC");
         pt1->SetName("pt1name");
         pt1->SetBorderSize(0);
         pt1->SetFillStyle(0);
 
         TText *blah;
         //blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
-        blah = pt1->AddText("CMS, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
-        blah->SetTextSize(0.032);
+        blah = pt1->AddText("CMS, #sqrt{s} = 7 TeV, 5.0 fb^{-1}");
+        blah->SetTextSize(0.036);
         blah->SetTextAlign(11);
         pt1->Draw();
 
