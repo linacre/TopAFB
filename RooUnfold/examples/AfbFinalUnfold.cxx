@@ -44,6 +44,8 @@ Double_t tau = 0.005; //for TUnfold - this is a more reasonable default (1E-4 gi
 bool doScanLCurve = false; //determine tau automatically when using unfoldingType=2, using scanLcurve (overrides value set above) - doesn't work very well
 Int_t nVars = 9;
 Int_t includeSys = 0;
+bool drawDiffs = true;
+int lineWidthDiffs=drawDiffs?lineWidth*2/3:lineWidth;
 bool checkErrors = true; //turn this on when making the final plots for the paper, to check the hard-coded systematics have been correctly entered
 bool draw_truth_before_pT_reweighting = true; //turn this on when making the final plots for the paper (want to compare the data against the unweighted MC)
 //bool drawTheory = true; //turn this on to show Bernreuther's predictions for AdeltaPhi and Ac1c2
@@ -53,12 +55,14 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 {
 
     setTDRStyle();
+    tdrStyle->SetErrorX(0.0);
     gStyle->SetOptFit();
     gStyle->SetOptStat(0);
     gStyle->SetOptTitle(0);
     cout.precision(3);
 
     TString summary_name = "summary_1Dunfolding";
+    TString xaxisunit;
 
     if (!(scalettotr == 1. && scalewjets == 1. && scaleDY == 1. && scaletw == 1. && scaleVV == 1.))  summary_name = Form("summary_1Dunfolding_%i_%i_%i_%i_%i", int(10.*scalettotr + 0.5), int(10.*scalewjets + 0.5), int(10.*scaleDY + 0.5), int(10.*scaletw + 0.5), int(10.*scaleVV + 0.5));
 
@@ -88,6 +92,9 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
     {
 
         Initialize1DBinning(iVar);
+
+        if(acceptanceName == "lepAzimAsym2") xaxisunit = " (radians)";
+        else xaxisunit = "";
 
         //use twice as many reco bins for TUnfold
         int recobinsmult = 2;
@@ -329,7 +336,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
         TCanvas *c_reco = new TCanvas("c_reco", "c_reco", 500, 500);
 
-        hData->SetLineWidth(lineWidth + 2);
+        hData->SetLineWidth(lineWidth);
 
         hMeas->SetLineColor(TColor::GetColorDark(kGreen));
         hMeas->SetFillColor(TColor::GetColorDark(kGreen));
@@ -464,12 +471,32 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
             c_d->SaveAs("D_" + acceptanceName + Region + ".pdf");
         }
 
-        TCanvas *c_resp = new TCanvas("c_resp", "c_resp");
+        TCanvas *c_resp = new TCanvas("c_resp", "c_resp", 550, 500);
         TH2D *hResp = (TH2D *) response.Hresponse();
         gStyle->SetPalette(1);
-        hResp->GetXaxis()->SetTitle(xaxislabel);
-        hResp->GetYaxis()->SetTitle(xaxislabel + "_{gen}");
+        c_resp->SetLeftMargin(0.14);
+        c_resp->SetRightMargin(0.20);
+        hResp->GetXaxis()->SetTitle("Reconstructed " + xaxislabel);
+        hResp->GetYaxis()->SetTitle("Generated " + xaxislabel);
+        hResp->GetZaxis()->SetTitle("Number of events");
+        hResp->GetYaxis()->SetTitleOffset(1.00);
+        hResp->GetZaxis()->SetTitleOffset(1.25);
+        if(acceptanceName != "lepAzimAsym2") hResp->GetXaxis()->SetNdivisions(504,0);
+        if(acceptanceName != "lepAzimAsym2") hResp->GetYaxis()->SetNdivisions(504,0);
         hResp->Draw("COLZ");
+
+        TPaveText *pt1s = new TPaveText(0.155, 0.94, 0.41, 0.98, "brNDC");
+        pt1s->SetName("pt1sname");
+        pt1s->SetBorderSize(0);
+        pt1s->SetFillStyle(0);
+
+        TText *blahs;
+        //blahs = pt1s->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
+        blahs = pt1s->AddText("CMS Simulation, #sqrt{s} = 7 TeV");
+        blahs->SetTextSize(0.036);
+        blahs->SetTextAlign(11);
+        pt1s->Draw();
+
         c_resp->SaveAs("Response_" + acceptanceName + Region + ".pdf");
         c_resp->SaveAs("Response_" + acceptanceName + Region + ".C");
         c_resp->SaveAs("Response_" + acceptanceName + Region + ".root");
@@ -690,6 +717,7 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         hData_unfolded_minussyst->SetFillColor(10);
         hData_unfolded_minussyst->SetFillStyle(0);
         hs->Add(hData_unfolded_minussyst);
+        tdrStyle->SetHatchesSpacing(0.6);
         hData_unfolded_plussyst->SetFillStyle(3353);
         hData_unfolded_plussyst->SetLineColor(kWhite);
         hData_unfolded_plussyst->SetFillColor(15);
@@ -700,33 +728,65 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         else hs->SetMaximum(1.3 * hData_unfolded->GetMaximum());
 
 
-        TCanvas *c_test = new TCanvas("c_final", "c_final", 500, 500);
+        TCanvas *c_test;
+        if(drawDiffs) c_test = new TCanvas("c_final", "c_final", 500, 725);
+        else c_test = new TCanvas("c_final", "c_final", 500, 500);
+
+
+        TPad *p1, *p2;
+        TLine *line;
+        if(!drawDiffs) {
+            p1 = new TPad("p1", "dist", 0.0, 0.0, 1, 1.);
+            p1->Draw();
+            p1->cd();
+
+        }
+        if(drawDiffs) {
+            p1 = new TPad("p1", "dist", 0.0, 0.31, 1, 1.);
+            p2 = new TPad("p2", "diff", 0.0, 0.0, 1, 0.31);
+            p1->Draw();
+            p2->Draw();
+            p1->cd();
+        }
+
+
 
         theoryProfileCorr->SetLineColor(kBlue);
-        theoryProfileCorr->SetLineWidth(2);
+        theoryProfileCorr->SetLineWidth(lineWidthDiffs);
         theoryProfileCorr->SetMarkerStyle(1);
 
         theoryProfileUnCorr->SetLineColor(kBlue);
-        theoryProfileUnCorr->SetLineWidth(2);
+        theoryProfileUnCorr->SetLineWidth(lineWidthDiffs);
         theoryProfileUnCorr->SetLineStyle(2);
         theoryProfileUnCorr->SetMarkerStyle(1);
 
         hs->Draw();
-        hs->GetXaxis()->SetTitle(xaxislabel);
+        hs->GetXaxis()->SetTitle(xaxislabel+xaxisunit);
         hs->GetYaxis()->SetTitle("1/#sigma d#sigma/d(" + xaxislabel + ")");
+        if(acceptanceName != "lepAzimAsym2") hs->GetXaxis()->SetNdivisions(504,0);
+
+        /*
+        if(acceptanceName == "lepAzimAsym2"){
+            char *binlabel[7] = {"0","4#pi/20","7#pi/20","#pi/2","13#pi/20","16#pi/20","#pi"};
+            for (Int_t i=1;i<=6;i++) {
+                hs->GetXaxis()->SetBinLabel(i,binlabel[i-1]);
+            }
+        }
+        */
+
         //hData_unfolded->GetXaxis()->SetTitle(xaxislabel);
         //hData_unfolded->GetYaxis()->SetTitle("1/#sigma d#sigma/d("+xaxislabel+")");
         //hData_unfolded->SetMinimum(0.0);
         //hData_unfolded->SetMaximum( 2.0* hData_unfolded->GetMaximum());
-        hData_unfolded->SetMarkerStyle(23);
-        hData_unfolded->SetMarkerSize(1);
+        //hData_unfolded->SetMarkerStyle(23);
+        hData_unfolded->SetMarkerSize(0.7);
         hData_unfolded->SetFillStyle(0);
         hData_unfolded->Draw("E same");
-        hData_unfolded->SetLineWidth(lineWidth);
-        denominatorM_nopTreweighting->SetLineWidth(lineWidth);
+        hData_unfolded->SetLineWidth(lineWidthDiffs);
+        denominatorM_nopTreweighting->SetLineWidth(lineWidthDiffs);
         denominatorM_nopTreweighting->SetLineColor(TColor::GetColorDark(kRed));
         denominatorM_nopTreweighting->SetFillStyle(0);
-        hTrue->SetLineWidth(lineWidth);
+        hTrue->SetLineWidth(lineWidthDiffs);
         hTrue->SetLineColor(TColor::GetColorDark(kRed));
         //hTrue->SetFillColor(TColor::GetColorDark(kGreen));
         hTrue->SetFillStyle(0);
@@ -740,30 +800,33 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
         }
 
         //TLegend* leg1=new TLegend(0.55,0.62,0.9,0.838,NULL,"brNDC");
-        TLegend *leg1 = new TLegend(0.59, 0.75, 0.89, 0.93, NULL, "brNDC");
+        TLegend *leg1 = new TLegend(0.18, 0.755, 0.89, 0.935, NULL, "brNDC");
         leg1->SetEntrySeparation(0.1);
         leg1->SetFillColor(0);
         leg1->SetLineColor(0);
         leg1->SetBorderSize(0);
         leg1->SetFillStyle(0);
-        leg1->SetTextSize(0.032);
-        leg1->AddEntry(hData_unfolded, "(#kern[-0.2]{ }Data#kern[-0.2]{ }-#kern[-0.2]{ }bkg.#kern[-0.2]{ }) unfolded");
-        leg1->AddEntry(hData_unfolded_plussyst,    "Syst. uncertainty", "F");
+        leg1->SetTextSize(0.036);
+        //leg1->AddEntry(hData_unfolded, "(#kern[-0.2]{ }Data#kern[-0.2]{ }-#kern[-0.2]{ }#kern[-0.1]{b}kg.#kern[-0.2]{ }) unfolded");
+        leg1->AddEntry(hData_unfolded, "(#kern[-0.2]{ }Data#kern[-0.2]{ }-#kern[-0.2]{ }#kern[-0.1]{b}ackground#kern[-0.2]{ }), unfolded", "P");
+        //leg1->AddEntry(hData_unfolded, "Data, background-subtracted and unfolded");
+        leg1->AddEntry(hData_unfolded_plussyst,    "Systematic uncertainty", "F");
         leg1->AddEntry(hTrue,    "MC@NLO parton level", "L");
 
         leg1->Draw();
 
         if (observablename == "lep_azimuthal_asymmetry2" || observablename == "top_spin_correlation")
         {
-            TLegend *leg2 = new TLegend(0.17, 0.745, 0.45, 0.88, NULL, "brNDC");
+            //TLegend *leg2 = new TLegend(0.17, 0.745, 0.45, 0.88, NULL, "brNDC");
+            TLegend *leg2 = new TLegend(0.17, 0.76, 0.45, 0.925, NULL, "brNDC");
             leg2->SetEntrySeparation(0.5);
             leg2->SetFillColor(0);
             leg2->SetLineColor(0);
             leg2->SetBorderSize(0);
             leg2->SetFillStyle(0);
             leg2->SetTextSize(0.032);
-            leg2->AddEntry(theoryProfileCorr,  "#splitline{W.#kern[-0.2]{ }Bernreuther & Z.#kern[-0.2]{-}G.#kern[-0.2]{ }Si}{(SM, #mu=^{}m_{t})}", "L");
-            leg2->AddEntry(theoryProfileUnCorr,  "#splitline{W.#kern[-0.2]{ }Bernreuther & Z.#kern[-0.2]{-}G.#kern[-0.2]{ }Si}{(uncorrelated, #mu=^{}m_{t})}", "L");
+            leg2->AddEntry(theoryProfileCorr,  "#splitline{W.#kern[-0.2]{ }Bernreuther & Z.#kern[-0.2]{-}G.#kern[-0.2]{ }Si}{(SM, #mu = ^{}m_{t})}", "L");
+            leg2->AddEntry(theoryProfileUnCorr,  "#splitline{W.#kern[-0.2]{ }Bernreuther & Z.#kern[-0.2]{-}G.#kern[-0.2]{ }Si}{(uncorrelated, #mu = ^{}m_{t})}", "L");
             leg2->Draw();
         }
 
@@ -771,17 +834,110 @@ void AfbUnfoldExample(double scalettdil = 1., double scalettotr = 1., double sca
 
 
 
-        TPaveText *pt1 = new TPaveText(0.175, 0.885, 0.41, 0.91, "brNDC");
+        //TPaveText *pt1 = new TPaveText(0.175, 0.885, 0.41, 0.91, "brNDC");
+        TPaveText *pt1 = new TPaveText(0.155, 0.94, 0.41, 0.98, "brNDC");
         pt1->SetName("pt1name");
         pt1->SetBorderSize(0);
         pt1->SetFillStyle(0);
 
         TText *blah;
         //blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
-        blah = pt1->AddText("CMS, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
-        blah->SetTextSize(0.032);
+        blah = pt1->AddText("CMS, #sqrt{s} = 7 TeV, 5.0 fb^{-1}");
+        blah->SetTextSize(0.036);
         blah->SetTextAlign(11);
         pt1->Draw();
+
+
+        if(drawDiffs) {
+            p2->cd();
+           int tempnbins = hData_unfolded->GetNbinsX();
+            TString s_hname = "diff_";
+            TH1D *h_diff = (TH1D *) hData_unfolded->Clone(s_hname +  acceptanceName);
+
+        TH1D *h_diff_minussyst;
+        TH1D *h_diff_plussyst;
+        h_diff_minussyst = (TH1D *) hData_unfolded->Clone("Data_unfolded_minussyst");
+        h_diff_plussyst = (TH1D *) hData_unfolded->Clone("Data_unfolded_plussyst");
+
+
+            h_diff->Reset();
+            line = new TLine(hData_unfolded->GetXaxis()->GetBinLowEdge(1), 1.0, 
+              hData_unfolded->GetXaxis()->GetBinUpEdge(tempnbins), 1.0);
+            h_diff->TH1D::Sumw2();  
+            for(int tempbin = 1; tempbin < hData_unfolded->GetNbinsX()+1; tempbin++) {
+              double mc, mcerr;
+
+        if (!draw_truth_before_pT_reweighting) mc = hTrue->GetBinContent(tempbin);
+        else mc = denominatorM_nopTreweighting->GetBinContent(tempbin);
+
+              double mcerr = 0.;
+              double data = hData_unfolded->GetBinContent(tempbin);
+              double dataerr = hData_unfolded->GetBinError(tempbin);
+              double err2 = pow(mcerr*data/mc/mc,2) + pow(dataerr/mc,2);
+              if(mc < 1e-10) 
+                continue;
+              h_diff->SetBinContent(tempbin, (data)/mc);
+              h_diff->SetBinError(tempbin, sqrt(err2));         
+              //h_diff->GetXaxis()->SetBinLabel(tempbin, hData_unfolded->GetXaxis()->GetBinLabel(tempbin));
+
+
+//cout<<data<<" "<<mc<<" "<<syst_corr[tempbin - 1]<<endl;
+
+
+            h_diff_minussyst->SetBinContent(tempbin, (data)/mc
+                                                    - syst_corr[tempbin - 1]/mc );  //hard-coded syst_corr now includes unfolding syst
+            h_diff_minussyst->SetBinError(tempbin, 0);
+            h_diff_plussyst ->SetBinContent(tempbin, 2 * syst_corr[tempbin - 1]/mc );  //hard-coded syst_corr now includes unfolding syst
+            h_diff_plussyst ->SetBinError(tempbin, 0);
+
+            }
+
+            //p2->SetTopMargin(0.1);
+            p2->SetBottomMargin(0.28);
+
+            THStack *hsd = new THStack("hsd_systband", "Systematic band");
+            h_diff_minussyst->SetLineColor(kWhite);
+            h_diff_minussyst->SetFillColor(kWhite);
+            h_diff_minussyst->SetFillStyle(0);
+            hsd->Add(h_diff_minussyst);
+            h_diff_plussyst->SetFillStyle(3353);
+            h_diff_plussyst->SetLineColor(kWhite);
+            h_diff_plussyst->SetFillColor(15);
+            hsd->Add(h_diff_plussyst);
+
+            hsd->Draw();
+
+            hsd->SetMinimum(0.941);
+            hsd->SetMaximum(1.059/1.05); //because THStack multiplies the max when gStyle->SetHistTopMargin(0.) is not set
+
+            hsd->GetXaxis()->SetTitle( hs->GetXaxis()->GetTitle() );
+            hsd->GetXaxis()->SetTitleSize( hs->GetXaxis()->GetTitleSize()*0.69/0.31);
+            hsd->GetXaxis()->SetLabelSize( hs->GetXaxis()->GetLabelSize()*0.69/0.31);
+            //hsd->GetXaxis()->SetLabelOffset(-0.88);
+
+            hsd->GetYaxis()->SetTitle("Data/Simulation");
+            hsd->GetYaxis()->SetNdivisions(803);
+            //hsd->GetYaxis()->SetTitleFont(hData_unfolded->GetYaxis()->GetTitleFont());
+            hsd->GetYaxis()->SetTitleOffset(0.7);
+            hsd->GetYaxis()->SetTitleSize(0.120);
+            hsd->GetYaxis()->SetLabelSize( hs->GetYaxis()->GetLabelSize()*0.69/0.31);
+            //hsd->GetYaxis()->SetLabelFont(hData_unfolded->GetYaxis()->GetLabelFont());
+
+            //hsd->SetMarkerSize(0.8);
+
+            //hsd->Draw("same");
+
+
+            h_diff->Draw("Pesames");
+            line->Draw();
+            c_test->Modified();
+            c_test->Update();
+
+
+            p1->cd();   
+        }
+
+
 
         c_test->SaveAs("finalplot_unfolded_" + acceptanceName + Region + ".pdf");
         c_test->SaveAs("finalplot_unfolded_" + acceptanceName + Region + ".C");

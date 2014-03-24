@@ -44,6 +44,7 @@ void AfbRecoLevel()
 {
 
   setTDRStyle();
+  tdrStyle->SetErrorX(0.0);
   gStyle->SetOptFit();
   gStyle->SetOptStat(0);
   gStyle->SetOptTitle(0);
@@ -182,6 +183,9 @@ void AfbRecoLevel()
       }    
     }
 
+    double topScalingFactor = (hData->Integral() - hBkg->Integral()) / hTop->Integral();
+    //cout<<"topScalingFactor: "<<_topScalingFactor<<" "<<topScalingFactor<<" "<< _topScalingFactor - topScalingFactor <<endl;
+
     hTop->Scale(_topScalingFactor);
     TH1D* hTop_bkgAdd= (TH1D*) hTop->Clone();
     hTop_bkgAdd->Add(hBkg);  
@@ -216,17 +220,23 @@ void AfbRecoLevel()
     hData->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
     hData->GetYaxis()->SetTitleOffset(1.6);
     hData->SetLineWidth(lineWidth);
+    hData->SetMarkerSize(0.7);
 
     hTop->SetLineWidth(lineWidth);
+    hTop->SetMarkerStyle(20);
+    hTop->SetMarkerColor(TColor::GetColorDark(kRed));
     hTop->SetMarkerSize(0.0);
-    hTop->SetLineColor(TColor::GetColorDark(kGreen));
-    hTop->SetFillColor(TColor::GetColorDark(kGreen));
-    hTop->SetFillStyle(3353);
+    hTop->SetLineColor(TColor::GetColorDark(kRed));
+    //hTop->SetFillColor(10);
+    hTop->SetFillStyle(0);
 
     hBkg->SetLineWidth(lineWidth);
+    hBkg->SetMarkerStyle(20);
+    hBkg->SetMarkerColor(TColor::GetColorDark(kBlue));
     hBkg->SetMarkerSize(0.0);
-    hBkg->SetLineColor(kYellow);
-    hBkg->SetFillColor(kYellow);
+    hBkg->SetLineColor(TColor::GetColorDark(kBlue));
+    hBkg->SetFillColor(TColor::GetColorDark(kBlue));
+    hBkg->SetFillStyle(3353);
 
     THStack *hs = new THStack("hs","Stacked Top+BG");
     hs->Add(hBkg);
@@ -238,29 +248,32 @@ void AfbRecoLevel()
     hs->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
     hs->GetYaxis()->SetTitle("Events/"+xaxislabel+"");
     hs->GetYaxis()->SetTitleOffset(1.6);
+    if(acceptanceName != "lepAzimAsym2") hs->GetXaxis()->SetNdivisions(504,0);
 
     hData->Draw("E same");
 
     //TLegend* leg1=new TLegend(0.6,0.62,0.9,0.838,NULL,"brNDC");
-    TLegend* leg1=new TLegend(0.68, 0.75, 0.95, 0.93, NULL, "brNDC");
+    //TLegend* leg1=new TLegend(0.68, 0.75, 0.95, 0.93, NULL, "brNDC");
+    TLegend *leg1 = new TLegend(0.66, 0.755, 0.95, 0.935, NULL, "brNDC");
     leg1->SetFillStyle(0);
     leg1->SetEntrySeparation(100);  
     leg1->SetBorderSize(0);                                                                                 
-    leg1->SetTextSize(0.03);
-    leg1->AddEntry(hData, "Data");
+    leg1->SetTextSize(0.036);
+    leg1->AddEntry(hData, "Data", "P");
     leg1->AddEntry(hTop,  "t#bar{t} (dileptonic)");                                                               
     leg1->AddEntry(hBkg,  "Background");                                                               
     leg1->Draw();                
 
-    TPaveText *pt1 = new TPaveText(0.22, 0.88, 0.45, 0.91, "brNDC");
+    //TPaveText *pt1 = new TPaveText(0.22, 0.88, 0.45, 0.91, "brNDC");
+    TPaveText *pt1 = new TPaveText(0.19, 0.94, 0.41, 0.98, "brNDC");
     pt1->SetName("pt1name");
     pt1->SetBorderSize(0);
     pt1->SetFillStyle(0);
 
     TText *blah;
     //blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
-    blah = pt1->AddText("CMS, 5.0 fb^{-1} at #sqrt{s}=7 TeV");
-    blah->SetTextSize(0.035);
+    blah = pt1->AddText("CMS, #sqrt{s} = 7 TeV, 5.0 fb^{-1}");
+    blah->SetTextSize(0.036);
     blah->SetTextAlign(11);
 
     pt1->Draw();
