@@ -8,6 +8,7 @@
 #include "TSystem.h"
 #include "TLegend.h"
 #include "TPaveText.h"
+#include "THStack.h"
 #include "TLatex.h"
 #include <fstream>
 #include "tdrStyle.C"
@@ -20,6 +21,8 @@ TH1D* hnumerator;
 TH1D* hdenominator;
 TH1D* hacceptance;
 TH1D* hacceptance_copy;
+TH1D* hacceptance_statup;
+TH1D* hacceptance_statdown;
 
 TH2D* hnumerator2d_mtt;
 TH2D* hdenominator2d_mtt;
@@ -227,26 +230,32 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
 
   gStyle->SetPaintTextFormat("6.4f");
 
-  TCanvas *c1 = new TCanvas();
+  TCanvas *c1 = new TCanvas("c_acc", "c_acc", 500, 500); 
   c1->cd();
 
   hacceptance->SetMaximum(1.25*hacceptance->GetMaximum());
   if(hacceptance->GetMinimum() <0.15 *hacceptance->GetMaximum() ) hacceptance->SetMinimum(0.);  
   if(hacceptance->GetMinimum() > 0.) hacceptance->SetMinimum(0.75*hacceptance->GetMinimum() );  
 
-  hacceptance->GetYaxis()->SetTitle("Acceptance");
-  hacceptance->SetTitleSize(0.05, "XYZ");
-  hacceptance->GetYaxis()->SetTitleOffset(1.5);
+  hacceptance->GetYaxis()->SetTitle("Acceptance #times Efficiency");
+  hacceptance->GetYaxis()->SetDecimals(kTRUE);
+  hacceptance->SetTitleSize(0.06, "XYZ");
+  hacceptance->SetLabelSize(0.05, "XYZ");
+  if(!histname.Contains("lepAzimAsym2") ) hacceptance->GetXaxis()->SetNdivisions(504,0);
+  else hacceptance->GetXaxis()->SetNdivisions(506);
+  hacceptance->GetYaxis()->SetTitleOffset(1.4);
 
 
   if(histname.Contains("lepChargeAsym") ) {
     hacceptance->GetXaxis()->SetTitle("#Delta|#eta_{l}|");
   }
   if(histname.Contains("lepAzimAsym2") ) {
-    hacceptance->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
+    //hacceptance->GetXaxis()->SetTitle("#Delta#phi_{l+l-}");
+    hacceptance->GetXaxis()->SetTitle("#Delta#phi_{l#lower[-0.4]{+}l#lower[-0.48]{-}}");
   }
   if(histname.Contains("lepCosTheta") ) {
-    hacceptance->GetXaxis()->SetTitle("cos(#theta_{l})");
+    //hacceptance->GetXaxis()->SetTitle("cos(#theta_{l})");
+    hacceptance->GetXaxis()->SetTitle("cos(^{}#theta_{l}#kern[-0.35]{*})");
   }
   if(histname.Contains("lepPlusCosTheta") ) {
     hacceptance->GetXaxis()->SetTitle("cos(#theta_{l+})");
@@ -255,7 +264,8 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
     hacceptance->GetXaxis()->SetTitle("cos(#theta_{l-})");
   }
   if(histname.Contains("topSpinCorr") ) {
-    hacceptance->GetXaxis()->SetTitle("cos(#theta_{l+})cos(#theta_{l-})");
+    //hacceptance->GetXaxis()->SetTitle("cos(#theta_{l+})cos(#theta_{l-})");
+    hacceptance->GetXaxis()->SetTitle("cos(^{}#theta_{l#lower[-0.4]{+}}#kern[-1.38]{*}) cos(^{}#theta_{l#lower[-0.48]{-}}#kern[-1.0]{*})");
   }
   if(histname.Contains("rapiditydiffMarco") ) {
     hacceptance->GetXaxis()->SetTitle("#Delta|y_{t}|");
@@ -265,17 +275,55 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   double Asym1err,Asym2err,Asym3err;
   
   hacceptance_copy = new TH1D("hac","hac",6, bins);
+  hacceptance_statup = new TH1D("hacup","hacup",6, bins);
+  hacceptance_statdown = new TH1D("hacdown","hacdown",6, bins);
   TAxis *xaxis_ = hacceptance->GetXaxis();
   for (int i=1;i<=xaxis_->GetNbins();i++) {
     hacceptance_copy->Fill(xaxis_->GetBinCenter(i), hacceptance->GetBinContent(i));
+    hacceptance_statup->Fill(xaxis_->GetBinCenter(i), 2.* hacceptance->GetBinError(i));
+    hacceptance_statdown->Fill(xaxis_->GetBinCenter(i), hacceptance->GetBinContent(i) - hacceptance->GetBinError(i));
   }
 
   
 
   if(!drawnorm){
+
+    THStack *hs = new THStack("hs_statband", "Stat band");
+    hacceptance_statdown->SetLineColor(kWhite);
+    hacceptance_statdown->SetFillColor(kWhite);
+    hacceptance_statdown->SetFillStyle(0);
+    hs->Add(hacceptance_statdown);
+    tdrStyle->SetHatchesSpacing(0.6);
+    hacceptance_statup->SetFillStyle(3335);
+    hacceptance_statup->SetLineColor(kWhite);
+    hacceptance_statup->SetFillColor(15);
+    hs->Add(hacceptance_statup);
+
+    hs->Draw();
+
+    hs->SetMaximum(1.25*hs->GetMaximum()/1.05);
+    if(hs->GetMinimum() <0.15 *hs->GetMaximum() ) hs->SetMinimum(0.);  
+    else hs->SetMinimum(0.75*hs->GetMinimum() );  
+
+    hs->GetXaxis()->SetTitle(hacceptance->GetXaxis()->GetTitle());
+    hs->GetYaxis()->SetDecimals(kTRUE);
+    hs->GetYaxis()->SetTitle("Acceptance #times Efficiency");
+    hs->GetYaxis()->SetDecimals(kTRUE);
+    hs->GetXaxis()->SetTitleSize(0.06);
+    hs->GetXaxis()->SetLabelSize(0.05);
+    hs->GetYaxis()->SetTitleSize(0.06);
+    hs->GetYaxis()->SetLabelSize(0.05);
+    if(!histname.Contains("lepAzimAsym2") ) hs->GetXaxis()->SetNdivisions(504,0);
+    else hs->GetXaxis()->SetNdivisions(506);
+    hs->GetYaxis()->SetNdivisions(508);
+    hs->GetYaxis()->SetTitleOffset(1.4);
+    hs->GetXaxis()->SetTitleOffset(1.0);
+
     hacceptance->SetMarkerSize(1.5);
     //hacceptance->Draw("hist TEXT30E");
-    hacceptance->Draw("histE");
+    //hacceptance->Draw("hist E");
+
+    hacceptance->Draw("hist same");
   }
   else{
 
@@ -310,26 +358,29 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
     hdenominator->Draw("histsame");
   }
 
-  TLegend *leg = new TLegend(0.74,0.84,0.90,0.92);
+  TLegend *leg = new TLegend(0.48,0.78,0.90,0.92);
   leg->SetFillStyle(0);
   leg->SetLineColor(0);
-  leg->SetTextSize(0.032);
+  leg->SetTextSize(0.036);
   leg->SetFillStyle(0);
-  leg->AddEntry(hacceptance, "acceptance","l");
+  if(drawnorm) leg->AddEntry(hacceptance, "acceptance","l");
+  else { leg->AddEntry(hacceptance, "MC@NLO parton level","l"); leg->AddEntry(hacceptance_statup,    "Statistical uncertainty", "F"); }
   if(drawnorm) leg->AddEntry(hnumerator, "numerator","l");
   if(drawnorm) leg->AddEntry(hdenominator, "denominator","l");
-  if(drawnorm) leg->Draw("same");
+  leg->Draw("same");
 
-  TPaveText *pt1 = new TPaveText(0.18, 0.86, 0.40, 0.92, "brNDC");
-  if(drawnorm) pt1 = new TPaveText(0.18, 0.77, 0.40, 0.92, "brNDC");
+  //TPaveText *pt1 = new TPaveText(0.18, 0.86, 0.40, 0.92, "brNDC");
+  //if(drawnorm) pt1 = new TPaveText(0.18, 0.77, 0.40, 0.92, "brNDC");
+  TPaveText *pt1 = new TPaveText(0.155, 0.94, 0.41, 0.98, "brNDC");
   pt1->SetName("pt1name");
   pt1->SetBorderSize(0);
   pt1->SetFillStyle(0);
 
   TText *blah;
   //blah = pt1->AddText("CMS Preliminary, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
-  blah = pt1->AddText("CMS, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
-  blah->SetTextSize(0.032);
+  //blah = pt1->AddText("CMS, 5.0 fb^{-1} at  #sqrt{s}=7 TeV");
+  blah = pt1->AddText("CMS Simulation, #sqrt{s} = 7 TeV");
+  blah->SetTextSize(0.036);
   blah->SetTextAlign(11);  
 
 
@@ -340,7 +391,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   Asym1_temp.ReplaceAll(" " , "" );
   Asym1_temp = TString("   Asym: ") +  Asym1_temp;
   blah = pt1->AddText(Asym1_temp.Data());
-  blah->SetTextSize(0.032);
+  blah->SetTextSize(0.036);
   blah->SetTextAlign(11);  
   blah->SetTextColor(kBlack);  
 
@@ -348,7 +399,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   Asym2_temp.ReplaceAll(" " , "" );
   Asym2_temp = TString("   Asym: ") +  Asym2_temp;
   blah = pt1->AddText(Asym2_temp.Data());
-  blah->SetTextSize(0.032);
+  blah->SetTextSize(0.036);
   blah->SetTextAlign(11);  
   blah->SetTextColor(kBlue);  
 
@@ -356,7 +407,7 @@ void acceptanceplots(TString histname = "lepAzimAsym", bool drawnorm = false, TS
   Asym3_temp.ReplaceAll(" " , "" );
   Asym3_temp = TString("   Asym: ") +  Asym3_temp;
   blah = pt1->AddText(Asym3_temp.Data());
-  blah->SetTextSize(0.032);
+  blah->SetTextSize(0.036);
   blah->SetTextAlign(11);  
   blah->SetTextColor(kRed);
   }
