@@ -1528,7 +1528,7 @@ void topAFB_looper::ScanChain(TChain *chain, vector<TString> v_Cuts, string pref
             int goodHyps_size = v_goodHyps.size();
             if (applyNoCuts) goodHyps_size = 1;
 
-            for (unsigned int ii = 0; ii < goodHyps_size; i++)
+            for (unsigned int ii = 0; ii < goodHyps_size; ii++)
             {
 
                 unsigned int hypIdx = 999;
