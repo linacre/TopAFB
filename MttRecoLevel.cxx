@@ -60,7 +60,7 @@ void MttRecoLevel()
 
   int nVars =8;
 
-  for (Int_t iVar= 4; iVar < 5; iVar++) {
+  for (Int_t iVar= 5; iVar < 6; iVar++) {
     Initialize1DBinning(iVar);
     xaxislabel = "M_{t#bar{t}}";
     bool combineLepMinus = acceptanceName=="lepCosTheta" ? true : false;
